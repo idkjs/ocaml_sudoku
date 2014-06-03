@@ -1,9 +1,4 @@
-﻿#light
-
-module sudoku
-
-open System
-//open System.Text
+﻿module sudoku
 
 // A sudoku is a grid of columns...
 [<Measure>] type col
@@ -65,11 +60,12 @@ type SymbolLookup = Cell -> Symbol option
 // A sudoku is defined by the overall grid size (it is always square)
 // which is the same as the symbols in the alphabet
 // and also by the width and height of the boxes
-type PuzzleSpec = {
+[<NoEquality; NoComparison>]
+type Puzzle = {
     boxWidth : int
     boxHeight : int
-    gridSize : int  // same as size of Alphabet
     alphabet : Alphabet
+    symbols : SymbolLookup
 }
 
 // Whilst working to a solution each cell in the grid
@@ -88,13 +84,14 @@ type Action =
     | ClearCandidate of Cell * Symbol
 
 // Track the updated grid and the action
+[<NoEquality; NoComparison>]
 type Step = {
     grid : EntryLookup
     action : Action
 }
 
+[<NoEquality; NoComparison>]
 type Solution = {
-    spec : PuzzleSpec
-    puzzle : SymbolLookup
-    mutable steps : Step list
+    puzzle : Puzzle
+    steps : Step list
 }

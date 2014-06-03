@@ -19,7 +19,7 @@
     <Tailcalls>false</Tailcalls>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <WarningLevel>3</WarningLevel>
+    <WarningLevel>5</WarningLevel>
     <DocumentationFile>bin\Debug\fsharp_sudoku_repl.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -28,7 +28,7 @@
     <Tailcalls>true</Tailcalls>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
-    <WarningLevel>3</WarningLevel>
+    <WarningLevel>5</WarningLevel>
     <DocumentationFile>bin\Release\fsharp_sudoku_repl.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
@@ -42,9 +42,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="sudoku.fs" />
+    <Compile Include="format.fs" />
     <Compile Include="tactics.fs" />
     <Compile Include="hints.fs" />
     <Compile Include="console.fs" />
+    <Compile Include="command.fs" />
+    <Compile Include="shell.fs" />
     <Compile Include="main.fs" />
   </ItemGroup>
   <PropertyGroup>

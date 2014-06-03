@@ -12,6 +12,7 @@ let solutionGridCellLookup (grid:SolutionGrid) = fun cell -> grid.[cell]
 
 type Container<'a, 'b> = ('a * 'b) list
 
+[<NoEquality; NoComparison>]
 type HouseCells = {
     cellColumn : (Cell -> Column)
     columnCells : (Column -> Cell list)
@@ -20,6 +21,12 @@ type HouseCells = {
     cellBox : (Cell -> Box)
     boxCells : (Box -> Cell list)
 }
+
+let getHouseCells (houseCells:HouseCells) (h:House) =
+    match h with
+    | Column c -> houseCells.columnCells c
+    | Row r -> houseCells.rowCells r
+    | Box b -> houseCells.boxCells b
 
 let contentsOfContainer<'a, 'b when 'b : equality> (s : 'b) (sc : Container<'b, 'a>) = List.filter (fun p -> s = fst p) sc |> List.map (fun p -> snd p)
 
@@ -71,14 +78,10 @@ let eachBox (stacks:Stack list) (bands:Band list) =
 
     all
 
-let makeCell (column:Column) (row:Row) = { Cell.col = column; row = row }
-
-let makeCell2 row column = makeCell column row
-
 let allCells (columns:Column list) (rows:Row list)= [
     for row in rows do
         for column in columns do
-            yield makeCell column row ]
+            yield { Cell.col = column; row = row } ]
 
 let makeContainerContainerCell<'a when 'a:equality> (columns:'a list) (allCells:Cell list) (container: Cell -> 'a) = 
     let cc = List.map (fun cell -> (container cell, cell)) allCells
@@ -121,21 +124,18 @@ let entryToAlphabet = function
     | Candidates(_) -> None
 
 // For a cell, return all the cell symbols for its containing column
-let rowCellsForCell (symbolLookup:SymbolLookup) cell (c2c:Cell -> Column) (cc:Column -> Cell list) = 
-    c2c cell |> cc |> List.choose symbolLookup
+let rowCellsForCell (c2c:Cell -> Column) (cc:Column -> Cell list) = c2c >> cc
 
 // For a cell, return all the cell symbols for its containing row
-let colCellsForCell symbolLookup cell (cr:Cell -> Row) (rc:Row -> Cell list) = 
-    cr cell |> rc |> List.choose symbolLookup
+let colCellsForCell (cr:Cell -> Row) (rc:Row -> Cell list) = cr >> rc
 
 // For a cell, return all the cell symbols for its containing box
-let boxCellsForCell symbolLookup cell (cb:Cell -> Box) (bc:Box -> Cell list) =
-    cb cell |> bc |> List.choose symbolLookup
+let boxCellsForCell (cb:Cell -> Box) (bc:Box -> Cell list) = cb >> bc
 
-let houseCellsForCell symbolLookup cell (houseCells:HouseCells) =
-  let r = rowCellsForCell symbolLookup cell houseCells.cellColumn houseCells.columnCells
-  let c = colCellsForCell symbolLookup cell houseCells.cellRow houseCells.rowCells
-  let b = boxCellsForCell symbolLookup cell houseCells.cellBox houseCells.boxCells
+let allHouseCells cell (houseCells:HouseCells) =
+  let r = cell |> rowCellsForCell houseCells.cellColumn houseCells.columnCells
+  let c = cell |> colCellsForCell houseCells.cellRow houseCells.rowCells
+  let b = cell |> boxCellsForCell houseCells.cellBox houseCells.boxCells
 
   let rc = Set.ofList r
   let cc = Set.ofList c
@@ -143,7 +143,29 @@ let houseCellsForCell symbolLookup cell (houseCells:HouseCells) =
 
   Set.unionMany [rc; cc; bc]
 
-let associateSymbols symbolLookup cell (houseCells:HouseCells) =
-    houseCellsForCell symbolLookup cell houseCells
+let houseCellsForCell symbolLookup cell (houseCells:HouseCells) =
+  let r = cell |> rowCellsForCell houseCells.cellColumn houseCells.columnCells |> List.choose symbolLookup
+  let c = cell |> colCellsForCell houseCells.cellRow houseCells.rowCells |> List.choose symbolLookup
+  let b = cell |> boxCellsForCell houseCells.cellBox houseCells.boxCells |> List.choose symbolLookup
 
-let candidateSymbols cell symbolLookup (houseCells:HouseCells) alphabet = Set.difference (Set.ofList alphabet) (associateSymbols symbolLookup cell houseCells)
+  let rc = Set.ofList r
+  let cc = Set.ofList c
+  let bc = Set.ofList b
+
+  Set.unionMany [rc; cc; bc]
+
+let candidateSymbols cell symbolLookup (houseCells:HouseCells) existingCandidates =
+    Set.difference existingCandidates (houseCellsForCell symbolLookup cell houseCells)
+
+
+let findCell (c:int<col>) (r:int<row>) (cells:Cell list) =
+    List.tryFind (
+        fun cell -> cell.col.col = c && cell.row.row = r
+    ) cells
+
+
+let getCandidateEntries = function
+    | Given(_) -> Set.empty
+    | Set(_) -> Set.empty
+    | Candidates(s) -> s
+
