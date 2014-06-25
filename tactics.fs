@@ -1,171 +1,123 @@
-﻿#light
-
-module tactics
+﻿module tactics
 
 open sudoku
+open puzzlemap
 
-let cons x y = x :: y
 
-type SolutionGrid = System.Collections.Generic.Dictionary<Cell, Entry>
 
-let solutionGridCellLookup (grid:SolutionGrid) = fun cell -> grid.[cell]
+let makeColumn i = { Column.col = i * 1<col> }
 
-type Container<'a, 'b> = ('a * 'b) list
+let makeRow i = { Row.row = i * 1<row> }
 
-[<NoEquality; NoComparison>]
-type HouseCells = {
-    cellColumn : (Cell -> Column)
-    columnCells : (Column -> Cell list)
-    cellRow : (Cell -> Row)
-    rowCells : (Row -> Cell list)
-    cellBox : (Cell -> Box)
-    boxCells : (Box -> Cell list)
-}
+let makeStack i = { Stack.stack = i * 1<boxcol> }
 
-let getHouseCells (houseCells:HouseCells) (h:House) =
-    match h with
-    | Column c -> houseCells.columnCells c
-    | Row r -> houseCells.rowCells r
-    | Box b -> houseCells.boxCells b
+let makeBand i = { Band.band = i * 1<boxrow> }
 
-let contentsOfContainer<'a, 'b when 'b : equality> (s : 'b) (sc : Container<'b, 'a>) = List.filter (fun p -> s = fst p) sc |> List.map (fun p -> snd p)
 
-let containerOfContent<'a, 'b when 'a : equality> (sc : Container<'b, 'a>) (c : 'a) = List.find (fun p -> c = snd p) sc |> fst
+let cellColumn cell = cell.col
 
-let eachContainerSet<'a, 'b when 'a:equality and 'b:equality> (makeElement : int -> 'a) (makeContainer : int -> 'b) boxSize gridSize =
+let columnCells length (column:Column) =
+    let rr = List.map makeRow [1..length]
 
-    let elements (c:int) = [ 
-        for elementIndex in c .. c + boxSize - 1 do
-            let element = makeElement elementIndex
-            yield element ]
+    List.map (fun row -> {col = column; row = row}) rr
+
+let cellRow cell = cell.row
+
+let rowCells length (row:Row) =
+    let cc = List.map makeColumn [1..length]
+
+    List.map (fun column -> {col = column; row = row}) cc
+
+let columnStack (boxWidth:int<width>) (column:Column) =
+    match column with
+    | { col = col } -> 1 + ((int) col - 1) / (int)boxWidth |> makeStack
+
+let stackColumns (boxWidth:int<width>) (stack:Stack) =
+    let s =
+        match stack with
+        | { stack = boxcol } -> (int) boxcol
+
+    let ss = [ ((s - 1) * (int)boxWidth + 1) .. s * (int)boxWidth ]
+    List.map makeColumn ss
+
+let rowBand (boxHeight:int<height>) (row:Row) =
+    match row with
+    | { row = row } -> 1 + ((int) row - 1) / (int)boxHeight |> makeBand
+
+let bandRows (boxHeight:int<height>) (band:Band) =
+    let b =
+        match band with
+        | { band = boxrow } -> (int) boxrow
+
+    let bb = [ ((b - 1) * (int)boxHeight + 1) .. b * (int)boxHeight ]
+    List.map makeRow bb
+
+let stacks (boxWidth:int<width>) (length:int) =
+    List.map makeStack [1..(length / (int)boxWidth)]
+
+let bands (boxHeight:int<height>) (length:int) =
+    List.map makeBand [1..(length / (int)boxHeight)]
+
+let boxes (boxWidth:int<width>) (boxHeight:int<height>) (length:int) = 
+    let ss = stacks boxWidth length
+    let bb = bands boxHeight length
 
     let all = [
-        for i in 1 .. boxSize .. gridSize do
-            let containerIndex = (((i - 1) / boxSize) + 1)
-            let c = makeContainer containerIndex
-            let es = elements i
-            let ces = List.map (fun e -> (c, e)) es
-            yield (c, es, ces) ]
-
-    let containers = List.map (fun (a, _, _) -> a) all
-    let elements = List.collect (fun (_, b, _) -> b) all
-    let elementContainers = List.collect (fun (_, _, c) -> c) all
-
-    let elementContainerLookup = (fun c -> containerOfContent elementContainers c)
-    let containerElementLookup = (fun s -> contentsOfContainer s elementContainers)
-
-    (containers, elements, elementContainerLookup, containerElementLookup)
-
-let eachStackColumns boxWidth gridWidth =
-    eachContainerSet<Column, Stack>
-        (fun i -> { Column.col = i * 1<col> }) 
-        (fun i -> { Stack.stack = i * 1<boxcol> })
-        boxWidth
-        gridWidth
-
-let eachBandRows boxHeight gridHeight =
-    eachContainerSet<Row, Band>
-        (fun i -> { Row.row = i * 1<row> }) 
-        (fun i -> { Band.band = i * 1<boxrow> })
-        boxHeight
-        gridHeight
-
-let eachBox (stacks:Stack list) (bands:Band list) = 
-    let all = [
-        for band in bands do
-            for stack in stacks do
+        for band in bb do
+            for stack in ss do
                 yield { Box.stack = stack; band = band } ]
 
     all
 
-let allCells (columns:Column list) (rows:Row list)= [
-    for row in rows do
-        for column in columns do
+let columns length =
+    List.map makeColumn [1..length]
+
+let rows length =
+    List.map makeRow [1..length]
+
+let allCells length = 
+    let cc = columns length
+    let rr = rows length
+
+    [ for row in rr do
+        for column in cc do
             yield { Cell.col = column; row = row } ]
+
+
+let cons x y = x :: y
+
+
+
+type Container<'a, 'b> = ('a * 'b) list
+
+
+let contentsOfContainer<'a, 'b when 'b : equality> (s : 'b) (sc : Container<'b, 'a>) = List.filter (fun p -> s = fst p) sc |> List.map (fun p -> snd p)
+
+let containerOfContent<'a, 'b when 'a : equality> (sc : Container<'b, 'a>) (c : 'a) = List.find (fun p -> c = snd p) sc |> fst
 
 let makeContainerContainerCell<'a when 'a:equality> (columns:'a list) (allCells:Cell list) (container: Cell -> 'a) = 
     let cc = List.map (fun cell -> (container cell, cell)) allCells
     let ccLookup = (fun b -> contentsOfContainer b cc)
     (cc, ccLookup)
 
-let makeContainerColumnCell (columns:Column list) (cells:Cell list) =
-    let (columnCells, columnCellLookup) = makeContainerContainerCell<Column> columns cells (fun cell -> cell.col)
-    let cellColumnLookup = (fun c -> c.col)
-    (columnCellLookup, cellColumnLookup)
-
-let makeContainerRowCell (rows:Row list) (cells:Cell list) =
-    let (rowCells, rowCellLookup) = makeContainerContainerCell<Row> rows cells (fun cell -> cell.row)
-    let cellRowLookup = (fun c -> c.row)
-    (rowCellLookup, cellRowLookup)
-
-let makeContainerBoxCell (boxes:Box list) (cells:Cell list) (columnStack:Column -> Stack) (rowBand:Row -> Band) =
+let makeContainerBoxCell (boxes:Box list) (cells:Cell list) boxWidth boxHeight =
     let (boxCells, boxCellLookup) = 
         makeContainerContainerCell<Box> boxes cells
             (fun cell ->
                 let col = cell.col
-                let stack = columnStack col
-                let row = cell.row
-                let band = rowBand row
+                let stack = columnStack boxWidth col
+                let row = cellRow cell
+                let band = rowBand boxHeight row
                 { Box.band = band; stack = stack })
     let cellBoxLookup = (fun c -> containerOfContent boxCells c)
     (cellBoxLookup, boxCellLookup)
 
 // and v.v.
-let charToAlphabet (alphabet : Alphabet) (trialSymbol : char) = 
-  let compareAlpha symbol =
-    let (Symbol charSymbol) = symbol
-    trialSymbol = charSymbol
 
-  List.tryFind compareAlpha alphabet
+
+
 
 let entryToAlphabet = function
     | Given(g) -> Some(g)
     | Set(s) -> Some(s)
     | Candidates(_) -> None
-
-// For a cell, return all the cell symbols for its containing column
-let rowCellsForCell (c2c:Cell -> Column) (cc:Column -> Cell list) = c2c >> cc
-
-// For a cell, return all the cell symbols for its containing row
-let colCellsForCell (cr:Cell -> Row) (rc:Row -> Cell list) = cr >> rc
-
-// For a cell, return all the cell symbols for its containing box
-let boxCellsForCell (cb:Cell -> Box) (bc:Box -> Cell list) = cb >> bc
-
-let allHouseCells cell (houseCells:HouseCells) =
-  let r = cell |> rowCellsForCell houseCells.cellColumn houseCells.columnCells
-  let c = cell |> colCellsForCell houseCells.cellRow houseCells.rowCells
-  let b = cell |> boxCellsForCell houseCells.cellBox houseCells.boxCells
-
-  let rc = Set.ofList r
-  let cc = Set.ofList c
-  let bc = Set.ofList b
-
-  Set.unionMany [rc; cc; bc]
-
-let houseCellsForCell symbolLookup cell (houseCells:HouseCells) =
-  let r = cell |> rowCellsForCell houseCells.cellColumn houseCells.columnCells |> List.choose symbolLookup
-  let c = cell |> colCellsForCell houseCells.cellRow houseCells.rowCells |> List.choose symbolLookup
-  let b = cell |> boxCellsForCell houseCells.cellBox houseCells.boxCells |> List.choose symbolLookup
-
-  let rc = Set.ofList r
-  let cc = Set.ofList c
-  let bc = Set.ofList b
-
-  Set.unionMany [rc; cc; bc]
-
-let candidateSymbols cell symbolLookup (houseCells:HouseCells) existingCandidates =
-    Set.difference existingCandidates (houseCellsForCell symbolLookup cell houseCells)
-
-
-let findCell (c:int<col>) (r:int<row>) (cells:Cell list) =
-    List.tryFind (
-        fun cell -> cell.col.col = c && cell.row.row = r
-    ) cells
-
-
-let getCandidateEntries = function
-    | Given(_) -> Set.empty
-    | Set(_) -> Set.empty
-    | Candidates(s) -> s
-

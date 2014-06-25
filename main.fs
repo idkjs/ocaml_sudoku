@@ -1,220 +1,190 @@
-﻿#light
-
-module main
+﻿module main
 
 open System
 open System.Text
 
 open sudoku
+open puzzlemap
 open format
 open tactics
+open fullHouse
+open hiddenSingle
+open nakedSingle
+open nakedPair
+
 open hints
 open console
 open command
 open shell
 
-let symbolsToAllCandidates alphabet symbolOpt =
-    match symbolOpt with
+let symbolToEntry (symbolLookup:SymbolLookup) (puzzleMaps:PuzzleMaps) (alphaset:Set<Symbol>) cell =
+    match symbolLookup cell with
     | Some(e) -> Given(e)
-    | None -> Candidates(alphabet |> Set.ofList)
-
-
-let beginSolution (symbolLookup : SymbolLookup) houseCells (cells:Cell list) (puzzle : Puzzle) =
-    let s = 
-        List.map (
-            fun cell ->
-                let e1 = symbolsToAllCandidates puzzle.alphabet (symbolLookup cell)
-                let entry = symbolsToCandidates symbolLookup houseCells e1 cell
-                (cell, entry)
-        ) cells
-
-    let s2 = s |> Map.ofList
-
-    let solutionGrid = new System.Collections.Generic.Dictionary<Cell, Entry>(s2)
-
-    let firstStep = { grid = (solutionGridCellLookup solutionGrid); action = Load }
-
-    let solution = { puzzle = puzzle; steps = [firstStep] }
-
-    solution
-
-
+    | None ->
+        let cs = houseCellsForCell puzzleMaps cell symbolLookup
+        Set.difference alphaset cs |> Candidates
 
 type ConsoleCharWriter = ConsoleChar -> Unit
 
-let print_step (write:ConsoleCharWriter) step stacks stackColumns bands bandRows =
-    let grid = step.grid
-    Seq.iter write (print_long defaultGridChars (grid >> entryToConsole) stacks stackColumns bands bandRows)
+let print_step (write:ConsoleCharWriter) (grid:EntryLookup) (action:Action) (puzzleMaps:PuzzleMaps) =
+    Seq.iter write (printGrid defaultGridChars sNL (grid >> entryToConsole >> drawFL) puzzleMaps)
 
-    match step.action with
-    | Load -> write (CStr "Load")
-    | SetValue({col = col; row = row}, Symbol s) -> write (CStr (String.Format("SetValue: ({0}, {1}) = {2}", (int)col.col, (int)row.row, s)))
-    | ClearCandidate({col = col; row = row}, Symbol s) -> write (CStr (String.Format("ClearCandidate: ({0}, {1}) = {2}", (int)col.col, (int)row.row, s)))
+    match action with
+    | SetValue({col = col; row = row} as cell, Symbol s) -> write (CStr (String.Format("SetValue: {0} = {1}", formatCell cell, s)))
+    | ClearCandidate({col = col; row = row} as cell, Symbol s) -> write (CStr (String.Format("ClearCandidate: {0} = {1}", formatCell cell, s)))
 
     write NL
 
-let print_last solution (stacks:Stack list) stackColumns (bands:Band list) bandRows =
-    let lastStep = solution.steps.Head
-    print_step ConsoleWriteChar lastStep stacks stackColumns bands bandRows
+let print_last solution (puzzleMaps:PuzzleMaps) =
+    match solution.steps with
+    | s :: _ -> print_step ConsoleWriteChar solution.grid s puzzleMaps
+    | [] -> ()
 
 
-
-let parse (item:string) gridSize alphabet solution (stacks:Stack list) (stackColumns:Stack -> Column list) (bands:Band list) (bandRows:Band->Row list) houseCells (cells:Cell list) (columns:Column list) (rows:Row list) (boxes:Box list) : Solution = 
+let parse (item:string) (alphabet:Alphabet) solution (puzzleMaps:PuzzleMaps) : Solution = 
     Console.WriteLine item
 
     if item = "print" then
-        let lastStep = solution.steps.Head
-        let grid = lastStep.grid
-        let print_grid cell symbol = entryAndCandidateToConsole (List.nth alphabet ((List.length alphabet) / 2))  symbol (grid cell)
+        let grid = solution.grid
+        let print_grid cell symbol = grid cell |> entryAndCandidateToConsole symbol
+        let draw_cell symbol = drawFL2 (List.nth alphabet ((List.length alphabet) / 2)) symbol
 
-        let pf = print_full defaultSolutionChars print_grid stacks stackColumns bands bandRows alphabet
+        let pf = print_full defaultSolutionChars sNL print_grid puzzleMaps alphabet draw_cell
         Seq.iter ConsoleWriteChar pf
         solution
 
     else if item.StartsWith "set" then
-        let lastStep = solution.steps.Head
-        let lastGrid = lastStep.grid
+        let lastGrid = solution.grid
 
-        let set = ui_set item gridSize alphabet lastGrid houseCells cells
+        let set = ui_set item alphabet lastGrid puzzleMaps
         let newSolution =
             match set with
-            | Some step -> { solution with steps = step :: solution.steps }
+            | Some (grid, action) -> { solution with grid = grid; steps = action :: solution.steps }
             | None ->
                 Console.WriteLine("")
                 solution
 
-        print_last newSolution stacks stackColumns bands bandRows
+        print_last newSolution puzzleMaps
         newSolution
 
     else if item = "fh" then
-        let lastStep = solution.steps.Head
-        let lastGrid = lastStep.grid
+        let lastGrid = solution.grid
 
-        let hints = findFullHouse lastGrid columns rows boxes houseCells
-
-        printFullHouse hints
+        let hints = findFullHouse (lastGrid >> getCandidateEntries) puzzleMaps
 
         List.iter (
             fun hint ->
-                Seq.iter ConsoleWriteChar (print_long defaultGridChars (fullHouseSymbolTo lastGrid houseCells hint) stacks stackColumns bands bandRows))
+                Console.WriteLine (printFullHouse hint)
+
+                let st cell = lastGrid cell |> fullHouseSymbolTo hint entryToConsole cell |> drawFL
+                Seq.iter ConsoleWriteChar (printGrid defaultGridChars sNL st puzzleMaps)
+
+                let print_grid cell symbol = lastGrid cell |> fullHouseFullSymbolTo hint entryAndCandidateToConsole cell symbol
+                let draw_cell symbol = drawFL2 (List.nth alphabet ((List.length alphabet) / 2)) symbol
+
+                Seq.iter ConsoleWriteChar (print_full defaultSolutionChars sNL print_grid puzzleMaps alphabet draw_cell)
+                )
+
             hints
         solution
 
     else if item = "hs" then
-        let lastStep = solution.steps.Head
-        let lastGrid = lastStep.grid
+        let lastGrid = solution.grid
 
-        let hints = findHiddenSingles alphabet lastGrid columns rows boxes houseCells
-
-        printHiddenSingles hints
+        let hints = findHiddenSingles alphabet (lastGrid >> getCandidateEntries) puzzleMaps
 
         List.iter (
             fun hint ->
-                Seq.iter ConsoleWriteChar (print_long defaultGridChars (hiddenSingleSymbolTo lastGrid houseCells hint) stacks stackColumns bands bandRows))
+                Console.WriteLine (formatHiddenSingle hint)
+
+                let st cell = lastGrid cell |> hiddenSingleSymbolTo hint entryToConsole cell |> drawFL
+                Seq.iter ConsoleWriteChar (printGrid defaultGridChars sNL st puzzleMaps))
             hints
         solution
 
     else if item = "ns" then
-        let lastStep = solution.steps.Head
-        let lastGrid = lastStep.grid
+        let lastGrid = solution.grid
 
-        let hints = findNakedSingles lastGrid cells
-
-        printNakedSingles hints
+        let hints = findNakedSingles (lastGrid >> getCandidateEntries) puzzleMaps.cells
 
         List.iter (
             fun hint ->
-                Seq.iter ConsoleWriteChar (print_long defaultGridChars (nakedSingleSymbolTo lastGrid houseCells hint) stacks stackColumns bands bandRows))
+                Console.WriteLine (printNakedSingle hint)
+
+                let st cell = lastGrid cell |> nakedSingleSymbolTo hint entryToConsole cell |> drawFL
+                Seq.iter ConsoleWriteChar (printGrid defaultGridChars sNL st puzzleMaps)
+
+                let print_grid cell symbol = lastGrid cell |> nakedSingleFullSymbolTo hint entryAndCandidateToConsole cell symbol
+                let draw_cell symbol = drawFL2 (List.nth alphabet ((List.length alphabet) / 2)) symbol
+
+                Seq.iter ConsoleWriteChar (print_full defaultSolutionChars sNL print_grid puzzleMaps alphabet draw_cell))
             hints
         solution
 
     else if item = "np" then
-        let lastStep = solution.steps.Head
-        let lastGrid = lastStep.grid
+        let lastGrid = solution.grid
 
-        let hints = findNakedPairs lastGrid columns rows boxes houseCells
+        let hints = findNakedPairs (lastGrid >> getCandidateEntries) puzzleMaps
 
-        printNakedPairs hints
+        List.iter printNakedPair hints
+
+        List.iter (
+            fun hint ->
+                let print_grid cell symbol = lastGrid cell |> nakedPairSymbolTo hint entryAndCandidateToConsole cell symbol
+                let draw_cell symbol = drawFL2 (List.nth alphabet ((List.length alphabet) / 2)) symbol
+                Seq.iter ConsoleWriteChar (print_full defaultSolutionChars sNL print_grid puzzleMaps alphabet draw_cell))
+            hints
 
         solution
 
     else
         solution
-(*
-        List.iter (
-            fun hint ->
-                List.iter ConsoleWriteChar (print_full (nakedPairSymbolTo lastGrid houseCells hint) stacks stackColumns bands bandRows alphabet []))
-            hints
-*)
 
-let run gridSize alphabet (solution:Solution ref) (stacks:Stack list) stackColumns (bands:Band list) bandRows houseCells (cells:Cell list) (columns:Column list) (rows:Row list) (boxes:Box list) item =
+let run alphabet (solution:Solution ref) (puzzleMaps:PuzzleMaps) item =
     if item = "quit"
         then
             Some(item)
         else
-            solution := parse item gridSize alphabet !solution stacks stackColumns bands bandRows houseCells cells columns rows boxes
+            solution := parse item alphabet !solution puzzleMaps
             None
 
-[<NoEquality; NoComparison>]
-type Tactics = {
-    stacks : Stack list
-    bands : Band list
+let makePuzzleMaps (puzzleSpec : Puzzle) =
+    let length = puzzleSpec.alphabet.Length
 
-    columns : Column list
-    rows : Row list
-    boxes : Box list
+    let columns = columns length
+    let rows = rows length
+    let cells = allCells length
 
-    cells : Cell list
+    let columnCells = columnCells length
+    let rowCells = rowCells length
 
-    stackColumns : Stack -> Column list
-    bandRows : Band -> Row list
 
-    columnCells : Column -> Cell list
-    rowCells : Row -> Cell list
-    boxCells : Box -> Cell list
-
-    houseCells : HouseCells
-}
-
-let makeTactics (puzzleSpec : Puzzle) =
-    let (stacks, columns, columnStackLookup, stackColumnLookup) = eachStackColumns puzzleSpec.boxWidth puzzleSpec.alphabet.Length
-    let (bands, rows, rowBandLookup, bandRowLookup) = eachBandRows puzzleSpec.boxHeight puzzleSpec.alphabet.Length
-    let boxes = eachBox stacks bands
-    let cells = allCells columns rows
-    let (columnCells, cellColumnLookup) = makeContainerColumnCell columns cells
-    let (rowCells, cellRowLookup) = makeContainerRowCell rows cells
-    let (cellBoxLookup, boxCellLookup) = makeContainerBoxCell boxes cells columnStackLookup rowBandLookup
+    let (cellBoxLookup, boxCellLookup) = makeContainerBoxCell (boxes puzzleSpec.boxWidth puzzleSpec.boxHeight length) cells puzzleSpec.boxWidth puzzleSpec.boxHeight
 
     let houseCells =
         {
-            HouseCells.cellColumn = cellColumnLookup
+            columns = columns
+            rows = rows
+            cells = cells
+
+            cellColumn = cellColumn
             columnCells = columnCells
-            cellRow = cellRowLookup
+            cellRow = cellRow
             rowCells = rowCells
             cellBox = cellBoxLookup
             boxCells = boxCellLookup
+
+            stacks = stacks puzzleSpec.boxWidth length
+            bands = bands puzzleSpec.boxHeight length
+            boxes = boxes puzzleSpec.boxWidth puzzleSpec.boxHeight length
+
+            columnStack = columnStack puzzleSpec.boxWidth
+            stackColumns = stackColumns puzzleSpec.boxWidth
+            rowBand = rowBand puzzleSpec.boxHeight
+            bandRows = bandRows puzzleSpec.boxHeight
         }
 
-    let tactics =
-        {
-            stacks = stacks
-            columns = columns
-            bands = bands
-            rows = rows
-            boxes = boxes
-            cells = cells
-
-            stackColumns = stackColumnLookup
-            bandRows = bandRowLookup
-
-            columnCells = columnCells
-            rowCells = rowCells
-            boxCells = boxCellLookup
-
-            houseCells = houseCells
-        }
-
-    tactics
+    houseCells
 
 
 let mainWriter = ConsoleWriteChar
@@ -225,31 +195,45 @@ let repl (sudoku:string) (puzzleSpec : Puzzle) =
 
     let alphabetisedLine = loadLine sudoku puzzleSpec.alphabet
 
-    let tactics = makeTactics puzzleSpec
+    let puzzleMaps = makePuzzleMaps puzzleSpec
 
-    let puzzleGrid = loadPuzzle alphabetisedLine tactics.cells
+    let puzzleGrid = loadPuzzle alphabetisedLine puzzleMaps.cells
 
-    let solution = ref (beginSolution puzzleGrid tactics.houseCells tactics.cells puzzleSpec)
+    let alphaset = puzzleSpec.alphabet |> Set.ofList
 
-    let line = List.foldBack (puzzleGrid >> symbolOptionToConsoleChar >> cons) tactics.cells [NL]
+    let stoe = symbolToEntry puzzleGrid puzzleMaps alphaset
+
+    let solutionGrid = flattenEntry stoe puzzleMaps.cells
+
+    let solution = ref ({ grid = solutionGrid; steps = [] })
+
+    let line = List.foldBack (puzzleGrid >> symbolOptionToConsoleChar >> drawFL >> cons) puzzleMaps.cells [NL]
     List.iter mainWriter line
     mainWriter NL
 
-    let rows = printRowOnOneLine (puzzleGrid >> symbolOptionToConsoleChar) tactics.houseCells.rowCells sNL tactics.rows
-    Seq.iter mainWriter rows
+    let prows = printRowOnOneLine (puzzleGrid >> symbolOptionToConsoleChar >> drawFL) puzzleMaps.rowCells sNL puzzleMaps.rows
+    Seq.iter mainWriter prows
 
-    Seq.iter ConsoleWriteChar (print_long defaultGridChars (puzzleGrid >> symbolOptionToConsoleChar) tactics.stacks tactics.stackColumns tactics.bands tactics.bandRows)
+    Seq.iter ConsoleWriteChar (printGrid defaultGridChars sNL (puzzleGrid >> symbolOptionToConsoleChar >> drawFL) puzzleMaps)
 
-    Seq.tryPick (run puzzleSpec.alphabet.Length puzzleSpec.alphabet solution tactics.stacks tactics.stackColumns tactics.bands tactics.bandRows tactics.houseCells tactics.cells tactics.columns tactics.rows tactics.boxes) readlines |> ignore
+    Seq.tryPick (run puzzleSpec.alphabet solution puzzleMaps) readlines |> ignore
 
 
 let defaultPuzzleSpec = {
-    boxWidth = 3
-    boxHeight = 3
+    boxWidth = 3 * 1<width>
+    boxHeight = 3 * 1<height>
     alphabet = [ for i in 1 .. 9 -> (char) i + '0' |> Symbol ]
     symbols = fun _ -> None
 }
 
+(*
+let defaultPuzzleSpec = {
+    boxWidth = 4 * 1<width>
+    boxHeight = 2 * 1<height>
+    alphabet = [ for i in 1 .. 8 -> (char) i + '0' |> Symbol ]
+    symbols = fun _ -> None
+}
+*)
 // Input puzzle
 Console.WriteLine "1........2........3........4........5........6........7........8........9........"
 Console.WriteLine "123456789123456789123456789123456789123456789123456789123456789123456789123456789"

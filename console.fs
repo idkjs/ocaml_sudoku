@@ -1,13 +1,11 @@
-﻿#light
-
-module console
+﻿module console
 
 open System
 open System.Text
 
 open sudoku
+open puzzlemap
 open format
-open tactics
 open hints
 
 
@@ -26,7 +24,11 @@ let cs = CChar >> Seq.singleton
 
 let defaultGridChars:gridChars<seq<ConsoleChar>> = {
     h = cs '─'
-    v = cs '│'
+    v = {
+        l = cs '│'
+        m = cs '│'
+        r = cs '│'
+        }
     t = { 
         l = cs '┌'
         m = cs '┬'
@@ -42,7 +44,6 @@ let defaultGridChars:gridChars<seq<ConsoleChar>> = {
         m = cs '┴'
         r = cs '┘'
         }
-    nl = sNL
 }
 
 // Some predefined characters - for smaller grid
@@ -50,7 +51,11 @@ let defaultGridChars:gridChars<seq<ConsoleChar>> = {
 let defaultSolutionChars:solutionChars<seq<ConsoleChar>> = {
     h=cs '═'
     hi=cs '─'
-    v=cs '║'
+    v={
+        l=cs '║'
+        m=cs '║'
+        r=cs '║'
+      }
     vi=cs '│'
     t={
         mi=cs '╦'
@@ -84,12 +89,11 @@ let defaultSolutionChars:solutionChars<seq<ConsoleChar>> = {
             r=cs '╝'
         }
     }
-    nl=sNL
 }
 
 
 // Change the console colour to write a string
-let consoleWriteColor (value:char) consoleColour =
+let consoleWriteColor (value:'a) consoleColour =
     let foregroundColour = System.Console.ForegroundColor
     try
         System.Console.ForegroundColor <- consoleColour
@@ -103,62 +107,37 @@ let ConsoleWriteChar = function
     | ColouredChar (c, consoleColour) -> consoleWriteColor c consoleColour
     | NL -> Console.WriteLine ""
 
-// Print a symbol option, with colours
-let symbolOptionToConsoleChar = function
-    | Some(Symbol s) -> ColouredChar (s, ConsoleColor.Blue)
-    | None -> CChar '.'
+let charToAlphabet (alphabet : Alphabet) (trialSymbol : char) = 
+  let compareAlpha symbol =
+    let (Symbol charSymbol) = symbol
+    trialSymbol = charSymbol
 
-// Print an entry, with colours
-let entryToConsole = function
-    | Given(Symbol s) -> ColouredChar (s, ConsoleColor.Blue)
-    | Set(Symbol s) -> ColouredChar (s, ConsoleColor.Red)
-    | Candidates(_) -> CChar '.'
-
-// Print an entry for a candidate to console
-let entryAndCandidateToConsole centreSymbol candidate = function
-    | Given(Symbol s) ->
-        if centreSymbol = candidate then
-            ColouredChar (s, ConsoleColor.Blue)
-        else
-            CChar ' '
-    | Set(Symbol s) ->
-        if centreSymbol = candidate then
-            ColouredChar (s, ConsoleColor.Red)
-        else
-            CChar ' '
-    | Candidates(candidates) ->
-        if Set.contains candidate candidates then
-            let (Symbol s) = candidate
-            CChar s
-        else
-            CChar ' '
-
+  List.tryFind compareAlpha alphabet
 
 let loadLine (line:string) alphabet = List.map (charToAlphabet alphabet) (List.ofSeq line)
 
 // Load a sudoku given as a single line of gridSize*gridSize characters
-let loadPuzzle (alphabetisedLine:Symbol option list) (cells:Cell list) =
+let loadPuzzle (alphabetisedLine:Symbol option list) (cells:Cell list) cell =
+    let zs = List.zip alphabetisedLine cells
 
-    let grid = new System.Collections.Generic.Dictionary<Cell, Symbol option>()
+    List.pick (fun (symbolOpt, c) ->
+        if c = cell then
+            Some symbolOpt
+        else
+            None) zs
 
-    List.iter2 (fun cell c -> grid.Add(cell, c) ) cells alphabetisedLine
+let formatColumn (c:Column) = String.Format ("Column {0}", c.col)
 
-    let puzzleGridCellLookup = fun cell -> grid.[cell]
+let formatRow (r:Row) = String.Format ("Row {0}", r.row)
 
-    puzzleGridCellLookup
-
-
+let formatBox (b:Box) = String.Format ("Box s{0}b{1}", (int)b.stack.stack, (int)b.band.band)
 
 let formatHouse = function
-    | Column c ->
-        String.Format ("Column {0}", c.col)
-    | Row r ->
-        String.Format ("Row {0}", r.row)
-    | Box b ->
-        String.Format ("Box s{0}b{1}", (int)b.stack.stack, (int)b.band.band)
+    | Column c -> formatColumn c
+    | Row r -> formatRow r
+    | Box b -> formatBox b
 
-let formatCell cell =
-    String.Format ("c{0}r{1}", (int)cell.col.col, (int)cell.row.row)
+let formatCell cell = String.Format ("c{0}r{1}", (int)cell.col.col, (int)cell.row.row)
 
 let formatSymbol (Symbol s) = s
 
@@ -167,97 +146,63 @@ let formatSymbols (candidates:Set<Symbol>) =
     let t = Array.map formatSymbol s
     String.Join(",", t)
 
-let formatHiddenSingle {HiddenSingle.cell = cell; symbol = Symbol symbol; house = house} =
-    String.Format ("hs {0}, Value {1}, Cell {2}", formatHouse house, symbol, formatCell cell)
 
-let printHiddenSingles hss =
-    List.iter (
-        fun h ->
-            Console.WriteLine (formatHiddenSingle h)
-            )
-        hss
+let drawFL (l:FormatLabel) =
+    match l with
+    | LPlain (Given s) -> ColouredChar (formatSymbol s, ConsoleColor.Blue)
+    | LPlain (Set s) -> ColouredChar (formatSymbol s, ConsoleColor.Red)
+    | LPlain (Candidates _) -> CChar '.'
+    | LHintHouse (Given s) -> ColouredChar (formatSymbol s, ConsoleColor.Green)
+    | LHintHouse (Set s) -> ColouredChar (formatSymbol s, ConsoleColor.Yellow)
+    | LHintHouse (Candidates _) -> CChar '.'
+    | LHintCell s -> ColouredChar(formatSymbol s, ConsoleColor.Cyan)
 
-let hiddenSingleSymbolTo (entryLookup:EntryLookup) (houseCells:HouseCells) (hint:HiddenSingle) (cell:Cell) =
-    let hc = getHouseCells houseCells hint.house
-    let houseEntryToConsole = function
-        | Given(Symbol s) -> ColouredChar (s, ConsoleColor.Green)
-        | Set(Symbol s) -> ColouredChar (s, ConsoleColor.Yellow)
-        | Candidates(_) -> CChar '.'
+let drawFLF (l:FormatLabelF) =
+    match l with
+    | FLGiven s -> ColouredChar (formatSymbol s, ConsoleColor.Blue)
+    | FLSet s -> ColouredChar (formatSymbol s, ConsoleColor.Red)
+    | FLCandidatePossible s -> CChar (formatSymbol s)
+    | FLCandidateExcluded s -> CChar ' '
+    | FLHintHouseGiven s -> ColouredChar (formatSymbol s, ConsoleColor.Green)
+    | FLHintHouseSet s -> ColouredChar (formatSymbol s, ConsoleColor.Yellow)
+    | FLHintCell s -> ColouredChar(formatSymbol s, ConsoleColor.Cyan)
+    | FLHintCandidatePointer s -> ColouredChar (formatSymbol s, ConsoleColor.Magenta)
+    | FLHintCandidateReduction s -> ColouredChar (formatSymbol s, ConsoleColor.DarkYellow)
 
-    if cell = hint.cell then
-        ColouredChar(formatSymbol hint.symbol, ConsoleColor.Cyan)
-    else if Set.contains cell (Set.ofList hc) then
-        (houseEntryToConsole (entryLookup cell))
-    else
-        (entryToConsole (entryLookup cell))
+let drawFL2 centreCandidate candidate (l:FormatLabelF) =
+    let c = centreCandidate = candidate
 
-let printNakedSingles hints =
-    List.iter (
-        fun {NakedSingle.cell = cell; symbol = Symbol symbol} ->
-                Console.WriteLine ("Cell {0}: Symbol: {1}", formatCell cell, symbol)
-            )
-        hints
+    match l with
+    | FLGiven _ when not c -> CChar ' '
+    | FLSet _ when not c -> CChar ' '
+    | FLCandidatePossible symbol ->
+                                CChar (formatSymbol symbol)
+    | FLCandidateExcluded _ ->
+                                CChar ' '
+    | FLHintHouseGiven _ when not c -> CChar ' '
+    | FLHintHouseSet _ when not c -> CChar ' '
+    | FLHintCell symbol -> ColouredChar(formatSymbol symbol, ConsoleColor.Cyan)
+    | FLHintCandidatePointer symbol -> ColouredChar (formatSymbol symbol, ConsoleColor.Magenta)
+    | FLHintCandidateReduction symbol -> ColouredChar (formatSymbol symbol, ConsoleColor.DarkYellow)
+    | _ -> drawFLF (l)
 
-let nakedSingleSymbolTo (entryLookup:EntryLookup) (houseCells:HouseCells) (hint:NakedSingle) (cell:Cell) =
-    if cell = hint.cell then
-        ColouredChar(formatSymbol hint.symbol, ConsoleColor.Cyan)
-    else
-        (entryToConsole (entryLookup cell))
+// Print a symbol option, with colours
+let symbolOptionToConsoleChar = function
+    | Some symbol -> LPlain (Given symbol)
+    | None -> LPlain (Candidates Set.empty)
 
-let printFullHouse hss =
-    List.iter (
-        fun hs ->
-            match hs with
-            | {FullHouse.cell = cell; symbol = Symbol symbol; house = house} ->
-                Console.WriteLine ("{0}, Value {1}, Cell {2}", formatHouse house, symbol, formatCell cell)
-            )
-        hss
+// Print an entry, with colours
+let entryToConsole (entry:Entry) = LPlain entry
 
-let fullHouseSymbolTo (entryLookup:EntryLookup) (houseCells:HouseCells) (hint:FullHouse) (cell:Cell) =
-    let hc = getHouseCells houseCells hint.house
-
-    let houseEntryToConsole = function
-        | Given(Symbol s) -> ColouredChar (s, ConsoleColor.Green)
-        | Set(Symbol s) -> ColouredChar (s, ConsoleColor.Yellow)
-        | Candidates(_) -> CChar '.'
-
-    if cell = hint.cell then
-        ColouredChar(formatSymbol hint.symbol, ConsoleColor.Cyan)
-    else if Set.contains cell (Set.ofList hc) then
-        (houseEntryToConsole (entryLookup cell))
-    else
-        (entryToConsole (entryLookup cell))
-
-
-let printNakedPairs hints =
-    List.iter (
-        fun hs ->
-            match hs with
-            | {NakedPair.cell1 = cell1; cell2 = cell2; symbols = symbols; candidateReduction = candidateReduction; house = house} ->
-                Console.WriteLine ("{0}, Cell {1}, Cell {2}, {3}", formatHouse house, formatCell cell1, formatCell cell2, formatSymbols symbols)
-
-                List.iter
-                    (fun {CandidateReduction.symbols = candidates; cell = cell} ->
-                        Console.WriteLine ("  Cell {0}, Candidates {1}", formatCell cell, formatSymbols candidates)
-                    )
-                    candidateReduction
-            )
-        hints
-
-let nakedPairSymbolTo (entryLookup:EntryLookup) (houseCells:HouseCells) (hint:NakedPair) (cell:Cell) chars =
-    let hc = getHouseCells houseCells hint.house
-    let houseEntryToConsole = function
-        | Given(Symbol s) -> ColouredChar (s, ConsoleColor.Green)
-        | Set(Symbol s) -> ColouredChar (s, ConsoleColor.Yellow)
-        | Candidates(_) -> CChar '.'
-
-    let cc =
-        if cell = hint.cell1 || cell = hint.cell2 then
-            ColouredChar('a' (*formatSymbol hint.symbol*), ConsoleColor.Cyan)
-        else if Set.contains cell (Set.ofList hc) then
-            (houseEntryToConsole (entryLookup cell))
+// Print an entry for a candidate to console
+let entryAndCandidateToConsole candidate entry =
+    match entry with
+    | Given symbol -> FLGiven symbol
+    | Set symbol -> FLSet symbol
+    | Candidates candidates ->
+        if Set.contains candidate candidates then
+            FLCandidatePossible candidate
         else
-            (entryToConsole (entryLookup cell))
+            FLCandidateExcluded candidate
 
-    cc :: chars
 

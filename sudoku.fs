@@ -57,13 +57,16 @@ type Alphabet = Symbol list
 // Instead of defining the container, define how to get symbols per cell
 type SymbolLookup = Cell -> Symbol option
 
+[<Measure>] type width
+[<Measure>] type height
+
 // A sudoku is defined by the overall grid size (it is always square)
 // which is the same as the symbols in the alphabet
 // and also by the width and height of the boxes
 [<NoEquality; NoComparison>]
 type Puzzle = {
-    boxWidth : int
-    boxHeight : int
+    boxWidth : int<width>
+    boxHeight : int<height>
     alphabet : Alphabet
     symbols : SymbolLookup
 }
@@ -77,21 +80,54 @@ type Entry =
 
 type EntryLookup = Cell -> Entry
 
+type CandidateLookup = Cell -> Set<Symbol>
+
+type FormatLabel =
+    | LPlain of Entry
+    | LHintHouse of Entry
+    | LHintCell of Symbol
+
+type FormatLabelF =
+    | FLGiven of Symbol
+    | FLSet of Symbol
+    | FLCandidatePossible of Symbol
+    | FLCandidateExcluded of Symbol
+    | FLHintHouseGiven of Symbol
+    | FLHintHouseSet of Symbol
+    | FLHintCell of Symbol
+    | FLHintCandidatePointer of Symbol
+    | FLHintCandidateReduction of Symbol
+
 // Working towards a solution we take one of the following actions:
 type Action =
-    | Load
     | SetValue of Cell * Symbol
     | ClearCandidate of Cell * Symbol
 
-// Track the updated grid and the action
 [<NoEquality; NoComparison>]
-type Step = {
+type Solution = {
     grid : EntryLookup
-    action : Action
+    steps : Action list
 }
 
 [<NoEquality; NoComparison>]
-type Solution = {
-    puzzle : Puzzle
-    steps : Step list
+type PuzzleMaps = {
+    columns : Column list
+    rows : Row list
+    cells : Cell list
+
+    cellColumn : Cell->Column
+    columnCells : Column->Cell list
+    cellRow : Cell->Row
+    rowCells : Row->Cell list
+    cellBox : Cell -> Box
+    boxCells : Box -> Cell list
+
+    stacks : Stack list
+    bands : Band list
+    boxes : Box list
+
+    columnStack : Column -> Stack
+    stackColumns : Stack-> Column list
+    rowBand : Row->Band
+    bandRows : Band->Row list
 }

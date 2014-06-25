@@ -1,14 +1,12 @@
-﻿#light
-
-module command
+﻿module command
 
 open System
 open System.Text
 
 open sudoku
+open puzzlemap
 open format
 open console
-open tactics
 
 // find a column or row
 let parseColumnRow what gridSize term =
@@ -26,7 +24,9 @@ let parseCell gridSize cells termColumn termRow =
 
     match (parsedCol, parsedRow) with
     | (Some col, Some row) ->
-        findCell (col * 1<col>) (row * 1<row>) cells
+        List.tryFind
+            (fun cell -> cell.col.col = col * 1<col> && cell.row.row = row * 1<row>)
+            cells
     | _ ->
         Console.WriteLine("({0},{1} is not a cell", termColumn, termRow)
         None
@@ -40,90 +40,61 @@ let parseValue alphabet (term:string) =
         None
 
 
+type SetCellValue =
+    {
+        cell:Cell
+        value:Symbol
+        housesCells:Set<Cell>
+    }
 
-let symbolsToCandidates (symbolLookup : SymbolLookup) houseCells entry cell =
-    match entry with
-    | Candidates(c1) ->
-        let c = 
-            candidateSymbols cell symbolLookup houseCells c1
-        Candidates(c)
-    | _ -> entry
-
-let makeSolutionGrid s cells =
-
-    let s3 = List.map2 (fun a b -> (a, b)) cells s
-
-    let s2 = s3 |> Map.ofList
-
-    let solutionGrid = new System.Collections.Generic.Dictionary<Cell, Entry>(s2)
-
-    solutionGrid
-
-// Update the set of candidates
-let updateCandidates (entryLookup:EntryLookup) houseCells (cells:Cell list) c value =
-
-    let houses = allHouseCells c houseCells
-
-    List.map (
-        fun cell ->
+// Modify entryLoopup to set a cell to a value
+let setACell (entryLookup:EntryLookup) (setCellValue:SetCellValue) : EntryLookup =
+    fun cell ->
+        if setCellValue.cell = cell then
+            Set(setCellValue.value)
+        else
             let entry = entryLookup cell
 
             match entry with
-            | Candidates(c1) when houses.Contains cell -> Candidates(Set.remove value c1)
+            | Candidates candidates when setCellValue.housesCells.Contains cell -> Candidates(Set.remove setCellValue.value candidates)
             | _ -> entry
-    ) cells
 
-// Update the set of candidates
-let doSet (entryLookup:EntryLookup) (cells:Cell list) c value =
-    List.map (
-        fun cell ->
-            if cell = c then
-                Set(value)
-            else
-                entryLookup cell
-    ) cells
 
-let setValue (entryLookup:EntryLookup) houseCells (cells:Cell list) cell value =
-    let c = entryLookup(cell)
-    match c with
+
+let setValue (entryLookup:EntryLookup) (puzzleMaps:PuzzleMaps) cell value =
+    let entry = entryLookup cell
+    match entry with
     | Given(Symbol s) ->
-        Console.WriteLine ("Cell <{0}, {1}> has given value {2}", cell.col, cell.row, s)
+        Console.WriteLine ("Cell {0} has given value {1}", formatCell cell, s)
         None
     | Set(Symbol s) ->
-        Console.WriteLine ("Cell <{0}, {1}> has been set value {2}", cell.col, cell.row, s)
+        Console.WriteLine ("Cell {0} has been set value {1}", formatCell cell, s)
         None
     | Candidates(_) ->
-        let lookup cell2 =
-            if cell = cell2 then
-                Set(value)
-            else
-                entryLookup(cell2)
+        let housesCells = allHouseCells puzzleMaps cell
 
-        let updatedGrid3 = doSet entryLookup cells cell value
+        let setCellValue =
+            {
+                SetCellValue.cell = cell
+                value = value
+                housesCells = housesCells
+            }
 
-        let updatedGrid4 = makeSolutionGrid updatedGrid3 cells
-
-        let entryLookup2 = solutionGridCellLookup updatedGrid4
-
-        let updatedGrid = updateCandidates entryLookup2 houseCells cells cell value
-
-        let updatedGrid2 = makeSolutionGrid updatedGrid cells
+        let sac = setACell entryLookup setCellValue
 
         let action = SetValue(cell, value)
 
-        let step = { grid = (solutionGridCellLookup updatedGrid2); action = action }
+        Some (sac, action)
 
-        Some step
-
-let ui_set (item:string) gridSize alphabet (lastGrid:EntryLookup) houseCells (cells:Cell list) =
+let ui_set (item:string) (alphabet:Alphabet) (lastGrid:EntryLookup) (puzzleMaps:PuzzleMaps) =
     let terms = item.Split(' ')
     if terms.Length = 4 then
-        let parsedCell = parseCell gridSize cells terms.[1] terms.[2]
+        let parsedCell = parseCell alphabet.Length puzzleMaps.cells terms.[1] terms.[2]
         let parsedValue = parseValue alphabet terms.[3]
 
         match (parsedCell, parsedValue) with
         | (Some cell, Some value) ->
-            setValue lastGrid houseCells cells cell value
+            setValue lastGrid puzzleMaps cell value
         | _ ->
             Console.WriteLine "Expect set <col> <row> <val>"
             None

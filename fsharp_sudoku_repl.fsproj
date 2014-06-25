@@ -42,12 +42,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="sudoku.fs" />
+    <Compile Include="puzzlemap.fs" />
     <Compile Include="format.fs" />
-    <Compile Include="tactics.fs" />
     <Compile Include="hints.fs" />
     <Compile Include="console.fs" />
+    <Compile Include="fullHouse.fs" />
+    <Compile Include="hiddenSingle.fs" />
+    <Compile Include="nakedSingle.fs" />
+    <Compile Include="nakedPair.fs" />
     <Compile Include="command.fs" />
     <Compile Include="shell.fs" />
+    <Compile Include="tactics.fs" />
     <Compile Include="main.fs" />
   </ItemGroup>
   <PropertyGroup>
