@@ -50,6 +50,8 @@ type House =
 // Each cell in the grid contains a symbol, usually numbers 1..9
 type Symbol = Symbol of char
 
+type Candidate = Candidate of char
+
 // A puzzle takes a list of symbols, which gives
 // the size of the grid
 type Alphabet = Symbol list
@@ -67,40 +69,55 @@ type SymbolLookup = Cell -> Symbol option
 type Puzzle = {
     boxWidth : int<width>
     boxHeight : int<height>
-    alphabet : Alphabet
-    symbols : SymbolLookup
+    alphabet : Symbol list
+    symbols : Cell->Symbol option
 }
 
 // Whilst working to a solution each cell in the grid
 // has either:
-type Entry =
+type AnnotatedCandidate =
+    | Possible
+    | Excluded
+    | Removed
+
+[<NoEquality; NoComparison>]
+type AnnotatedSymbol =
     | Given of Symbol
     | Set of Symbol
-    | Candidates of Set<Symbol>
+    | Candidates of (Candidate->AnnotatedCandidate)
 
-type EntryLookup = Cell -> Entry
-
-type CandidateLookup = Cell -> Set<Symbol>
-
+[<NoEquality; NoComparison>]
 type FormatLabel =
-    | LPlain of Entry
-    | LHintHouse of Entry
+    | LPlain of AnnotatedSymbol
+    | LHintHouse of AnnotatedSymbol
     | LHintCell of Symbol
 
+type EntryLookup = Cell -> AnnotatedSymbol
+
+type EntryLabel =
+    | EGiven of Symbol
+    | ESet of Symbol
+    | EFLCandidatePossible of Candidate
+    | EFLCandidateExcluded of Candidate
+
 type FormatLabelF =
-    | FLGiven of Symbol
-    | FLSet of Symbol
-    | FLCandidatePossible of Symbol
-    | FLCandidateExcluded of Symbol
-    | FLHintHouseGiven of Symbol
-    | FLHintHouseSet of Symbol
+    | FLPlain of EntryLabel
+    | FLHintHouse of EntryLabel
     | FLHintCell of Symbol
-    | FLHintCandidatePointer of Symbol
-    | FLHintCandidateReduction of Symbol
+    | FLHintCandidatePointer of Candidate
+    | FLHintCandidateReduction of Candidate
 
 // Working towards a solution we take one of the following actions:
+
+type SetCellValue =
+    {
+        cell:Cell
+        value:Candidate
+        //candidateReductions:Set<Cell>
+    }
+
 type Action =
-    | SetValue of Cell * Symbol
+    | SetValue of SetCellValue
     | ClearCandidate of Cell * Symbol
 
 [<NoEquality; NoComparison>]

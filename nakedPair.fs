@@ -12,13 +12,13 @@ open console
 type NakedPair = {
     cell1 : Cell
     cell2 : Cell
-    symbols : Set<Symbol>
+    symbols : Set<Candidate>
     candidateReduction : CandidateReduction list
     house : House
     houseCells : Set<Cell>
 }
 
-let nakedPairPerHouse (candidateLookup:CandidateLookup) (puzzleMaps:PuzzleMaps) (house:House) =
+let nakedPairPerHouse (candidateLookup:Cell->Set<Candidate>) (puzzleMaps:PuzzleMaps) (house:House) =
 
     let cells = getHouseCells puzzleMaps house
 
@@ -54,7 +54,7 @@ let nakedPairPerHouse (candidateLookup:CandidateLookup) (puzzleMaps:PuzzleMaps) 
                 ) (Seq.skip (i + 1) hht)) hht
     !hints
 
-let findNakedPairs (candidateLookup:CandidateLookup) (puzzleMaps:PuzzleMaps) =
+let findNakedPairs (candidateLookup:Cell->Set<Candidate>) (puzzleMaps:PuzzleMaps) =
 
     let perHouse = nakedPairPerHouse candidateLookup puzzleMaps
 
@@ -63,36 +63,34 @@ let findNakedPairs (candidateLookup:CandidateLookup) (puzzleMaps:PuzzleMaps) =
     List.collect perHouse houses
 
 let printNakedPair {NakedPair.cell1 = cell1; cell2 = cell2; symbols = symbols; candidateReduction = candidateReduction; house = house} =
-    Console.WriteLine ("{0}, Cell {1}, Cell {2}, {3}", formatHouse house, formatCell cell1, formatCell cell2, formatSymbols symbols)
+    Console.WriteLine ("{0}, Cell {1}, Cell {2}, {3}", formatHouse house, formatCell cell1, formatCell cell2, formatCandidates symbols)
 
     List.iter
         (fun {CandidateReduction.symbols = candidates; cell = cell} ->
-            Console.WriteLine ("  Cell {0}, Candidates {1}", formatCell cell, formatSymbols candidates)
+            Console.WriteLine ("  Cell {0}, Candidates {1}", formatCell cell, formatCandidates candidates)
         )
         candidateReduction
 
-let nakedPairSymbolTo (hint:NakedPair) (etoc:Symbol->Entry->FormatLabelF) (cell:Cell) candidate (entry:Entry) =
-    match entry with
-    | Given symbol ->
-        if Set.contains cell hint.houseCells then
-            FLHintHouseGiven symbol
-        else
-            etoc candidate entry
-    | Set symbol ->
-        if Set.contains cell hint.houseCells then
-            FLHintHouseSet symbol
-        else
-            etoc candidate entry
-    | Candidates(candidates) ->
-        if Set.contains candidate candidates then
-            if cell = hint.cell1 || cell = hint.cell2 then
-                FLHintCandidatePointer candidate
-            else
-                let o = List.tryFind (fun { CandidateReduction.cell = cell2; symbols = symbols } -> cell = cell2) hint.candidateReduction
-                match o with
-                | Some { CandidateReduction.cell = cell2; symbols = symbols } when Set.contains candidate symbols ->
-                    FLHintCandidateReduction candidate
-                | _ ->
-                    etoc candidate entry
-        else
-            etoc candidate entry
+let nakedPairSymbolTo (hint:NakedPair) : (Cell->Candidate->EntryLabel)->(Cell->Candidate->FormatLabelF) =
+    fun (etoc:Cell->Candidate->EntryLabel) ->
+        fun (cell:Cell) (candidate:Candidate) ->
+            let label = etoc cell candidate
+            match label with
+            | EGiven _
+            | ESet _ ->
+                if Set.contains cell hint.houseCells then
+                    FLHintHouse label
+                else
+                    FLPlain label
+            | EFLCandidatePossible symbol ->
+                if cell = hint.cell1 || cell = hint.cell2 then
+                    FLHintCandidatePointer candidate
+                else
+                    let o = List.tryFind (fun { CandidateReduction.cell = cell2; symbols = symbols } -> cell = cell2) hint.candidateReduction
+                    match o with
+                    | Some { CandidateReduction.cell = cell2; symbols = symbols } when Set.contains candidate symbols ->
+                        FLHintCandidateReduction candidate
+                    | _ ->
+                        FLPlain label
+
+            | EFLCandidateExcluded symbol -> FLPlain label

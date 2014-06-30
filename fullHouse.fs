@@ -13,12 +13,12 @@ open console
 
 type FullHouse = {
     cell : Cell
-    symbol : Symbol
+    symbol : Candidate
     house : House
     houseCells : Set<Cell>
 }
 
-let fullHousePerHouse (candidateLookup:CandidateLookup) (puzzleMaps:PuzzleMaps) (house:House) =
+let fullHousePerHouse (candidateLookup:Cell->Set<Candidate>) (puzzleMaps:PuzzleMaps) (house:House) =
 
     let cells = getHouseCells puzzleMaps house
 
@@ -33,7 +33,7 @@ let fullHousePerHouse (candidateLookup:CandidateLookup) (puzzleMaps:PuzzleMaps) 
     else
         []
 
-let findFullHouse (candidateLookup:CandidateLookup) (puzzleMaps:PuzzleMaps) =
+let findFullHouse (candidateLookup:Cell->Set<Candidate>) (puzzleMaps:PuzzleMaps) =
 
     let perHouse = fullHousePerHouse candidateLookup puzzleMaps
 
@@ -41,34 +41,29 @@ let findFullHouse (candidateLookup:CandidateLookup) (puzzleMaps:PuzzleMaps) =
 
     List.collect perHouse houses
 
-let printFullHouse {FullHouse.cell = cell; symbol = symbol; house = house} =
-    String.Format ("{0}, Value {1}, Cell {2}", formatHouse house, formatSymbol symbol, formatCell cell)
+let printFullHouse (hint:FullHouse) =
+    String.Format ("{0}, Value {1}, Cell {2}", formatHouse hint.house, formatCandidate hint.symbol, formatCell hint.cell)
 
-let fullHouseSymbolTo (hint:FullHouse) (etoc:Entry->FormatLabel) (cell:Cell) =
-    if cell = hint.cell then
-        konst (LHintCell hint.symbol)
-    else if Set.contains cell hint.houseCells then
-        LHintHouse
-    else
-        etoc
-
-let fullHouseFullSymbolTo (hint:FullHouse) (etoc:Symbol->Entry->FormatLabelF) (cell:Cell) candidate (entry:Entry) =
-    match entry with
-    | Given symbol ->
-        if Set.contains cell hint.houseCells then
-            FLHintHouseGiven symbol
-        else
-            etoc candidate entry
-    | Set symbol ->
-        if Set.contains cell hint.houseCells then
-            FLHintHouseSet symbol
-        else
-            etoc candidate entry
-    | Candidates(candidates) ->
-        if Set.contains candidate candidates then
+let fullHouseSymbolTo (hint:FullHouse) : (Cell->AnnotatedSymbol)->(Cell->FormatLabel) =
+    fun (etoc:Cell->AnnotatedSymbol) ->
+        fun (cell:Cell) ->
+            let entry = etoc cell
             if cell = hint.cell then
-                FLHintCandidateReduction candidate
+                LHintCell (candidateToSymbol hint.symbol)
+            else if Set.contains cell hint.houseCells then
+                LHintHouse entry
             else
-                etoc candidate entry
-        else
-            etoc candidate entry
+                LPlain entry
+
+let fullHouseFullSymbolTo (hint:FullHouse) : (Cell->Candidate->EntryLabel)->(Cell->Candidate->FormatLabelF) =
+    fun (etoc:Cell->Candidate->EntryLabel) ->
+        fun (cell:Cell) (candidate:Candidate) ->
+            let label = etoc cell candidate
+
+            if cell = hint.cell then
+                FLHintCell (candidateToSymbol hint.symbol)
+            else if Set.contains cell hint.houseCells then
+                FLHintHouse label
+            else
+                FLPlain label
+

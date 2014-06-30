@@ -4,11 +4,14 @@ open sudoku
 
 let konst x _ = x
 
+let candidateToSymbol (Candidate s:Candidate) = Symbol s
 
-let getCandidateEntries = function
-    | Given _ -> Set.empty
+let symbolToCandidate (Symbol s:Symbol) = Candidate s
+
+let getCandidateEntries (alphaset:Set<Candidate>) = function
     | Set _ -> Set.empty
-    | Candidates s -> s
+    | Given _ -> Set.empty
+    | Candidates s -> Set.filter (fun symbol -> s symbol = Possible) alphaset
 
 let getHouseCells (puzzleMaps:PuzzleMaps) (h:House) =
     match h with
@@ -68,16 +71,14 @@ let houseCellsForCell (puzzleMaps:PuzzleMaps) (cell:Cell) (symbolLookup:Cell->'a
 
   Set.unionMany [rc; cc; bc]
 
-let flattenEntry (entryLookup:EntryLookup) (cells:Cell list) =
+let flattenEntry (cellLookup:Cell->'a) (cells:Cell list) =
     let s = 
         List.map (
-            fun cell -> (cell, entryLookup cell)
+            fun cell -> (cell, cellLookup cell)
         ) cells
 
     let s2 = s |> Map.ofList
 
-    let solutionGrid = new System.Collections.Generic.Dictionary<Cell, Entry>(s2)
+    let solutionGrid = new System.Collections.Generic.Dictionary<Cell, 'a>(s2)
 
     fun cell -> solutionGrid.[cell]
-
-

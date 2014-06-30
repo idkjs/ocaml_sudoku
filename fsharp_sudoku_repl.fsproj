@@ -46,6 +46,7 @@
     <Compile Include="format.fs" />
     <Compile Include="hints.fs" />
     <Compile Include="console.fs" />
+    <Compile Include="setCell.fs" />
     <Compile Include="fullHouse.fs" />
     <Compile Include="hiddenSingle.fs" />
     <Compile Include="nakedSingle.fs" />

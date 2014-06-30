@@ -7,6 +7,7 @@ open sudoku
 open puzzlemap
 open format
 open console
+open setCell
 
 // find a column or row
 let parseColumnRow what gridSize term =
@@ -32,61 +33,14 @@ let parseCell gridSize cells termColumn termRow =
         None
 
 // find an element of the alphabet
-let parseValue alphabet (term:string) =
+let parseValue (alphabet:Candidate list) (term:string) =
     if term.Length = 1 then
-        charToAlphabet alphabet (term.Chars 0)
+        charToCandidate alphabet (term.Chars 0)
     else
         Console.WriteLine ("Expect a single digit, not {0}", term)
         None
 
-
-type SetCellValue =
-    {
-        cell:Cell
-        value:Symbol
-        housesCells:Set<Cell>
-    }
-
-// Modify entryLoopup to set a cell to a value
-let setACell (entryLookup:EntryLookup) (setCellValue:SetCellValue) : EntryLookup =
-    fun cell ->
-        if setCellValue.cell = cell then
-            Set(setCellValue.value)
-        else
-            let entry = entryLookup cell
-
-            match entry with
-            | Candidates candidates when setCellValue.housesCells.Contains cell -> Candidates(Set.remove setCellValue.value candidates)
-            | _ -> entry
-
-
-
-let setValue (entryLookup:EntryLookup) (puzzleMaps:PuzzleMaps) cell value =
-    let entry = entryLookup cell
-    match entry with
-    | Given(Symbol s) ->
-        Console.WriteLine ("Cell {0} has given value {1}", formatCell cell, s)
-        None
-    | Set(Symbol s) ->
-        Console.WriteLine ("Cell {0} has been set value {1}", formatCell cell, s)
-        None
-    | Candidates(_) ->
-        let housesCells = allHouseCells puzzleMaps cell
-
-        let setCellValue =
-            {
-                SetCellValue.cell = cell
-                value = value
-                housesCells = housesCells
-            }
-
-        let sac = setACell entryLookup setCellValue
-
-        let action = SetValue(cell, value)
-
-        Some (sac, action)
-
-let ui_set (item:string) (alphabet:Alphabet) (lastGrid:EntryLookup) (puzzleMaps:PuzzleMaps) =
+let ui_set (item:string) (alphabet:Candidate list) (lastGrid:Cell->AnnotatedSymbol) (puzzleMaps:PuzzleMaps) =
     let terms = item.Split(' ')
     if terms.Length = 4 then
         let parsedCell = parseCell alphabet.Length puzzleMaps.cells terms.[1] terms.[2]
@@ -94,11 +48,12 @@ let ui_set (item:string) (alphabet:Alphabet) (lastGrid:EntryLookup) (puzzleMaps:
 
         match (parsedCell, parsedValue) with
         | (Some cell, Some value) ->
-            setValue lastGrid puzzleMaps cell value
+            setValue puzzleMaps value lastGrid cell
         | _ ->
             Console.WriteLine "Expect set <col> <row> <val>"
             None
     else
         Console.WriteLine "Expect set <col> <row> <val>"
         None
+
 

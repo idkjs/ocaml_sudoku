@@ -15,10 +15,10 @@ open console
 type NakedSingle = {
     //candidateReduction : CandidateReduction
     cell : Cell
-    symbol : Symbol
+    symbol : Candidate
 }
 
-let findNakedSingles (candidateLookup:CandidateLookup) (cells:Cell list) =
+let findNakedSingles (candidateLookup:Cell->Set<Candidate>) (cells:Cell list) =
 
     let candidateCells =
         List.map (fun cell -> (candidateLookup cell, cell)) cells
@@ -28,25 +28,29 @@ let findNakedSingles (candidateLookup:CandidateLookup) (cells:Cell list) =
 
     List.map (fun (candidates, cell) -> {NakedSingle.cell=cell; NakedSingle.symbol=first candidates }) filteredCandidateCells
 
-let printNakedSingle {NakedSingle.cell = cell; symbol = Symbol symbol} =
+let printNakedSingle {NakedSingle.cell = cell; symbol = Candidate symbol} =
     String.Format ("Cell {0}: Symbol: {1}", formatCell cell, symbol)
 
-let nakedSingleSymbolTo (hint:NakedSingle) (etoc:Entry->FormatLabel) (cell:Cell) =
-    if cell = hint.cell then
-        konst (LHintCell hint.symbol)
-    else
-        etoc
+let nakedSingleSymbolTo (hint:NakedSingle) : (Cell->AnnotatedSymbol)->(Cell->FormatLabel) =
+    fun (etoc:Cell->AnnotatedSymbol) ->
+        fun cell ->
+            if cell = hint.cell then
+                LHintCell (candidateToSymbol hint.symbol)
+            else
+                LPlain (etoc cell)
 
-let nakedSingleFullSymbolTo (hint:NakedSingle) (etoc:Symbol->Entry->FormatLabelF) (cell:Cell) candidate (entry:Entry) =
-    match entry with
-    | Given symbol ->
-        etoc candidate entry
-    | Set symbol ->
-        etoc candidate entry
-    | Candidates(candidates) ->
-        if Set.contains candidate candidates &&
-            cell = hint.cell then
-                FLHintCandidateReduction hint.symbol
-        else
-            etoc candidate entry
+let nakedSingleFullSymbolTo (hint:NakedSingle) : (Cell->Candidate->EntryLabel)->(Cell->Candidate->FormatLabelF) =
+    fun (etoc:Cell->Candidate->EntryLabel) ->
+        fun (cell:Cell) (candidate:Candidate) ->
+            let label = etoc cell candidate
+            match label with
+            | EGiven _
+            | ESet _ ->
+                FLPlain label
+            | EFLCandidatePossible symbol ->
+                if cell = hint.cell then
+                    FLHintCell (candidateToSymbol hint.symbol)
+                else
+                    FLPlain label
+            | EFLCandidateExcluded symbol -> FLPlain label
 

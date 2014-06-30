@@ -107,9 +107,14 @@ let ConsoleWriteChar = function
     | ColouredChar (c, consoleColour) -> consoleWriteColor c consoleColour
     | NL -> Console.WriteLine ""
 
-let charToAlphabet (alphabet : Alphabet) (trialSymbol : char) = 
-  let compareAlpha symbol =
-    let (Symbol charSymbol) = symbol
+let charToAlphabet (alphabet : Symbol list) (trialSymbol : char) = 
+  let compareAlpha (Symbol charSymbol) =
+    trialSymbol = charSymbol
+
+  List.tryFind compareAlpha alphabet
+
+let charToCandidate (alphabet : Candidate list) (trialSymbol : char) = 
+  let compareAlpha (Candidate charSymbol) =
     trialSymbol = charSymbol
 
   List.tryFind compareAlpha alphabet
@@ -141,68 +146,98 @@ let formatCell cell = String.Format ("c{0}r{1}", (int)cell.col.col, (int)cell.ro
 
 let formatSymbol (Symbol s) = s
 
+let formatCandidate (Candidate c) = c
+
 let formatSymbols (candidates:Set<Symbol>) =
     let s = Set.toArray candidates
     let t = Array.map formatSymbol s
     String.Join(",", t)
 
+let formatCandidates (candidates:Set<Candidate>) =
+    let s = Set.toArray candidates
+    let t = Array.map formatCandidate s
+    String.Join(",", t)
+
+let drawF (entry:AnnotatedSymbol) =
+    match entry with
+    | Given s -> ColouredChar (formatSymbol s, ConsoleColor.Blue)
+    | Set s -> ColouredChar (formatSymbol s, ConsoleColor.Red)
+    | Candidates _ -> CChar '.'
+
+let drawHintF (entry:AnnotatedSymbol) =
+    match entry with
+    | Given s -> ColouredChar (formatSymbol s, ConsoleColor.Green)
+    | Set s -> ColouredChar (formatSymbol s, ConsoleColor.Yellow)
+    | Candidates _ -> CChar '.'
 
 let drawFL (l:FormatLabel) =
     match l with
-    | LPlain (Given s) -> ColouredChar (formatSymbol s, ConsoleColor.Blue)
-    | LPlain (Set s) -> ColouredChar (formatSymbol s, ConsoleColor.Red)
-    | LPlain (Candidates _) -> CChar '.'
-    | LHintHouse (Given s) -> ColouredChar (formatSymbol s, ConsoleColor.Green)
-    | LHintHouse (Set s) -> ColouredChar (formatSymbol s, ConsoleColor.Yellow)
-    | LHintHouse (Candidates _) -> CChar '.'
+    | LPlain entry -> drawF entry
+    | LHintHouse entry -> drawHintF entry
     | LHintCell s -> ColouredChar(formatSymbol s, ConsoleColor.Cyan)
 
+let drawFLFE centreCandidate candidate (l:EntryLabel) =
+    let c = centreCandidate = candidate
+
+    match l with
+    | EGiven _ when not c -> CChar ' '
+    | EGiven s -> ColouredChar (formatSymbol s, ConsoleColor.Blue)
+    | ESet _ when not c -> CChar ' '
+    | ESet s -> ColouredChar (formatSymbol s, ConsoleColor.Red)
+    | EFLCandidatePossible s -> CChar (formatCandidate s)
+    | EFLCandidateExcluded s -> CChar ' '
+
+let drawHintFLFE centreCandidate candidate (l:EntryLabel) =
+    let c = centreCandidate = candidate
+
+    match l with
+    | EGiven _ when not c -> CChar ' '
+    | EGiven s -> ColouredChar (formatSymbol s, ConsoleColor.Green)
+    | ESet _ when not c -> CChar ' '
+    | ESet s -> ColouredChar (formatSymbol s, ConsoleColor.Yellow)
+    | EFLCandidatePossible s -> CChar (formatCandidate s)
+    | EFLCandidateExcluded s -> CChar ' '
+
+(*
 let drawFLF (l:FormatLabelF) =
     match l with
-    | FLGiven s -> ColouredChar (formatSymbol s, ConsoleColor.Blue)
-    | FLSet s -> ColouredChar (formatSymbol s, ConsoleColor.Red)
+    | FLPlain m -> drawF m
+    | FLHintHouse m -> drawHintF m
+
+    | FLHintCell s
     | FLCandidatePossible s -> CChar (formatSymbol s)
     | FLCandidateExcluded s -> CChar ' '
-    | FLHintHouseGiven s -> ColouredChar (formatSymbol s, ConsoleColor.Green)
-    | FLHintHouseSet s -> ColouredChar (formatSymbol s, ConsoleColor.Yellow)
-    | FLHintCell s -> ColouredChar(formatSymbol s, ConsoleColor.Cyan)
     | FLHintCandidatePointer s -> ColouredChar (formatSymbol s, ConsoleColor.Magenta)
     | FLHintCandidateReduction s -> ColouredChar (formatSymbol s, ConsoleColor.DarkYellow)
-
+*)
 let drawFL2 centreCandidate candidate (l:FormatLabelF) =
     let c = centreCandidate = candidate
 
     match l with
-    | FLGiven _ when not c -> CChar ' '
-    | FLSet _ when not c -> CChar ' '
-    | FLCandidatePossible symbol ->
-                                CChar (formatSymbol symbol)
-    | FLCandidateExcluded _ ->
-                                CChar ' '
-    | FLHintHouseGiven _ when not c -> CChar ' '
-    | FLHintHouseSet _ when not c -> CChar ' '
-    | FLHintCell symbol -> ColouredChar(formatSymbol symbol, ConsoleColor.Cyan)
-    | FLHintCandidatePointer symbol -> ColouredChar (formatSymbol symbol, ConsoleColor.Magenta)
-    | FLHintCandidateReduction symbol -> ColouredChar (formatSymbol symbol, ConsoleColor.DarkYellow)
-    | _ -> drawFLF (l)
+    | FLPlain e -> drawFLFE centreCandidate candidate e
+    | FLHintHouse e -> drawHintFLFE centreCandidate candidate e
+    | FLHintCell _ when not c -> CChar ' '
+    | FLHintCell s -> ColouredChar (formatSymbol s, ConsoleColor.Cyan)
+    | FLHintCandidatePointer symbol -> ColouredChar (formatCandidate symbol, ConsoleColor.Magenta)
+    | FLHintCandidateReduction symbol -> ColouredChar (formatCandidate symbol, ConsoleColor.DarkYellow)
 
 // Print a symbol option, with colours
 let symbolOptionToConsoleChar = function
-    | Some symbol -> LPlain (Given symbol)
-    | None -> LPlain (Candidates Set.empty)
+    | Some symbol -> Given symbol
+    | None -> Candidates (konst Removed)
 
 // Print an entry, with colours
-let entryToConsole (entry:Entry) = LPlain entry
+let entryToConsole (entry:AnnotatedSymbol) = entry
 
 // Print an entry for a candidate to console
-let entryAndCandidateToConsole candidate entry =
+let entryAndCandidateToConsole (entryLookup:EntryLookup) (cell:Cell) (candidate:Candidate) =
+    let entry = entryLookup cell
+
     match entry with
-    | Given symbol -> FLGiven symbol
-    | Set symbol -> FLSet symbol
+    | Given s -> EGiven s
+    | Set s -> ESet s
     | Candidates candidates ->
-        if Set.contains candidate candidates then
-            FLCandidatePossible candidate
-        else
-            FLCandidateExcluded candidate
-
-
+        match candidates candidate with
+        | Possible -> EFLCandidatePossible candidate
+        | Excluded -> EFLCandidateExcluded candidate
+        | Removed -> EFLCandidateExcluded candidate

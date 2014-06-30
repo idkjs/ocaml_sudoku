@@ -115,7 +115,7 @@ let printGrid (gridChars:gridChars<seq<'c>>) (eol:seq<'c>) (symbolTo:Cell->'c) (
 
     sinterleave doPrintBand t m b Seq.empty puzzleMaps.bands
 
-let print_full (solutionChars:solutionChars<seq<'c>>) (eol:seq<'c>) (symbolTo:Cell->Symbol->'b) (puzzleMaps:PuzzleMaps) (alphabet : Alphabet) (draw_cell:Symbol->'b -> 'c) =
+let print_full (solutionChars:solutionChars<seq<'c>>) (eol:seq<'c>) (symbolTo:Cell->Candidate->'b) (puzzleMaps:PuzzleMaps) (alphabet:Candidate list) (draw_cell:Candidate->'b ->'c) =
 
     let d = Seq.collect (konst solutionChars.h) (puzzleMaps.stackColumns puzzleMaps.stacks.Head)
     let i = Seq.collect (konst solutionChars.hi) (puzzleMaps.stackColumns puzzleMaps.stacks.Head)

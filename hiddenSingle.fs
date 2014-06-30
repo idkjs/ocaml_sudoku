@@ -12,12 +12,12 @@ open console
 
 type HiddenSingle = {
     cell : Cell
-    symbol : Symbol
+    symbol : Candidate
     house : House
     houseCells : Set<Cell>
 }
 
-let hiddenSinglesPerHouse (alphabet:Alphabet) (candidateLookup:CandidateLookup) (puzzleMaps:PuzzleMaps) (house:House) =
+let hiddenSinglesPerHouse (alphabet:Candidate list) (candidateLookup:Cell->Set<Candidate>) (puzzleMaps:PuzzleMaps) (house:House) =
 
     let cells = getHouseCells puzzleMaps house
 
@@ -41,7 +41,7 @@ let hiddenSinglesPerHouse (alphabet:Alphabet) (candidateLookup:CandidateLookup) 
     hhhs
 
 
-let findHiddenSingles alphabet (candidateLookup:CandidateLookup) (puzzleMaps:PuzzleMaps) =
+let findHiddenSingles (alphabet:Candidate list) (candidateLookup:Cell->Set<Candidate>) (puzzleMaps:PuzzleMaps) =
 
     let perHouse = hiddenSinglesPerHouse alphabet candidateLookup puzzleMaps
 
@@ -50,12 +50,14 @@ let findHiddenSingles alphabet (candidateLookup:CandidateLookup) (puzzleMaps:Puz
     List.collect perHouse houses
 
 let formatHiddenSingle {HiddenSingle.cell = cell; symbol = symbol; house = house} =
-    String.Format ("hs {0}, Value {1}, Cell {2}", formatHouse house, formatSymbol symbol, formatCell cell)
+    String.Format ("hs {0}, Value {1}, Cell {2}", formatHouse house, formatCandidate symbol, formatCell cell)
 
-let hiddenSingleSymbolTo (hint:HiddenSingle) (etoc:Entry->FormatLabel) (cell:Cell) =
-    if cell = hint.cell then
-        konst (LHintCell hint.symbol)
-    else if Set.contains cell hint.houseCells then
-        LHintHouse
-    else
-        etoc
+let hiddenSingleSymbolTo (hint:HiddenSingle) : (Cell->AnnotatedSymbol)->(Cell->FormatLabel) =
+    fun (etoc:Cell->AnnotatedSymbol) ->
+        fun cell ->
+            if cell = hint.cell then
+                LHintCell (candidateToSymbol hint.symbol)
+            else if Set.contains cell hint.houseCells then
+                LHintHouse (etoc cell)
+            else
+                LPlain (etoc cell)
