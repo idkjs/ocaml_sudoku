@@ -16,10 +16,10 @@ let setCellValueModelEffect (setCellValue:SetCellValue) (puzzleMaps:PuzzleMaps) 
 
     candidateReductions
 
-let setACell (setCellValue:SetCellValue) (puzzleMaps:PuzzleMaps) (candidateLookup:Cell->Set<Candidate>) : EntryLookup->EntryLookup =
+let setACell (setCellValue:SetCellValue) (puzzleMaps:PuzzleMaps) (candidateLookup:Cell->Set<Candidate>) : (Cell->AnnotatedSymbol)->(Cell->AnnotatedSymbol) =
     let candidateReductions = setCellValueModelEffect setCellValue puzzleMaps candidateLookup
 
-    fun (entryLookup:EntryLookup) ->
+    fun (entryLookup:Cell->AnnotatedSymbol) ->
 
         fun (cell:Cell) ->
             if setCellValue.cell = cell then
@@ -48,14 +48,14 @@ let setValue (puzzleMaps:PuzzleMaps) (candidate:Candidate) (entryLookup:Cell->An
                 value = candidate
             }
 
-let setCellCandidateGrid (setCellValue:SetCellValue) (puzzleMaps:PuzzleMaps) (candidateLookup:Cell->Set<Candidate>):(Cell->Candidate->EntryLabel)->(Cell->Candidate->FormatLabelF) =
+let setCellCandidateGrid (setCellValue:SetCellValue) (puzzleMaps:PuzzleMaps) (candidateLookup:Cell->Set<Candidate>):(Cell->Candidate->AnnotatedSymbol)->(Cell->Candidate->FormatLabelF) =
     let candidateReductions = setCellValueModelEffect setCellValue puzzleMaps candidateLookup
 
-    fun (toLabel:Cell->Candidate->EntryLabel) ->
+    fun (toLabel:Cell->Candidate->AnnotatedSymbol) ->
         fun (cell:Cell) (candidate:Candidate) ->
             if cell = setCellValue.cell then
-                FLPlain (ESet (candidateToSymbol setCellValue.value))
-            else if Set.contains cell candidateReductions && candidate = setCellValue.value  then
-                FLHintCandidateReduction candidate
+                FLPlain (Set (candidateToSymbol setCellValue.value))
+            else if Set.contains cell candidateReductions && candidate = setCellValue.value then
+                FLHintCandidates (fun _ -> Reduction)
             else
                 FLPlain (toLabel cell candidate)

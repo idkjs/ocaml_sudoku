@@ -31,26 +31,29 @@ let findNakedSingles (candidateLookup:Cell->Set<Candidate>) (cells:Cell list) =
 let printNakedSingle {NakedSingle.cell = cell; symbol = Candidate symbol} =
     String.Format ("Cell {0}: Symbol: {1}", formatCell cell, symbol)
 
-let nakedSingleSymbolTo (hint:NakedSingle) : (Cell->AnnotatedSymbol)->(Cell->FormatLabel) =
+let nakedSingleSymbolTo (hint:NakedSingle) : (Cell->AnnotatedSymbol)->(Cell->HintAnnotatedSymbol) =
     fun (etoc:Cell->AnnotatedSymbol) ->
         fun cell ->
             if cell = hint.cell then
-                LHintCell (candidateToSymbol hint.symbol)
+                HASCell (candidateToSymbol hint.symbol)
             else
-                LPlain (etoc cell)
+                HASId (etoc cell)
 
-let nakedSingleFullSymbolTo (hint:NakedSingle) : (Cell->Candidate->EntryLabel)->(Cell->Candidate->FormatLabelF) =
-    fun (etoc:Cell->Candidate->EntryLabel) ->
+let nakedSingleFullSymbolTo (hint:NakedSingle) : (Cell->Candidate->AnnotatedSymbol)->(Cell->Candidate->FormatLabelF) =
+    fun (etoc:Cell->Candidate->AnnotatedSymbol) ->
         fun (cell:Cell) (candidate:Candidate) ->
             let label = etoc cell candidate
             match label with
-            | EGiven _
-            | ESet _ ->
+            | Given _
+            | Set _ ->
                 FLPlain label
-            | EFLCandidatePossible symbol ->
-                if cell = hint.cell then
-                    FLHintCell (candidateToSymbol hint.symbol)
-                else
-                    FLPlain label
-            | EFLCandidateExcluded symbol -> FLPlain label
+            | Candidates candidates ->
+                match candidates candidate with
+                | Possible ->
+                    if cell = hint.cell then
+                        FLHintCell (candidateToSymbol hint.symbol)
+                    else
+                        FLPlain label
+                | Excluded -> FLPlain label
+                | Removed -> FLPlain label
 

@@ -52,12 +52,12 @@ let findHiddenSingles (alphabet:Candidate list) (candidateLookup:Cell->Set<Candi
 let formatHiddenSingle {HiddenSingle.cell = cell; symbol = symbol; house = house} =
     String.Format ("hs {0}, Value {1}, Cell {2}", formatHouse house, formatCandidate symbol, formatCell cell)
 
-let hiddenSingleSymbolTo (hint:HiddenSingle) : (Cell->AnnotatedSymbol)->(Cell->FormatLabel) =
+let hiddenSingleSymbolTo (hint:HiddenSingle) : (Cell->AnnotatedSymbol)->(Cell->HintAnnotatedSymbol) =
     fun (etoc:Cell->AnnotatedSymbol) ->
         fun cell ->
             if cell = hint.cell then
-                LHintCell (candidateToSymbol hint.symbol)
+                HASCell (candidateToSymbol hint.symbol)
             else if Set.contains cell hint.houseCells then
-                LHintHouse (etoc cell)
+                HASHouse (etoc cell)
             else
-                LPlain (etoc cell)
+                HASId (etoc cell)

@@ -52,13 +52,6 @@ type Symbol = Symbol of char
 
 type Candidate = Candidate of char
 
-// A puzzle takes a list of symbols, which gives
-// the size of the grid
-type Alphabet = Symbol list
-
-// Instead of defining the container, define how to get symbols per cell
-type SymbolLookup = Cell -> Symbol option
-
 [<Measure>] type width
 [<Measure>] type height
 
@@ -74,7 +67,7 @@ type Puzzle = {
 }
 
 // Whilst working to a solution each cell in the grid
-// has either:
+// that doesn't have a symbol is filled with candidates
 type AnnotatedCandidate =
     | Possible
     | Excluded
@@ -87,28 +80,23 @@ type AnnotatedSymbol =
     | Candidates of (Candidate->AnnotatedCandidate)
 
 [<NoEquality; NoComparison>]
-type FormatLabel =
-    | LPlain of AnnotatedSymbol
-    | LHintHouse of AnnotatedSymbol
-    | LHintCell of Symbol
+type HintAnnotatedSymbol =
+    | HASId of AnnotatedSymbol
+    | HASHouse of AnnotatedSymbol
+    | HASCell of Symbol
 
-type EntryLookup = Cell -> AnnotatedSymbol
+type HintAnnotatedCandidate =
+    | Pointer
+    | Reduction
 
-type EntryLabel =
-    | EGiven of Symbol
-    | ESet of Symbol
-    | EFLCandidatePossible of Candidate
-    | EFLCandidateExcluded of Candidate
-
+[<NoEquality; NoComparison>]
 type FormatLabelF =
-    | FLPlain of EntryLabel
-    | FLHintHouse of EntryLabel
+    | FLPlain of AnnotatedSymbol
+    | FLHintHouse of AnnotatedSymbol
     | FLHintCell of Symbol
-    | FLHintCandidatePointer of Candidate
-    | FLHintCandidateReduction of Candidate
+    | FLHintCandidates of (Candidate->HintAnnotatedCandidate)
 
 // Working towards a solution we take one of the following actions:
-
 type SetCellValue =
     {
         cell:Cell
@@ -122,7 +110,7 @@ type Action =
 
 [<NoEquality; NoComparison>]
 type Solution = {
-    grid : EntryLookup
+    grid : Cell->AnnotatedSymbol
     steps : Action list
 }
 
@@ -136,8 +124,8 @@ type PuzzleMaps = {
     columnCells : Column->Cell list
     cellRow : Cell->Row
     rowCells : Row->Cell list
-    cellBox : Cell -> Box
-    boxCells : Box -> Cell list
+    cellBox : Cell->Box
+    boxCells : Box->Cell list
 
     stacks : Stack list
     bands : Band list

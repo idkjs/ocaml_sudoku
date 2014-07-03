@@ -17,7 +17,7 @@ open command
 open shell
 open tactics
 
-let symbolToEntry (puzzleMaps:PuzzleMaps) (symbolLookup:SymbolLookup) =
+let symbolToEntry (puzzleMaps:PuzzleMaps) (symbolLookup:Cell->Symbol option) =
     fun (cell:Cell) ->
         match symbolLookup cell with
         | Some(e) -> Given(e)
@@ -29,7 +29,7 @@ let symbolToEntry (puzzleMaps:PuzzleMaps) (symbolLookup:SymbolLookup) =
 
 type ConsoleCharWriter = ConsoleChar -> Unit
 
-let print_step (write:ConsoleCharWriter) (grid:EntryLookup) (action:Action) (puzzleMaps:PuzzleMaps) =
+let print_step (write:ConsoleCharWriter) (grid:Cell->AnnotatedSymbol) (action:Action) (puzzleMaps:PuzzleMaps) =
     Seq.iter write (printGrid defaultGridChars sNL (grid >> entryToConsole >> drawF) puzzleMaps)
 
     match action with
@@ -47,8 +47,8 @@ let print_last solution (puzzleMaps:PuzzleMaps) =
 let parse (item:string) (alphabet:Candidate list) solution (puzzleMaps:PuzzleMaps) : Solution =
     let draw_grid (dr:'a->ConsoleChar) (gridTo:Cell->'a) = Seq.iter ConsoleWriteChar (printGrid defaultGridChars sNL (gridTo >> dr) puzzleMaps)
 
-    let draw_cell (symbol:Candidate) = drawFLFE (List.nth alphabet ((List.length alphabet) / 2)) symbol
-    let draw_cell2 (symbol:Candidate) = drawFL2 (List.nth alphabet ((List.length alphabet) / 2)) symbol
+    let draw_cell = drawFLFE (List.nth alphabet ((List.length alphabet) / 2))
+    let draw_cell2 = drawFL2 (List.nth alphabet ((List.length alphabet) / 2))
     let draw_full (dr:Candidate->'a->ConsoleChar) (symbolTo:Cell->Candidate->'a) = Seq.iter ConsoleWriteChar (print_full defaultSolutionChars sNL symbolTo puzzleMaps alphabet dr)
 
     let print_g cell = solution.grid cell |> entryToConsole

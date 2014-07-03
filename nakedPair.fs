@@ -71,26 +71,30 @@ let printNakedPair {NakedPair.cell1 = cell1; cell2 = cell2; symbols = symbols; c
         )
         candidateReduction
 
-let nakedPairSymbolTo (hint:NakedPair) : (Cell->Candidate->EntryLabel)->(Cell->Candidate->FormatLabelF) =
-    fun (etoc:Cell->Candidate->EntryLabel) ->
+let nakedPairSymbolTo (hint:NakedPair) : (Cell->Candidate->AnnotatedSymbol)->(Cell->Candidate->FormatLabelF) =
+    fun (etoc:Cell->Candidate->AnnotatedSymbol) ->
         fun (cell:Cell) (candidate:Candidate) ->
             let label = etoc cell candidate
             match label with
-            | EGiven _
-            | ESet _ ->
+            | Given _
+            | Set _ ->
                 if Set.contains cell hint.houseCells then
                     FLHintHouse label
                 else
                     FLPlain label
-            | EFLCandidatePossible symbol ->
-                if cell = hint.cell1 || cell = hint.cell2 then
-                    FLHintCandidatePointer candidate
-                else
-                    let o = List.tryFind (fun { CandidateReduction.cell = cell2; symbols = symbols } -> cell = cell2) hint.candidateReduction
-                    match o with
-                    | Some { CandidateReduction.cell = cell2; symbols = symbols } when Set.contains candidate symbols ->
-                        FLHintCandidateReduction candidate
-                    | _ ->
-                        FLPlain label
-
-            | EFLCandidateExcluded symbol -> FLPlain label
+            | Candidates candidates ->
+                match candidates candidate with
+                | Possible ->
+                    if cell = hint.cell1 || cell = hint.cell2 then
+                        //FLHintCandidatePointer candidate
+                        FLHintCandidates (fun _ -> Pointer)
+                    else
+                        let o = List.tryFind (fun { CandidateReduction.cell = cell2; symbols = symbols } -> cell = cell2) hint.candidateReduction
+                        match o with
+                        | Some { CandidateReduction.cell = cell2; symbols = symbols } when Set.contains candidate symbols ->
+                            //FLHintCandidateReduction candidate
+                            FLHintCandidates (fun _ -> Reduction)
+                        | _ ->
+                            FLPlain label
+                | Excluded -> FLPlain label
+                | Removed -> FLPlain label

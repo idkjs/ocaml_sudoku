@@ -170,33 +170,39 @@ let drawHintF (entry:AnnotatedSymbol) =
     | Set s -> ColouredChar (formatSymbol s, ConsoleColor.Yellow)
     | Candidates _ -> CChar '.'
 
-let drawFL (l:FormatLabel) =
+let drawFL (l:HintAnnotatedSymbol) =
     match l with
-    | LPlain entry -> drawF entry
-    | LHintHouse entry -> drawHintF entry
-    | LHintCell s -> ColouredChar(formatSymbol s, ConsoleColor.Cyan)
+    | HASId entry -> drawF entry
+    | HASHouse entry -> drawHintF entry
+    | HASCell s -> ColouredChar(formatSymbol s, ConsoleColor.Cyan)
 
-let drawFLFE centreCandidate candidate (l:EntryLabel) =
+let drawFLFE centreCandidate candidate (l:AnnotatedSymbol) =
     let c = centreCandidate = candidate
 
     match l with
-    | EGiven _ when not c -> CChar ' '
-    | EGiven s -> ColouredChar (formatSymbol s, ConsoleColor.Blue)
-    | ESet _ when not c -> CChar ' '
-    | ESet s -> ColouredChar (formatSymbol s, ConsoleColor.Red)
-    | EFLCandidatePossible s -> CChar (formatCandidate s)
-    | EFLCandidateExcluded s -> CChar ' '
+    | Given _ when not c -> CChar ' '
+    | Given s -> ColouredChar (formatSymbol s, ConsoleColor.Blue)
+    | Set _ when not c -> CChar ' '
+    | Set s -> ColouredChar (formatSymbol s, ConsoleColor.Red)
+    | Candidates candidates ->
+        match candidates candidate with
+        | Possible -> CChar (formatCandidate candidate)
+        | Excluded -> CChar ' '
+        | Removed -> CChar ' '
 
-let drawHintFLFE centreCandidate candidate (l:EntryLabel) =
+let drawHintFLFE centreCandidate candidate (l:AnnotatedSymbol) =
     let c = centreCandidate = candidate
 
     match l with
-    | EGiven _ when not c -> CChar ' '
-    | EGiven s -> ColouredChar (formatSymbol s, ConsoleColor.Green)
-    | ESet _ when not c -> CChar ' '
-    | ESet s -> ColouredChar (formatSymbol s, ConsoleColor.Yellow)
-    | EFLCandidatePossible s -> CChar (formatCandidate s)
-    | EFLCandidateExcluded s -> CChar ' '
+    | Given _ when not c -> CChar ' '
+    | Given s -> ColouredChar (formatSymbol s, ConsoleColor.Green)
+    | Set _ when not c -> CChar ' '
+    | Set s -> ColouredChar (formatSymbol s, ConsoleColor.Yellow)
+    | Candidates candidates ->
+        match candidates candidate with
+        | Possible -> CChar (formatCandidate candidate)
+        | Excluded -> CChar ' '
+        | Removed -> CChar ' '
 
 (*
 let drawFLF (l:FormatLabelF) =
@@ -218,8 +224,11 @@ let drawFL2 centreCandidate candidate (l:FormatLabelF) =
     | FLHintHouse e -> drawHintFLFE centreCandidate candidate e
     | FLHintCell _ when not c -> CChar ' '
     | FLHintCell s -> ColouredChar (formatSymbol s, ConsoleColor.Cyan)
-    | FLHintCandidatePointer symbol -> ColouredChar (formatCandidate symbol, ConsoleColor.Magenta)
-    | FLHintCandidateReduction symbol -> ColouredChar (formatCandidate symbol, ConsoleColor.DarkYellow)
+    | FLHintCandidates cs ->
+        let hac = cs candidate
+        match hac with
+        | Pointer -> ColouredChar (formatCandidate candidate, ConsoleColor.Magenta)
+        | Reduction -> ColouredChar (formatCandidate candidate, ConsoleColor.DarkYellow)
 
 // Print a symbol option, with colours
 let symbolOptionToConsoleChar = function
@@ -230,9 +239,9 @@ let symbolOptionToConsoleChar = function
 let entryToConsole (entry:AnnotatedSymbol) = entry
 
 // Print an entry for a candidate to console
-let entryAndCandidateToConsole (entryLookup:EntryLookup) (cell:Cell) (candidate:Candidate) =
+let entryAndCandidateToConsole (entryLookup:Cell->AnnotatedSymbol) (cell:Cell) (candidate:Candidate) =
     let entry = entryLookup cell
-
+    (*
     match entry with
     | Given s -> EGiven s
     | Set s -> ESet s
@@ -241,3 +250,5 @@ let entryAndCandidateToConsole (entryLookup:EntryLookup) (cell:Cell) (candidate:
         | Possible -> EFLCandidatePossible candidate
         | Excluded -> EFLCandidateExcluded candidate
         | Removed -> EFLCandidateExcluded candidate
+        *)
+    entry
