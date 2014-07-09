@@ -9,6 +9,7 @@ open format
 open hints
 open console
 open setCell
+open clearCandidate
 open fullHouse
 open hiddenSingle
 open nakedSingle
@@ -30,11 +31,12 @@ let symbolToEntry (puzzleMaps:PuzzleMaps) (symbolLookup:Cell->Symbol option) =
 type ConsoleCharWriter = ConsoleChar -> Unit
 
 let print_step (write:ConsoleCharWriter) (grid:Cell->AnnotatedSymbol) (action:Action) (puzzleMaps:PuzzleMaps) =
-    Seq.iter write (printGrid defaultGridChars sNL (grid >> entryToConsole >> drawF) puzzleMaps)
+    Seq.iter write (printGrid defaultGridChars sNL (grid >> drawF) puzzleMaps)
 
     match action with
-    | SetValue { SetCellValue.cell = {col = col; row = row} as cell; value = Candidate s} -> write (CStr (String.Format("SetValue: {0} = {1}", formatCell cell, s)))
-    | ClearCandidate({col = col; row = row} as cell, Symbol s) -> write (CStr (String.Format("ClearCandidate: {0} = {1}", formatCell cell, s)))
+    | SetValue sv -> write (CStr (setValueToString sv))
+    | ClearCandidate cc -> write (CStr (clearCandidateToString cc))
+    | ApplyHint ht -> ()
 
     write NL
 
@@ -44,30 +46,28 @@ let print_last solution (puzzleMaps:PuzzleMaps) =
     | [] -> ()
 
 
-let parse (item:string) (alphabet:Candidate list) solution (puzzleMaps:PuzzleMaps) : Solution =
+let parse (item:string) (alphabet:Candidate list) solution (puzzleMaps:PuzzleMaps) : (Solution * Hint list) =
     let draw_grid (dr:'a->ConsoleChar) (gridTo:Cell->'a) = Seq.iter ConsoleWriteChar (printGrid defaultGridChars sNL (gridTo >> dr) puzzleMaps)
 
     let draw_cell = drawFLFE (List.nth alphabet ((List.length alphabet) / 2))
     let draw_cell2 = drawFL2 (List.nth alphabet ((List.length alphabet) / 2))
-    let draw_full (dr:Candidate->'a->ConsoleChar) (symbolTo:Cell->Candidate->'a) = Seq.iter ConsoleWriteChar (print_full defaultSolutionChars sNL symbolTo puzzleMaps alphabet dr)
-
-    let print_g cell = solution.grid cell |> entryToConsole
-    let print_grid = entryAndCandidateToConsole solution.grid
+    let draw_full (dr:Candidate->'a->ConsoleChar) (symbolTo:Cell->'a) =
+        Seq.iter ConsoleWriteChar (print_full defaultSolutionChars sNL symbolTo puzzleMaps alphabet dr)
 
     let alphaset = alphabet |> Set.ofList
 
     Console.WriteLine item
 
     if item = "print" then
-        draw_full draw_cell print_grid
-        solution
+        draw_full draw_cell solution.grid
+        (solution, [])
 
     else if item.StartsWith "set" then
         let set = ui_set item alphabet solution.grid puzzleMaps
         let newSolution =
             match set with
             | Some setCellValue ->
-                let print_grid2 = setCellCandidateGrid setCellValue puzzleMaps (solution.grid >> getCandidateEntries alphaset) print_grid
+                let print_grid2 = setCellCandidateGridPre setCellValue puzzleMaps (solution.grid >> getCandidateEntries alphaset) solution.grid
                 draw_full draw_cell2 print_grid2
 
                 { solution with
@@ -79,31 +79,25 @@ let parse (item:string) (alphabet:Candidate list) solution (puzzleMaps:PuzzleMap
 
         print_last newSolution puzzleMaps
 
-        match set with
-        | Some setCellValue ->
-            let print_grid2 = setCellCandidateGrid setCellValue puzzleMaps (solution.grid >> getCandidateEntries alphaset) print_grid
-            draw_full draw_cell2 print_grid2
-        | _ -> ()
-
-        newSolution
+        (newSolution, [])
 
     else if item = "fh" then
         let lastGrid = solution.grid
 
         let hints = findFullHouse (solution.grid >> getCandidateEntries alphaset) puzzleMaps
 
-        List.iter (
-            fun hint ->
-                Console.WriteLine (printFullHouse hint)
+        List.iteri (
+            fun index hint ->
+                Console.WriteLine ("{0}: {1}", index, fullHouseToString hint)
 
-                let st = fullHouseSymbolTo hint solution.grid
+                let st = fullHouseSymbolTo hint puzzleMaps solution.grid
                 draw_grid drawFL st
 
-                let print_grid2 = fullHouseFullSymbolTo hint print_grid
-                draw_full draw_cell2 print_grid2
+                draw_full draw_cell2 st
             )
             hints
-        solution
+
+        (solution, List.map FH hints)
 
     else if item = "hs" then
         let lastGrid = solution.grid
@@ -114,11 +108,12 @@ let parse (item:string) (alphabet:Candidate list) solution (puzzleMaps:PuzzleMap
             fun hint ->
                 Console.WriteLine (formatHiddenSingle hint)
 
-                let st = hiddenSingleSymbolTo hint print_g
+                let st = hiddenSingleSymbolTo hint puzzleMaps solution.grid
                 draw_grid drawFL st
             )
             hints
-        solution
+
+        (solution, List.map HS hints)
 
     else if item = "ns" then
         let lastGrid = solution.grid
@@ -129,15 +124,15 @@ let parse (item:string) (alphabet:Candidate list) solution (puzzleMaps:PuzzleMap
             fun hint ->
                 Console.WriteLine (printNakedSingle hint)
 
-                let st = nakedSingleSymbolTo hint print_g
+                let st = nakedSingleSymbolTo hint solution.grid
                 draw_grid drawFL st
 
-                let print_grid2 = nakedSingleFullSymbolTo hint print_grid
+                let print_grid2 = nakedSingleFullSymbolTo hint solution.grid
 
                 draw_full draw_cell2 print_grid2
             )
             hints
-        solution
+        (solution, [])
 
     else if item = "np" then
         let lastGrid = solution.grid
@@ -148,22 +143,51 @@ let parse (item:string) (alphabet:Candidate list) solution (puzzleMaps:PuzzleMap
             fun hint ->
                 printNakedPair hint
 
-                let print_grid2 = nakedPairSymbolTo hint print_grid
+                let print_grid2 = nakedPairSymbolTo hint solution.grid
                 draw_full draw_cell2 print_grid2
             )
             hints
              
-        solution
+        (solution, [])
 
     else
-        solution
+        (solution, [])
+
+let printHint (candidates:Candidate list) (solution:Solution) (puzzleMaps:PuzzleMaps) (index:int) (h:Hint) =
+    let draw_grid (dr:'a->ConsoleChar) (gridTo:Cell->'a) = Seq.iter ConsoleWriteChar (printGrid defaultGridChars sNL (gridTo >> dr) puzzleMaps)
+
+    let draw_cell = drawFLFE (List.nth candidates ((List.length candidates) / 2))
+    let draw_cell2 = drawFL2 (List.nth candidates ((List.length candidates) / 2))
+    let draw_full (dr:Candidate->'a->ConsoleChar) (symbolTo:Cell->'a) =
+        Seq.iter ConsoleWriteChar (print_full defaultSolutionChars sNL symbolTo puzzleMaps candidates dr)
+
+    match h with
+    | FH hint ->
+        Console.WriteLine ("{0}: {1}", index, fullHouseToString hint)
+
+        let st = fullHouseSymbolTo hint puzzleMaps solution.grid
+        draw_grid drawFL st
+
+        draw_full draw_cell2 st
+
+    | HS hint ->
+        Console.WriteLine ("{0}: {1}", index, formatHiddenSingle hint)
+
+        let st = hiddenSingleSymbolTo hint puzzleMaps solution.grid
+        draw_grid drawFL st
+
+        draw_full draw_cell2 st
 
 let run (candidates:Candidate list) (solution:Solution ref) (puzzleMaps:PuzzleMaps) item =
     if item = "quit"
         then
             Some(item)
         else
-            solution := parse item candidates !solution puzzleMaps
+            let (soln, hints) = parse item candidates !solution puzzleMaps
+
+            List.iteri (printHint candidates !solution puzzleMaps) hints
+
+            solution := soln
             None
 
 let makePuzzleMaps (puzzleSpec : Puzzle) =

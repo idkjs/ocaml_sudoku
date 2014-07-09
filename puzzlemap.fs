@@ -9,9 +9,8 @@ let candidateToSymbol (Candidate s:Candidate) = Symbol s
 let symbolToCandidate (Symbol s:Symbol) = Candidate s
 
 let getCandidateEntries (alphaset:Set<Candidate>) = function
-    | Set _ -> Set.empty
-    | Given _ -> Set.empty
     | Candidates s -> Set.filter (fun symbol -> s symbol = Possible) alphaset
+    | _ -> Set.empty
 
 let getHouseCells (puzzleMaps:PuzzleMaps) (h:House) =
     match h with

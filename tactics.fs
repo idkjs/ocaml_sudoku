@@ -118,6 +118,6 @@ let makeContainerBoxCell (boxes:Box list) (cells:Cell list) boxWidth boxHeight =
 
 
 let entryToAlphabet = function
-    | Given(g) -> Some(g)
-    | Set(s) -> Some(s)
-    | Candidates(_) -> None
+    | Given g -> Some g
+    | Set s -> Some s
+    | Candidates _ -> None

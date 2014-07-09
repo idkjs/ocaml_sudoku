@@ -79,21 +79,17 @@ type AnnotatedSymbol =
     | Set of Symbol
     | Candidates of (Candidate->AnnotatedCandidate)
 
-[<NoEquality; NoComparison>]
-type HintAnnotatedSymbol =
-    | HASId of AnnotatedSymbol
-    | HASHouse of AnnotatedSymbol
-    | HASCell of Symbol
-
 type HintAnnotatedCandidate =
+    | HACId of AnnotatedCandidate
+    | HACSet
     | Pointer
     | Reduction
 
 [<NoEquality; NoComparison>]
-type FormatLabelF =
-    | FLPlain of AnnotatedSymbol
-    | FLHintHouse of AnnotatedSymbol
-    | FLHintCell of Symbol
+type HintAnnotatedSymbol =
+    | HASId of AnnotatedSymbol
+    | HASHouse of AnnotatedSymbol
+    | HASCell of Candidate
     | FLHintCandidates of (Candidate->HintAnnotatedCandidate)
 
 // Working towards a solution we take one of the following actions:
@@ -101,12 +97,36 @@ type SetCellValue =
     {
         cell:Cell
         value:Candidate
-        //candidateReductions:Set<Cell>
     }
+
+type ClearCandidate =
+    {
+        cell:Cell
+        value:Symbol
+    }
+
+type FullHouse =
+    {
+        cell:Cell
+        candidate:Candidate
+        house:House
+    }
+
+type HiddenSingle =
+    {
+        cell:Cell
+        symbol:Candidate
+        house:House
+    }
+
+type Hint =
+    | FH of FullHouse
+    | HS of HiddenSingle
 
 type Action =
     | SetValue of SetCellValue
-    | ClearCandidate of Cell * Symbol
+    | ClearCandidate of ClearCandidate
+    | ApplyHint of Hint
 
 [<NoEquality; NoComparison>]
 type Solution = {

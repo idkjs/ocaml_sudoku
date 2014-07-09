@@ -47,6 +47,7 @@
     <Compile Include="hints.fs" />
     <Compile Include="console.fs" />
     <Compile Include="setCell.fs" />
+    <Compile Include="clearCandidate.fs" />
     <Compile Include="fullHouse.fs" />
     <Compile Include="hiddenSingle.fs" />
     <Compile Include="nakedSingle.fs" />

@@ -35,25 +35,20 @@ let nakedSingleSymbolTo (hint:NakedSingle) : (Cell->AnnotatedSymbol)->(Cell->Hin
     fun (etoc:Cell->AnnotatedSymbol) ->
         fun cell ->
             if cell = hint.cell then
-                HASCell (candidateToSymbol hint.symbol)
+                HASCell hint.symbol
             else
                 HASId (etoc cell)
 
-let nakedSingleFullSymbolTo (hint:NakedSingle) : (Cell->Candidate->AnnotatedSymbol)->(Cell->Candidate->FormatLabelF) =
-    fun (etoc:Cell->Candidate->AnnotatedSymbol) ->
-        fun (cell:Cell) (candidate:Candidate) ->
-            let label = etoc cell candidate
+let nakedSingleFullSymbolTo (hint:NakedSingle) : (Cell->AnnotatedSymbol)->(Cell->HintAnnotatedSymbol) =
+    fun (etoc:Cell->AnnotatedSymbol) ->
+        fun (cell:Cell) ->
+            let label = etoc cell
             match label with
             | Given _
             | Set _ ->
-                FLPlain label
-            | Candidates candidates ->
-                match candidates candidate with
-                | Possible ->
-                    if cell = hint.cell then
-                        FLHintCell (candidateToSymbol hint.symbol)
-                    else
-                        FLPlain label
-                | Excluded -> FLPlain label
-                | Removed -> FLPlain label
-
+                HASId label
+            | Candidates _ ->
+                if cell = hint.cell then
+                    HASCell hint.symbol
+                else
+                    HASId label

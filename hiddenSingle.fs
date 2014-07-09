@@ -10,13 +10,6 @@ open sudoku
 open puzzlemap
 open console
 
-type HiddenSingle = {
-    cell : Cell
-    symbol : Candidate
-    house : House
-    houseCells : Set<Cell>
-}
-
 let hiddenSinglesPerHouse (alphabet:Candidate list) (candidateLookup:Cell->Set<Candidate>) (puzzleMaps:PuzzleMaps) (house:House) =
 
     let cells = getHouseCells puzzleMaps house
@@ -35,7 +28,7 @@ let hiddenSinglesPerHouse (alphabet:Candidate list) (candidateLookup:Cell->Set<C
 
     let hhhs =
         List.map (
-            fun (filteredCandidateCells, symbol) -> {cell = List.head filteredCandidateCells |> snd; symbol = symbol; house = house; houseCells = Set.ofList cells})
+            fun (filteredCandidateCells, symbol) -> {cell = List.head filteredCandidateCells |> snd; symbol = symbol; house = house})
             hhs
 
     hhhs
@@ -52,12 +45,14 @@ let findHiddenSingles (alphabet:Candidate list) (candidateLookup:Cell->Set<Candi
 let formatHiddenSingle {HiddenSingle.cell = cell; symbol = symbol; house = house} =
     String.Format ("hs {0}, Value {1}, Cell {2}", formatHouse house, formatCandidate symbol, formatCell cell)
 
-let hiddenSingleSymbolTo (hint:HiddenSingle) : (Cell->AnnotatedSymbol)->(Cell->HintAnnotatedSymbol) =
+let hiddenSingleSymbolTo (hint:HiddenSingle) (puzzleMaps:PuzzleMaps) : (Cell->AnnotatedSymbol)->(Cell->HintAnnotatedSymbol) =
+    let houseCells = getHouseCells puzzleMaps hint.house |> Set.ofList
+
     fun (etoc:Cell->AnnotatedSymbol) ->
         fun cell ->
             if cell = hint.cell then
-                HASCell (candidateToSymbol hint.symbol)
-            else if Set.contains cell hint.houseCells then
+                HASCell hint.symbol
+            else if Set.contains cell houseCells then
                 HASHouse (etoc cell)
             else
                 HASId (etoc cell)

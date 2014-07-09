@@ -71,30 +71,32 @@ let printNakedPair {NakedPair.cell1 = cell1; cell2 = cell2; symbols = symbols; c
         )
         candidateReduction
 
-let nakedPairSymbolTo (hint:NakedPair) : (Cell->Candidate->AnnotatedSymbol)->(Cell->Candidate->FormatLabelF) =
-    fun (etoc:Cell->Candidate->AnnotatedSymbol) ->
-        fun (cell:Cell) (candidate:Candidate) ->
-            let label = etoc cell candidate
+let nakedPairSymbolTo (hint:NakedPair) : (Cell->AnnotatedSymbol)->(Cell->HintAnnotatedSymbol) =
+    fun (etoc:Cell->AnnotatedSymbol) ->
+        fun (cell:Cell) ->
+            let label = etoc cell
             match label with
-            | Given _
+            | Given _ -> HASId label
             | Set _ ->
                 if Set.contains cell hint.houseCells then
-                    FLHintHouse label
+                    HASHouse label
                 else
-                    FLPlain label
+                    HASId label
             | Candidates candidates ->
-                match candidates candidate with
-                | Possible ->
-                    if cell = hint.cell1 || cell = hint.cell2 then
-                        //FLHintCandidatePointer candidate
-                        FLHintCandidates (fun _ -> Pointer)
-                    else
-                        let o = List.tryFind (fun { CandidateReduction.cell = cell2; symbols = symbols } -> cell = cell2) hint.candidateReduction
-                        match o with
-                        | Some { CandidateReduction.cell = cell2; symbols = symbols } when Set.contains candidate symbols ->
-                            //FLHintCandidateReduction candidate
-                            FLHintCandidates (fun _ -> Reduction)
-                        | _ ->
-                            FLPlain label
-                | Excluded -> FLPlain label
-                | Removed -> FLPlain label
+                let newHC candidate =
+                    let hc = candidates candidate
+                    match hc with
+                    | Possible ->
+                        if cell = hint.cell1 || cell = hint.cell2 then
+                            Pointer
+                        else
+                            let o = List.tryFind (fun { CandidateReduction.cell = cell2; symbols = symbols } -> cell = cell2) hint.candidateReduction
+                            match o with
+                            | Some { CandidateReduction.cell = cell2; symbols = symbols } when Set.contains candidate symbols ->
+                                Reduction
+                            | _ ->
+                                HACId hc
+                    | Excluded -> HACId hc
+                    | Removed -> HACId hc
+
+                FLHintCandidates newHC
