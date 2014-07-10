@@ -12,12 +12,6 @@ open format
 open hints
 open console
 
-type NakedSingle = {
-    //candidateReduction : CandidateReduction
-    cell : Cell
-    symbol : Candidate
-}
-
 let findNakedSingles (candidateLookup:Cell->Set<Candidate>) (cells:Cell list) =
 
     let candidateCells =
@@ -38,17 +32,3 @@ let nakedSingleSymbolTo (hint:NakedSingle) : (Cell->AnnotatedSymbol)->(Cell->Hin
                 HASCell hint.symbol
             else
                 HASId (etoc cell)
-
-let nakedSingleFullSymbolTo (hint:NakedSingle) : (Cell->AnnotatedSymbol)->(Cell->HintAnnotatedSymbol) =
-    fun (etoc:Cell->AnnotatedSymbol) ->
-        fun (cell:Cell) ->
-            let label = etoc cell
-            match label with
-            | Given _
-            | Set _ ->
-                HASId label
-            | Candidates _ ->
-                if cell = hint.cell then
-                    HASCell hint.symbol
-                else
-                    HASId label

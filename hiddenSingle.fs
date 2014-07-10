@@ -50,9 +50,11 @@ let hiddenSingleSymbolTo (hint:HiddenSingle) (puzzleMaps:PuzzleMaps) : (Cell->An
 
     fun (etoc:Cell->AnnotatedSymbol) ->
         fun cell ->
+            let label = etoc cell
+
             if cell = hint.cell then
                 HASCell hint.symbol
             else if Set.contains cell houseCells then
-                HASHouse (etoc cell)
+                HASHouse label
             else
-                HASId (etoc cell)
+                HASId label

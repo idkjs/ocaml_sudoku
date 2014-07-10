@@ -47,8 +47,6 @@ let print_last solution (puzzleMaps:PuzzleMaps) =
 
 
 let parse (item:string) (alphabet:Candidate list) solution (puzzleMaps:PuzzleMaps) : (Solution * Hint list) =
-    let draw_grid (dr:'a->ConsoleChar) (gridTo:Cell->'a) = Seq.iter ConsoleWriteChar (printGrid defaultGridChars sNL (gridTo >> dr) puzzleMaps)
-
     let draw_cell = drawFLFE (List.nth alphabet ((List.length alphabet) / 2))
     let draw_cell2 = drawFL2 (List.nth alphabet ((List.length alphabet) / 2))
     let draw_full (dr:Candidate->'a->ConsoleChar) (symbolTo:Cell->'a) =
@@ -82,73 +80,24 @@ let parse (item:string) (alphabet:Candidate list) solution (puzzleMaps:PuzzleMap
         (newSolution, [])
 
     else if item = "fh" then
-        let lastGrid = solution.grid
-
         let hints = findFullHouse (solution.grid >> getCandidateEntries alphaset) puzzleMaps
-
-        List.iteri (
-            fun index hint ->
-                Console.WriteLine ("{0}: {1}", index, fullHouseToString hint)
-
-                let st = fullHouseSymbolTo hint puzzleMaps solution.grid
-                draw_grid drawFL st
-
-                draw_full draw_cell2 st
-            )
-            hints
 
         (solution, List.map FH hints)
 
     else if item = "hs" then
-        let lastGrid = solution.grid
-
         let hints = findHiddenSingles alphabet (solution.grid >> getCandidateEntries alphaset) puzzleMaps
-
-        List.iter (
-            fun hint ->
-                Console.WriteLine (formatHiddenSingle hint)
-
-                let st = hiddenSingleSymbolTo hint puzzleMaps solution.grid
-                draw_grid drawFL st
-            )
-            hints
 
         (solution, List.map HS hints)
 
     else if item = "ns" then
-        let lastGrid = solution.grid
-
         let hints = findNakedSingles (solution.grid >> getCandidateEntries alphaset) puzzleMaps.cells
 
-        List.iter (
-            fun hint ->
-                Console.WriteLine (printNakedSingle hint)
-
-                let st = nakedSingleSymbolTo hint solution.grid
-                draw_grid drawFL st
-
-                let print_grid2 = nakedSingleFullSymbolTo hint solution.grid
-
-                draw_full draw_cell2 print_grid2
-            )
-            hints
-        (solution, [])
+        (solution, List.map NS hints)
 
     else if item = "np" then
-        let lastGrid = solution.grid
-
         let hints = findNakedPairs (solution.grid >> getCandidateEntries alphaset) puzzleMaps
 
-        List.iter (
-            fun hint ->
-                printNakedPair hint
-
-                let print_grid2 = nakedPairSymbolTo hint solution.grid
-                draw_full draw_cell2 print_grid2
-            )
-            hints
-             
-        (solution, [])
+        (solution, List.map NP hints)
 
     else
         (solution, [])
@@ -177,6 +126,21 @@ let printHint (candidates:Candidate list) (solution:Solution) (puzzleMaps:Puzzle
         draw_grid drawFL st
 
         draw_full draw_cell2 st
+
+    | NS hint ->
+        Console.WriteLine ("{0}: {1}", index, printNakedSingle hint)
+
+        let st = nakedSingleSymbolTo hint solution.grid
+        draw_grid drawFL st
+
+        draw_full draw_cell2 st
+
+    | NP hint ->
+        Console.WriteLine ("{0}: {1}", index, nakedPairToString hint)
+
+        let print_grid2 = nakedPairSymbolTo hint puzzleMaps solution.grid
+        draw_full draw_cell2 print_grid2
+
 
 let run (candidates:Candidate list) (solution:Solution ref) (puzzleMaps:PuzzleMaps) item =
     if item = "quit"

@@ -84,6 +84,7 @@ type HintAnnotatedCandidate =
     | HACSet
     | Pointer
     | Reduction
+    | HACHouse
 
 [<NoEquality; NoComparison>]
 type HintAnnotatedSymbol =
@@ -119,9 +120,30 @@ type HiddenSingle =
         house:House
     }
 
+type NakedSingle =
+    {
+        cell:Cell
+        symbol:Candidate
+    }
+
+type CandidateReduction = {
+    cell:Cell
+    symbols:Set<Candidate>
+}
+
+type NakedPair = {
+    cell1:Cell
+    cell2:Cell
+    symbols:Set<Candidate>
+    candidateReduction:CandidateReduction list
+    house:House
+}
+
 type Hint =
     | FH of FullHouse
     | HS of HiddenSingle
+    | NS of NakedSingle
+    | NP of NakedPair
 
 type Action =
     | SetValue of SetCellValue

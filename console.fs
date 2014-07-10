@@ -158,6 +158,9 @@ let formatCandidates (candidates:Set<Candidate>) =
     let t = Array.map formatCandidate s
     String.Join(",", t)
 
+let formatCandidateReduction (candidateReduction:CandidateReduction) =
+    String.Format ("Cell {0}, Candidates {1}", formatCell candidateReduction.cell, formatCandidates candidateReduction.symbols)
+
 let drawF (entry:AnnotatedSymbol) =
     match entry with
     | Given s -> ColouredChar (formatSymbol s, ConsoleColor.Blue)
@@ -185,7 +188,7 @@ let drawAnnotatedCandidate (c:AnnotatedCandidate) (candidate:Candidate) =
 
 let drawHintAnnotatedCandidate (c:AnnotatedCandidate) (candidate:Candidate) =
     match c with
-    | Possible -> ColouredChar (formatCandidate candidate, ConsoleColor.Magenta)
+    | Possible -> ColouredChar (formatCandidate candidate, ConsoleColor.DarkGreen)
     | Excluded -> CChar ' '
     | Removed -> ColouredChar (formatCandidate candidate, ConsoleColor.DarkMagenta)
 
@@ -225,6 +228,7 @@ let drawFL2 centreCandidate candidate (l:HintAnnotatedSymbol) =
             ColouredChar (formatCandidate candidate, ConsoleColor.Red)
         | Pointer -> ColouredChar (formatCandidate candidate, ConsoleColor.Magenta)
         | Reduction -> ColouredChar (formatCandidate candidate, ConsoleColor.DarkYellow)
+        | HACHouse -> ColouredChar (formatCandidate candidate, ConsoleColor.DarkGreen)
 
 // Print a symbol option, with colours
 let symbolOptionToConsoleChar = function
