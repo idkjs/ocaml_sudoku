@@ -18,6 +18,16 @@ open command
 open shell
 open tactics
 
+open System.Diagnostics
+open System.Runtime.InteropServices;
+
+[<DllImport("user32.dll")>]
+extern bool ShowWindow(System.IntPtr hWnd, int cmdShow)
+
+let Maximize () =
+    let p = Process.GetCurrentProcess()
+    ShowWindow(p.MainWindowHandle, 3) //SW_MAXIMIZE = 3
+
 let symbolToEntry (puzzleMaps:PuzzleMaps) (symbolLookup:Cell->Symbol option) =
     fun (cell:Cell) ->
         match symbolLookup cell with
@@ -30,8 +40,8 @@ let symbolToEntry (puzzleMaps:PuzzleMaps) (symbolLookup:Cell->Symbol option) =
 
 type ConsoleCharWriter = ConsoleChar -> Unit
 
-let print_step (write:ConsoleCharWriter) (grid:Cell->AnnotatedSymbol) (action:Action) (puzzleMaps:PuzzleMaps) =
-    Seq.iter write (printGrid defaultGridChars sNL (grid >> drawF) puzzleMaps)
+let print_step (write:ConsoleCharWriter) (grid:Cell->AnnotatedSymbol<AnnotatedCandidate>) (action:Action) (puzzleMaps:PuzzleMaps) =
+    Seq.iter write (printGrid defaultGridChars sNL (grid >> drawAnnotatedSymbol) puzzleMaps)
 
     match action with
     | SetValue sv -> write (CStr (setValueToString sv))
@@ -46,13 +56,11 @@ let print_last solution (puzzleMaps:PuzzleMaps) =
     | [] -> ()
 
 
-let parse (item:string) (alphabet:Candidate list) solution (puzzleMaps:PuzzleMaps) : (Solution * Hint list) =
+let parse (item:string) (alphabet:Candidate list) solution (puzzleMaps:PuzzleMaps) (alphaset:Set<Candidate>) (candidateLookup:Cell->Set<Candidate>) : (Solution * Hint list) =
     let draw_cell = drawFLFE (List.nth alphabet ((List.length alphabet) / 2))
     let draw_cell2 = drawFL2 (List.nth alphabet ((List.length alphabet) / 2))
     let draw_full (dr:Candidate->'a->ConsoleChar) (symbolTo:Cell->'a) =
         Seq.iter ConsoleWriteChar (print_full defaultSolutionChars sNL symbolTo puzzleMaps alphabet dr)
-
-    let alphaset = alphabet |> Set.ofList
 
     Console.WriteLine item
 
@@ -65,11 +73,11 @@ let parse (item:string) (alphabet:Candidate list) solution (puzzleMaps:PuzzleMap
         let newSolution =
             match set with
             | Some setCellValue ->
-                let print_grid2 = setCellCandidateGridPre setCellValue puzzleMaps (solution.grid >> getCandidateEntries alphaset) solution.grid
+                let print_grid2 = setCellCandidateGridPre setCellValue puzzleMaps candidateLookup solution.grid
                 draw_full draw_cell2 print_grid2
 
                 { solution with
-                    grid = setACell setCellValue puzzleMaps (solution.grid >> getCandidateEntries alphaset) solution.grid
+                    grid = setACell setCellValue puzzleMaps candidateLookup solution.grid
                     steps = (SetValue setCellValue) :: solution.steps }
             | None ->
                 Console.WriteLine("")
@@ -80,29 +88,29 @@ let parse (item:string) (alphabet:Candidate list) solution (puzzleMaps:PuzzleMap
         (newSolution, [])
 
     else if item = "fh" then
-        let hints = findFullHouse (solution.grid >> getCandidateEntries alphaset) puzzleMaps
+        let hints = findFullHouse candidateLookup puzzleMaps
 
         (solution, List.map FH hints)
 
     else if item = "hs" then
-        let hints = findHiddenSingles alphabet (solution.grid >> getCandidateEntries alphaset) puzzleMaps
+        let hints = findHiddenSingles alphabet candidateLookup puzzleMaps
 
         (solution, List.map HS hints)
 
     else if item = "ns" then
-        let hints = findNakedSingles (solution.grid >> getCandidateEntries alphaset) puzzleMaps.cells
+        let hints = findNakedSingles candidateLookup puzzleMaps.cells
 
         (solution, List.map NS hints)
 
     else if item = "np" then
-        let hints = findNakedPairs (solution.grid >> getCandidateEntries alphaset) puzzleMaps
+        let hints = findNakedPairs candidateLookup puzzleMaps
 
         (solution, List.map NP hints)
 
     else
         (solution, [])
 
-let printHint (candidates:Candidate list) (solution:Solution) (puzzleMaps:PuzzleMaps) (index:int) (h:Hint) =
+let printHint (candidates:Candidate list) (solution:Solution) (puzzleMaps:PuzzleMaps) (candidateLookup:Cell->Set<Candidate>) (index:int) (h:Hint) =
     let draw_grid (dr:'a->ConsoleChar) (gridTo:Cell->'a) = Seq.iter ConsoleWriteChar (printGrid defaultGridChars sNL (gridTo >> dr) puzzleMaps)
 
     let draw_cell = drawFLFE (List.nth candidates ((List.length candidates) / 2))
@@ -114,24 +122,24 @@ let printHint (candidates:Candidate list) (solution:Solution) (puzzleMaps:Puzzle
     | FH hint ->
         Console.WriteLine ("{0}: {1}", index, fullHouseToString hint)
 
-        let st = fullHouseSymbolTo hint puzzleMaps solution.grid
-        draw_grid drawFL st
+        let st = fullHouseSymbolTo hint puzzleMaps candidateLookup solution.grid
+        draw_grid drawHintAnnotatedSymbol st
 
         draw_full draw_cell2 st
 
     | HS hint ->
         Console.WriteLine ("{0}: {1}", index, formatHiddenSingle hint)
 
-        let st = hiddenSingleSymbolTo hint puzzleMaps solution.grid
-        draw_grid drawFL st
+        let st = hiddenSingleSymbolTo hint puzzleMaps candidateLookup solution.grid
+        draw_grid drawHintAnnotatedSymbol st
 
         draw_full draw_cell2 st
 
     | NS hint ->
         Console.WriteLine ("{0}: {1}", index, printNakedSingle hint)
 
-        let st = nakedSingleSymbolTo hint solution.grid
-        draw_grid drawFL st
+        let st = nakedSingleSymbolTo hint candidateLookup solution.grid
+        draw_grid drawHintAnnotatedSymbol st
 
         draw_full draw_cell2 st
 
@@ -142,14 +150,16 @@ let printHint (candidates:Candidate list) (solution:Solution) (puzzleMaps:Puzzle
         draw_full draw_cell2 print_grid2
 
 
-let run (candidates:Candidate list) (solution:Solution ref) (puzzleMaps:PuzzleMaps) item =
+let run (candidates:Candidate list) (solution:Solution ref) (puzzleMaps:PuzzleMaps) (alphaset:Set<Candidate>) item =
     if item = "quit"
         then
             Some(item)
         else
-            let (soln, hints) = parse item candidates !solution puzzleMaps
+            let candidateLookup = (!solution).grid >> getCandidateEntries alphaset
 
-            List.iteri (printHint candidates !solution puzzleMaps) hints
+            let (soln, hints) = parse item candidates !solution puzzleMaps alphaset candidateLookup
+
+            List.iteri (printHint candidates !solution puzzleMaps candidateLookup) hints
 
             solution := soln
             None
@@ -217,16 +227,16 @@ let repl (sudoku:string) (puzzleSpec : Puzzle) =
 
     let solution = ref ({ grid = solutionGrid; steps = [] })
 
-    let line = List.foldBack (puzzleGrid >> symbolOptionToConsoleChar >> drawF >> cons) puzzleMaps.cells [NL]
+    let line = List.foldBack (puzzleGrid >> symbolOptionToConsoleChar >> drawAnnotatedSymbol >> cons) puzzleMaps.cells [NL]
     List.iter mainWriter line
     mainWriter NL
 
-    let prows = printRowOnOneLine (puzzleGrid >> symbolOptionToConsoleChar >> drawF) puzzleMaps.rowCells sNL puzzleMaps.rows
+    let prows = printRowOnOneLine (puzzleGrid >> symbolOptionToConsoleChar >> drawAnnotatedSymbol) puzzleMaps.rowCells sNL puzzleMaps.rows
     Seq.iter mainWriter prows
 
-    Seq.iter ConsoleWriteChar (printGrid defaultGridChars sNL (puzzleGrid >> symbolOptionToConsoleChar >> drawF) puzzleMaps)
+    Seq.iter ConsoleWriteChar (printGrid defaultGridChars sNL (puzzleGrid >> symbolOptionToConsoleChar >> drawAnnotatedSymbol) puzzleMaps)
 
-    Seq.tryPick (run candidates solution puzzleMaps) readlines |> ignore
+    Seq.tryPick (run candidates solution puzzleMaps candidateSet) readlines |> ignore
 
 
 let defaultPuzzleSpec = {
@@ -244,6 +254,9 @@ let defaultPuzzleSpec = {
     symbols = fun _ -> None
 }
 *)
+
+Maximize() |> ignore
+
 // Input puzzle
 Console.WriteLine "1........2........3........4........5........6........7........8........9........"
 Console.WriteLine "123456789123456789123456789123456789123456789123456789123456789123456789123456789"

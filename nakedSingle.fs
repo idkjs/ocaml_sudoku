@@ -25,10 +25,5 @@ let findNakedSingles (candidateLookup:Cell->Set<Candidate>) (cells:Cell list) =
 let printNakedSingle {NakedSingle.cell = cell; symbol = Candidate symbol} =
     String.Format ("Cell {0}: Symbol: {1}", formatCell cell, symbol)
 
-let nakedSingleSymbolTo (hint:NakedSingle) : (Cell->AnnotatedSymbol)->(Cell->HintAnnotatedSymbol) =
-    fun (etoc:Cell->AnnotatedSymbol) ->
-        fun cell ->
-            if cell = hint.cell then
-                HASCell hint.symbol
-            else
-                HASId (etoc cell)
+let nakedSingleSymbolTo (hint:NakedSingle) (candidateLookup:Cell->Set<Candidate>) : (Cell->AnnotatedSymbol<AnnotatedCandidate>)->(Cell->HintAnnotatedSymbol) =
+    setHint (set [hint.cell]) >> setCellHint hint.cell hint.symbol candidateLookup

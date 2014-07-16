@@ -37,15 +37,7 @@ let findFullHouse (candidateLookup:Cell->Set<Candidate>) (puzzleMaps:PuzzleMaps)
 let fullHouseToString (hint:FullHouse) =
     String.Format ("{0}, Value {1}, Cell {2}", formatHouse hint.house, formatCandidate hint.candidate, formatCell hint.cell)
 
-let fullHouseSymbolTo (hint:FullHouse) (puzzleMaps:PuzzleMaps) : (Cell->AnnotatedSymbol)->(Cell->HintAnnotatedSymbol) =
+let fullHouseSymbolTo (hint:FullHouse) (puzzleMaps:PuzzleMaps) (candidateLookup:Cell->Set<Candidate>) : (Cell->AnnotatedSymbol<AnnotatedCandidate>)->(Cell->HintAnnotatedSymbol) =
     let houseCells = getHouseCells puzzleMaps hint.house |> Set.ofList
 
-    fun (etoc:Cell->AnnotatedSymbol) ->
-        fun (cell:Cell) ->
-            let entry = etoc cell
-            if cell = hint.cell then
-                HASCell hint.candidate
-            else if Set.contains cell houseCells then
-                HASHouse entry
-            else
-                HASId entry
+    houseSymbolTo houseCells >> setCellHint hint.cell hint.candidate candidateLookup

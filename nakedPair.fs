@@ -40,7 +40,7 @@ let nakedPairPerHouse (candidateLookup:Cell->Set<Candidate>) (puzzleMaps:PuzzleM
                             reductionCandidates
 
                     if reductions.Length > 0 then
-                        let hint = { NakedPair.cell1 = cell; cell2 = cell2; symbols = candidates; candidateReduction = reductions; house = house }
+                        let hint = { NakedPair.cell1 = cell; cell2 = cell2; candidates = candidates; candidateReductions = reductions; house = house }
                         hints := hint :: !hints
                 ) (Seq.skip (i + 1) hht)) hht
     !hints
@@ -56,59 +56,18 @@ let findNakedPairs (candidateLookup:Cell->Set<Candidate>) (puzzleMaps:PuzzleMaps
 let nakedPairToString (hint:NakedPair) =
     let sb = StringBuilder()
 
-    sb.AppendLine (String.Format ("{0}, Cell {1}, Cell {2}, {3}", formatHouse hint.house, formatCell hint.cell1, formatCell hint.cell2, formatCandidates hint.symbols)) |> ignore
+    sb.AppendLine (String.Format ("{0}, Cell {1}, Cell {2}, {3}", formatHouse hint.house, formatCell hint.cell1, formatCell hint.cell2, formatCandidates hint.candidates)) |> ignore
 
     List.iter
         (fun (cr:CandidateReduction) ->
             sb.AppendLine (String.Format ("  {0}", formatCandidateReduction cr)) |> ignore
         )
-        hint.candidateReduction
+        hint.candidateReductions
 
     sb.ToString()
 
-let nakedPairSymbolTo (hint:NakedPair) (puzzleMaps:PuzzleMaps) : (Cell->AnnotatedSymbol)->(Cell->HintAnnotatedSymbol) =
+let nakedPairSymbolTo (hint:NakedPair) (puzzleMaps:PuzzleMaps) : (Cell->AnnotatedSymbol<AnnotatedCandidate>)->(Cell->HintAnnotatedSymbol) =
     let houseCells = getHouseCells puzzleMaps hint.house |> Set.ofList
+    let pointers = set [hint.cell1; hint.cell2]
 
-    fun (etoc:Cell->AnnotatedSymbol) ->
-        fun (cell:Cell) ->
-            let label = etoc cell
-
-            if cell = hint.cell1 || cell = hint.cell2 then
-                match label with
-                | Given _
-                | Set _ ->
-                        HASHouse label  // not used
-                | Candidates candidates ->
-                    let newHC candidate =
-                        let hc = candidates candidate
-                        match hc with
-                        | Possible -> Pointer
-                        | Excluded -> HACId hc
-                        | Removed -> HACId hc
-
-                    FLHintCandidates newHC
-            else if Set.contains cell houseCells then
-                match label with
-                | Given _
-                | Set _ ->
-                        HASHouse label
-                | Candidates candidates ->
-                        let o = List.tryFind (fun cr -> cell = cr.cell) hint.candidateReduction
-                        match o with
-                        | Some cr ->
-                            let newHC candidate =
-                                let hc = candidates candidate
-                                match hc with
-                                | Possible ->
-                                        if Set.contains candidate cr.symbols then
-                                            Reduction
-                                        else
-                                            HACHouse
-                                | Excluded -> HACId hc
-                                | Removed -> HACId hc
-
-                            FLHintCandidates newHC
-                        | _ -> HASHouse label
-
-            else
-                HASId label
+    houseSymbolTo houseCells >> setReductions2 hint.candidateReductions >> setPointer pointers hint.candidates

@@ -8,6 +8,7 @@ open System.Text
 
 open sudoku
 open puzzlemap
+open hints
 open console
 
 let hiddenSinglesPerHouse (alphabet:Candidate list) (candidateLookup:Cell->Set<Candidate>) (puzzleMaps:PuzzleMaps) (house:House) =
@@ -45,16 +46,7 @@ let findHiddenSingles (alphabet:Candidate list) (candidateLookup:Cell->Set<Candi
 let formatHiddenSingle {HiddenSingle.cell = cell; symbol = symbol; house = house} =
     String.Format ("hs {0}, Value {1}, Cell {2}", formatHouse house, formatCandidate symbol, formatCell cell)
 
-let hiddenSingleSymbolTo (hint:HiddenSingle) (puzzleMaps:PuzzleMaps) : (Cell->AnnotatedSymbol)->(Cell->HintAnnotatedSymbol) =
+let hiddenSingleSymbolTo (hint:HiddenSingle) (puzzleMaps:PuzzleMaps) (candidateLookup:Cell->Set<Candidate>) : (Cell->AnnotatedSymbol<AnnotatedCandidate>)->(Cell->HintAnnotatedSymbol) =
     let houseCells = getHouseCells puzzleMaps hint.house |> Set.ofList
 
-    fun (etoc:Cell->AnnotatedSymbol) ->
-        fun cell ->
-            let label = etoc cell
-
-            if cell = hint.cell then
-                HASCell hint.symbol
-            else if Set.contains cell houseCells then
-                HASHouse label
-            else
-                HASId label
+    houseSymbolTo houseCells >> setCellHint hint.cell hint.symbol candidateLookup

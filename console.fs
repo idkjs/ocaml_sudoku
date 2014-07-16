@@ -161,27 +161,26 @@ let formatCandidates (candidates:Set<Candidate>) =
 let formatCandidateReduction (candidateReduction:CandidateReduction) =
     String.Format ("Cell {0}, Candidates {1}", formatCell candidateReduction.cell, formatCandidates candidateReduction.symbols)
 
-let drawF (entry:AnnotatedSymbol) =
-    match entry with
+let drawAnnotatedSymbol (asymbol:AnnotatedSymbol<'a>) =
+    match asymbol with
     | Given s -> ColouredChar (formatSymbol s, ConsoleColor.Blue)
     | Set s -> ColouredChar (formatSymbol s, ConsoleColor.Red)
     | Candidates _ -> CChar '.'
 
-let drawHintF (entry:AnnotatedSymbol) =
-    match entry with
+let drawAnnotatedSymbolAsHint (asymbol:AnnotatedSymbol<'a>) =
+    match asymbol with
     | Given s -> ColouredChar (formatSymbol s, ConsoleColor.Green)
     | Set s -> ColouredChar (formatSymbol s, ConsoleColor.Yellow)
     | Candidates _ -> CChar '.'
 
-let drawFL (l:HintAnnotatedSymbol) =
+let drawHintAnnotatedSymbol (l:HintAnnotatedSymbol) =
     match l with
-    | HASId entry -> drawF entry
-    | HASHouse entry -> drawHintF entry
-    | HASCell s -> ColouredChar(formatCandidate s, ConsoleColor.Cyan)
-    | FLHintCandidates _ -> CChar '.'
+    | HASId entry -> drawAnnotatedSymbol entry
+    | HASHId entry -> drawAnnotatedSymbol entry
+    | HASHint entry -> drawAnnotatedSymbolAsHint entry
 
-let drawAnnotatedCandidate (c:AnnotatedCandidate) (candidate:Candidate) =
-    match c with
+let drawAnnotatedCandidate (ac:AnnotatedCandidate) (candidate:Candidate) =
+    match ac with
     | Possible -> CChar (formatCandidate candidate)
     | Excluded -> CChar ' '
     | Removed -> ColouredChar (formatCandidate candidate, ConsoleColor.DarkMagenta)
@@ -192,43 +191,50 @@ let drawHintAnnotatedCandidate (c:AnnotatedCandidate) (candidate:Candidate) =
     | Excluded -> CChar ' '
     | Removed -> ColouredChar (formatCandidate candidate, ConsoleColor.DarkMagenta)
 
-let drawFLFE centreCandidate candidate (l:AnnotatedSymbol) =
-    let c = centreCandidate = candidate
+let drawHintAnnotatedCandidateHint (c:Candidate->HintAnnotatedCandidate) (candidate:Candidate) =
+    match c candidate with
+    | HACId l -> drawAnnotatedCandidate l candidate
+    | HACSet -> ColouredChar (formatCandidate candidate, ConsoleColor.Red)
+    | Pointer -> ColouredChar (formatCandidate candidate, ConsoleColor.Magenta)
+    | Reduction -> ColouredChar (formatCandidate candidate, ConsoleColor.DarkYellow)
+    | HACHouse l -> drawHintAnnotatedCandidate l candidate
+
+let drawFLFE centreCandidate candidate (l:AnnotatedSymbol<AnnotatedCandidate>) =
+    let isCentre = centreCandidate = candidate
 
     match l with
-    | Given _ when not c -> CChar ' '
+    | Given _ when not isCentre -> CChar ' '
     | Given s -> ColouredChar (formatSymbol s, ConsoleColor.Blue)
-    | Set _ when not c -> CChar ' '
+    | Set _ when not isCentre -> CChar ' '
     | Set s -> ColouredChar (formatSymbol s, ConsoleColor.Red)
     | Candidates candidates -> drawAnnotatedCandidate (candidates candidate) candidate
 
-let drawHintFLFE centreCandidate candidate (l:AnnotatedSymbol) =
-    let c = centreCandidate = candidate
+let drawHFLFE centreCandidate candidate (l:AnnotatedSymbol<HintAnnotatedCandidate>) =
+    let isCentre = centreCandidate = candidate
 
     match l with
-    | Given _ when not c -> CChar ' '
+    | Given _ when not isCentre -> CChar ' '
+    | Given s -> ColouredChar (formatSymbol s, ConsoleColor.Blue)
+    | Set _ when not isCentre -> CChar ' '
+    | Set s -> ColouredChar (formatSymbol s, ConsoleColor.Red)
+    | Candidates candidates -> drawHintAnnotatedCandidateHint candidates candidate
+
+
+let drawHintFLFE centreCandidate candidate (l:AnnotatedSymbol<HintAnnotatedCandidate>) =
+    let isCentre = centreCandidate = candidate
+
+    match l with
+    | Given _ when not isCentre -> CChar ' '
     | Given s -> ColouredChar (formatSymbol s, ConsoleColor.Green)
-    | Set _ when not c -> CChar ' '
+    | Set _ when not isCentre -> CChar ' '
     | Set s -> ColouredChar (formatSymbol s, ConsoleColor.Yellow)
-    | Candidates candidates -> drawHintAnnotatedCandidate (candidates candidate) candidate
+    | Candidates candidates -> drawHintAnnotatedCandidateHint candidates candidate
 
 let drawFL2 centreCandidate candidate (l:HintAnnotatedSymbol) =
-    let c = centreCandidate = candidate
-
     match l with
     | HASId entry -> drawFLFE centreCandidate candidate entry
-    | HASHouse entry -> drawHintFLFE centreCandidate candidate entry
-    | HASCell _ when not c -> CChar ' '
-    | HASCell s -> ColouredChar (formatCandidate s, ConsoleColor.Cyan)
-    | FLHintCandidates f ->
-        let hac = f candidate
-        match hac with
-        | HACId l -> drawAnnotatedCandidate l candidate
-        | HACSet ->
-            ColouredChar (formatCandidate candidate, ConsoleColor.Red)
-        | Pointer -> ColouredChar (formatCandidate candidate, ConsoleColor.Magenta)
-        | Reduction -> ColouredChar (formatCandidate candidate, ConsoleColor.DarkYellow)
-        | HACHouse -> ColouredChar (formatCandidate candidate, ConsoleColor.DarkGreen)
+    | HASHId entry -> drawHFLFE centreCandidate candidate entry
+    | HASHint entry -> drawHintFLFE centreCandidate candidate entry
 
 // Print a symbol option, with colours
 let symbolOptionToConsoleChar = function

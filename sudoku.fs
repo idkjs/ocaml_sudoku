@@ -74,24 +74,23 @@ type AnnotatedCandidate =
     | Removed
 
 [<NoEquality; NoComparison>]
-type AnnotatedSymbol =
+type AnnotatedSymbol<'a> =
     | Given of Symbol
     | Set of Symbol
-    | Candidates of (Candidate->AnnotatedCandidate)
+    | Candidates of (Candidate->'a)
 
 type HintAnnotatedCandidate =
     | HACId of AnnotatedCandidate
     | HACSet
     | Pointer
     | Reduction
-    | HACHouse
+    | HACHouse of AnnotatedCandidate
 
 [<NoEquality; NoComparison>]
 type HintAnnotatedSymbol =
-    | HASId of AnnotatedSymbol
-    | HASHouse of AnnotatedSymbol
-    | HASCell of Candidate
-    | FLHintCandidates of (Candidate->HintAnnotatedCandidate)
+    | HASId of AnnotatedSymbol<AnnotatedCandidate>
+    | HASHId of AnnotatedSymbol<HintAnnotatedCandidate>
+    | HASHint of AnnotatedSymbol<HintAnnotatedCandidate>
 
 // Working towards a solution we take one of the following actions:
 type SetCellValue =
@@ -134,8 +133,8 @@ type CandidateReduction = {
 type NakedPair = {
     cell1:Cell
     cell2:Cell
-    symbols:Set<Candidate>
-    candidateReduction:CandidateReduction list
+    candidates:Set<Candidate>
+    candidateReductions:CandidateReduction list
     house:House
 }
 
@@ -152,7 +151,7 @@ type Action =
 
 [<NoEquality; NoComparison>]
 type Solution = {
-    grid : Cell->AnnotatedSymbol
+    grid : Cell->AnnotatedSymbol<AnnotatedCandidate>
     steps : Action list
 }
 

@@ -40,7 +40,7 @@ let parseValue (alphabet:Candidate list) (term:string) =
         Console.WriteLine ("Expect a single digit, not {0}", term)
         None
 
-let ui_set (item:string) (alphabet:Candidate list) (lastGrid:Cell->AnnotatedSymbol) (puzzleMaps:PuzzleMaps) =
+let ui_set (item:string) (alphabet:Candidate list) (lastGrid:Cell->AnnotatedSymbol<AnnotatedCandidate>) (puzzleMaps:PuzzleMaps) =
     let terms = item.Split(' ')
     if terms.Length = 4 then
         let parsedCell = parseCell alphabet.Length puzzleMaps.cells terms.[1] terms.[2]
