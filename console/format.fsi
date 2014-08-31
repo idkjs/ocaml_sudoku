@@ -30,7 +30,7 @@ type solutionChars<'a> =
 
 val printRowOnOneLine : ('b -> 'c) -> ('a -> 'b list) -> seq<'c> -> 'a list -> seq<'c>
 
-val printGrid : int -> int<width> -> int<height> -> gridChars<seq<'c>> -> seq<'c> -> (Cell -> 'c) -> seq<'c>
+val printGrid : int<size> -> int<width> -> int<height> -> gridChars<seq<'c>> -> seq<'c> -> (Cell -> 'c) -> seq<'c>
 
-val print_full : int -> int<width> -> int<height> -> solutionChars<seq<'c>>
+val print_full : int<size> -> int<width> -> int<height> -> solutionChars<seq<'c>>
      -> seq<'c> -> (Cell -> 'b) -> Candidate list -> (Candidate -> 'b -> 'c) -> seq<'c>

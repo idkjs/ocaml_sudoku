@@ -34,11 +34,20 @@ type Hint =
     | NP of NakedPair
 
 let symbolToEntry (puzzleSpec : Puzzle) (symbolLookup : Cell -> Symbol option) = 
+    let puzzleHouseCellCells = houseCellCells puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight
+
+    let houseCellsForCell (cell : Cell) (symbolLookup : Cell -> 'a option) = 
+        let a = puzzleHouseCellCells cell
+
+        let sys = Set.map symbolLookup a
+        let sys2 = Set.filter (fun (s : 'a option) -> s.IsSome) sys
+        Set.map (fun (s : 'a option) -> s.Value) sys2
+
     fun (cell : Cell) -> 
         match symbolLookup cell with
         | Some(e) -> Given(e)
         | None -> 
-            let symbols = houseCellsForCell puzzleSpec.alphabet.Length puzzleSpec.boxWidth puzzleSpec.boxHeight cell symbolLookup
+            let symbols = houseCellsForCell cell symbolLookup
             let candidates = Set.map symbolToCandidate symbols
             Candidates(fun candidate -> 
                 if Set.contains candidate candidates then Excluded
@@ -48,7 +57,9 @@ type ConsoleCharWriter = ConsoleChar -> Unit
 
 let print_step (write : ConsoleCharWriter) (grid : Cell -> AnnotatedSymbol<AnnotatedCandidate>) (action : Action) 
     (puzzleSpec : Puzzle) = 
-    Seq.iter write (printGrid puzzleSpec.alphabet.Length puzzleSpec.boxWidth puzzleSpec.boxHeight defaultGridChars sNL (grid >> drawAnnotatedSymbol))
+    let puzzlePrintGrid = printGrid puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight
+
+    Seq.iter write (puzzlePrintGrid defaultGridChars sNL (grid >> drawAnnotatedSymbol))
     match action with
     | SetCellValue sv -> write (CStr(sv.ToString()))
     | ClearCandidate cc -> write (CStr(cc.ToString()))
@@ -61,16 +72,24 @@ let print_last (steps : Action list) (grid : Cell -> AnnotatedSymbol<AnnotatedCa
 
 let parse (item : string) (alphabet : Candidate list) solution (puzzleSpec : Puzzle) 
     (candidateLookup : Cell -> Set<Candidate>) : Solution * Hint list = 
+    let puzzlePrintFull (solutionChars : solutionChars<seq<'c>>) (eol : seq<'c>) (symbolTo : Cell -> 'b) (alphabet : Candidate list) (drawCell : Candidate -> 'b -> 'c) = print_full puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight solutionChars eol symbolTo alphabet drawCell
+    let puzzleHouseCells = houseCells puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight
+    let puzzleHouseCellCells = houseCellCells puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight
+    let puzzleCells = cells puzzleSpec.size
+    let puzzleHouses = houses puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight
+
     let draw_cell = drawFLFE (List.nth alphabet ((List.length alphabet) / 2))
     let draw_cell2 = drawFL2 (List.nth alphabet ((List.length alphabet) / 2))
     let draw_full (dr : Candidate -> 'a -> ConsoleChar) (symbolTo : Cell -> 'a) = 
-        Seq.iter ConsoleWriteChar (print_full puzzleSpec.alphabet.Length puzzleSpec.boxWidth puzzleSpec.boxHeight defaultSolutionChars sNL symbolTo alphabet dr)
+        Seq.iter ConsoleWriteChar (puzzlePrintFull defaultSolutionChars sNL symbolTo alphabet dr)
+
     Console.WriteLine item
+
     if item = "print" then 
         draw_full draw_cell solution.grid
         (solution, [])
     else if item.StartsWith "set" then 
-        let commandset = ui_set item alphabet solution.grid (cells puzzleSpec.alphabet.Length)
+        let commandset = ui_set item alphabet solution.grid puzzleCells
         
         let newSolution = 
             match commandset with
@@ -82,9 +101,9 @@ let parse (item : string) (alphabet : Candidate list) solution (puzzleSpec : Puz
                       pointerCells = set []
                       pointerCandidates = set [] }
                 
-                let print_grid2 = mhas hd (houseCells puzzleSpec.alphabet.Length puzzleSpec.boxWidth puzzleSpec.boxHeight) (houseCellCells puzzleSpec.alphabet.Length puzzleSpec.boxWidth puzzleSpec.boxHeight) candidateLookup solution.grid
+                let print_grid2 = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup solution.grid
                 draw_full draw_cell2 print_grid2
-                { solution with grid = setCellApply setCellValue (houseCellCells puzzleSpec.alphabet.Length puzzleSpec.boxWidth puzzleSpec.boxHeight) candidateLookup solution.grid
+                { solution with grid = setCellApply setCellValue puzzleHouseCellCells candidateLookup solution.grid
                                 steps = (SetCellValue setCellValue) :: solution.steps }
             | None -> 
                 Console.WriteLine("")
@@ -92,18 +111,18 @@ let parse (item : string) (alphabet : Candidate list) solution (puzzleSpec : Puz
         print_last newSolution.steps newSolution.grid puzzleSpec
         (newSolution, [])
     else if item = "fh" then 
-        let hints = fullHouseFind candidateLookup (houseCells puzzleSpec.alphabet.Length puzzleSpec.boxWidth puzzleSpec.boxHeight) (houses puzzleSpec.alphabet.Length puzzleSpec.boxWidth puzzleSpec.boxHeight)
+        let hints = fullHouseFind candidateLookup puzzleHouseCells puzzleHouses
         (solution, List.map FH hints)
     else if item = "hs" then 
-        let hints = hiddenSingleFind alphabet candidateLookup (houseCells puzzleSpec.alphabet.Length puzzleSpec.boxWidth puzzleSpec.boxHeight) (houses puzzleSpec.alphabet.Length puzzleSpec.boxWidth puzzleSpec.boxHeight)
+        let hints = hiddenSingleFind alphabet candidateLookup puzzleHouseCells puzzleHouses
         (solution, List.map HS hints)
     else if item = "ns" then 
-        let hints = nakedSingleFind candidateLookup (cells puzzleSpec.alphabet.Length)
+        let hints = nakedSingleFind candidateLookup puzzleCells
 
         (solution, List.map NS hints)
 
     else if item = "np" then 
-        let hints = nakedPairFind candidateLookup (houseCells puzzleSpec.alphabet.Length puzzleSpec.boxWidth puzzleSpec.boxHeight) (houses puzzleSpec.alphabet.Length puzzleSpec.boxWidth puzzleSpec.boxHeight)
+        let hints = nakedPairFind candidateLookup puzzleHouseCells puzzleHouses
 
         (solution, List.map NP hints)
 
@@ -111,12 +130,17 @@ let parse (item : string) (alphabet : Candidate list) solution (puzzleSpec : Puz
 
 let printHint (candidates : Candidate list) (solution : Solution) (puzzleSpec : Puzzle) 
     (candidateLookup : Cell -> Set<Candidate>) (index : int) (h : Hint) = 
+    let puzzlePrintFull (solutionChars : solutionChars<seq<'c>>) (eol : seq<'c>) (symbolTo : Cell -> 'b) (alphabet : Candidate list) (drawCell : Candidate -> 'b -> 'c) = print_full puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight solutionChars eol symbolTo alphabet drawCell
+    let puzzleHouseCells = houseCells puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight
+    let puzzleHouseCellCells = houseCellCells puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight
+    let puzzlePrintGrid = printGrid puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight
+
     let draw_grid (dr : 'a -> ConsoleChar) (gridTo : Cell -> 'a) = 
-        Seq.iter ConsoleWriteChar (printGrid puzzleSpec.alphabet.Length puzzleSpec.boxWidth puzzleSpec.boxHeight defaultGridChars sNL (gridTo >> dr))
+        Seq.iter ConsoleWriteChar (puzzlePrintGrid defaultGridChars sNL (gridTo >> dr))
 
     let draw_cell2 = drawFL2 (List.nth candidates ((List.length candidates) / 2))
     let draw_full (dr : Candidate -> 'a -> ConsoleChar) (symbolTo : Cell -> 'a) = 
-        Seq.iter ConsoleWriteChar (print_full puzzleSpec.alphabet.Length puzzleSpec.boxWidth puzzleSpec.boxHeight defaultSolutionChars sNL symbolTo candidates dr)
+        Seq.iter ConsoleWriteChar (puzzlePrintFull defaultSolutionChars sNL symbolTo candidates dr)
 
     match h with
     | FH hint -> 
@@ -124,7 +148,7 @@ let printHint (candidates : Candidate list) (solution : Solution) (puzzleSpec : 
 
         let hd = fullHouseToDescription hint
 
-        let st = mhas hd (houseCells puzzleSpec.alphabet.Length puzzleSpec.boxWidth puzzleSpec.boxHeight) (houseCellCells puzzleSpec.alphabet.Length puzzleSpec.boxWidth puzzleSpec.boxHeight) candidateLookup solution.grid
+        let st = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup solution.grid
 
         draw_grid drawHintAnnotatedSymbol st
 
@@ -135,7 +159,7 @@ let printHint (candidates : Candidate list) (solution : Solution) (puzzleSpec : 
 
         let hd = hiddenSingleToDescription hint
 
-        let st = mhas hd (houseCells puzzleSpec.alphabet.Length puzzleSpec.boxWidth puzzleSpec.boxHeight) (houseCellCells puzzleSpec.alphabet.Length puzzleSpec.boxWidth puzzleSpec.boxHeight) candidateLookup solution.grid
+        let st = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup solution.grid
 
         draw_grid drawHintAnnotatedSymbol st
 
@@ -146,7 +170,7 @@ let printHint (candidates : Candidate list) (solution : Solution) (puzzleSpec : 
 
         let hd = nakedSingleToDescription hint
 
-        let st = mhas hd (houseCells puzzleSpec.alphabet.Length puzzleSpec.boxWidth puzzleSpec.boxHeight) (houseCellCells puzzleSpec.alphabet.Length puzzleSpec.boxWidth puzzleSpec.boxHeight) candidateLookup solution.grid
+        let st = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup solution.grid
 
         draw_grid drawHintAnnotatedSymbol st
 
@@ -157,7 +181,7 @@ let printHint (candidates : Candidate list) (solution : Solution) (puzzleSpec : 
 
         let hd = nakedPairToDescription hint
 
-        let print_grid2 = mhas hd (houseCells puzzleSpec.alphabet.Length puzzleSpec.boxWidth puzzleSpec.boxHeight) (houseCellCells puzzleSpec.alphabet.Length puzzleSpec.boxWidth puzzleSpec.boxHeight) candidateLookup solution.grid
+        let print_grid2 = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup solution.grid
 
         draw_full draw_cell2 print_grid2
 
@@ -201,13 +225,13 @@ let repl (sudoku : string) (puzzleSpec : Puzzle) =
 
     let alphabetisedLine = loadLine sudoku puzzleSpec.alphabet
 
-    let puzzleGrid = loadPuzzle alphabetisedLine (cells puzzleSpec.alphabet.Length)
+    let puzzleGrid = loadPuzzle alphabetisedLine (cells puzzleSpec.size)
 
     let candidates = List.map symbolToCandidate puzzleSpec.alphabet
 
     let stoe = symbolToEntry puzzleSpec puzzleGrid
 
-    let solutionGrid = flattenEntry stoe (cells puzzleSpec.alphabet.Length)
+    let solutionGrid = flattenEntry stoe (cells puzzleSpec.size)
 
     let cons x y = x :: y
 
@@ -215,17 +239,17 @@ let repl (sudoku : string) (puzzleSpec : Puzzle) =
         List.foldBack (puzzleGrid
                        >> symbolOptionToConsoleChar
                        >> drawAnnotatedSymbol
-                       >> cons) (cells puzzleSpec.alphabet.Length) [ NL ]
+                       >> cons) (cells puzzleSpec.size) [ NL ]
     List.iter mainWriter line
     mainWriter NL
 
     let prows = 
         printRowOnOneLine (puzzleGrid
                            >> symbolOptionToConsoleChar
-                           >> drawAnnotatedSymbol) (rowCells puzzleSpec.alphabet.Length) sNL (rows puzzleSpec.alphabet.Length)
+                           >> drawAnnotatedSymbol) (rowCells puzzleSpec.size) sNL (rows puzzleSpec.size)
     Seq.iter mainWriter prows
 
-    Seq.iter ConsoleWriteChar (printGrid puzzleSpec.alphabet.Length puzzleSpec.boxWidth puzzleSpec.boxHeight defaultGridChars sNL (puzzleGrid
+    Seq.iter ConsoleWriteChar (printGrid puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight defaultGridChars sNL (puzzleGrid
                       >> symbolOptionToConsoleChar
                       >> drawAnnotatedSymbol))
 
@@ -247,6 +271,7 @@ let defaultPuzzleSpec =
       alphabet = 
           [ for i in 1..9 -> (char) i + '0'
                              |> Symbol ]
+      size = 9 * 1<size>
       symbols = fun _ -> None }
 
 (*
