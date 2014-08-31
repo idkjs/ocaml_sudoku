@@ -7,7 +7,6 @@ open System
 
 open console
 
-open core.puzzlemap
 open core.setCell
 open core.sudoku
 open hints
@@ -27,8 +26,7 @@ let nakedSingleFind (candidateLookup : Cell -> Set<Candidate>) (cells : Cell lis
               { SetCellValue.cell = cell
                 candidate = first candidates } }) filteredCandidateCells
 
-let nakedSingleToDescription (hint : NakedSingle) (puzzleMaps : PuzzleMaps) (candidateLookup : Cell -> Set<Candidate>) : HintDescription = 
-
+let nakedSingleToDescription (hint : NakedSingle) : HintDescription = 
     { HintDescription.house = None
       candidateReductions = set []
       setCellValue = Some hint.setCellValue

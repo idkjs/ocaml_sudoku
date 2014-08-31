@@ -1,151 +1,130 @@
 ﻿module core.puzzlemap
 
 open sudoku
-open tactics
 
 let konst x _ = x
 
-let candidateToSymbol (Candidate s : Candidate) = Symbol s
-
 let symbolToCandidate (Symbol s : Symbol) = Candidate s
 
-[<NoEquality; NoComparison>]
-type PuzzleMaps = 
-    { columns : Column list
-      rows : Row list
-      cells : Cell list
+let makeColumn i = { Column.col = i * 1<column> }
 
-      cellColumn : Cell -> Column
-      columnCells : Column -> Cell list
-      cellRow : Cell -> Row
-      rowCells : Row -> Cell list
-      cellBox : Cell -> Box
-      boxCells : Box -> Cell list
+let makeRow i = { Row.row = i * 1<row> }
 
-      stacks : Stack list
-      bands : Band list
-      boxes : Box list
+let makeStack i = { Stack.stack = i * 1<boxcol> }
 
-      columnStack : Column -> Stack
-      stackColumns : Stack -> Column list
-      rowBand : Row -> Band
-      bandRows : Band -> Row list }
+let makeBand i = { Band.band = i * 1<boxrow> }
 
-let makePuzzleMaps (puzzleSpec : Puzzle) = 
-    let length = puzzleSpec.alphabet.Length
+let columns (length : int) = List.map makeColumn [ 1..length ]
 
-    let columns = columns length
-    let rows = rows length
-    let cells = allCells length
+let rows (length : int) = List.map makeRow [ 1..length ]
 
-    let columnCells = columnCells length
-    let rowCells = rowCells length
+let cells (length : int) =
+    [ for row in (rows length) do
+            for column in (columns length) do
+                yield { Cell.col = column
+                        row = row } ]
 
-    let (cellBoxLookup, boxCellLookup) = 
-        makeContainerBoxCell (boxes puzzleSpec.boxWidth puzzleSpec.boxHeight length) cells puzzleSpec.boxWidth 
-            puzzleSpec.boxHeight
-    
-    let houseCells = 
-        { columns = columns
-          rows = rows
-          cells = cells
+let columnCells (length : int) (column : Column) = 
+    List.map (fun row -> 
+        { col = column
+          row = row }) (rows length)
 
-          cellColumn = cellColumn
-          columnCells = columnCells
-          cellRow = cellRow
-          rowCells = rowCells
-          cellBox = cellBoxLookup
-          boxCells = boxCellLookup
+// For a cell, return all the cell symbols for its containing row
+let columnCellCells (length : int) (cell : Cell) = columnCells length cell.col
 
-          stacks = stacks puzzleSpec.boxWidth length
-          bands = bands puzzleSpec.boxHeight length
-          boxes = boxes puzzleSpec.boxWidth puzzleSpec.boxHeight length
+let rowCells (length : int) (row : Row ) = 
+    List.map (fun column -> 
+        { col = column
+          row = row }) (columns length)
 
-          columnStack = columnStack puzzleSpec.boxWidth
-          stackColumns = stackColumns puzzleSpec.boxWidth
-          rowBand = rowBand puzzleSpec.boxHeight
-          bandRows = bandRows puzzleSpec.boxHeight }
+// For a cell, return all the cell symbols for its containing column
+let rowCellCells (length : int) (cell : Cell) = rowCells length cell.row
 
-    houseCells
+let stacks (length : int) (boxWidth : int<width>) = 
+    List.map makeStack [ 1..(length / (int) boxWidth) ]
 
-let getHouseCells (puzzleMaps : PuzzleMaps) (h : House) = 
-    match h with
-    | Column c -> puzzleMaps.columnCells c |> Set.ofList
-    | Row r -> puzzleMaps.rowCells r |> Set.ofList
-    | Box b -> puzzleMaps.boxCells b |> Set.ofList
+let columnStack (boxWidth : int<width>) (column : Column) = 
+    1 + ((int) column.col - 1) / (int) boxWidth
+    |> makeStack
 
-let allHouses (puzzleMaps : PuzzleMaps) = 
-    let chs = List.map (fun c -> Column c) puzzleMaps.columns
+let stackColumns (boxWidth : int<width>) (stack : Stack) = 
+    let t = ((int) stack.stack - 1) * (int) boxWidth
+    let ss = [ (t + 1)..(t + (int) boxWidth) ]
+    List.map makeColumn ss
 
-    let rhs = List.map (fun r -> Row r) puzzleMaps.rows
+let bands (length : int) (boxHeight : int<height>) = 
+    List.map makeBand [ 1..(length / (int) boxHeight) ]
 
-    let bhs = List.map (fun b -> Box b) puzzleMaps.boxes
+let rowBand (boxHeight : int<height>) (row : Row) = 
+    1 + ((int) row.row - 1) / (int) boxHeight
+    |> makeBand
+
+let bandRows (boxHeight : int<height>) (band : Band) = 
+    let c = ((int) band.band - 1) * (int) boxHeight
+    let bb = [ (c + 1)..(c + (int) boxHeight) ]
+    List.map makeRow bb
+
+let boxes (length : int) (boxWidth : int<width>) (boxHeight : int<height>) =
+    [ for band in bands length boxHeight do
+            for stack in stacks length boxWidth do
+                yield { Box.stack = stack
+                        band = band } ]
+
+let cellBox (boxWidth : int<width>) (boxHeight : int<height>) (cell : Cell) = 
+    let stack = columnStack boxWidth cell.col
+    let band = rowBand boxHeight cell.row
+    { Box.band = band
+      stack = stack }
+
+let boxCells (boxWidth : int<width>) (boxHeight : int<height>) (box : Box) = 
+    let stackColumns = stackColumns boxWidth box.stack
+    let bandRows = bandRows boxHeight box.band
+
+    [ for row in bandRows do
+            for column in stackColumns do
+                yield { Cell.col = column
+                        row = row } ]
+
+
+// For a cell, return all the cell symbols for its containing box
+let boxCellCells (boxWidth : int<width>) (boxHeight : int<height>) (cell : Cell) = boxCells boxWidth boxHeight (cellBox boxWidth boxHeight cell)
+
+let houses (length : int) (boxWidth : int<width>) (boxHeight : int<height>) = 
+    let chs = List.map (fun c -> Column c) (columns length)
+
+    let rhs = List.map (fun r -> Row r) (rows length)
+
+    let bhs = List.map (fun b -> Box b) (boxes length boxWidth boxHeight)
 
     List.concat [ chs; rhs; bhs ]
 
-// For a cell, return all the cell symbols for its containing column
-let rowCellsForCell (puzzleMaps : PuzzleMaps) = puzzleMaps.cellRow >> puzzleMaps.rowCells
+let houseCells (length : int) (boxWidth : int<width>) (boxHeight : int<height>) (house : House) = 
+    match house with
+    | Column c -> columnCells length c |> Set.ofList
+    | Row r -> rowCells length r |> Set.ofList
+    | Box b -> boxCells boxWidth boxHeight b |> Set.ofList
 
-// For a cell, return all the cell symbols for its containing row
-let colCellsForCell (puzzleMaps : PuzzleMaps) = puzzleMaps.cellColumn >> puzzleMaps.columnCells
-
-// For a cell, return all the cell symbols for its containing box
-let boxCellsForCell (puzzleMaps : PuzzleMaps) = puzzleMaps.cellBox >> puzzleMaps.boxCells
-
-let allHouseCells (puzzleMaps : PuzzleMaps) cell = 
+let houseCellCells (length : int) (boxWidth : int<width>) (boxHeight : int<height>) (cell : Cell) = 
     let r = 
         cell
-        |> rowCellsForCell puzzleMaps
+        |> rowCellCells length
         |> Set.ofList
     
     let c = 
         cell
-        |> colCellsForCell puzzleMaps
+        |> columnCellCells length
         |> Set.ofList
     
     let b = 
         cell
-        |> boxCellsForCell puzzleMaps
+        |> boxCellCells boxWidth boxHeight
         |> Set.ofList
     
     Set.unionMany [ r; c; b ]
 
-let houseCellsForCell (puzzleMaps : PuzzleMaps) (cell : Cell) (symbolLookup : Cell -> 'a option) = 
-    let a = allHouseCells puzzleMaps cell
+let houseCellsForCell (length : int) (boxWidth : int<width>) (boxHeight : int<height>) (cell : Cell) (symbolLookup : Cell -> 'a option) = 
+    let a = houseCellCells length boxWidth boxHeight cell
 
     let sys = Set.map symbolLookup a
     let sys2 = Set.filter (fun (s : 'a option) -> s.IsSome) sys
     Set.map (fun (s : 'a option) -> s.Value) sys2
-
-let setCellValueModelEffect (puzzleMaps : PuzzleMaps) (setCellValue : SetCellValue) 
-    (candidateLookup : Cell -> Set<Candidate>) : Set<CandidateReduction> = 
-    let houseCells = allHouseCells puzzleMaps setCellValue.cell
-    let otherHouseCells = Set.remove setCellValue.cell houseCells
-    
-    let candidateReductions = 
-        Set.filter (fun c -> 
-            let cs = candidateLookup c
-            Set.contains setCellValue.candidate cs) otherHouseCells
-    
-    let candidateReductionCells = 
-        Set.map (fun c -> 
-            { CandidateReduction.cell = c
-              symbols = set [ setCellValue.candidate ] }) candidateReductions
-    
-    candidateReductionCells
-
-let setCellCandidateReductions (puzzleMaps : PuzzleMaps) (setCellValue : SetCellValue) 
-    (candidateLookup : Cell -> Set<Candidate>) : Set<CandidateReduction> = 
-    let candidateReductionCells = setCellValueModelEffect puzzleMaps setCellValue candidateLookup
-
-    let ccs = candidateLookup setCellValue.cell
-    let ccs2 = Set.remove setCellValue.candidate ccs
-    
-    let crs = 
-        { CandidateReduction.cell = setCellValue.cell
-          symbols = ccs2 }
-    
-    let crs3 = Set.add crs candidateReductionCells
-
-    crs3
-

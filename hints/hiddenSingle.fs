@@ -6,7 +6,6 @@ open System
 
 open console
 
-open core.puzzlemap
 open core.setCell
 open core.sudoku
 open hints
@@ -17,9 +16,9 @@ type HiddenSingle =
     override this.ToString() = String.Format("hs {0}, {1}", this.house, this.setCellValue)
 
 let hiddenSinglesPerHouse (alphabet : Candidate list) (candidateLookup : Cell -> Set<Candidate>) 
-    (puzzleMaps : PuzzleMaps) (house : House) = 
+    (houseCells : House -> Set<Cell>) (house : House) = 
 
-    let cells = getHouseCells puzzleMaps house
+    let cells = houseCells house
 
     let candidateCells = Set.map (fun cell -> ((candidateLookup cell), cell)) cells
     
@@ -41,16 +40,10 @@ let hiddenSinglesPerHouse (alphabet : Candidate list) (candidateLookup : Cell ->
 
     hhhs
 
-let hiddenSingleFind (alphabet : Candidate list) (candidateLookup : Cell -> Set<Candidate>) (puzzleMaps : PuzzleMaps) = 
+let hiddenSingleFind (alphabet : Candidate list) (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> Set<Cell>) (houses : House list) = 
+    List.collect (hiddenSinglesPerHouse alphabet candidateLookup houseCells) houses
 
-    let perHouse = hiddenSinglesPerHouse alphabet candidateLookup puzzleMaps
-
-    let houses = allHouses puzzleMaps
-
-    List.collect perHouse houses
-
-let hiddenSingleToDescription (hint : HiddenSingle) (puzzleMaps : PuzzleMaps) (candidateLookup : Cell -> Set<Candidate>) : HintDescription = 
-
+let hiddenSingleToDescription (hint : HiddenSingle) : HintDescription = 
     { HintDescription.house = Some hint.house
       candidateReductions = set []
       setCellValue = Some hint.setCellValue

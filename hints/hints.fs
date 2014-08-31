@@ -1,7 +1,7 @@
 ﻿module hints.hints
 
-open core.puzzlemap
 open core.sudoku
+open core.setCell
 
 exception CellStateInvalid
 
@@ -81,16 +81,16 @@ type HintDescription =
       pointerCells : Set<Cell>
       pointerCandidates : Set<Candidate> }
 
-let mhas (hd : HintDescription) puzzleMaps (candidateLookup : Cell -> Set<Candidate>) 
+let mhas (hd : HintDescription) (houseCells : House -> Set<Cell>) (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) 
     (solutionGrid : Cell -> AnnotatedSymbol<AnnotatedCandidate>) = 
     let houseCells = 
         match hd.house with
-        | Some house -> getHouseCells puzzleMaps house
+        | Some house -> houseCells house
         | None -> set []
     
     let crs = 
         match hd.setCellValue with
-        | Some scv -> setCellCandidateReductions puzzleMaps scv candidateLookup
+        | Some scv -> setCellCandidateReductions scv cellHouseCells candidateLookup
         | None -> set []
     
     (setHint houseCells

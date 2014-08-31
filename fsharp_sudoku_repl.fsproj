@@ -70,7 +70,6 @@
   </ProjectExtensions>
   <ItemGroup>
     <Compile Include="core\sudoku.fs" />
-    <Compile Include="core\tactics.fs" />
     <Compile Include="core\puzzlemap.fsi" />
     <Compile Include="core\puzzlemap.fs" />
     <Compile Include="core\setCell.fsi" />

@@ -1,6 +1,5 @@
 ﻿module hints.nakedPair
 
-open core.puzzlemap
 open core.sudoku
 open hints
 
@@ -11,7 +10,7 @@ type NakedPair =
       candidateReductions : Set<CandidateReduction>
       house : House }
 
-val nakedPairFind : (Cell -> Set<Candidate>) -> PuzzleMaps -> NakedPair list
+val nakedPairFind : (Cell -> Set<Candidate>) -> (House -> Set<Cell>) -> House list -> NakedPair list
 
-val nakedPairToDescription : NakedPair -> PuzzleMaps -> HintDescription
+val nakedPairToDescription : NakedPair -> HintDescription
 

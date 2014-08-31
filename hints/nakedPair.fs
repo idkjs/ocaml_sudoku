@@ -5,7 +5,6 @@ open System.Text
 
 open console
 
-open core.puzzlemap
 open core.sudoku
 open hints
 
@@ -27,8 +26,8 @@ type NakedPair =
 
         sb.ToString()
 
-let nakedPairPerHouse (candidateLookup : Cell -> Set<Candidate>) (puzzleMaps : PuzzleMaps) (house : House) = 
-    let cells = getHouseCells puzzleMaps house
+let nakedPairPerHouse (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> Set<Cell>) (house : House) = 
+    let cells = houseCells house
 
     let candidateCells = Set.map (fun cell -> ((candidateLookup cell), cell)) cells
 
@@ -60,18 +59,12 @@ let nakedPairPerHouse (candidateLookup : Cell -> Set<Candidate>) (puzzleMaps : P
                     hints := hint :: !hints) (Seq.skip (i + 1) hht)) hht
     !hints
 
-let nakedPairFind (candidateLookup : Cell -> Set<Candidate>) (puzzleMaps : PuzzleMaps) = 
-    let perHouse = nakedPairPerHouse candidateLookup puzzleMaps
+let nakedPairFind (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> Set<Cell>) (houses : House list) = 
+    List.collect (nakedPairPerHouse candidateLookup houseCells) houses
 
-    let houses = allHouses puzzleMaps
-
-    List.collect perHouse houses
-
-let nakedPairToDescription (hint : NakedPair) (puzzleMaps : PuzzleMaps) : HintDescription = 
-    let pointers = set [ hint.cell1; hint.cell2 ]
-
+let nakedPairToDescription (hint : NakedPair) : HintDescription = 
     { HintDescription.house = Some hint.house
       candidateReductions = hint.candidateReductions
       setCellValue = None
-      pointerCells = pointers
+      pointerCells = set [ hint.cell1; hint.cell2 ]
       pointerCandidates = hint.candidates }

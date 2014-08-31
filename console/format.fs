@@ -92,40 +92,40 @@ let printBand (rowToSeq : Row -> seq<'c>) (rowSeparator : seq<'c>) (bandRows : B
     simpleInterleave rowToSeq rowSeparator (bandRows band)
 
 // Print a puzzle grid, supply callback to draw each cell
-let printGrid (gridChars : gridChars<seq<'c>>) (eol : seq<'c>) (symbolTo : Cell -> 'c) (puzzleMaps : PuzzleMaps) = 
+let printGrid (length : int) (boxWidth : int<width>) (boxHeight : int<height>) (gridChars : gridChars<seq<'c>>) (eol : seq<'c>) (symbolTo : Cell -> 'c) = 
 
     let doPrintColumn = printColumn (printCell symbolTo)
 
-    let doPrintStack = printStack doPrintColumn Seq.empty puzzleMaps.stackColumns
+    let doPrintStack = printStack doPrintColumn Seq.empty (stackColumns boxWidth)
 
-    let doPrintRow row = printRow (doPrintStack row) gridChars.v eol puzzleMaps.stacks
+    let doPrintRow row = printRow (doPrintStack row) gridChars.v eol (stacks length boxWidth)
 
-    let doPrintBand = printBand doPrintRow Seq.empty puzzleMaps.bandRows
+    let doPrintBand = printBand doPrintRow Seq.empty (bandRows boxHeight)
 
-    let r = Seq.collect (konst gridChars.h) (puzzleMaps.stackColumns puzzleMaps.stacks.Head)
-    let printHorizontal (g : gridCharsRow<seq<'c>>) = sinterleave (konst r) g.l g.m g.r eol puzzleMaps.stacks
+    let r = Seq.collect (konst gridChars.h) ((stackColumns boxWidth) (stacks length boxWidth).Head)
+    let printHorizontal (g : gridCharsRow<seq<'c>>) = sinterleave (konst r) g.l g.m g.r eol (stacks length boxWidth)
     let t = printHorizontal gridChars.t
     let m = printHorizontal gridChars.m
     let b = printHorizontal gridChars.b
 
-    sinterleave doPrintBand t m b Seq.empty puzzleMaps.bands
+    sinterleave doPrintBand t m b Seq.empty (bands length boxHeight)
 
-let print_full (solutionChars : solutionChars<seq<'c>>) (eol : seq<'c>) (symbolTo : Cell -> 'b) 
-    (puzzleMaps : PuzzleMaps) (alphabet : Candidate list) (draw_cell : Candidate -> 'b -> 'c) = 
-    let d = Seq.collect (konst solutionChars.h) (puzzleMaps.stackColumns puzzleMaps.stacks.Head)
-    let i = Seq.collect (konst solutionChars.hi) (puzzleMaps.stackColumns puzzleMaps.stacks.Head)
+let print_full (length : int) (boxWidth : int<width>) (boxHeight : int<height>) (solutionChars : solutionChars<seq<'c>>) (eol : seq<'c>) (symbolTo : Cell -> 'b) 
+    (alphabet : Candidate list) (draw_cell : Candidate -> 'b -> 'c) = 
+    let d = Seq.collect (konst solutionChars.h) ((stackColumns boxWidth) (stacks alphabet.Length boxWidth).Head)
+    let i = Seq.collect (konst solutionChars.hi) ((stackColumns boxWidth) (stacks alphabet.Length boxWidth).Head)
     
     let printFullHorizontal (x : solutionCharsRow<seq<'c>>) i = 
-        let s = simpleInterleave (konst i) x.mi (puzzleMaps.stackColumns puzzleMaps.stacks.Head)
+        let s = simpleInterleave (konst i) x.mi ((stackColumns boxWidth) (stacks alphabet.Length boxWidth).Head)
 
-        sinterleave (konst s) x.x.l x.x.m x.x.r eol puzzleMaps.stacks
+        sinterleave (konst s) x.x.l x.x.m x.x.r eol (stacks alphabet.Length boxWidth)
     
-    let c = List.length (puzzleMaps.stackColumns puzzleMaps.stacks.Head)
+    let c = List.length ((stackColumns boxWidth) (stacks alphabet.Length boxWidth).Head)
     let s = List.toSeq alphabet
     
     let ss = 
         seq { 
-            for i in 0..puzzleMaps.stacks.Length - 1 do
+            for i in 0..(stacks alphabet.Length boxWidth).Length - 1 do
                 yield Seq.skip (i * c) s |> Seq.take c
         }
     
@@ -136,15 +136,15 @@ let print_full (solutionChars : solutionChars<seq<'c>>) (eol : seq<'c>) (symbolT
         let doPrintCell cell = Seq.map (fun symbol -> symbolTo cell |> draw_cell symbol) symbols
         printColumn doPrintCell
     
-    let doPrintStack symbols = printStack (doPrintColumn symbols) solutionChars.vi puzzleMaps.stackColumns
+    let doPrintStack symbols = printStack (doPrintColumn symbols) solutionChars.vi (stackColumns boxWidth)
     let doPrintRow row = 
-        Seq.collect (fun symbols -> printRow (doPrintStack symbols row) solutionChars.v eol puzzleMaps.stacks) ssss
+        Seq.collect (fun symbols -> printRow (doPrintStack symbols row) solutionChars.v eol (stacks alphabet.Length boxWidth)) ssss
     let t = printFullHorizontal solutionChars.t d
     let m = printFullHorizontal solutionChars.m d
     let b = printFullHorizontal solutionChars.b d
 
     let rowSeparator = printFullHorizontal solutionChars.mi i
 
-    let doPrintBand = printBand doPrintRow rowSeparator puzzleMaps.bandRows
+    let doPrintBand = printBand doPrintRow rowSeparator (bandRows boxHeight)
 
-    sinterleave doPrintBand t m b Seq.empty puzzleMaps.bands
+    sinterleave doPrintBand t m b Seq.empty (bands alphabet.Length boxHeight)

@@ -4,51 +4,49 @@ open sudoku
 
 val konst : 'a -> 'b -> 'a
 
-val candidateToSymbol : Candidate -> Symbol
-
 val symbolToCandidate : Symbol -> Candidate
 
-[<NoEquality; NoComparison>]
-type PuzzleMaps = 
-    { columns : Column list
-      rows : Row list
-      cells : Cell list
+val columns : int -> Column list
 
-      cellColumn : Cell -> Column
-      columnCells : Column -> Cell list
-      cellRow : Cell -> Row
-      rowCells : Row -> Cell list
-      cellBox : Cell -> Box
-      boxCells : Box -> Cell list
+val rows : int -> Row list
 
-      stacks : Stack list
-      bands : Band list
-      boxes : Box list
+val cells : int -> Cell list
 
-      columnStack : Column -> Stack
-      stackColumns : Stack -> Column list
-      rowBand : Row -> Band
-      bandRows : Band -> Row list }
-
-val makePuzzleMaps : Puzzle -> PuzzleMaps
-
-val getHouseCells : PuzzleMaps -> House -> Set<Cell>
-
-val allHouses : PuzzleMaps -> House list
-
-// For a cell, return all the cell symbols for its containing column
-val rowCellsForCell : PuzzleMaps -> (Cell -> Cell list)
+val columnCells : int -> Column -> Cell list
 
 // For a cell, return all the cell symbols for its containing row
-val colCellsForCell : PuzzleMaps -> (Cell -> Cell list)
+val columnCellCells : int -> Cell -> Cell list
+
+val rowCells : int -> Row -> Cell list
+
+// For a cell, return all the cell symbols for its containing column
+val rowCellCells : int -> Cell -> Cell list
+
+val stacks : int -> int<width> -> Stack list
+
+val columnStack : int<width> -> Column -> Stack
+
+val stackColumns : int<width> -> Stack -> Column list
+
+val bands : int -> int<height> -> Band list
+
+val rowBand : int<height> -> Row -> Band
+
+val bandRows : int<height> -> Band -> Row list
+
+val boxes : int -> int<width> -> int<height> -> Box list
+
+val cellBox : int<width> -> int<height> -> Cell -> Box
+
+val boxCells : int<width> -> int<height> -> Box -> Cell list
 
 // For a cell, return all the cell symbols for its containing box
-val boxCellsForCell : PuzzleMaps -> (Cell -> Cell list)
+val boxCellCells : int<width> -> int<height> -> Cell -> Cell list
 
-val allHouseCells : PuzzleMaps -> Cell -> Set<Cell>
+val houses : int -> int<width> -> int<height> -> House list
 
-val houseCellsForCell : PuzzleMaps -> Cell -> (Cell -> 'a option) -> Set<'a>
+val houseCells : int -> int<width> -> int<height> -> House -> Set<Cell>
 
-val setCellValueModelEffect : PuzzleMaps -> SetCellValue -> (Cell -> Set<Candidate>) -> Set<CandidateReduction>
+val houseCellCells : int -> int<width> -> int<height> -> Cell -> Set<Cell>
 
-val setCellCandidateReductions : PuzzleMaps -> SetCellValue -> (Cell -> Set<Candidate>) -> Set<CandidateReduction>
+val houseCellsForCell : int -> int<width> -> int<height> -> Cell -> (Cell -> 'a option) -> Set<'a>

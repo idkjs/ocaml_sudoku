@@ -1,6 +1,5 @@
 ﻿module hints.hints
 
-open core.puzzlemap
 open core.sudoku
 
 type HintDescription = 
@@ -13,5 +12,5 @@ type HintDescription =
 val first : Set<'a> -> 'a
 
 val mhas : HintDescription
-     -> PuzzleMaps
+     -> (House -> Set<Cell>) -> (Cell -> Set<Cell>)
      -> (Cell -> Set<Candidate>) -> (Cell -> AnnotatedSymbol<AnnotatedCandidate>) -> (Cell -> HintAnnotatedSymbol)

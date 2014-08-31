@@ -6,7 +6,6 @@ open System
 
 open console
 
-open core.puzzlemap
 open core.setCell
 open core.sudoku
 open hints
@@ -16,9 +15,9 @@ type FullHouse =
       house : House }
     override this.ToString() = String.Format("fh {0}, {1}", this.house, this.setCellValue)
 
-let fullHousePerHouse (candidateLookup : Cell -> Set<Candidate>) (puzzleMaps : PuzzleMaps) (house : House) = 
+let fullHousePerHouse (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> Set<Cell>) (house : House) = 
 
-    let cells = getHouseCells puzzleMaps house
+    let cells = houseCells house
 
     let candidateCells = Set.map (fun cell -> ((candidateLookup cell), cell)) cells
 
@@ -33,16 +32,10 @@ let fullHousePerHouse (candidateLookup : Cell -> Set<Candidate>) (puzzleMaps : P
             house = house } ]
     else []
 
-let fullHouseFind (candidateLookup : Cell -> Set<Candidate>) (puzzleMaps : PuzzleMaps) = 
+let fullHouseFind (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> Set<Cell>) (houses : House list) = 
+    List.collect (fullHousePerHouse candidateLookup houseCells) houses
 
-    let perHouse = fullHousePerHouse candidateLookup puzzleMaps
-
-    let houses = allHouses puzzleMaps
-
-    List.collect perHouse houses
-
-let fullHouseToDescription (hint : FullHouse) (puzzleMaps : PuzzleMaps) (candidateLookup : Cell -> Set<Candidate>) : HintDescription = 
-
+let fullHouseToDescription (hint : FullHouse) : HintDescription = 
     { HintDescription.house = Some hint.house
       candidateReductions = set []
       setCellValue = Some hint.setCellValue

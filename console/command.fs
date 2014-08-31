@@ -4,7 +4,6 @@ open System
 
 open console.console
 open console.format
-open core.puzzlemap
 open core.setCell
 open core.sudoku
 
@@ -36,14 +35,14 @@ let parseValue (alphabet : Candidate list) (term : string) =
         None
 
 let ui_set (item : string) (alphabet : Candidate list) (lastGrid : Cell -> AnnotatedSymbol<AnnotatedCandidate>) 
-    (puzzleMaps : PuzzleMaps) = 
+    (cells : Cell list) = 
     let terms = item.Split(' ')
     if terms.Length = 4 then 
-        let parsedCell = parseCell alphabet.Length puzzleMaps.cells terms.[1] terms.[2]
+        let parsedCell = parseCell alphabet.Length cells terms.[1] terms.[2]
         let parsedValue = parseValue alphabet terms.[3]
 
         match (parsedCell, parsedValue) with
-        | (Some cell, Some value) -> setCellTry puzzleMaps value lastGrid cell
+        | (Some cell, Some value) -> setCellTry value lastGrid cell
         | _ -> 
             Console.WriteLine "Expect set <col> <row> <val>"
             None
