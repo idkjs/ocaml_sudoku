@@ -6,11 +6,11 @@ type HintDescription =
     { house : House option
       candidateReductions : Set<CandidateReduction>
       setCellValue : SetCellValue option
-      pointerCells : Set<Cell>
-      pointerCandidates : Set<Candidate> }
+      pointers : Set<CandidateReduction> }
 
 val first : Set<'a> -> 'a
 
 val mhas : HintDescription
-     -> (House -> Set<Cell>) -> (Cell -> Set<Cell>)
+     -> (House -> Set<Cell>)
+     -> (Cell -> Set<Cell>)
      -> (Cell -> Set<Candidate>) -> (Cell -> AnnotatedSymbol<AnnotatedCandidate>) -> (Cell -> HintAnnotatedSymbol)

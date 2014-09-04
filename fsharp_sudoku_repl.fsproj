@@ -90,6 +90,10 @@
     <Compile Include="hints\nakedSingle.fs" />
     <Compile Include="hints\nakedPair.fsi" />
     <Compile Include="hints\nakedPair.fs" />
+    <Compile Include="hints\nakedTriple.fsi" />
+    <Compile Include="hints\nakedTriple.fs" />
+    <Compile Include="hints\nakedQuad.fsi" />
+    <Compile Include="hints\nakedQuad.fs" />
     <Compile Include="load.fsi" />
     <Compile Include="load.fs" />
     <Compile Include="main.fs" />

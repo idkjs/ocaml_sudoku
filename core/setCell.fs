@@ -37,7 +37,8 @@ let setCellCandidateReductions (setCellValue : SetCellValue) (cellHouseCells : C
     crs3
 
 
-let setCellApply (setCellValue : SetCellValue) (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) : (Cell -> AnnotatedSymbol<AnnotatedCandidate>) -> Cell -> AnnotatedSymbol<AnnotatedCandidate> = 
+let setCellApply (setCellValue : SetCellValue) (cellHouseCells : Cell -> Set<Cell>) 
+    (candidateLookup : Cell -> Set<Candidate>) : (Cell -> AnnotatedSymbol<AnnotatedCandidate>) -> Cell -> AnnotatedSymbol<AnnotatedCandidate> = 
     let candidateReductions = setCellValueModelEffect setCellValue cellHouseCells candidateLookup
 
     fun (entryLookup : Cell -> AnnotatedSymbol<AnnotatedCandidate>) (cell : Cell) -> 
@@ -59,8 +60,7 @@ let setCellApply (setCellValue : SetCellValue) (cellHouseCells : Cell -> Set<Cel
                     else hs
                 Candidates f
 
-let setCellTry (candidate : Candidate) 
-    (entryLookup : Cell -> AnnotatedSymbol<AnnotatedCandidate>) cell = 
+let setCellTry (candidate : Candidate) (entryLookup : Cell -> AnnotatedSymbol<AnnotatedCandidate>) cell = 
     match entryLookup cell with
     | Given s -> 
         Console.WriteLine("Cell {0} has been given value {1}", cell, s)

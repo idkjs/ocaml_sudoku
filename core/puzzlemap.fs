@@ -11,7 +11,7 @@ let columnCells (length : int<size>) (column : Column) =
         { col = column
           row = row }) (rows length)
 
-let rowCells (length : int<size>) (row : Row ) = 
+let rowCells (length : int<size>) (row : Row) = 
     List.map (fun column -> 
         { col = column
           row = row }) (columns length)
@@ -45,9 +45,9 @@ let boxCells (boxWidth : int<width>) (boxHeight : int<height>) (box : Box) =
     let bandRows = bandRows boxHeight box.band
 
     [ for row in bandRows do
-            for column in stackColumns do
-                yield { Cell.col = column
-                        row = row } ]
+          for column in stackColumns do
+              yield { Cell.col = column
+                      row = row } ]
 
 let houseCells (length : int<size>) (boxWidth : int<width>) (boxHeight : int<height>) (house : House) = 
     match house with
@@ -57,11 +57,9 @@ let houseCells (length : int<size>) (boxWidth : int<width>) (boxHeight : int<hei
 
 let houseCellCells (length : int<size>) (boxWidth : int<width>) (boxHeight : int<height>) (cell : Cell) = 
     let r = rowCells length cell.row |> Set.ofList
-    
+
     let c = columnCells length cell.col |> Set.ofList
-    
-    let b = 
-        boxCells boxWidth boxHeight (cellBox boxWidth boxHeight cell)
-        |> Set.ofList
-    
+
+    let b = boxCells boxWidth boxHeight (cellBox boxWidth boxHeight cell) |> Set.ofList
+
     Set.unionMany [ r; c; b ]

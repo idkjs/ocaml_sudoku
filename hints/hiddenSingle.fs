@@ -40,12 +40,12 @@ let hiddenSinglesPerHouse (alphabet : Candidate list) (candidateLookup : Cell ->
 
     hhhs
 
-let hiddenSingleFind (alphabet : Candidate list) (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> Set<Cell>) (houses : House list) = 
+let hiddenSingleFind (alphabet : Candidate list) (candidateLookup : Cell -> Set<Candidate>) 
+    (houseCells : House -> Set<Cell>) (houses : House list) = 
     List.collect (hiddenSinglesPerHouse alphabet candidateLookup houseCells) houses
 
 let hiddenSingleToDescription (hint : HiddenSingle) : HintDescription = 
     { HintDescription.house = Some hint.house
       candidateReductions = set []
       setCellValue = Some hint.setCellValue
-      pointerCells = set []
-      pointerCandidates = set [] }
+      pointers = set [] }

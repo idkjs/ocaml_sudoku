@@ -1,7 +1,7 @@
 ﻿module hints.hints
 
-open core.sudoku
 open core.setCell
+open core.sudoku
 
 exception CellStateInvalid
 
@@ -49,9 +49,9 @@ let setCellHintOption (setCellValueOption : SetCellValue option) =
     | Some { cell = cell; candidate = value } -> setCellHint cell value
     | None -> id
 
-let setReductions2 (candidateReductions : Set<CandidateReduction>) = 
+let setReductions2 (candidateReductions : Set<CandidateReduction>) hac = 
     let newHC (crSymbols : Set<Candidate>) candidates candidate = 
-        if Set.contains candidate crSymbols then Reduction
+        if Set.contains candidate crSymbols then hac
         else candidates candidate
     
     let hintAnnotationTransformer cell = 
@@ -63,26 +63,14 @@ let setReductions2 (candidateReductions : Set<CandidateReduction>) =
 
     fun (etoc : Cell -> HintAnnotatedSymbol) (cell : Cell) -> (hintAnnotationTransformer cell) (etoc cell)
 
-let setPointer (cells : Set<Cell>) (symbols : Set<Candidate>) = 
-    let newHC candidates candidate = 
-        if Set.contains candidate symbols then Pointer
-        else candidates candidate
-    
-    let hintAnnotationTransformer cell = 
-        if Set.contains cell cells then rewriteHASHIdCandidates newHC
-        else id
-    
-    fun (etoc : Cell -> HintAnnotatedSymbol) (cell : Cell) -> (hintAnnotationTransformer cell) (etoc cell)
-
 type HintDescription = 
     { house : House option
       candidateReductions : Set<CandidateReduction>
       setCellValue : SetCellValue option
-      pointerCells : Set<Cell>
-      pointerCandidates : Set<Candidate> }
+      pointers : Set<CandidateReduction> }
 
-let mhas (hd : HintDescription) (houseCells : House -> Set<Cell>) (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) 
-    (solutionGrid : Cell -> AnnotatedSymbol<AnnotatedCandidate>) = 
+let mhas (hd : HintDescription) (houseCells : House -> Set<Cell>) (cellHouseCells : Cell -> Set<Cell>) 
+    (candidateLookup : Cell -> Set<Candidate>) (solutionGrid : Cell -> AnnotatedSymbol<AnnotatedCandidate>) = 
     let houseCells = 
         match hd.house with
         | Some house -> houseCells house
@@ -94,7 +82,7 @@ let mhas (hd : HintDescription) (houseCells : House -> Set<Cell>) (cellHouseCell
         | None -> set []
     
     (setHint houseCells
-     >> setReductions2 crs
-     >> setReductions2 hd.candidateReductions
-     >> setPointer hd.pointerCells hd.pointerCandidates
+     >> setReductions2 crs Reduction
+     >> setReductions2 hd.candidateReductions Reduction
+     >> setReductions2 hd.pointers Pointer
      >> setCellHintOption hd.setCellValue) solutionGrid

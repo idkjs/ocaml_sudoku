@@ -92,7 +92,8 @@ let printBand (rowToSeq : Row -> seq<'c>) (rowSeparator : seq<'c>) (bandRows : B
     simpleInterleave rowToSeq rowSeparator (bandRows band)
 
 // Print a puzzle grid, supply callback to draw each cell
-let printGrid (length : int<size>) (boxWidth : int<width>) (boxHeight : int<height>) (gridChars : gridChars<seq<'c>>) (eol : seq<'c>) (symbolTo : Cell -> 'c) = 
+let printGrid (length : int<size>) (boxWidth : int<width>) (boxHeight : int<height>) (gridChars : gridChars<seq<'c>>) 
+    (eol : seq<'c>) (symbolTo : Cell -> 'c) = 
 
     let doPrintColumn = printColumn (printCell symbolTo)
 
@@ -110,8 +111,9 @@ let printGrid (length : int<size>) (boxWidth : int<width>) (boxHeight : int<heig
 
     sinterleave doPrintBand t m b Seq.empty (bands length boxHeight)
 
-let print_full (length : int<size>) (boxWidth : int<width>) (boxHeight : int<height>) (solutionChars : solutionChars<seq<'c>>) (eol : seq<'c>) (symbolTo : Cell -> 'b) 
-    (alphabet : Candidate list) (draw_cell : Candidate -> 'b -> 'c) = 
+let print_full (length : int<size>) (boxWidth : int<width>) (boxHeight : int<height>) 
+    (solutionChars : solutionChars<seq<'c>>) (eol : seq<'c>) (symbolTo : Cell -> 'b) (alphabet : Candidate list) 
+    (draw_cell : Candidate -> 'b -> 'c) = 
     let d = Seq.collect (konst solutionChars.h) ((stackColumns boxWidth) (stacks length boxWidth).Head)
     let i = Seq.collect (konst solutionChars.hi) ((stackColumns boxWidth) (stacks length boxWidth).Head)
     
@@ -138,7 +140,8 @@ let print_full (length : int<size>) (boxWidth : int<width>) (boxHeight : int<hei
     
     let doPrintStack symbols = printStack (doPrintColumn symbols) solutionChars.vi (stackColumns boxWidth)
     let doPrintRow row = 
-        Seq.collect (fun symbols -> printRow (doPrintStack symbols row) solutionChars.v eol (stacks length boxWidth)) ssss
+        Seq.collect (fun symbols -> printRow (doPrintStack symbols row) solutionChars.v eol (stacks length boxWidth)) 
+            ssss
     let t = printFullHorizontal solutionChars.t d
     let m = printFullHorizontal solutionChars.m d
     let b = printFullHorizontal solutionChars.b d

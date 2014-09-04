@@ -35,11 +35,11 @@ type Cell =
       row : Row }
     override this.ToString() = String.Format("c{0}r{1}", (int) this.col.col, (int) this.row.row)
 
-let cells (length : int<size>) =
+let cells (length : int<size>) = 
     [ for row in (rows length) do
-        for column in (columns length) do
-            yield { Cell.col = column
-                    row = row } ]
+          for column in (columns length) do
+              yield { Cell.col = column
+                      row = row } ]
 
 // The grid is divided into boxes
 [<Measure>]
@@ -55,8 +55,7 @@ type width
 
 let makeStack i = { Stack.stack = i * 1<boxcol> }
 
-let stacks (length : int<size>) (boxWidth : int<width>) = 
-    List.map makeStack [ 1..((int) length / (int) boxWidth) ]
+let stacks (length : int<size>) (boxWidth : int<width>) = List.map makeStack [ 1..((int) length / (int) boxWidth) ]
 
 [<Measure>]
 type boxrow
@@ -71,8 +70,7 @@ type height
 
 let makeBand i = { Band.band = i * 1<boxrow> }
 
-let bands (length : int<size>) (boxHeight : int<height>) = 
-    List.map makeBand [ 1..((int) length / (int) boxHeight) ]
+let bands (length : int<size>) (boxHeight : int<height>) = List.map makeBand [ 1..((int) length / (int) boxHeight) ]
 
 // A box is the intersection of a stack and a band
 type Box = 
@@ -80,11 +78,11 @@ type Box =
       band : Band }
     override this.ToString() = String.Format("stk{0}bnd{1}", (int) this.stack.stack, (int) this.band.band)
 
-let boxes (length : int<size>) (boxWidth : int<width>) (boxHeight : int<height>) =
+let boxes (length : int<size>) (boxWidth : int<width>) (boxHeight : int<height>) = 
     [ for band in bands length boxHeight do
-        for stack in stacks length boxWidth do
-            yield { Box.stack = stack
-                    band = band } ]
+          for stack in stacks length boxWidth do
+              yield { Box.stack = stack
+                      band = band } ]
 
 // The columns, rows and boxes are called houses
 type House = 

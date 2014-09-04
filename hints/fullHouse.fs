@@ -39,5 +39,4 @@ let fullHouseToDescription (hint : FullHouse) : HintDescription =
     { HintDescription.house = Some hint.house
       candidateReductions = set []
       setCellValue = Some hint.setCellValue
-      pointerCells = set []
-      pointerCandidates = set [] }
+      pointers = set [] }

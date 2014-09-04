@@ -30,5 +30,4 @@ let nakedSingleToDescription (hint : NakedSingle) : HintDescription =
     { HintDescription.house = None
       candidateReductions = set []
       setCellValue = Some hint.setCellValue
-      pointerCells = set []
-      pointerCandidates = set [] }
+      pointers = set [] }

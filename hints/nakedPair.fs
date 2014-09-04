@@ -9,18 +9,19 @@ open core.sudoku
 open hints
 
 type NakedPair = 
-    { cell1 : Cell
-      cell2 : Cell
-      candidates : Set<Candidate>
-      candidateReductions : Set<CandidateReduction>
+    { candidateReductions : Set<CandidateReduction>
+      pointers : Set<CandidateReduction>
       house : House }
     override this.ToString() = 
         let sb = StringBuilder()
 
+        let cells = Set.toArray (Set.map (fun p -> p.cell) this.pointers)
+        let candidates = Set.unionMany (Set.toArray (Set.map (fun p -> p.symbols) this.pointers))
+
         sb.AppendLine
             (String.Format
-                 ("np {0}, Cell {1}, Cell {2}, {3}", this.house, this.cell1, this.cell2, 
-                  String.Join(",", Set.toArray this.candidates))) |> ignore
+                 ("np {0}, Cells {1}, {2}", this.house, String.Join(",", cells), 
+                  String.Join(",", Set.toArray candidates))) |> ignore
         Set.iter (fun (cr : CandidateReduction) -> sb.AppendLine(String.Format("  {0}", cr)) |> ignore) 
             this.candidateReductions
 
@@ -49,12 +50,15 @@ let nakedPairPerHouse (candidateLookup : Cell -> Set<Candidate>) (houseCells : H
                         (fun { CandidateReduction.symbols = candidates3; cell = cell3 } -> 
                         cell <> cell3 && cell2 <> cell3 && Set.count candidates3 > 0) reductionCandidates
 
+                
+                let makeCandidateReduction cell = 
+                    { CandidateReduction.cell = cell
+                      symbols = candidateLookup cell }
+
                 if reductions.Count > 0 then 
                     let hint = 
-                        { NakedPair.cell1 = cell
-                          cell2 = cell2
-                          candidates = candidates
-                          candidateReductions = reductions
+                        { NakedPair.candidateReductions = reductions
+                          pointers = set [ makeCandidateReduction cell; makeCandidateReduction cell2 ]
                           house = house }
                     hints := hint :: !hints) (Seq.skip (i + 1) hht)) hht
     !hints
@@ -66,5 +70,4 @@ let nakedPairToDescription (hint : NakedPair) : HintDescription =
     { HintDescription.house = Some hint.house
       candidateReductions = hint.candidateReductions
       setCellValue = None
-      pointerCells = set [ hint.cell1; hint.cell2 ]
-      pointerCandidates = hint.candidates }
+      pointers = hint.pointers }

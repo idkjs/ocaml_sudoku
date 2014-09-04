@@ -18,7 +18,9 @@ open hints.fullHouse
 open hints.hiddenSingle
 open hints.hints
 open hints.nakedPair
+open hints.nakedQuad
 open hints.nakedSingle
+open hints.nakedTriple
 
 [<DllImport("user32.dll")>]
 extern bool ShowWindow(System.IntPtr hWnd, int cmdShow)
@@ -32,10 +34,12 @@ type Hint =
     | HS of HiddenSingle
     | NS of NakedSingle
     | NP of NakedPair
+    | NT of NakedTriple
+    | NQ of NakedQuad
 
 let symbolToEntry (puzzleSpec : Puzzle) (symbolLookup : Cell -> Symbol option) = 
     let puzzleHouseCellCells = houseCellCells puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight
-
+    
     let houseCellsForCell (cell : Cell) (symbolLookup : Cell -> 'a option) = 
         let a = puzzleHouseCellCells cell
 
@@ -72,7 +76,9 @@ let print_last (steps : Action list) (grid : Cell -> AnnotatedSymbol<AnnotatedCa
 
 let parse (item : string) (alphabet : Candidate list) solution (puzzleSpec : Puzzle) 
     (candidateLookup : Cell -> Set<Candidate>) : Solution * Hint list = 
-    let puzzlePrintFull (solutionChars : solutionChars<seq<'c>>) (eol : seq<'c>) (symbolTo : Cell -> 'b) (alphabet : Candidate list) (drawCell : Candidate -> 'b -> 'c) = print_full puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight solutionChars eol symbolTo alphabet drawCell
+    let puzzlePrintFull (solutionChars : solutionChars<seq<'c>>) (eol : seq<'c>) (symbolTo : Cell -> 'b) 
+        (alphabet : Candidate list) (drawCell : Candidate -> 'b -> 'c) = 
+        print_full puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight solutionChars eol symbolTo alphabet drawCell
     let puzzleHouseCells = houseCells puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight
     let puzzleHouseCellCells = houseCellCells puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight
     let puzzleCells = cells puzzleSpec.size
@@ -98,8 +104,7 @@ let parse (item : string) (alphabet : Candidate list) solution (puzzleSpec : Puz
                     { HintDescription.house = None
                       candidateReductions = set []
                       setCellValue = Some setCellValue
-                      pointerCells = set []
-                      pointerCandidates = set [] }
+                      pointers = set [] }
                 
                 let print_grid2 = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup solution.grid
                 draw_full draw_cell2 print_grid2
@@ -126,11 +131,23 @@ let parse (item : string) (alphabet : Candidate list) solution (puzzleSpec : Puz
 
         (solution, List.map NP hints)
 
+    else if item = "nt" then 
+        let hints = nakedTripleFind candidateLookup puzzleHouseCells puzzleHouses
+
+        (solution, List.map NT hints)
+
+    else if item = "nq" then 
+        let hints = nakedQuadFind candidateLookup puzzleHouseCells puzzleHouses
+
+        (solution, List.map NQ hints)
+
     else (solution, [])
 
 let printHint (candidates : Candidate list) (solution : Solution) (puzzleSpec : Puzzle) 
     (candidateLookup : Cell -> Set<Candidate>) (index : int) (h : Hint) = 
-    let puzzlePrintFull (solutionChars : solutionChars<seq<'c>>) (eol : seq<'c>) (symbolTo : Cell -> 'b) (alphabet : Candidate list) (drawCell : Candidate -> 'b -> 'c) = print_full puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight solutionChars eol symbolTo alphabet drawCell
+    let puzzlePrintFull (solutionChars : solutionChars<seq<'c>>) (eol : seq<'c>) (symbolTo : Cell -> 'b) 
+        (alphabet : Candidate list) (drawCell : Candidate -> 'b -> 'c) = 
+        print_full puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight solutionChars eol symbolTo alphabet drawCell
     let puzzleHouseCells = houseCells puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight
     let puzzleHouseCellCells = houseCellCells puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight
     let puzzlePrintGrid = printGrid puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight
@@ -185,6 +202,24 @@ let printHint (candidates : Candidate list) (solution : Solution) (puzzleSpec : 
 
         draw_full draw_cell2 print_grid2
 
+    | NT hint -> 
+        Console.WriteLine("{0}: {1}", index, hint)
+
+        let hd = nakedTripleToDescription hint
+
+        let print_grid2 = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup solution.grid
+
+        draw_full draw_cell2 print_grid2
+
+    | NQ hint -> 
+        Console.WriteLine("{0}: {1}", index, hint)
+
+        let hd = nakedQuadToDescription hint
+
+        let print_grid2 = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup solution.grid
+
+        draw_full draw_cell2 print_grid2
+
     Console.Read() |> ignore
 
 let run (candidates : Candidate list) (solution : Solution ref) (puzzleSpec : Puzzle) item = 
@@ -234,7 +269,7 @@ let repl (sudoku : string) (puzzleSpec : Puzzle) =
     let solutionGrid = flattenEntry stoe (cells puzzleSpec.size)
 
     let cons x y = x :: y
-
+    
     let line = 
         List.foldBack (puzzleGrid
                        >> symbolOptionToConsoleChar
@@ -249,9 +284,11 @@ let repl (sudoku : string) (puzzleSpec : Puzzle) =
                            >> drawAnnotatedSymbol) (rowCells puzzleSpec.size) sNL (rows puzzleSpec.size)
     Seq.iter mainWriter prows
 
-    Seq.iter ConsoleWriteChar (printGrid puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight defaultGridChars sNL (puzzleGrid
-                      >> symbolOptionToConsoleChar
-                      >> drawAnnotatedSymbol))
+    Seq.iter ConsoleWriteChar 
+        (printGrid puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight defaultGridChars sNL 
+             (puzzleGrid
+              >> symbolOptionToConsoleChar
+              >> drawAnnotatedSymbol))
 
     let solution = 
         ref ({ grid = solutionGrid
