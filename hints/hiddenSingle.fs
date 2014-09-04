@@ -26,7 +26,7 @@ let hiddenSinglesPerHouse (alphabet : Candidate list) (candidateLookup : Cell ->
         List.map (fun symbol -> 
             let filteredCandidateCells = 
                 Set.filter (fun (candidates, _) -> Set.contains symbol candidates) candidateCells
-            let cells = Set.map snd filteredCandidateCells
+//            let cells = Set.map snd filteredCandidateCells
             (filteredCandidateCells, symbol)) alphabet
     
     let hhs = List.filter (fun (filteredCandidateCells, _) -> Set.count filteredCandidateCells = 1) hs

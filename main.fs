@@ -15,6 +15,7 @@ open core.setCell
 open core.sudoku
 
 open hints.fullHouse
+open hints.hiddenPair
 open hints.hiddenSingle
 open hints.hints
 open hints.nakedPair
@@ -32,6 +33,7 @@ let Maximize() =
 type Hint = 
     | FH of FullHouse
     | HS of HiddenSingle
+    | HP of HiddenPair
     | NS of NakedSingle
     | NP of NakedPair
     | NT of NakedTriple
@@ -121,6 +123,9 @@ let parse (item : string) (alphabet : Candidate list) solution (puzzleSpec : Puz
     else if item = "hs" then 
         let hints = hiddenSingleFind alphabet candidateLookup puzzleHouseCells puzzleHouses
         (solution, List.map HS hints)
+    else if item = "hp" then 
+        let hints = hiddenPairFind alphabet candidateLookup puzzleHouseCells puzzleHouses
+        (solution, List.map HP hints)
     else if item = "ns" then 
         let hints = nakedSingleFind candidateLookup puzzleCells
 
@@ -175,6 +180,17 @@ let printHint (candidates : Candidate list) (solution : Solution) (puzzleSpec : 
         Console.WriteLine("{0}: {1}", index, hint)
 
         let hd = hiddenSingleToDescription hint
+
+        let st = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup solution.grid
+
+        draw_grid drawHintAnnotatedSymbol st
+
+        draw_full draw_cell2 st
+
+    | HP hint -> 
+        Console.WriteLine("{0}: {1}", index, hint)
+
+        let hd = hiddenPairToDescription hint
 
         let st = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup solution.grid
 
@@ -331,7 +347,8 @@ Console.WriteLine "8007390063704650000401820090006000400543006100605000004008530
 //let example = "000105000140000670080002400063070010900000003010090520007200080026000035000409000"
 
 // FullHouse
-let example = "800739006370465000040182009000600040054300610060500000400853070000271064100940002"
+//let example = "800739006370465000040182009000600040054300610060500000400853070000271064100940002"
+let example = "801006094300009080970080500547062030632000050198375246083620915065198000219500008"
 
 repl example defaultPuzzleSpec
 
