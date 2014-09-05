@@ -88,6 +88,8 @@
     <Compile Include="hints\hiddenSingle.fs" />
     <Compile Include="hints\hiddenPair.fsi" />
     <Compile Include="hints\hiddenPair.fs" />
+    <Compile Include="hints\hiddenTriple.fsi" />
+    <Compile Include="hints\hiddenTriple.fs" />
     <Compile Include="hints\nakedSingle.fsi" />
     <Compile Include="hints\nakedSingle.fs" />
     <Compile Include="hints\nakedPair.fsi" />
