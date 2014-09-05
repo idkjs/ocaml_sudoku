@@ -16,6 +16,7 @@ open core.sudoku
 
 open hints.fullHouse
 open hints.hiddenPair
+open hints.hiddenQuad
 open hints.hiddenSingle
 open hints.hiddenTriple
 open hints.hints
@@ -33,9 +34,10 @@ let Maximize() =
 
 type Hint = 
     | FH of FullHouse
-    | HS of HiddenSingle
-    | HP of HiddenPair
-    | HT of HiddenTriple
+    | HS of HintDescription
+    | HP of HintDescription
+    | HT of HintDescription
+    | HQ of HintDescription
     | NS of NakedSingle
     | NP of NakedPair
     | NT of NakedTriple
@@ -131,6 +133,9 @@ let parse (item : string) (alphabet : Candidate list) solution (puzzleSpec : Puz
     else if item = "ht" then 
         let hints = hiddenTripleFind alphabet candidateLookup puzzleHouseCells puzzleHouses
         (solution, List.map HT hints)
+    else if item = "hq" then 
+        let hints = hiddenQuadFind alphabet candidateLookup puzzleHouseCells puzzleHouses
+        (solution, List.map HQ hints)
     else if item = "ns" then 
         let hints = nakedSingleFind candidateLookup puzzleCells
 
@@ -184,7 +189,7 @@ let printHint (candidates : Candidate list) (solution : Solution) (puzzleSpec : 
     | HS hint -> 
         Console.WriteLine("{0}: {1}", index, hint)
 
-        let hd = hiddenSingleToDescription hint
+        let hd = hint
 
         let st = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup solution.grid
 
@@ -195,7 +200,7 @@ let printHint (candidates : Candidate list) (solution : Solution) (puzzleSpec : 
     | HP hint -> 
         Console.WriteLine("{0}: {1}", index, hint)
 
-        let hd = hiddenPairToDescription hint
+        let hd = hint
 
         let st = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup solution.grid
 
@@ -206,7 +211,18 @@ let printHint (candidates : Candidate list) (solution : Solution) (puzzleSpec : 
     | HT hint -> 
         Console.WriteLine("{0}: {1}", index, hint)
 
-        let hd = hiddenTripleToDescription hint
+        let hd = hint
+
+        let st = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup solution.grid
+
+        draw_grid drawHintAnnotatedSymbol st
+
+        draw_full draw_cell2 st
+
+    | HQ hint -> 
+        Console.WriteLine("{0}: {1}", index, hint)
+
+        let hd = hint
 
         let st = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup solution.grid
 
@@ -359,7 +375,7 @@ Console.WriteLine "1........2........3........4........5........6........7......
 Console.WriteLine "123456789123456789123456789123456789123456789123456789123456789123456789123456789"
 Console.WriteLine "800739006370465000040182009000600040054300610060500000400853070000271064100940002"
 
-//let example = "410230000700580040000000020190000700380000016000008400000806005031050000000090800"
+let example = "410230000700580040000000020190000700380000016000008400000806005031050000000090800"
 //let example = "000105000140000670080002400063070010900000003010090520007200080026000035000409000"
 
 // FullHouse
@@ -368,7 +384,12 @@ Console.WriteLine "8007390063704650000401820090006000400543006100605000004008530
 //let example = "2...3..7.9...1..8.5...6.9.4653871492489325761721496.....5.8.....6..4.....9..5...3"
 
 // ht
-let example = "528600049136490025794205630000100200007826300002509060240300976809702413070904582"
+//let example = "528600049136490025794205630000100200007826300002509060240300976809702413070904582"
+// hq
+//let example = "...3742......82.4..............3.8266...9...48.5.4697.547.2...9......4.5.1.45.7.2"
+// http://www.sudokuwiki.org/Hidden_Candidates hq
+//let example = "65..87.24...649.5..4..25...57.438.61...5.1...31.9.2.85...89..1....213...13.75..98"
+//let example = "000500000425090001800010020500000000019000460000000002090040003200060807000001600"
 
 repl example defaultPuzzleSpec
 

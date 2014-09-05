@@ -1,5 +1,8 @@
 ﻿module hints.hints
 
+open System
+open System.Text
+
 open core.setCell
 open core.sudoku
 
@@ -68,6 +71,15 @@ type HintDescription =
       candidateReductions : Set<CandidateReduction>
       setCellValue : SetCellValue option
       pointers : Set<CandidateReduction> }
+    override this.ToString() = 
+        let sb = StringBuilder()
+
+        sb.AppendLine(String.Format("House {0}, Pointers {1}", this.house, String.Join(",", Set.toArray this.pointers))) 
+        |> ignore
+        Set.iter (fun (cr : CandidateReduction) -> sb.AppendLine(String.Format("  {0}", cr)) |> ignore) 
+            this.candidateReductions
+
+        sb.ToString()
 
 let mhas (hd : HintDescription) (houseCells : House -> Set<Cell>) (cellHouseCells : Cell -> Set<Cell>) 
     (candidateLookup : Cell -> Set<Candidate>) (solutionGrid : Cell -> AnnotatedSymbol<AnnotatedCandidate>) = 
