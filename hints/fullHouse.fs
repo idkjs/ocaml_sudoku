@@ -16,11 +16,12 @@ let fullHousePerHouse (candidateLookup : Cell -> Set<Candidate>) (houseCells : H
     if hhs.Count = 1 then 
         let h = first hhs
 
-        [{ HintDescription.house = Some house
-           candidateReductions = set []
-           setCellValue = Some { SetCellValue.cell = snd h
-                                 candidate = first (fst h) }
-           pointers = set [] }]
+        [ { HintDescription.house = Some house
+            candidateReductions = set []
+            setCellValue = 
+                Some { SetCellValue.cell = snd h
+                       candidate = first (fst h) }
+            pointers = set [] } ]
     else []
 
 let fullHouseFind (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> Set<Cell>) (houses : House list) = 

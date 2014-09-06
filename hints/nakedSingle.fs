@@ -15,8 +15,7 @@ let nakedSingleFind (candidateLookup : Cell -> Set<Candidate>) (cells : Cell lis
     List.map (fun (candidates, cell) -> 
         { HintDescription.house = None
           candidateReductions = set []
-          setCellValue = Some { SetCellValue.cell = cell
-                                candidate = first candidates }
-          pointers = set [] }
-
-        ) filteredCandidateCells
+          setCellValue = 
+              Some { SetCellValue.cell = cell
+                     candidate = first candidates }
+          pointers = set [] }) filteredCandidateCells

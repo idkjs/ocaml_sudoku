@@ -102,6 +102,10 @@
     <Compile Include="hints\nakedTriple.fs" />
     <Compile Include="hints\nakedQuad.fsi" />
     <Compile Include="hints\nakedQuad.fs" />
+    <Compile Include="hints\pointingPair.fsi" />
+    <Compile Include="hints\pointingPair.fs" />
+    <Compile Include="hints\boxLineReduction.fsi" />
+    <Compile Include="hints\boxLineReduction.fs" />
     <Compile Include="load.fsi" />
     <Compile Include="load.fs" />
     <Compile Include="main.fs" />

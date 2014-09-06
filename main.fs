@@ -14,6 +14,7 @@ open core.puzzlemap
 open core.setCell
 open core.sudoku
 
+open hints.boxLineReduction
 open hints.fullHouse
 open hints.hiddenPair
 open hints.hiddenQuad
@@ -24,6 +25,7 @@ open hints.nakedPair
 open hints.nakedQuad
 open hints.nakedSingle
 open hints.nakedTriple
+open hints.pointingPair
 
 [<DllImport("user32.dll")>]
 extern bool ShowWindow(System.IntPtr hWnd, int cmdShow)
@@ -42,6 +44,8 @@ type Hint =
     | NP of HintDescription
     | NT of HintDescription
     | NQ of HintDescription
+    | PP of HintDescription
+    | BL of HintDescription
 
 let symbolToEntry (puzzleSpec : Puzzle) (symbolLookup : Cell -> Symbol option) = 
     let puzzleHouseCellCells = houseCellCells puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight
@@ -156,6 +160,16 @@ let parse (item : string) (alphabet : Candidate list) solution (puzzleSpec : Puz
 
         (solution, List.map NQ hints)
 
+    else if item = "pp" then 
+        let hints = pointingPairFind candidateLookup puzzleHouseCells puzzleHouses
+
+        (solution, List.map PP hints)
+
+    else if item = "bl" then 
+        let hints = 
+            boxLineReductionFind candidateLookup puzzleHouseCells puzzleHouses puzzleSpec.boxWidth puzzleSpec.boxHeight
+        (solution, List.map BL hints)
+
     else (solution, [])
 
 let printHint (candidates : Candidate list) (solution : Solution) (puzzleSpec : Puzzle) 
@@ -173,41 +187,25 @@ let printHint (candidates : Candidate list) (solution : Solution) (puzzleSpec : 
     let draw_cell2 = drawFL2 (List.nth candidates ((List.length candidates) / 2))
     let draw_full (dr : Candidate -> 'a -> ConsoleChar) (symbolTo : Cell -> 'a) = 
         Seq.iter ConsoleWriteChar (puzzlePrintFull defaultSolutionChars sNL symbolTo candidates dr)
-
-    let draw_full_hint index hint =
+    
+    let draw_full_hint index hint = 
         Console.WriteLine("{0}: {1}", index, hint)
 
         let print_grid2 = mhas hint puzzleHouseCells puzzleHouseCellCells candidateLookup solution.grid
         draw_full draw_cell2 print_grid2
 
     match h with
-    | FH hint -> 
-        draw_full_hint index hint
-
-    | HS hint -> 
-        draw_full_hint index hint
-
-    | HP hint -> 
-        draw_full_hint index hint
-
-    | HT hint -> 
-        draw_full_hint index hint
-
-    | HQ hint -> 
-        draw_full_hint index hint
-
-    | NS hint -> 
-        draw_full_hint index hint
-
-    | NP hint -> 
-        draw_full_hint index hint
-
-    | NT hint -> 
-        draw_full_hint index hint
-
-    | NQ hint -> 
-        draw_full_hint index hint
-
+    | FH hint -> draw_full_hint index hint
+    | HS hint -> draw_full_hint index hint
+    | HP hint -> draw_full_hint index hint
+    | HT hint -> draw_full_hint index hint
+    | HQ hint -> draw_full_hint index hint
+    | NS hint -> draw_full_hint index hint
+    | NP hint -> draw_full_hint index hint
+    | NT hint -> draw_full_hint index hint
+    | NQ hint -> draw_full_hint index hint
+    | PP hint -> draw_full_hint index hint
+    | BL hint -> draw_full_hint index hint
     Console.Read() |> ignore
 
 let run (candidates : Candidate list) (solution : Solution ref) (puzzleSpec : Puzzle) item = 

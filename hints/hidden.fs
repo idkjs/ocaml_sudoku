@@ -24,14 +24,13 @@ let findHidden symbols houseCandidates candidateCells house =
                     { CandidateReduction.cell = cell
                       symbols = Set.difference candidates symbols }) a
             
-            let setCellValue =
-                if Set.count a = 1 then
+            let setCellValue = 
+                if Set.count a = 1 then 
                     let scv = first a
                     Some { SetCellValue.cell = snd scv
                            candidate = first symbols }
-                else
-                    None
-
+                else None
+            
             let nonEmptyCandidateReductions = Set.filter (fun cr -> Set.count cr.symbols > 0) candidateReductions
             
             let pointers = 
