@@ -33,15 +33,15 @@ let Maximize() =
     ShowWindow(p.MainWindowHandle, 3) //SW_MAXIMIZE = 3
 
 type Hint = 
-    | FH of FullHouse
+    | FH of HintDescription
     | HS of HintDescription
     | HP of HintDescription
     | HT of HintDescription
     | HQ of HintDescription
-    | NS of NakedSingle
-    | NP of NakedPair
-    | NT of NakedTriple
-    | NQ of NakedQuad
+    | NS of HintDescription
+    | NP of HintDescription
+    | NT of HintDescription
+    | NQ of HintDescription
 
 let symbolToEntry (puzzleSpec : Puzzle) (symbolLookup : Cell -> Symbol option) = 
     let puzzleHouseCellCells = houseCellCells puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight
@@ -174,99 +174,39 @@ let printHint (candidates : Candidate list) (solution : Solution) (puzzleSpec : 
     let draw_full (dr : Candidate -> 'a -> ConsoleChar) (symbolTo : Cell -> 'a) = 
         Seq.iter ConsoleWriteChar (puzzlePrintFull defaultSolutionChars sNL symbolTo candidates dr)
 
+    let draw_full_hint index hint =
+        Console.WriteLine("{0}: {1}", index, hint)
+
+        let print_grid2 = mhas hint puzzleHouseCells puzzleHouseCellCells candidateLookup solution.grid
+        draw_full draw_cell2 print_grid2
+
     match h with
     | FH hint -> 
-        Console.WriteLine("{0}: {1}", index, hint)
-
-        let hd = fullHouseToDescription hint
-
-        let st = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup solution.grid
-
-        draw_grid drawHintAnnotatedSymbol st
-
-        draw_full draw_cell2 st
+        draw_full_hint index hint
 
     | HS hint -> 
-        Console.WriteLine("{0}: {1}", index, hint)
-
-        let hd = hint
-
-        let st = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup solution.grid
-
-        draw_grid drawHintAnnotatedSymbol st
-
-        draw_full draw_cell2 st
+        draw_full_hint index hint
 
     | HP hint -> 
-        Console.WriteLine("{0}: {1}", index, hint)
-
-        let hd = hint
-
-        let st = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup solution.grid
-
-        draw_grid drawHintAnnotatedSymbol st
-
-        draw_full draw_cell2 st
+        draw_full_hint index hint
 
     | HT hint -> 
-        Console.WriteLine("{0}: {1}", index, hint)
-
-        let hd = hint
-
-        let st = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup solution.grid
-
-        draw_grid drawHintAnnotatedSymbol st
-
-        draw_full draw_cell2 st
+        draw_full_hint index hint
 
     | HQ hint -> 
-        Console.WriteLine("{0}: {1}", index, hint)
-
-        let hd = hint
-
-        let st = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup solution.grid
-
-        draw_grid drawHintAnnotatedSymbol st
-
-        draw_full draw_cell2 st
+        draw_full_hint index hint
 
     | NS hint -> 
-        Console.WriteLine("{0}: {1}", index, hint)
-
-        let hd = nakedSingleToDescription hint
-
-        let st = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup solution.grid
-
-        draw_grid drawHintAnnotatedSymbol st
-
-        draw_full draw_cell2 st
+        draw_full_hint index hint
 
     | NP hint -> 
-        Console.WriteLine("{0}: {1}", index, hint)
-
-        let hd = nakedPairToDescription hint
-
-        let print_grid2 = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup solution.grid
-
-        draw_full draw_cell2 print_grid2
+        draw_full_hint index hint
 
     | NT hint -> 
-        Console.WriteLine("{0}: {1}", index, hint)
-
-        let hd = nakedTripleToDescription hint
-
-        let print_grid2 = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup solution.grid
-
-        draw_full draw_cell2 print_grid2
+        draw_full_hint index hint
 
     | NQ hint -> 
-        Console.WriteLine("{0}: {1}", index, hint)
-
-        let hd = nakedQuadToDescription hint
-
-        let print_grid2 = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup solution.grid
-
-        draw_full draw_cell2 print_grid2
+        draw_full_hint index hint
 
     Console.Read() |> ignore
 
@@ -375,11 +315,11 @@ Console.WriteLine "1........2........3........4........5........6........7......
 Console.WriteLine "123456789123456789123456789123456789123456789123456789123456789123456789123456789"
 Console.WriteLine "800739006370465000040182009000600040054300610060500000400853070000271064100940002"
 
-let example = "410230000700580040000000020190000700380000016000008400000806005031050000000090800"
+//let example = "410230000700580040000000020190000700380000016000008400000806005031050000000090800"
 //let example = "000105000140000670080002400063070010900000003010090520007200080026000035000409000"
 
 // FullHouse
-//let example = "800739006370465000040182009000600040054300610060500000400853070000271064100940002"
+let example = "800739006370465000040182009000600040054300610060500000400853070000271064100940002"
 //let example = "801006094300009080970080500547062030632000050198375246083620915065198000219500008"
 //let example = "2...3..7.9...1..8.5...6.9.4653871492489325761721496.....5.8.....6..4.....9..5...3"
 
