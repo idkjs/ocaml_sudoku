@@ -14,18 +14,11 @@ open core.puzzlemap
 open core.setCell
 open core.sudoku
 
-open hints.boxLineReduction
 open hints.fullHouse
-open hints.hiddenPair
-open hints.hiddenQuad
-open hints.hiddenSingle
-open hints.hiddenTriple
+open hints.hidden
 open hints.hints
-open hints.nakedPair
-open hints.nakedQuad
-open hints.nakedSingle
-open hints.nakedTriple
-open hints.pointingPair
+open hints.intersection
+open hints.naked
 
 [<DllImport("user32.dll")>]
 extern bool ShowWindow(System.IntPtr hWnd, int cmdShow)
