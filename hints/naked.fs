@@ -29,7 +29,8 @@ let findNaked candidatesCellAll candidateCells house =
                   symbols = candidates }) chosenCells
 
         if Set.count nonEmptyCandidateReductions > 0 then 
-            Some { HintDescription.house = Some house
+            Some { HintDescription.primaryHouses = set [ house ]
+                   secondaryHouses = set []
                    candidateReductions = nonEmptyCandidateReductions
                    setCellValue = None
                    pointers = pointers }
@@ -44,7 +45,8 @@ let nakedSingleFind (candidateLookup : Cell -> Set<Candidate>) (cells : Cell lis
     let filteredCandidateCells = List.filter (fun (candidates, _) -> Set.count candidates = 1) candidateCells
 
     List.map (fun (candidates, cell) -> 
-        { HintDescription.house = None
+        { HintDescription.primaryHouses = set []
+          secondaryHouses = set []
           candidateReductions = set []
           setCellValue = 
               Some { SetCellValue.cell = cell

@@ -4,7 +4,7 @@ open core.puzzlemap
 open core.sudoku
 open hints
 
-let makeHint candidate hht primaryHouse primaryHouseCells secondaryHouseCells candidateLookup = 
+let makeHint candidate hht primaryHouse primaryHouseCells secondaryHouse secondaryHouseCells candidateLookup = 
 
     let otherHouseCells = Set.difference secondaryHouseCells primaryHouseCells
 
@@ -23,7 +23,8 @@ let makeHint candidate hht primaryHouse primaryHouseCells secondaryHouseCells ca
               symbols = set [ candidate ] }) hht
         
     if Set.count candidateReductions > 0 then 
-        Some { HintDescription.house = Some primaryHouse
+        Some { HintDescription.primaryHouses = set [ primaryHouse ]
+               secondaryHouses = set [ secondaryHouse ]
                candidateReductions = candidateReductions
                setCellValue = None
                pointers = pointers }
@@ -48,7 +49,7 @@ let pointingPairsPerBox (candidateLookup : Cell -> Set<Candidate>) (houseCells :
                 let secondaryHouse = Row(first rows)
                 let secondaryHouseCells = houseCells secondaryHouse
 
-                makeHint candidate hht primaryHouse primaryHouseCells secondaryHouseCells candidateLookup
+                makeHint candidate hht primaryHouse primaryHouseCells secondaryHouse secondaryHouseCells candidateLookup
             else None
         else None
     
@@ -60,7 +61,7 @@ let pointingPairsPerBox (candidateLookup : Cell -> Set<Candidate>) (houseCells :
                 let secondaryHouse = Column(first cols)
                 let secondaryHouseCells = houseCells secondaryHouse
 
-                makeHint candidate hht primaryHouse primaryHouseCells secondaryHouseCells candidateLookup
+                makeHint candidate hht primaryHouse primaryHouseCells secondaryHouse secondaryHouseCells candidateLookup
             else None
         else None
     
@@ -99,7 +100,7 @@ let boxLineReductionsPerHouse (candidateLookup : Cell -> Set<Candidate>) (houseC
                 let secondaryHouse = Box(first boxes)
                 let secondaryHouseCells = houseCells secondaryHouse
 
-                makeHint candidate hht primaryHouse primaryHouseCells secondaryHouseCells candidateLookup
+                makeHint candidate hht primaryHouse primaryHouseCells secondaryHouse secondaryHouseCells candidateLookup
             else None
         else None
     

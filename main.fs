@@ -19,6 +19,7 @@ open hints.hidden
 open hints.hints
 open hints.intersection
 open hints.naked
+open hints.wing
 
 [<DllImport("user32.dll")>]
 extern bool ShowWindow(System.IntPtr hWnd, int cmdShow)
@@ -39,6 +40,7 @@ type Hint =
     | NQ of HintDescription
     | PP of HintDescription
     | BL of HintDescription
+    | X of HintDescription
 
 let symbolToEntry (puzzleSpec : Puzzle) (symbolLookup : Cell -> Symbol option) = 
     let puzzleHouseCellCells = houseCellCells puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight
@@ -104,7 +106,8 @@ let parse (item : string) (alphabet : Candidate list) solution (puzzleSpec : Puz
             match commandset with
             | Some setCellValue -> 
                 let hd = 
-                    { HintDescription.house = None
+                    { HintDescription.primaryHouses = set []
+                      secondaryHouses = set []
                       candidateReductions = set []
                       setCellValue = Some setCellValue
                       pointers = set [] }
@@ -163,6 +166,11 @@ let parse (item : string) (alphabet : Candidate list) solution (puzzleSpec : Puz
             boxLineReductionFind candidateLookup puzzleHouseCells puzzleHouses puzzleSpec.boxWidth puzzleSpec.boxHeight
         (solution, List.map BL hints)
 
+    else if item = "x" then 
+        let hints = xWingFind candidateLookup puzzleHouseCells puzzleHouses
+
+        (solution, List.map X hints)
+
     else (solution, [])
 
 let printHint (candidates : Candidate list) (solution : Solution) (puzzleSpec : Puzzle) 
@@ -199,6 +207,7 @@ let printHint (candidates : Candidate list) (solution : Solution) (puzzleSpec : 
     | NQ hint -> draw_full_hint index hint
     | PP hint -> draw_full_hint index hint
     | BL hint -> draw_full_hint index hint
+    | X hint -> draw_full_hint index hint
     Console.Read() |> ignore
 
 let run (candidates : Candidate list) (solution : Solution ref) (puzzleSpec : Puzzle) item = 
@@ -310,7 +319,7 @@ Console.WriteLine "8007390063704650000401820090006000400543006100605000004008530
 //let example = "000105000140000670080002400063070010900000003010090520007200080026000035000409000"
 
 // FullHouse
-let example = "800739006370465000040182009000600040054300610060500000400853070000271064100940002"
+//let example = "800739006370465000040182009000600040054300610060500000400853070000271064100940002"
 //let example = "801006094300009080970080500547062030632000050198375246083620915065198000219500008"
 //let example = "2...3..7.9...1..8.5...6.9.4653871492489325761721496.....5.8.....6..4.....9..5...3"
 
@@ -321,6 +330,9 @@ let example = "80073900637046500004018200900060004005430061006050000040085307000
 // http://www.sudokuwiki.org/Hidden_Candidates hq
 //let example = "65..87.24...649.5..4..25...57.438.61...5.1...31.9.2.85...89..1....213...13.75..98"
 //let example = "000500000425090001800010020500000000019000460000000002090040003200060807000001600"
+
+// http://www.sudokuwiki.org/X_Wing_Strategy
+let example = "100000569492056108056109240009640801064010000218035604040500016905061402621000005"
 
 repl example defaultPuzzleSpec
 

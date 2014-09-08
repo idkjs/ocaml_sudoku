@@ -116,7 +116,8 @@ type HintAnnotatedCandidate =
 [<NoEquality; NoComparison>]
 type HintAnnotatedSymbol = 
     { symbol : AnnotatedSymbol<HintAnnotatedCandidate>
-      hintHouse : bool }
+      primaryHintHouse : bool
+      secondaryHintHouse : bool }
 
 // Working towards a solution we take one of the following actions:
 type SetCellValue = 

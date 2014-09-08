@@ -90,9 +90,12 @@
     <Compile Include="hints\naked.fs" />
     <Compile Include="hints\intersection.fsi" />
     <Compile Include="hints\intersection.fs" />
+    <Compile Include="hints\wing.fsi" />
+    <Compile Include="hints\wing.fs" />
     <Compile Include="load.fsi" />
     <Compile Include="load.fs" />
     <Compile Include="main.fs" />
+	
     <None Include="App.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

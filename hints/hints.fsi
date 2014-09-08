@@ -3,7 +3,8 @@
 open core.sudoku
 
 type HintDescription = 
-    { house : House option
+    { primaryHouses : Set<House>
+      secondaryHouses : Set<House>
       candidateReductions : Set<CandidateReduction>
       setCellValue : SetCellValue option
       pointers : Set<CandidateReduction> }

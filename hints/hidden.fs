@@ -39,7 +39,8 @@ let findHidden symbols houseCandidates candidateCells house =
                       symbols = Set.intersect candidates symbols }) a
 
             if Set.count nonEmptyCandidateReductions > 0 then 
-                Some { HintDescription.house = Some house
+                Some { HintDescription.primaryHouses = set [ house ]
+                       secondaryHouses = set []
                        candidateReductions = candidateReductions
                        setCellValue = setCellValue
                        pointers = pointers }

@@ -16,7 +16,8 @@ let fullHousePerHouse (candidateLookup : Cell -> Set<Candidate>) (houseCells : H
     if hhs.Count = 1 then 
         let h = first hhs
 
-        [ { HintDescription.house = Some house
+        [ { HintDescription.primaryHouses = set [ house ]
+            secondaryHouses = set []
             candidateReductions = set []
             setCellValue = 
                 Some { SetCellValue.cell = snd h

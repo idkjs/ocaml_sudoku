@@ -23,11 +23,12 @@ let convertToH : AnnotatedSymbol<AnnotatedCandidate> -> AnnotatedSymbol<HintAnno
         | Set s -> Set s
         | Candidates candidateMap -> Candidates(candidateMap >> HACId)
 
-let setHint (houseCells : Set<Cell>) : (Cell -> AnnotatedSymbol<AnnotatedCandidate>) -> Cell -> HintAnnotatedSymbol = 
+let setHint (primaryHouseCells : Set<Cell>) (secondaryHouseCells : Set<Cell>) : (Cell -> AnnotatedSymbol<AnnotatedCandidate>) -> Cell -> HintAnnotatedSymbol = 
     fun (etoc : Cell -> AnnotatedSymbol<AnnotatedCandidate>) (cell : Cell) -> 
         let hac label = 
             { HintAnnotatedSymbol.symbol = convertToH label
-              hintHouse = Set.contains cell houseCells }
+              primaryHintHouse = Set.contains cell primaryHouseCells
+              secondaryHintHouse = Set.contains cell secondaryHouseCells }
         (etoc >> hac) cell
 
 let rewriteHASHIdCandidates (newHC : (Candidate -> HintAnnotatedCandidate) -> Candidate -> HintAnnotatedCandidate) 
@@ -67,15 +68,21 @@ let setReductions2 (candidateReductions : Set<CandidateReduction>) hac =
     fun (etoc : Cell -> HintAnnotatedSymbol) (cell : Cell) -> (hintAnnotationTransformer cell) (etoc cell)
 
 type HintDescription = 
-    { house : House option
+    { primaryHouses : Set<House>
+      secondaryHouses : Set<House>
       candidateReductions : Set<CandidateReduction>
       setCellValue : SetCellValue option
       pointers : Set<CandidateReduction> }
     override this.ToString() = 
         let sb = StringBuilder()
 
-        sb.AppendLine(String.Format("House {0}, Pointers {1}", this.house, String.Join(",", Set.toArray this.pointers))) 
+        sb.AppendLine(String.Format("Primary Houses {0}", String.Join(",", Set.toArray this.primaryHouses))) 
         |> ignore
+        sb.AppendLine(String.Format("Secondary Houses {0}", String.Join(",", Set.toArray this.secondaryHouses))) 
+        |> ignore
+        sb.AppendLine(String.Format("Pointers {0}", String.Join(",", Set.toArray this.pointers))) 
+        |> ignore
+
         Set.iter (fun (cr : CandidateReduction) -> sb.AppendLine(String.Format("  {0}", cr)) |> ignore) 
             this.candidateReductions
 
@@ -83,17 +90,15 @@ type HintDescription =
 
 let mhas (hd : HintDescription) (houseCells : House -> Set<Cell>) (cellHouseCells : Cell -> Set<Cell>) 
     (candidateLookup : Cell -> Set<Candidate>) (solutionGrid : Cell -> AnnotatedSymbol<AnnotatedCandidate>) = 
-    let houseCells = 
-        match hd.house with
-        | Some house -> houseCells house
-        | None -> set []
-    
+    let primaryHouseCells = Set.map houseCells hd.primaryHouses |> Set.unionMany
+    let secondaryHouseCells = Set.map houseCells hd.secondaryHouses |> Set.unionMany
+
     let crs = 
         match hd.setCellValue with
         | Some scv -> setCellCandidateReductions scv cellHouseCells candidateLookup
         | None -> set []
     
-    (setHint houseCells
+    (setHint primaryHouseCells secondaryHouseCells
      >> setReductions2 crs Reduction
      >> setReductions2 hd.candidateReductions Reduction
      >> setReductions2 hd.pointers Pointer
