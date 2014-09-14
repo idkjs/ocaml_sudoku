@@ -158,16 +158,16 @@ let parse (item : string) (alphabet : Candidate list) solution (puzzleSpec : Puz
         let hints = fullHouseFind candidateLookup puzzleHouseCells puzzleHouses
         (solution, List.map FH hints)
     else if item = "hs" then 
-        let hints = hiddenSingleFind alphabet candidateLookup puzzleHouseCells puzzleHouses
+        let hints = List.collect (hiddenNPerHouse alphabet candidateLookup puzzleHouseCells 1) puzzleHouses
         (solution, List.map HS hints)
     else if item = "hp" then 
-        let hints = hiddenPairFind alphabet candidateLookup puzzleHouseCells puzzleHouses
+        let hints = List.collect (hiddenNPerHouse alphabet candidateLookup puzzleHouseCells 2) puzzleHouses
         (solution, List.map HP hints)
     else if item = "ht" then 
-        let hints = hiddenTripleFind alphabet candidateLookup puzzleHouseCells puzzleHouses
+        let hints = List.collect (hiddenNPerHouse alphabet candidateLookup puzzleHouseCells 3) puzzleHouses
         (solution, List.map HT hints)
     else if item = "hq" then 
-        let hints = hiddenQuadFind alphabet candidateLookup puzzleHouseCells puzzleHouses
+        let hints = List.collect (hiddenNPerHouse alphabet candidateLookup puzzleHouseCells 4) puzzleHouses
         (solution, List.map HQ hints)
     else if item = "ns" then 
         let hints = nakedSingleFind candidateLookup puzzleCells
@@ -175,17 +175,17 @@ let parse (item : string) (alphabet : Candidate list) solution (puzzleSpec : Puz
         (solution, List.map NS hints)
 
     else if item = "np" then 
-        let hints = nakedPairFind candidateLookup puzzleHouseCells puzzleHouses
+        let hints = List.collect (nakedNPerHouse candidateLookup puzzleHouseCells 2) puzzleHouses
 
         (solution, List.map NP hints)
 
     else if item = "nt" then 
-        let hints = nakedTripleFind candidateLookup puzzleHouseCells puzzleHouses
+        let hints = List.collect (nakedNPerHouse candidateLookup puzzleHouseCells 3) puzzleHouses
 
         (solution, List.map NT hints)
 
     else if item = "nq" then 
-        let hints = nakedQuadFind candidateLookup puzzleHouseCells puzzleHouses
+        let hints = List.collect (nakedNPerHouse candidateLookup puzzleHouseCells 4) puzzleHouses
 
         (solution, List.map NQ hints)
 
@@ -355,8 +355,8 @@ Console.WriteLine "1........2........3........4........5........6........7......
 Console.WriteLine "123456789123456789123456789123456789123456789123456789123456789123456789123456789"
 Console.WriteLine "800739006370465000040182009000600040054300610060500000400853070000271064100940002"
 
-let example = "410230000700580040000000020190000700380000016000008400000806005031050000000090800"
-//let example = "000105000140000670080002400063070010900000003010090520007200080026000035000409000"
+//let example = "410230000700580040000000020190000700380000016000008400000806005031050000000090800"
+let example = "000105000140000670080002400063070010900000003010090520007200080026000035000409000"
 
 // FullHouse
 //let example = "800739006370465000040182009000600040054300610060500000400853070000271064100940002"

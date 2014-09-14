@@ -9,7 +9,9 @@ open core.setCell
 open core.sudoku
 open hints
 
-let findHidden symbols houseCandidates candidateCells house = 
+let findHidden symbols candidateCells house = 
+    let houseCandidates = Set.map fst candidateCells |> Set.unionMany
+
     if Set.isSubset symbols houseCandidates then 
         let fcc = 
             Set.map (fun symbol -> Set.filter (fun (candidates, _) -> Set.contains symbol candidates) candidateCells) 
@@ -55,26 +57,8 @@ let hiddenNPerHouse (alphabet : Candidate list) (candidateLookup : Cell -> Set<C
 
     let candidateCells = Set.map (fun cell -> ((candidateLookup cell), cell)) cells
 
-    let houseCandidates = Set.map fst candidateCells |> Set.unionMany
-
     let subsets = setSubsets alphabet count
 
-    let hs = List.map (fun symbols -> findHidden (Set.ofList symbols) houseCandidates candidateCells house) subsets
+    let hs = List.map (fun subset -> findHidden (Set.ofList subset) candidateCells house) subsets
 
     List.choose id hs
-
-let hiddenSingleFind (alphabet : Candidate list) (candidateLookup : Cell -> Set<Candidate>) 
-    (houseCells : House -> Set<Cell>) (houses : House list) = 
-    List.collect (hiddenNPerHouse alphabet candidateLookup houseCells 1) houses
-
-let hiddenPairFind (alphabet : Candidate list) (candidateLookup : Cell -> Set<Candidate>) 
-    (houseCells : House -> Set<Cell>) (houses : House list) = 
-    List.collect (hiddenNPerHouse alphabet candidateLookup houseCells 2) houses
-
-let hiddenTripleFind (alphabet : Candidate list) (candidateLookup : Cell -> Set<Candidate>) 
-    (houseCells : House -> Set<Cell>) (houses : House list) = 
-    List.collect (hiddenNPerHouse alphabet candidateLookup houseCells 3) houses
-
-let hiddenQuadFind (alphabet : Candidate list) (candidateLookup : Cell -> Set<Candidate>) 
-    (houseCells : House -> Set<Cell>) (houses : House list) = 
-    List.collect (hiddenNPerHouse alphabet candidateLookup houseCells 4) houses
