@@ -10,20 +10,18 @@ exception CellStateInvalid
 
 let first (set : Set<'a>) = Set.toList set |> List.head
 
-let rec doSetSubsets (list : List<'a>) (size : int) (prefix : List<'a>) : List<List<'a>> =
+let rec doSetSubsets (list : List<'a>) (size : int) (prefix : List<'a>) : List<List<'a>> = 
     match list with
-    | x :: xs when size > 0 ->
-        if size = 1 then
-            (x :: prefix) :: doSetSubsets xs 1 prefix
-        else
+    | x :: xs when size > 0 -> 
+        if size = 1 then (x :: prefix) :: doSetSubsets xs 1 prefix
+        else 
             let inc = doSetSubsets xs (size - 1) (x :: prefix)
             let dec = doSetSubsets xs size prefix
 
             List.append inc dec
     | _ -> []
 
-let rec setSubsets (list : List<'a>) (size : int) : List<List<'a>> =
-    doSetSubsets list size []
+let rec setSubsets (list : List<'a>) (size : int) : List<List<'a>> = doSetSubsets list size []
 
 (*
     let s0 = []
@@ -120,12 +118,10 @@ type HintDescription =
     override this.ToString() = 
         let sb = StringBuilder()
 
-        sb.AppendLine(String.Format("Primary Houses {0}", String.Join(",", Set.toArray this.primaryHouses))) 
-        |> ignore
+        sb.AppendLine(String.Format("Primary Houses {0}", String.Join(",", Set.toArray this.primaryHouses))) |> ignore
         sb.AppendLine(String.Format("Secondary Houses {0}", String.Join(",", Set.toArray this.secondaryHouses))) 
         |> ignore
-        sb.AppendLine(String.Format("Pointers {0}", String.Join(",", Set.toArray this.pointers))) 
-        |> ignore
+        sb.AppendLine(String.Format("Pointers {0}", String.Join(",", Set.toArray this.pointers))) |> ignore
 
         Set.iter (fun (cr : CandidateReduction) -> sb.AppendLine(String.Format("  {0}", cr)) |> ignore) 
             this.candidateReductions
@@ -136,12 +132,12 @@ let mhas (hd : HintDescription) (houseCells : House -> Set<Cell>) (cellHouseCell
     (candidateLookup : Cell -> Set<Candidate>) (solutionGrid : Cell -> AnnotatedSymbol<AnnotatedCandidate>) = 
     let primaryHouseCells = Set.map houseCells hd.primaryHouses |> Set.unionMany
     let secondaryHouseCells = Set.map houseCells hd.secondaryHouses |> Set.unionMany
-
+    
     let crs = 
         match hd.setCellValue with
         | Some scv -> setCellCandidateReductions scv cellHouseCells candidateLookup
         | None -> set []
-    
+
     (setHint primaryHouseCells secondaryHouseCells
      >> setReductions2 crs Reduction
      >> setReductions2 hd.candidateReductions Reduction

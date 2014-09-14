@@ -136,38 +136,32 @@ let drawFL2 centreCandidate candidate (l : HintAnnotatedSymbol) =
 
     match l.symbol with
     | Given _ when not isCentre -> CChar ' '
-    | Given s ->
-        if l.primaryHintHouse then
-            ColouredString(s.ToString(), ConsoleColor.Cyan)
-        else if l.secondaryHintHouse then
-            ColouredString(s.ToString(), ConsoleColor.DarkBlue)
-        else
-            ColouredString(s.ToString(), ConsoleColor.Blue)
+    | Given s -> 
+        if l.primaryHintHouse then ColouredString(s.ToString(), ConsoleColor.Cyan)
+        else if l.secondaryHintHouse then ColouredString(s.ToString(), ConsoleColor.DarkBlue)
+        else ColouredString(s.ToString(), ConsoleColor.Blue)
     | Set _ when not isCentre -> CChar ' '
-    | Set s ->
-        if l.primaryHintHouse then
-            ColouredString(s.ToString(), ConsoleColor.Yellow)
-        else if l.secondaryHintHouse then
-            ColouredString(s.ToString(), ConsoleColor.DarkRed)
-        else
-            ColouredString(s.ToString(), ConsoleColor.Red)
-    | Candidates candidates ->
-            match candidates candidate with
-            | HACId h -> 
-                if l.primaryHintHouse then
-                    match h with
-                    | Possible -> ColouredString(candidate.ToString(), ConsoleColor.DarkGreen)
-                    | Excluded -> CChar ' '
-                    | Removed -> CChar ' '
-                else if l.secondaryHintHouse then
-                    match h with
-                    | Possible -> ColouredString(candidate.ToString(), ConsoleColor.Green)
-                    | Excluded -> CChar ' '
-                    | Removed -> CChar ' '
-                else drawAnnotatedCandidate h candidate
-            | HACSet -> ColouredString(candidate.ToString(), ConsoleColor.Red)
-            | Pointer -> ColouredString(candidate.ToString(), ConsoleColor.Magenta)
-            | Reduction -> ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
+    | Set s -> 
+        if l.primaryHintHouse then ColouredString(s.ToString(), ConsoleColor.Yellow)
+        else if l.secondaryHintHouse then ColouredString(s.ToString(), ConsoleColor.DarkRed)
+        else ColouredString(s.ToString(), ConsoleColor.Red)
+    | Candidates candidates -> 
+        match candidates candidate with
+        | HACId h -> 
+            if l.primaryHintHouse then 
+                match h with
+                | Possible -> ColouredString(candidate.ToString(), ConsoleColor.DarkGreen)
+                | Excluded -> CChar ' '
+                | Removed -> CChar ' '
+            else if l.secondaryHintHouse then 
+                match h with
+                | Possible -> ColouredString(candidate.ToString(), ConsoleColor.Green)
+                | Excluded -> CChar ' '
+                | Removed -> CChar ' '
+            else drawAnnotatedCandidate h candidate
+        | HACSet -> ColouredString(candidate.ToString(), ConsoleColor.Red)
+        | Pointer -> ColouredString(candidate.ToString(), ConsoleColor.Magenta)
+        | Reduction -> ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
 
 // Print a symbol option, with colours
 let symbolOptionToConsoleChar = 

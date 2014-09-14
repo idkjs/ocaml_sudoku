@@ -51,8 +51,8 @@ let setCellCommand (item : string) (alphabet : Candidate list) (lastGrid : Cell 
         Console.WriteLine "Expect set <col> <row> <val>"
         None
 
-let candidateClearCommand (item : string) (alphabet : Candidate list) (lastGrid : Cell -> AnnotatedSymbol<AnnotatedCandidate>) 
-    (cells : Cell list) = 
+let candidateClearCommand (item : string) (alphabet : Candidate list) 
+    (lastGrid : Cell -> AnnotatedSymbol<AnnotatedCandidate>) (cells : Cell list) = 
     let terms = item.Split(' ')
     if terms.Length = 4 then 
         let parsedCell = parseCell alphabet.Length cells terms.[1] terms.[2]

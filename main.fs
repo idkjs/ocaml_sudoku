@@ -132,7 +132,10 @@ let parse (item : string) (alphabet : Candidate list) solution (puzzleSpec : Puz
         let newSolution = 
             match clearCommand with
             | Some clearCandidate -> 
-                let cr = { CandidateReduction.cell = clearCandidate.cell; symbols = set [ clearCandidate.candidate ] }
+                let cr = 
+                    { CandidateReduction.cell = clearCandidate.cell
+                      symbols = set [ clearCandidate.candidate ] }
+                
                 let hd = 
                     { HintDescription.primaryHouses = set []
                       secondaryHouses = set []
@@ -193,7 +196,8 @@ let parse (item : string) (alphabet : Candidate list) solution (puzzleSpec : Puz
 
     else if item = "bl" then 
         let hints = 
-            boxLineReductionFind candidateLookup puzzleHouseCells puzzleRows puzzleCols puzzleSpec.boxWidth puzzleSpec.boxHeight
+            boxLineReductionFind candidateLookup puzzleHouseCells puzzleRows puzzleCols puzzleSpec.boxWidth 
+                puzzleSpec.boxHeight
         (solution, List.map BL hints)
 
     else if item = "x" then 
@@ -351,7 +355,7 @@ Console.WriteLine "1........2........3........4........5........6........7......
 Console.WriteLine "123456789123456789123456789123456789123456789123456789123456789123456789123456789"
 Console.WriteLine "800739006370465000040182009000600040054300610060500000400853070000271064100940002"
 
-//let example = "410230000700580040000000020190000700380000016000008400000806005031050000000090800"
+let example = "410230000700580040000000020190000700380000016000008400000806005031050000000090800"
 //let example = "000105000140000670080002400063070010900000003010090520007200080026000035000409000"
 
 // FullHouse
@@ -370,7 +374,7 @@ Console.WriteLine "8007390063704650000401820090006000400543006100605000004008530
 // http://www.sudokuwiki.org/X_Wing_Strategy
 //let example = "100000569492056108056109240009640801064010000218035604040500016905061402621000005"
 // http://www.sudokuwiki.org/Y_Wing_Strategy
-let example = "900240000050690231020050090090700320002935607070002900069020073510079062207086009"
+//let example = "900240000050690231020050090090700320002935607070002900069020073510079062207086009"
 //let example = "273005081810302004009010200100953728792186345538724196021060500300201869080530412"
 
 repl example defaultPuzzleSpec

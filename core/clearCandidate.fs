@@ -15,11 +15,9 @@ let clearCandidateApply (clearCandidate : ClearCandidate) : (Cell -> AnnotatedSy
             let candidateToSymbol (Candidate s : Candidate) = Symbol s
 
             if clearCandidate.cell = cell then 
-                let clr candidate =
-                    if clearCandidate.candidate = candidate then
-                        Removed
-                    else
-                        candidates candidate
+                let clr candidate = 
+                    if clearCandidate.candidate = candidate then Removed
+                    else candidates candidate
 
                 Candidates clr
             else entry
@@ -35,10 +33,9 @@ let clearCandidateTry (candidate : Candidate) (entryLookup : Cell -> AnnotatedSy
     | Candidates candidates -> 
         let c = candidates candidate
         match c with
-        | Possible ->
+        | Possible -> 
             Some { ClearCandidate.cell = cell
                    candidate = candidate }
-        | Excluded
-        | Removed ->
+        | Excluded | Removed -> 
             Console.WriteLine("Cell {0} does not have candidate {1}", cell, candidate)
             None

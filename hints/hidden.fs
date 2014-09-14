@@ -48,9 +48,8 @@ let findHidden symbols houseCandidates candidateCells house =
         else None
     else None
 
-
-let hiddenSinglesPerHouse (alphabet : Candidate list) (candidateLookup : Cell -> Set<Candidate>) 
-    (houseCells : House -> Set<Cell>) (house : House) = 
+let hiddenNPerHouse (alphabet : Candidate list) (candidateLookup : Cell -> Set<Candidate>) 
+    (houseCells : House -> Set<Cell>) (count : int) (house : House) = 
 
     let cells = houseCells house
 
@@ -58,117 +57,24 @@ let hiddenSinglesPerHouse (alphabet : Candidate list) (candidateLookup : Cell ->
 
     let houseCandidates = Set.map fst candidateCells |> Set.unionMany
 
-    let salphabet = List.toSeq alphabet
-    
-    let hs = 
-        Seq.mapi (fun i symbol1 -> 
-            let symbols = set [ symbol1 ]
+    let subsets = setSubsets alphabet count
 
-            findHidden symbols houseCandidates candidateCells house) salphabet
-    
-    let hhs = hs
+    let hs = List.map (fun symbols -> findHidden (Set.ofList symbols) houseCandidates candidateCells house) subsets
 
-    Seq.choose id hhs |> Seq.toList
+    List.choose id hs
 
 let hiddenSingleFind (alphabet : Candidate list) (candidateLookup : Cell -> Set<Candidate>) 
     (houseCells : House -> Set<Cell>) (houses : House list) = 
-    List.collect (hiddenSinglesPerHouse alphabet candidateLookup houseCells) houses
-
-
-let hiddenPairsPerHouse (alphabet : Candidate list) (candidateLookup : Cell -> Set<Candidate>) 
-    (houseCells : House -> Set<Cell>) (house : House) = 
-
-    let cells = houseCells house
-
-    let candidateCells = Set.map (fun cell -> ((candidateLookup cell), cell)) cells
-
-    let houseCandidates = Set.map fst candidateCells |> Set.unionMany
-
-    let salphabet = List.toSeq alphabet
-    
-    let hs = 
-        Seq.mapi (fun i symbol1 -> 
-            Seq.mapi (fun j symbol2 -> 
-                let symbols = set [ symbol1; symbol2 ]
-
-                findHidden symbols houseCandidates candidateCells house) (Seq.skip (i + 1) salphabet)) salphabet
-    
-    let hhs = Seq.concat hs
-
-    Seq.choose id hhs |> Seq.toList
+    List.collect (hiddenNPerHouse alphabet candidateLookup houseCells 1) houses
 
 let hiddenPairFind (alphabet : Candidate list) (candidateLookup : Cell -> Set<Candidate>) 
     (houseCells : House -> Set<Cell>) (houses : House list) = 
-    List.collect (hiddenPairsPerHouse alphabet candidateLookup houseCells) houses
-
-
-let hiddenTriplesPerHouse (alphabet : Candidate list) (candidateLookup : Cell -> Set<Candidate>) 
-    (houseCells : House -> Set<Cell>) (house : House) = 
-
-    let cells = houseCells house
-
-    let candidateCells = Set.map (fun cell -> ((candidateLookup cell), cell)) cells
-
-    let houseCandidates = Set.map fst candidateCells |> Set.unionMany
-
-    let salphabet = List.toSeq alphabet
-    
-    let hs = 
-        Seq.mapi 
-            (fun i symbol1 -> 
-            Seq.mapi (fun j symbol2 -> 
-                Seq.mapi (fun k symbol3 -> 
-                    let symbols = set [ symbol1; symbol2; symbol3 ]
-
-                    findHidden symbols houseCandidates candidateCells house) (Seq.skip (i + j + 2) salphabet)) 
-                (Seq.skip (i + 1) salphabet)) salphabet
-    
-    let hhs = 
-        hs
-        |> Seq.concat
-        |> Seq.concat
-    
-    Seq.choose id hhs |> Seq.toList
+    List.collect (hiddenNPerHouse alphabet candidateLookup houseCells 2) houses
 
 let hiddenTripleFind (alphabet : Candidate list) (candidateLookup : Cell -> Set<Candidate>) 
     (houseCells : House -> Set<Cell>) (houses : House list) = 
-    List.collect (hiddenTriplesPerHouse alphabet candidateLookup houseCells) houses
-
-
-let hiddenQuadsPerHouse (alphabet : Candidate list) (candidateLookup : Cell -> Set<Candidate>) 
-    (houseCells : House -> Set<Cell>) (house : House) = 
-
-    let cells = houseCells house
-
-    let candidateCells = Set.map (fun cell -> ((candidateLookup cell), cell)) cells
-
-    let houseCandidates = Set.map fst candidateCells |> Set.unionMany
-
-    let salphabet = List.toSeq alphabet
-    
-    let hs = 
-        Seq.mapi 
-            (fun i symbol1 -> 
-            Seq.mapi 
-                (fun j symbol2 -> 
-                Seq.mapi (fun k symbol3 -> 
-                    Seq.mapi (fun l symbol4 -> 
-                        let symbols = set [ symbol1; symbol2; symbol3; symbol4 ]
-
-                        findHidden symbols houseCandidates candidateCells house) (Seq.skip (i + j + k + 3) salphabet)) 
-                    (Seq.skip (i + j + 2) salphabet)) (Seq.skip (i + 1) salphabet)) salphabet
-    
-    let hhs = 
-        hs
-        |> Seq.concat
-        |> Seq.concat
-        |> Seq.concat
-    
-    Seq.choose id hhs |> Seq.toList
+    List.collect (hiddenNPerHouse alphabet candidateLookup houseCells 3) houses
 
 let hiddenQuadFind (alphabet : Candidate list) (candidateLookup : Cell -> Set<Candidate>) 
     (houseCells : House -> Set<Cell>) (houses : House list) = 
-    List.collect (hiddenQuadsPerHouse alphabet candidateLookup houseCells) houses
-
-
-
+    List.collect (hiddenNPerHouse alphabet candidateLookup houseCells 4) houses

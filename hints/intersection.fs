@@ -9,19 +9,18 @@ let makeHint candidate hht primaryHouse primaryHouseCells secondaryHouse seconda
     let otherHouseCells = Set.difference secondaryHouseCells primaryHouseCells
 
     let candidateReductionsCandidateCells = Set.map (fun cell -> ((candidateLookup cell), cell)) otherHouseCells
-    let hht2 = 
-        Set.filter (fun (candidates, _) -> Set.contains candidate candidates) candidateReductionsCandidateCells
-        
+    let hht2 = Set.filter (fun (candidates, _) -> Set.contains candidate candidates) candidateReductionsCandidateCells
+    
     let candidateReductions = 
         Set.map (fun (_, cell) -> 
             { CandidateReduction.cell = cell
               symbols = set [ candidate ] }) hht2
-        
+    
     let pointers = 
         Set.map (fun (_, cell) -> 
             { CandidateReduction.cell = cell
               symbols = set [ candidate ] }) hht
-        
+    
     if Set.count candidateReductions > 0 then 
         Some { HintDescription.primaryHouses = set [ primaryHouse ]
                secondaryHouses = set [ secondaryHouse ]
@@ -30,7 +29,8 @@ let makeHint candidate hht primaryHouse primaryHouseCells secondaryHouse seconda
                pointers = pointers }
     else None
 
-let pointingPairsPerBox (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> Set<Cell>) (primaryHouse : House) = 
+let pointingPairsPerBox (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> Set<Cell>) 
+    (primaryHouse : House) = 
 
     let primaryHouseCells = houseCells primaryHouse
 
@@ -45,7 +45,7 @@ let pointingPairsPerBox (candidateLookup : Cell -> Set<Candidate>) (houseCells :
         let hht = Set.filter (fun (candidates, _) -> Set.contains candidate candidates) primaryHouseCandidateCells
         if Set.count hht > 1 then 
             let rows = Set.map (fun (_, cell) -> cell.row) hht
-            if Set.count rows = 1 then
+            if Set.count rows = 1 then 
                 let secondaryHouse = Row(first rows)
                 let secondaryHouseCells = houseCells secondaryHouse
 
@@ -57,7 +57,7 @@ let pointingPairsPerBox (candidateLookup : Cell -> Set<Candidate>) (houseCells :
         let hht = Set.filter (fun (candidates, _) -> Set.contains candidate candidates) primaryHouseCandidateCells
         if Set.count hht > 1 then 
             let cols = Set.map (fun (_, cell) -> cell.col) hht
-            if Set.count cols = 1 then
+            if Set.count cols = 1 then 
                 let secondaryHouse = Column(first cols)
                 let secondaryHouseCells = houseCells secondaryHouse
 
@@ -91,7 +91,7 @@ let boxLineReductionsPerHouse (candidateLookup : Cell -> Set<Candidate>) (houseC
         let hht = Set.filter (fun (candidates, _) -> Set.contains candidate candidates) primaryHouseCandidateCells
         if Set.count hht > 1 then 
             let boxes = Set.map (fun (_, cell) -> cellBox boxWidth boxHeight cell) hht
-            if Set.count boxes = 1 then
+            if Set.count boxes = 1 then 
                 let secondaryHouse = Box(first boxes)
                 let secondaryHouseCells = houseCells secondaryHouse
 
@@ -101,12 +101,14 @@ let boxLineReductionsPerHouse (candidateLookup : Cell -> Set<Candidate>) (houseC
     
     List.choose uniqueBoxForCandidate primaryHouseCandidates
 
-let boxLineReductionFind (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> Set<Cell>) 
-    (rows : Row list) (cols : Column list) (boxWidth : int<width>) (boxHeight : int<height>) = 
+let boxLineReductionFind (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> Set<Cell>) (rows : Row list) 
+    (cols : Column list) (boxWidth : int<width>) (boxHeight : int<height>) = 
 
-    let rowHints = List.collect (boxLineReductionsPerHouse candidateLookup houseCells boxWidth boxHeight) (List.map Row rows)
+    let rowHints = 
+        List.collect (boxLineReductionsPerHouse candidateLookup houseCells boxWidth boxHeight) (List.map Row rows)
 
-    let colHints = List.collect (boxLineReductionsPerHouse candidateLookup houseCells boxWidth boxHeight) (List.map Column cols)
+    let colHints = 
+        List.collect (boxLineReductionsPerHouse candidateLookup houseCells boxWidth boxHeight) (List.map Column cols)
 
     List.concat [ rowHints; colHints ]
 
