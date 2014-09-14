@@ -11,6 +11,8 @@ type HintDescription =
 
 val first : Set<'a> -> 'a
 
+val setSubsets : List<'a> -> int -> List<List<'a>>
+
 val mhas : HintDescription
      -> (House -> Set<Cell>)
      -> (Cell -> Set<Cell>)

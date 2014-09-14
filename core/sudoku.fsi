@@ -126,7 +126,7 @@ type SetCellValue =
 
 type ClearCandidate = 
     { cell : Cell
-      value : Symbol }
+      candidate : Candidate }
 
 type CandidateReduction = 
     { cell : Cell

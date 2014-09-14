@@ -117,7 +117,7 @@ let drawAnnotatedCandidate (ac : AnnotatedCandidate) (candidate : Candidate) =
     match ac with
     | Possible -> CStr(candidate.ToString())
     | Excluded -> CChar ' '
-    | Removed -> ColouredString(candidate.ToString(), ConsoleColor.DarkMagenta)
+    | Removed -> CChar ' '
 
 let drawFLFE centreCandidate candidate (l : AnnotatedSymbol<AnnotatedCandidate>) = 
 
@@ -158,12 +158,12 @@ let drawFL2 centreCandidate candidate (l : HintAnnotatedSymbol) =
                     match h with
                     | Possible -> ColouredString(candidate.ToString(), ConsoleColor.DarkGreen)
                     | Excluded -> CChar ' '
-                    | Removed -> ColouredString(candidate.ToString(), ConsoleColor.DarkMagenta)
+                    | Removed -> CChar ' '
                 else if l.secondaryHintHouse then
                     match h with
                     | Possible -> ColouredString(candidate.ToString(), ConsoleColor.Green)
                     | Excluded -> CChar ' '
-                    | Removed -> ColouredString(candidate.ToString(), ConsoleColor.DarkMagenta)
+                    | Removed -> CChar ' '
                 else drawAnnotatedCandidate h candidate
             | HACSet -> ColouredString(candidate.ToString(), ConsoleColor.Red)
             | Pointer -> ColouredString(candidate.ToString(), ConsoleColor.Magenta)

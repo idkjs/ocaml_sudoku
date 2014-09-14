@@ -41,6 +41,7 @@ type Hint =
     | PP of HintDescription
     | BL of HintDescription
     | X of HintDescription
+    | Y of HintDescription
 
 let symbolToEntry (puzzleSpec : Puzzle) (symbolLookup : Cell -> Symbol option) = 
     let puzzleHouseCellCells = houseCellCells puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight
@@ -88,6 +89,9 @@ let parse (item : string) (alphabet : Candidate list) solution (puzzleSpec : Puz
     let puzzleHouseCellCells = houseCellCells puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight
     let puzzleCells = cells puzzleSpec.size
     let puzzleHouses = houses puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight
+    let puzzleBoxes = boxes puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight
+    let puzzleRows = rows puzzleSpec.size
+    let puzzleCols = columns puzzleSpec.size
 
     let draw_cell = drawFLFE (List.nth alphabet ((List.length alphabet) / 2))
     let draw_cell2 = drawFL2 (List.nth alphabet ((List.length alphabet) / 2))
@@ -99,11 +103,11 @@ let parse (item : string) (alphabet : Candidate list) solution (puzzleSpec : Puz
     if item = "print" then 
         draw_full draw_cell solution.grid
         (solution, [])
-    else if item.StartsWith "set" then 
-        let commandset = ui_set item alphabet solution.grid puzzleCells
+    else if item.StartsWith "s" then 
+        let setCommand = setCellCommand item alphabet solution.grid puzzleCells
         
         let newSolution = 
-            match commandset with
+            match setCommand with
             | Some setCellValue -> 
                 let hd = 
                     { HintDescription.primaryHouses = set []
@@ -121,6 +125,32 @@ let parse (item : string) (alphabet : Candidate list) solution (puzzleSpec : Puz
                 solution
         print_last newSolution.steps newSolution.grid puzzleSpec
         (newSolution, [])
+
+    else if item.StartsWith "c" then 
+        let clearCommand = candidateClearCommand item alphabet solution.grid puzzleCells
+        
+        let newSolution = 
+            match clearCommand with
+            | Some clearCandidate -> 
+                let cr = { CandidateReduction.cell = clearCandidate.cell; symbols = set [ clearCandidate.candidate ] }
+                let hd = 
+                    { HintDescription.primaryHouses = set []
+                      secondaryHouses = set []
+                      candidateReductions = set [ cr ]
+                      setCellValue = None
+                      pointers = set [] }
+                
+                let print_grid2 = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup solution.grid
+                draw_full draw_cell2 print_grid2
+                { solution with grid = clearCandidateApply clearCandidate solution.grid
+                                steps = (ClearCandidate clearCandidate) :: solution.steps }
+            | None -> 
+                Console.WriteLine("")
+                solution
+
+        print_last newSolution.steps newSolution.grid puzzleSpec
+        (newSolution, [])
+
     else if item = "fh" then 
         let hints = fullHouseFind candidateLookup puzzleHouseCells puzzleHouses
         (solution, List.map FH hints)
@@ -157,19 +187,24 @@ let parse (item : string) (alphabet : Candidate list) solution (puzzleSpec : Puz
         (solution, List.map NQ hints)
 
     else if item = "pp" then 
-        let hints = pointingPairFind candidateLookup puzzleHouseCells puzzleHouses
+        let hints = pointingPairFind candidateLookup puzzleHouseCells puzzleBoxes
 
         (solution, List.map PP hints)
 
     else if item = "bl" then 
         let hints = 
-            boxLineReductionFind candidateLookup puzzleHouseCells puzzleHouses puzzleSpec.boxWidth puzzleSpec.boxHeight
+            boxLineReductionFind candidateLookup puzzleHouseCells puzzleRows puzzleCols puzzleSpec.boxWidth puzzleSpec.boxHeight
         (solution, List.map BL hints)
 
     else if item = "x" then 
-        let hints = xWingFind candidateLookup puzzleHouseCells puzzleHouses
+        let hints = xWingFind candidateLookup puzzleHouseCells puzzleRows puzzleCols
 
         (solution, List.map X hints)
+
+    else if item = "y" then 
+        let hints = yWingFind candidateLookup puzzleHouseCells puzzleRows puzzleCols
+
+        (solution, List.map Y hints)
 
     else (solution, [])
 
@@ -208,6 +243,7 @@ let printHint (candidates : Candidate list) (solution : Solution) (puzzleSpec : 
     | PP hint -> draw_full_hint index hint
     | BL hint -> draw_full_hint index hint
     | X hint -> draw_full_hint index hint
+    | Y hint -> draw_full_hint index hint
     Console.Read() |> ignore
 
 let run (candidates : Candidate list) (solution : Solution ref) (puzzleSpec : Puzzle) item = 
@@ -332,7 +368,10 @@ Console.WriteLine "8007390063704650000401820090006000400543006100605000004008530
 //let example = "000500000425090001800010020500000000019000460000000002090040003200060807000001600"
 
 // http://www.sudokuwiki.org/X_Wing_Strategy
-let example = "100000569492056108056109240009640801064010000218035604040500016905061402621000005"
+//let example = "100000569492056108056109240009640801064010000218035604040500016905061402621000005"
+// http://www.sudokuwiki.org/Y_Wing_Strategy
+let example = "900240000050690231020050090090700320002935607070002900069020073510079062207086009"
+//let example = "273005081810302004009010200100953728792186345538724196021060500300201869080530412"
 
 repl example defaultPuzzleSpec
 

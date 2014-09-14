@@ -72,13 +72,8 @@ let pointingPairsPerBox (candidateLookup : Cell -> Set<Candidate>) (houseCells :
     List.concat [ rows; cols ]
 
 
-let pointingPairFind (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> Set<Cell>) (houses : House list) = 
-    let boxes = 
-        List.filter (fun house -> 
-            match house with
-            | Box _ -> true
-            | _ -> false) houses
-    List.collect (pointingPairsPerBox candidateLookup houseCells) boxes
+let pointingPairFind (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> Set<Cell>) (boxes : Box list) = 
+    List.collect (pointingPairsPerBox candidateLookup houseCells) (List.map Box boxes)
 
 
 let boxLineReductionsPerHouse (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> Set<Cell>) 
@@ -107,22 +102,11 @@ let boxLineReductionsPerHouse (candidateLookup : Cell -> Set<Candidate>) (houseC
     List.choose uniqueBoxForCandidate primaryHouseCandidates
 
 let boxLineReductionFind (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> Set<Cell>) 
-    (houses : House list) (boxWidth : int<width>) (boxHeight : int<height>) = 
-    let rows = 
-        List.filter (fun house -> 
-            match house with
-            | Row _ -> true
-            | _ -> false) houses
-    
-    let cols = 
-        List.filter (fun house -> 
-            match house with
-            | Column _ -> true
-            | _ -> false) houses
-    
-    let rowHints = List.collect (boxLineReductionsPerHouse candidateLookup houseCells boxWidth boxHeight) rows
+    (rows : Row list) (cols : Column list) (boxWidth : int<width>) (boxHeight : int<height>) = 
 
-    let colHints = List.collect (boxLineReductionsPerHouse candidateLookup houseCells boxWidth boxHeight) cols
+    let rowHints = List.collect (boxLineReductionsPerHouse candidateLookup houseCells boxWidth boxHeight) (List.map Row rows)
+
+    let colHints = List.collect (boxLineReductionsPerHouse candidateLookup houseCells boxWidth boxHeight) (List.map Column cols)
 
     List.concat [ rowHints; colHints ]
 

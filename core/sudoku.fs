@@ -161,8 +161,8 @@ type SetCellValue =
 
 type ClearCandidate = 
     { cell : Cell
-      value : Symbol }
-    override this.ToString() = String.Format("ClearCandidate: {0} = {1}", this.cell, this.value)
+      candidate : Candidate }
+    override this.ToString() = String.Format("ClearCandidate: {0} = {1}", this.cell, this.candidate)
 
 type CandidateReduction = 
     { cell : Cell

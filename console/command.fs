@@ -4,6 +4,7 @@ open System
 
 open console.console
 open console.format
+open core.clearCandidate
 open core.setCell
 open core.sudoku
 
@@ -34,7 +35,7 @@ let parseValue (alphabet : Candidate list) (term : string) =
         Console.WriteLine("Expect a single digit, not {0}", term)
         None
 
-let ui_set (item : string) (alphabet : Candidate list) (lastGrid : Cell -> AnnotatedSymbol<AnnotatedCandidate>) 
+let setCellCommand (item : string) (alphabet : Candidate list) (lastGrid : Cell -> AnnotatedSymbol<AnnotatedCandidate>) 
     (cells : Cell list) = 
     let terms = item.Split(' ')
     if terms.Length = 4 then 
@@ -49,3 +50,20 @@ let ui_set (item : string) (alphabet : Candidate list) (lastGrid : Cell -> Annot
     else 
         Console.WriteLine "Expect set <col> <row> <val>"
         None
+
+let candidateClearCommand (item : string) (alphabet : Candidate list) (lastGrid : Cell -> AnnotatedSymbol<AnnotatedCandidate>) 
+    (cells : Cell list) = 
+    let terms = item.Split(' ')
+    if terms.Length = 4 then 
+        let parsedCell = parseCell alphabet.Length cells terms.[1] terms.[2]
+        let parsedValue = parseValue alphabet terms.[3]
+
+        match (parsedCell, parsedValue) with
+        | (Some cell, Some value) -> clearCandidateTry value lastGrid cell
+        | _ -> 
+            Console.WriteLine "Expect clr <col> <row> <val>"
+            None
+    else 
+        Console.WriteLine "Expect clr <col> <row> <val>"
+        None
+
