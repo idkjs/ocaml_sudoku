@@ -155,19 +155,19 @@ let parse (item : string) (alphabet : Candidate list) solution (puzzleSpec : Puz
         (newSolution, [])
 
     else if item = "fh" then 
-        let hints = fullHouseFind candidateLookup puzzleHouseCells puzzleHouses
+        let hints = List.collect (fullHousePerHouse candidateLookup puzzleHouseCells) puzzleHouses
         (solution, List.map FH hints)
     else if item = "hs" then 
-        let hints = List.collect (hiddenNPerHouse alphabet candidateLookup puzzleHouseCells 1) puzzleHouses
+        let hints = List.collect (hiddenNPerHouse candidateLookup puzzleHouseCells 1) puzzleHouses
         (solution, List.map HS hints)
     else if item = "hp" then 
-        let hints = List.collect (hiddenNPerHouse alphabet candidateLookup puzzleHouseCells 2) puzzleHouses
+        let hints = List.collect (hiddenNPerHouse candidateLookup puzzleHouseCells 2) puzzleHouses
         (solution, List.map HP hints)
     else if item = "ht" then 
-        let hints = List.collect (hiddenNPerHouse alphabet candidateLookup puzzleHouseCells 3) puzzleHouses
+        let hints = List.collect (hiddenNPerHouse candidateLookup puzzleHouseCells 3) puzzleHouses
         (solution, List.map HT hints)
     else if item = "hq" then 
-        let hints = List.collect (hiddenNPerHouse alphabet candidateLookup puzzleHouseCells 4) puzzleHouses
+        let hints = List.collect (hiddenNPerHouse candidateLookup puzzleHouseCells 4) puzzleHouses
         (solution, List.map HQ hints)
     else if item = "ns" then 
         let hints = nakedSingleFind candidateLookup puzzleCells
@@ -190,14 +190,21 @@ let parse (item : string) (alphabet : Candidate list) solution (puzzleSpec : Puz
         (solution, List.map NQ hints)
 
     else if item = "pp" then 
-        let hints = pointingPairFind candidateLookup puzzleHouseCells puzzleBoxes
+        let hints = List.collect (pointingPairsPerBox candidateLookup puzzleHouseCells) (List.map Box puzzleBoxes)
 
         (solution, List.map PP hints)
 
     else if item = "bl" then 
-        let hints = 
-            boxLineReductionFind candidateLookup puzzleHouseCells puzzleRows puzzleCols puzzleSpec.boxWidth 
-                puzzleSpec.boxHeight
+        let rowHints = 
+            List.collect 
+                (boxLineReductionsPerHouse candidateLookup puzzleHouseCells puzzleSpec.boxWidth puzzleSpec.boxHeight) 
+                (List.map Row puzzleRows)
+        let colHints = 
+            List.collect 
+                (boxLineReductionsPerHouse candidateLookup puzzleHouseCells puzzleSpec.boxWidth puzzleSpec.boxHeight) 
+                (List.map Column puzzleCols)
+        let hints = List.concat [ rowHints; colHints ]
+
         (solution, List.map BL hints)
 
     else if item = "x" then 

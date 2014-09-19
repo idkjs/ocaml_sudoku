@@ -9,56 +9,57 @@ open core.setCell
 open core.sudoku
 open hints
 
-let findHidden symbols candidateCells house = 
-    let houseCandidates = Set.map fst candidateCells |> Set.unionMany
-
-    if Set.isSubset symbols houseCandidates then 
-        let fcc = 
-            Set.map (fun symbol -> Set.filter (fun (candidates, _) -> Set.contains symbol candidates) candidateCells) 
-                symbols
-
-        let a = Set.unionMany fcc
-
-        if Set.count a = Set.count symbols then 
-
-            let candidateReductions = 
-                Set.map (fun (candidates, cell) -> 
-                    { CandidateReduction.cell = cell
-                      symbols = Set.difference candidates symbols }) a
+let findHidden (candidateLookup : Cell -> Set<Candidate>) (houseCells : List<Cell>) (candidateSubset : Set<Candidate>) 
+    (count : int) house = 
+    let pairs = 
+        List.map (fun cell -> 
+            let candidates = candidateLookup cell
             
-            let setCellValue = 
-                if Set.count a = 1 then 
-                    let scv = first a
-                    Some { SetCellValue.cell = snd scv
-                           candidate = first symbols }
-                else None
+            let pointer = 
+                { CandidateReduction.cell = cell
+                  symbols = Set.intersect candidates candidateSubset }
             
-            let nonEmptyCandidateReductions = Set.filter (fun cr -> Set.count cr.symbols > 0) candidateReductions
+            let crs = 
+                if Set.count pointer.symbols > 0 then Set.difference candidates candidateSubset
+                else set []
             
-            let pointers = 
-                Set.map (fun (candidates, cell) -> 
-                    { CandidateReduction.cell = cell
-                      symbols = Set.intersect candidates symbols }) a
+            let candidateReduction = 
+                { CandidateReduction.cell = cell
+                  symbols = crs }
+            
+            (pointer, candidateReduction)) houseCells
+    
+    let pointers, candidateReductions = List.unzip pairs
 
-            if Set.count nonEmptyCandidateReductions > 0 then 
-                Some { HintDescription.primaryHouses = set [ house ]
-                       secondaryHouses = set []
-                       candidateReductions = candidateReductions
-                       setCellValue = setCellValue
-                       pointers = pointers }
+    let nonEmptyPointers = List.filter (fun cr -> Set.count cr.symbols > 0) pointers
+
+    let nonEmptyCandidateReductions = List.filter (fun cr -> Set.count cr.symbols > 0) candidateReductions
+
+    if List.length nonEmptyPointers = count && List.length nonEmptyCandidateReductions > 0 then 
+
+        let setCellValue = 
+            if count = 1 then 
+                let h = List.head nonEmptyPointers
+                Some { SetCellValue.cell = h.cell
+                       candidate = first candidateSubset }
             else None
-        else None
+
+        Some { HintDescription.primaryHouses = set [ house ]
+               secondaryHouses = set []
+               candidateReductions = Set.ofList nonEmptyCandidateReductions
+               setCellValue = setCellValue
+               pointers = Set.ofList nonEmptyPointers }
     else None
 
-let hiddenNPerHouse (alphabet : Candidate list) (candidateLookup : Cell -> Set<Candidate>) 
-    (houseCells : House -> Set<Cell>) (count : int) (house : House) = 
-
+let hiddenNPerHouse (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> Set<Cell>) (count : int) 
+    (house : House) = 
     let cells = houseCells house
 
-    let candidateCells = Set.map (fun cell -> ((candidateLookup cell), cell)) cells
+    let houseCandidates = Set.map candidateLookup cells |> Set.unionMany
 
-    let subsets = setSubsets alphabet count
-
-    let hs = List.map (fun subset -> findHidden (Set.ofList subset) candidateCells house) subsets
-
+    let candidateSubsets = setSubsets (Set.toList houseCandidates) count
+    let hs = 
+        List.map 
+            (fun candidateSubset -> 
+            findHidden candidateLookup (Set.toList cells) (Set.ofList candidateSubset) count house) candidateSubsets
     List.choose id hs

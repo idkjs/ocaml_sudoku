@@ -24,6 +24,3 @@ let fullHousePerHouse (candidateLookup : Cell -> Set<Candidate>) (houseCells : H
                        candidate = first (fst h) }
             pointers = set [] } ]
     else []
-
-let fullHouseFind (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> Set<Cell>) (houses : House list) = 
-    List.collect (fullHousePerHouse candidateLookup houseCells) houses
