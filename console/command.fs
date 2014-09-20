@@ -28,9 +28,13 @@ let parseCell gridSize cells termColumn termRow =
         Console.WriteLine("({0},{1} is not a cell", termColumn, termRow)
         None
 
+let charToCandidate (candidates : Candidate list) (trialSymbol : char) = 
+    let compareAlpha (Candidate charSymbol) = trialSymbol = charSymbol
+    List.tryFind compareAlpha candidates
+
 // find an element of the alphabet
-let parseValue (alphabet : Candidate list) (term : string) = 
-    if term.Length = 1 then charToCandidate alphabet (term.Chars 0)
+let parseValue (candidates : Candidate list) (term : string) = 
+    if term.Length = 1 then charToCandidate candidates (term.Chars 0)
     else 
         Console.WriteLine("Expect a single digit, not {0}", term)
         None

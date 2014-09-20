@@ -78,7 +78,9 @@
     <Compile Include="core\clearCandidate.fs" />
     <Compile Include="console\format.fsi" />
     <Compile Include="console\format.fs" />
+    <Compile Include="console\console.fsi" />
     <Compile Include="console\console.fs" />
+    <Compile Include="console\command.fsi" />
     <Compile Include="console\command.fs" />
     <Compile Include="hints\hints.fsi" />
     <Compile Include="hints\hints.fs" />
@@ -95,7 +97,6 @@
     <Compile Include="load.fsi" />
     <Compile Include="load.fs" />
     <Compile Include="main.fs" />
-	
     <None Include="App.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

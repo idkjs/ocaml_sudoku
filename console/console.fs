@@ -90,22 +90,7 @@ let ConsoleWriteChar(consoleChar : ConsoleChar) =
     | ColouredString(c, consoleColour) -> consoleWriteColor c consoleColour
     | NL -> Console.WriteLine ""
 
-let charToAlphabet (alphabet : Symbol list) (trialSymbol : char) = 
-    let compareAlpha (Symbol charSymbol) = trialSymbol = charSymbol
-    List.tryFind compareAlpha alphabet
 
-let charToCandidate (alphabet : Candidate list) (trialSymbol : char) = 
-    let compareAlpha (Candidate charSymbol) = trialSymbol = charSymbol
-    List.tryFind compareAlpha alphabet
-
-let loadLine (line : string) alphabet = List.map (charToAlphabet alphabet) (List.ofSeq line)
-
-// Load a sudoku given as a single line of gridSize*gridSize characters
-let loadPuzzle (alphabetisedLine : Symbol option list) (cells : Cell list) cell = 
-    let zs = List.zip alphabetisedLine cells
-    List.pick (fun (symbolOpt, c) -> 
-        if c = cell then Some symbolOpt
-        else None) zs
 
 let drawAnnotatedSymbol (asymbol : AnnotatedSymbol<'a>) = 
     match asymbol with

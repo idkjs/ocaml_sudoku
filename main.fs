@@ -21,6 +21,8 @@ open hints.intersection
 open hints.naked
 open hints.wing
 
+open load
+
 [<DllImport("user32.dll")>]
 extern bool ShowWindow(System.IntPtr hWnd, int cmdShow)
 
@@ -293,9 +295,7 @@ let repl (sudoku : string) (puzzleSpec : Puzzle) =
 
     Console.WriteLine sudoku
 
-    let alphabetisedLine = loadLine sudoku puzzleSpec.alphabet
-
-    let puzzleGrid = loadPuzzle alphabetisedLine (cells puzzleSpec.size)
+    let puzzleGrid = load puzzleSpec.size puzzleSpec.alphabet sudoku
 
     let candidates = List.map symbolToCandidate puzzleSpec.alphabet
 
@@ -360,7 +360,6 @@ Maximize() |> ignore
 // Input puzzle
 Console.WriteLine "1........2........3........4........5........6........7........8........9........"
 Console.WriteLine "123456789123456789123456789123456789123456789123456789123456789123456789123456789"
-Console.WriteLine "800739006370465000040182009000600040054300610060500000400853070000271064100940002"
 
 //let example = "410230000700580040000000020190000700380000016000008400000806005031050000000090800"
 let example = "000105000140000670080002400063070010900000003010090520007200080026000035000409000"
