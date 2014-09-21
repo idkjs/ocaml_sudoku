@@ -103,9 +103,8 @@ type AnnotatedCandidate =
 
 [<NoEquality; NoComparison>]
 type AnnotatedSymbol<'a> = 
-    | Given of Symbol
-    | Set of Symbol
-    | Candidates of (Candidate -> 'a)
+    | ASymbol of Symbol
+    | ACandidates of (Candidate -> 'a)
 
 type HintAnnotatedCandidate = 
     | HACId of AnnotatedCandidate
@@ -138,6 +137,7 @@ type Action =
 
 [<NoEquality; NoComparison>]
 type Solution = 
-    { grid : Cell -> AnnotatedSymbol<AnnotatedCandidate>
+    { start : Cell -> AnnotatedSymbol<AnnotatedCandidate>
+      current : Cell -> AnnotatedSymbol<AnnotatedCandidate>
       steps : Action list }
 

@@ -4,8 +4,6 @@ open sudoku
 
 let konst x _ = x
 
-let symbolToCandidate (Symbol s : Symbol) = Candidate s
-
 let columnCells (length : int<size>) (column : Column) = 
     List.map (fun row -> 
         { col = column

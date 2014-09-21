@@ -35,4 +35,4 @@ val printGrid : int<size> -> int<width> -> int<height> -> gridChars<seq<'c>> -> 
 val print_full : int<size>
      -> int<width>
      -> int<height>
-     -> solutionChars<seq<'c>> -> seq<'c> -> (Cell -> 'b) -> Candidate list -> (Candidate -> 'b -> 'c) -> seq<'c>
+     -> solutionChars<seq<'c>> -> seq<'c> -> Candidate list -> (Cell -> Candidate -> 'c) -> seq<'c>

@@ -10,27 +10,22 @@ let clearCandidateApply (clearCandidate : ClearCandidate) : (Cell -> AnnotatedSy
         let entry = entryLookup cell
 
         match entry with
-        | Given _ | Set _ -> entry
-        | Candidates candidates -> 
-            let candidateToSymbol (Candidate s : Candidate) = Symbol s
-
+        | ASymbol _ -> entry
+        | ACandidates candidates -> 
             if clearCandidate.cell = cell then 
                 let clr candidate = 
                     if clearCandidate.candidate = candidate then Removed
                     else candidates candidate
 
-                Candidates clr
+                ACandidates clr
             else entry
 
 let clearCandidateTry (candidate : Candidate) (entryLookup : Cell -> AnnotatedSymbol<AnnotatedCandidate>) cell = 
     match entryLookup cell with
-    | Given s -> 
-        Console.WriteLine("Cell {0} has been given value {1}", cell, s)
+    | ASymbol symbol -> 
+        Console.WriteLine("Cell {0} has been set value {1}", cell, symbol)
         None
-    | Set s -> 
-        Console.WriteLine("Cell {0} has been set value {1}", cell, s)
-        None
-    | Candidates candidates -> 
+    | ACandidates candidates -> 
         let c = candidates candidate
         match c with
         | Possible -> 

@@ -112,8 +112,8 @@ let printGrid (length : int<size>) (boxWidth : int<width>) (boxHeight : int<heig
     sinterleave doPrintBand t m b Seq.empty (bands length boxHeight)
 
 let print_full (length : int<size>) (boxWidth : int<width>) (boxHeight : int<height>) 
-    (solutionChars : solutionChars<seq<'c>>) (eol : seq<'c>) (symbolTo : Cell -> 'b) (alphabet : Candidate list) 
-    (draw_cell : Candidate -> 'b -> 'c) = 
+    (solutionChars : solutionChars<seq<'c>>) (eol : seq<'c>) (alphabet : Candidate list) 
+    (draw_cell : Cell -> Candidate -> 'c) = 
     let d = Seq.collect (konst solutionChars.h) ((stackColumns boxWidth) (stacks length boxWidth).Head)
     let i = Seq.collect (konst solutionChars.hi) ((stackColumns boxWidth) (stacks length boxWidth).Head)
     
@@ -135,7 +135,7 @@ let print_full (length : int<size>) (boxWidth : int<width>) (boxHeight : int<hei
     let ssss = List.map List.ofSeq sss
     
     let doPrintColumn symbols = 
-        let doPrintCell cell = Seq.map (fun symbol -> symbolTo cell |> draw_cell symbol) symbols
+        let doPrintCell cell = Seq.map (fun symbol -> draw_cell cell symbol) symbols
         printColumn doPrintCell
     
     let doPrintStack symbols = printStack (doPrintColumn symbols) solutionChars.vi (stackColumns boxWidth)

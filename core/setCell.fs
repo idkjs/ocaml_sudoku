@@ -48,28 +48,23 @@ let setCellApply (setCellValue : SetCellValue) (cellHouseCells : Cell -> Set<Cel
             { CandidateReduction.cell = cell
               symbols = set [ setCellValue.candidate ] }
         match entry with
-        | Given _ | Set _ -> entry
-        | Candidates candidates -> 
-            let candidateToSymbol (Candidate s : Candidate) = Symbol s
+        | ASymbol _ -> entry
+        | ACandidates candidates -> 
+            let candidateToSymbol (Candidate s : Candidate) = ASymbol (Symbol s)
 
-            if setCellValue.cell = cell then Set(candidateToSymbol setCellValue.candidate)
+            if setCellValue.cell = cell then candidateToSymbol setCellValue.candidate
             else 
                 let f s = 
                     let hs = candidates s
                     if candidateReductions.Contains cr && s = setCellValue.candidate then Removed
                     else hs
-                Candidates f
+                ACandidates f
 
 let setCellTry (candidate : Candidate) (entryLookup : Cell -> AnnotatedSymbol<AnnotatedCandidate>) cell = 
     match entryLookup cell with
-    | Given s -> 
-        Console.WriteLine("Cell {0} has been given value {1}", cell, s)
+    | ASymbol symbol -> 
+        Console.WriteLine("Cell {0} has been set value {1}", cell, symbol)
         None
-    | Set s -> 
-        Console.WriteLine("Cell {0} has been set value {1}", cell, s)
-        None
-    | Candidates _ -> 
+    | ACandidates _ -> 
         Some { SetCellValue.cell = cell
                candidate = candidate }
-
-

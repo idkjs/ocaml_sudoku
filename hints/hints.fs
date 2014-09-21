@@ -61,9 +61,8 @@ let firstOpt (set : Set<'a>) =
 let convertToH : AnnotatedSymbol<AnnotatedCandidate> -> AnnotatedSymbol<HintAnnotatedCandidate> = 
     fun entry -> 
         match entry with
-        | Given s -> Given s
-        | Set s -> Set s
-        | Candidates candidateMap -> Candidates(candidateMap >> HACId)
+        | ASymbol symbol -> ASymbol symbol
+        | ACandidates candidateMap -> ACandidates(candidateMap >> HACId)
 
 let setHint (primaryHouseCells : Set<Cell>) (secondaryHouseCells : Set<Cell>) : (Cell -> AnnotatedSymbol<AnnotatedCandidate>) -> Cell -> HintAnnotatedSymbol = 
     fun (etoc : Cell -> AnnotatedSymbol<AnnotatedCandidate>) (cell : Cell) -> 
@@ -76,7 +75,7 @@ let setHint (primaryHouseCells : Set<Cell>) (secondaryHouseCells : Set<Cell>) : 
 let rewriteHASHIdCandidates (newHC : (Candidate -> HintAnnotatedCandidate) -> Candidate -> HintAnnotatedCandidate) 
     (hintAnnotatedSymbol : HintAnnotatedSymbol) = 
     match hintAnnotatedSymbol.symbol with
-    | Candidates candidates -> { hintAnnotatedSymbol with symbol = Candidates(newHC candidates) }
+    | ACandidates candidates -> { hintAnnotatedSymbol with symbol = ACandidates(newHC candidates) }
     | _ -> hintAnnotatedSymbol
 
 let setCellHint (setCell : Cell) (setCandidate : Candidate) = 

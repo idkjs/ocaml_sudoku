@@ -4,8 +4,6 @@ open sudoku
 
 val konst : 'a -> 'b -> 'a
 
-val symbolToCandidate : Symbol -> Candidate
-
 val columnCells : int<size> -> Column -> Cell list
 
 val rowCells : int<size> -> Row -> Cell list
