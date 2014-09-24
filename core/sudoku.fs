@@ -130,27 +130,18 @@ type Candidate =
 
 // Whilst working to a solution each cell in the grid
 // that doesn't have a symbol is filled with candidates
-type AnnotatedCandidate = 
-    | Possible
-    | Excluded
-    | Removed
-
 [<NoEquality; NoComparison>]
-type AnnotatedSymbol<'a> = 
+type CellContents = 
     | ASymbol of Symbol
-    | ACandidates of (Candidate -> 'a)
-
-type HintAnnotatedCandidate = 
-    | HACId of AnnotatedCandidate
-    | HACSet
-    | Pointer
-    | Reduction
+    | ACandidates of Set<Candidate>
 
 [<NoEquality; NoComparison>]
-type HintAnnotatedSymbol = 
-    { symbol : AnnotatedSymbol<HintAnnotatedCandidate>
+type CellAnnotation = 
+    { setValue : Candidate option
       primaryHintHouse : bool
-      secondaryHintHouse : bool }
+      secondaryHintHouse : bool
+      reductions : Set<Candidate>
+      pointers : Set<Candidate> }
 
 // Working towards a solution we take one of the following actions:
 type SetCellValue = 
@@ -165,9 +156,9 @@ type ClearCandidate =
 
 type CandidateReduction = 
     { cell : Cell
-      symbols : Set<Candidate> }
+      candidates : Set<Candidate> }
     override this.ToString() = 
-        String.Format("Cell {0}, Candidates {1}", this.cell, String.Join(",", Set.toArray this.symbols))
+        String.Format("Cell {0}, Candidates {1}", this.cell, String.Join(",", Set.toArray this.candidates))
 
 type Action = 
     | SetCellValue of SetCellValue
@@ -175,6 +166,6 @@ type Action =
 
 [<NoEquality; NoComparison>]
 type Solution = 
-    { start : Cell -> AnnotatedSymbol<AnnotatedCandidate>
-      current : Cell -> AnnotatedSymbol<AnnotatedCandidate>
+    { start : Cell -> CellContents
+      current : Cell -> CellContents
       steps : Action list }

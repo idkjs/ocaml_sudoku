@@ -39,7 +39,7 @@ let parseValue (candidates : Candidate list) (term : string) =
         Console.WriteLine("Expect a single digit, not {0}", term)
         None
 
-let setCellCommand (item : string) (alphabet : Candidate list) (lastGrid : Cell -> AnnotatedSymbol<AnnotatedCandidate>) 
+let setCellCommand (item : string) (alphabet : Candidate list) (lastGrid : Cell -> CellContents) 
     (cells : Cell list) = 
     let terms = item.Split(' ')
     if terms.Length = 4 then 
@@ -56,7 +56,7 @@ let setCellCommand (item : string) (alphabet : Candidate list) (lastGrid : Cell 
         None
 
 let candidateClearCommand (item : string) (alphabet : Candidate list) 
-    (lastGrid : Cell -> AnnotatedSymbol<AnnotatedCandidate>) (cells : Cell list) = 
+    (lastGrid : Cell -> CellContents) (cells : Cell list) = 
     let terms = item.Split(' ')
     if terms.Length = 4 then 
         let parsedCell = parseCell alphabet.Length cells terms.[1] terms.[2]

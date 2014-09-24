@@ -16,4 +16,4 @@ val setSubsets : List<'a> -> int -> List<List<'a>>
 val mhas : HintDescription
      -> (House -> Set<Cell>)
      -> (Cell -> Set<Cell>)
-     -> (Cell -> Set<Candidate>) -> (Cell -> AnnotatedSymbol<AnnotatedCandidate>) -> (Cell -> HintAnnotatedSymbol)
+     -> (Cell -> Set<Candidate>) -> (Cell -> CellAnnotation)

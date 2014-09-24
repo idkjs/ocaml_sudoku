@@ -11,7 +11,7 @@ val setCellCandidateReductions : SetCellValue
 val setCellApply : SetCellValue
      -> (Cell -> Set<Cell>)
      -> (Cell -> Set<Candidate>)
-     -> ((Cell -> AnnotatedSymbol<AnnotatedCandidate>) -> Cell -> AnnotatedSymbol<AnnotatedCandidate>)
+     -> ((Cell -> CellContents) -> Cell -> CellContents)
 
-val setCellTry : Candidate -> (Cell -> AnnotatedSymbol<AnnotatedCandidate>) -> Cell -> SetCellValue option
+val setCellTry : Candidate -> (Cell -> CellContents) -> Cell -> SetCellValue option
 

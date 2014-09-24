@@ -17,7 +17,7 @@ let setCellValueModelEffect (setCellValue : SetCellValue) (cellHouseCells : Cell
     let candidateReductionCells = 
         Set.map (fun c -> 
             { CandidateReduction.cell = c
-              symbols = set [ setCellValue.candidate ] }) candidateReductions
+              candidates = set [ setCellValue.candidate ] }) candidateReductions
     
     candidateReductionCells
 
@@ -30,7 +30,7 @@ let setCellCandidateReductions (setCellValue : SetCellValue) (cellHouseCells : C
     
     let crs = 
         { CandidateReduction.cell = setCellValue.cell
-          symbols = ccs2 }
+          candidates = ccs2 }
     
     let crs3 = Set.add crs candidateReductionCells
 
@@ -38,29 +38,27 @@ let setCellCandidateReductions (setCellValue : SetCellValue) (cellHouseCells : C
 
 
 let setCellApply (setCellValue : SetCellValue) (cellHouseCells : Cell -> Set<Cell>) 
-    (candidateLookup : Cell -> Set<Candidate>) : (Cell -> AnnotatedSymbol<AnnotatedCandidate>) -> Cell -> AnnotatedSymbol<AnnotatedCandidate> = 
+    (candidateLookup : Cell -> Set<Candidate>) : (Cell -> CellContents) -> Cell -> CellContents = 
+
     let candidateReductions = setCellValueModelEffect setCellValue cellHouseCells candidateLookup
 
-    fun (entryLookup : Cell -> AnnotatedSymbol<AnnotatedCandidate>) (cell : Cell) -> 
+    fun (entryLookup : Cell -> CellContents) (cell : Cell) -> 
         let entry = entryLookup cell
         
         let cr = 
             { CandidateReduction.cell = cell
-              symbols = set [ setCellValue.candidate ] }
+              candidates = set [ setCellValue.candidate ] }
+
         match entry with
         | ASymbol _ -> entry
         | ACandidates candidates -> 
             let candidateToSymbol (Candidate s : Candidate) = ASymbol (Symbol s)
 
             if setCellValue.cell = cell then candidateToSymbol setCellValue.candidate
-            else 
-                let f s = 
-                    let hs = candidates s
-                    if candidateReductions.Contains cr && s = setCellValue.candidate then Removed
-                    else hs
-                ACandidates f
+            else if candidateReductions.Contains cr then ACandidates (Set.remove setCellValue.candidate candidates)
+            else ACandidates candidates
 
-let setCellTry (candidate : Candidate) (entryLookup : Cell -> AnnotatedSymbol<AnnotatedCandidate>) cell = 
+let setCellTry (candidate : Candidate) (entryLookup : Cell -> CellContents) cell = 
     match entryLookup cell with
     | ASymbol symbol -> 
         Console.WriteLine("Cell {0} has been set value {1}", cell, symbol)

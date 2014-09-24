@@ -4,33 +4,27 @@ open System
 
 open core.sudoku
 
-let clearCandidateApply (clearCandidate : ClearCandidate) : (Cell -> AnnotatedSymbol<AnnotatedCandidate>) -> Cell -> AnnotatedSymbol<AnnotatedCandidate> = 
+let clearCandidateApply (clearCandidate : ClearCandidate) : (Cell -> CellContents) -> Cell -> CellContents = 
 
-    fun (entryLookup : Cell -> AnnotatedSymbol<AnnotatedCandidate>) (cell : Cell) -> 
+    fun (entryLookup : Cell -> CellContents) (cell : Cell) -> 
         let entry = entryLookup cell
 
         match entry with
         | ASymbol _ -> entry
         | ACandidates candidates -> 
             if clearCandidate.cell = cell then 
-                let clr candidate = 
-                    if clearCandidate.candidate = candidate then Removed
-                    else candidates candidate
-
-                ACandidates clr
+                ACandidates (Set.remove clearCandidate.candidate candidates)
             else entry
 
-let clearCandidateTry (candidate : Candidate) (entryLookup : Cell -> AnnotatedSymbol<AnnotatedCandidate>) cell = 
+let clearCandidateTry (candidate : Candidate) (entryLookup : Cell -> CellContents) cell = 
     match entryLookup cell with
     | ASymbol symbol -> 
         Console.WriteLine("Cell {0} has been set value {1}", cell, symbol)
         None
     | ACandidates candidates -> 
-        let c = candidates candidate
-        match c with
-        | Possible -> 
+        if Set.contains candidate candidates then 
             Some { ClearCandidate.cell = cell
                    candidate = candidate }
-        | Excluded | Removed -> 
+        else
             Console.WriteLine("Cell {0} does not have candidate {1}", cell, candidate)
             None

@@ -47,7 +47,7 @@ type Hint =
 
 let symbolToCandidate (Symbol s : Symbol) = Candidate s
 
-let symbolToEntry (puzzleSpec : Puzzle) (symbolLookup : Cell -> Symbol option) = 
+let symbolToEntry (puzzleSpec : Puzzle) (symbolLookup : Cell -> Symbol option) (allCandidates : Set<Candidate>) = 
     let puzzleHouseCellCells = houseCellCells puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight
     
     let houseCellsForCell (cell : Cell) (symbolLookup : Cell -> 'a option) = 
@@ -63,9 +63,8 @@ let symbolToEntry (puzzleSpec : Puzzle) (symbolLookup : Cell -> Symbol option) =
         | None -> 
             let symbols = houseCellsForCell cell symbolLookup
             let candidates = Set.map symbolToCandidate symbols
-            ACandidates(fun candidate -> 
-                if Set.contains candidate candidates then Excluded
-                else Possible)
+            let possibleCandidates = Set.difference allCandidates candidates
+            ACandidates possibleCandidates
 
 type ConsoleCharWriter = ConsoleChar -> Unit
 
@@ -113,10 +112,10 @@ let parse (item : string) (alphabet : Candidate list) (solution : Solution) (puz
 
     let puzzleDrawer (cell : Cell) (candidate : Candidate) = drawFLFE centreCandidate candidate (solution.start cell) (solution.current cell)
 
-    let print_grid2 hd = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup solution.current
+    let print_grid2 hd = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup
 
-    let draw_cell2 (l : Cell -> HintAnnotatedSymbol) (cell : Cell) (candidate : Candidate) =
-        drawFL2 centreCandidate candidate (solution.start cell) (l cell)
+    let draw_cell2 (k : Cell -> CellContents) (l : Cell -> CellAnnotation) (cell : Cell) (candidate : Candidate) =
+        drawFL2 centreCandidate candidate (solution.start cell) (solution.current cell) (k cell) (l cell)
 
     Console.WriteLine item
 
@@ -136,7 +135,7 @@ let parse (item : string) (alphabet : Candidate list) (solution : Solution) (puz
                       setCellValue = Some setCellValue
                       pointers = set [] }
                 
-                puzzleDrawFull (draw_cell2 (print_grid2 hd))
+                puzzleDrawFull (draw_cell2 solution.current (print_grid2 hd))
                 { solution with current = setCellApply setCellValue puzzleHouseCellCells candidateLookup solution.current
                                 steps = (SetCellValue setCellValue) :: solution.steps }
             | None -> 
@@ -153,7 +152,7 @@ let parse (item : string) (alphabet : Candidate list) (solution : Solution) (puz
             | Some clearCandidate -> 
                 let cr = 
                     { CandidateReduction.cell = clearCandidate.cell
-                      symbols = set [ clearCandidate.candidate ] }
+                      candidates = set [ clearCandidate.candidate ] }
                 
                 let hd = 
                     { HintDescription.primaryHouses = set []
@@ -162,7 +161,7 @@ let parse (item : string) (alphabet : Candidate list) (solution : Solution) (puz
                       setCellValue = None
                       pointers = set [] }
                 
-                puzzleDrawFull (draw_cell2 (print_grid2 hd))
+                puzzleDrawFull (draw_cell2 solution.current (print_grid2 hd))
                 { solution with current = clearCandidateApply clearCandidate solution.current
                                 steps = (ClearCandidate clearCandidate) :: solution.steps }
             | None -> 
@@ -248,15 +247,15 @@ let printHint (candidates : Candidate list) (solution : Solution) (puzzleSpec : 
 
     let centreCandidate = List.nth candidates ((List.length candidates) / 2)
 
-    let print_grid2 hd = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup solution.current
+    let print_grid2 hd = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup
 
-    let draw_cell2 (l : Cell -> HintAnnotatedSymbol) (cell : Cell) (candidate : Candidate) =
-        drawFL2 centreCandidate candidate (solution.start cell) (l cell)
+    let draw_cell2 (k : Cell -> CellContents) (l : Cell -> CellAnnotation) (cell : Cell) (candidate : Candidate) =
+        drawFL2 centreCandidate candidate (solution.start cell) (solution.current cell) (k cell) (l cell)
     
     let draw_full_hint index hint = 
         Console.WriteLine("{0}: {1}", index, hint)
 
-        puzzleDrawFull (draw_cell2 (print_grid2 hint))
+        puzzleDrawFull (draw_cell2 solution.current (print_grid2 hint))
 
     match h with
     | FH hint -> draw_full_hint index hint
@@ -279,10 +278,10 @@ let run (candidates : Candidate list) (solution : Solution ref) (puzzleSpec : Pu
     else 
         let alphaset = Set.ofList candidates
         
-        let getCandidateEntries = 
-            function 
-            | ACandidates s -> Set.filter (fun candidate -> s candidate = Possible) alphaset
-            | _ -> Set.empty
+        let getCandidateEntries (annotatedSymbol : CellContents) = 
+            match annotatedSymbol with
+            | ASymbol _ -> Set.empty
+            | ACandidates s -> s
         
         let candidateLookup = (!solution).current >> getCandidateEntries
 
@@ -314,7 +313,7 @@ let repl (sudoku : string) (puzzleSpec : Puzzle) =
 
     let candidates = List.map symbolToCandidate puzzleSpec.alphabet
 
-    let stoe = symbolToEntry puzzleSpec puzzleGrid
+    let stoe = symbolToEntry puzzleSpec puzzleGrid (Set.ofList candidates)
 
     let solutionGrid = flattenEntry stoe (cells puzzleSpec.size)
 
@@ -328,7 +327,7 @@ let repl (sudoku : string) (puzzleSpec : Puzzle) =
         let annotatedSymbol =
             match symbolOpt with
             | Some symbol -> ASymbol symbol
-            | None -> ACandidates(konst Removed)
+            | None -> ACandidates Set.empty
 
         drawAnnotatedSymbol annotatedSymbol annotatedSymbol
 

@@ -51,62 +51,11 @@ let rec setSubsets (list : List<'a>) (size : int) : List<List<'a>> = doSetSubset
     let p35 = setSubsets s3 5
 *)
 
-
 let firstOpt (set : Set<'a>) = 
     let l = Set.toList set
     match l with
-    | s :: ss -> Some s
+    | s :: _ -> Some s
     | _ -> None
-
-let convertToH : AnnotatedSymbol<AnnotatedCandidate> -> AnnotatedSymbol<HintAnnotatedCandidate> = 
-    fun entry -> 
-        match entry with
-        | ASymbol symbol -> ASymbol symbol
-        | ACandidates candidateMap -> ACandidates(candidateMap >> HACId)
-
-let setHint (primaryHouseCells : Set<Cell>) (secondaryHouseCells : Set<Cell>) : (Cell -> AnnotatedSymbol<AnnotatedCandidate>) -> Cell -> HintAnnotatedSymbol = 
-    fun (etoc : Cell -> AnnotatedSymbol<AnnotatedCandidate>) (cell : Cell) -> 
-        let hac label = 
-            { HintAnnotatedSymbol.symbol = convertToH label
-              primaryHintHouse = Set.contains cell primaryHouseCells
-              secondaryHintHouse = Set.contains cell secondaryHouseCells }
-        (etoc >> hac) cell
-
-let rewriteHASHIdCandidates (newHC : (Candidate -> HintAnnotatedCandidate) -> Candidate -> HintAnnotatedCandidate) 
-    (hintAnnotatedSymbol : HintAnnotatedSymbol) = 
-    match hintAnnotatedSymbol.symbol with
-    | ACandidates candidates -> { hintAnnotatedSymbol with symbol = ACandidates(newHC candidates) }
-    | _ -> hintAnnotatedSymbol
-
-let setCellHint (setCell : Cell) (setCandidate : Candidate) = 
-    let newHC candidates c = 
-        if c = setCandidate then HACSet
-        else candidates c
-    
-    let hintAnnotationTransformer cell = 
-        if cell = setCell then rewriteHASHIdCandidates newHC
-        else id
-    
-    fun (etoc : Cell -> HintAnnotatedSymbol) (cell : Cell) -> (hintAnnotationTransformer cell) (etoc cell)
-
-let setCellHintOption (setCellValueOption : SetCellValue option) = 
-    match setCellValueOption with
-    | Some { cell = cell; candidate = value } -> setCellHint cell value
-    | None -> id
-
-let setReductions2 (candidateReductions : Set<CandidateReduction>) hac = 
-    let newHC (crSymbols : Set<Candidate>) candidates candidate = 
-        if Set.contains candidate crSymbols then hac
-        else candidates candidate
-    
-    let hintAnnotationTransformer cell = 
-        let o = Set.filter (fun cr -> cell = cr.cell) candidateReductions
-        match firstOpt o with
-        | Some cr -> rewriteHASHIdCandidates (newHC cr.symbols)
-        | _ -> id
-    
-
-    fun (etoc : Cell -> HintAnnotatedSymbol) (cell : Cell) -> (hintAnnotationTransformer cell) (etoc cell)
 
 type HintDescription = 
     { primaryHouses : Set<House>
@@ -118,8 +67,7 @@ type HintDescription =
         let sb = StringBuilder()
 
         sb.AppendLine(String.Format("Primary Houses {0}", String.Join(",", Set.toArray this.primaryHouses))) |> ignore
-        sb.AppendLine(String.Format("Secondary Houses {0}", String.Join(",", Set.toArray this.secondaryHouses))) 
-        |> ignore
+        sb.AppendLine(String.Format("Secondary Houses {0}", String.Join(",", Set.toArray this.secondaryHouses))) |> ignore
         sb.AppendLine(String.Format("Pointers {0}", String.Join(",", Set.toArray this.pointers))) |> ignore
 
         Set.iter (fun (cr : CandidateReduction) -> sb.AppendLine(String.Format("  {0}", cr)) |> ignore) 
@@ -128,7 +76,8 @@ type HintDescription =
         sb.ToString()
 
 let mhas (hd : HintDescription) (houseCells : House -> Set<Cell>) (cellHouseCells : Cell -> Set<Cell>) 
-    (candidateLookup : Cell -> Set<Candidate>) (solutionGrid : Cell -> AnnotatedSymbol<AnnotatedCandidate>) = 
+    (candidateLookup : Cell -> Set<Candidate>) : (Cell -> CellAnnotation) = 
+
     let primaryHouseCells = Set.map houseCells hd.primaryHouses |> Set.unionMany
     let secondaryHouseCells = Set.map houseCells hd.secondaryHouses |> Set.unionMany
     
@@ -137,8 +86,34 @@ let mhas (hd : HintDescription) (houseCells : House -> Set<Cell>) (cellHouseCell
         | Some scv -> setCellCandidateReductions scv cellHouseCells candidateLookup
         | None -> set []
 
-    (setHint primaryHouseCells secondaryHouseCells
-     >> setReductions2 crs Reduction
-     >> setReductions2 hd.candidateReductions Reduction
-     >> setReductions2 hd.pointers Pointer
-     >> setCellHintOption hd.setCellValue) solutionGrid
+    fun (cell : Cell) -> 
+        let setValue =
+            match hd.setCellValue with
+            | Some setCellValue ->
+                if setCellValue.cell = cell then Some setCellValue.candidate
+                else None
+            | None -> None
+
+        let setCellCandidateReductions = Set.filter (fun pointer -> cell = pointer.cell) crs
+        let setCellReductions = 
+            match firstOpt setCellCandidateReductions with
+            | Some cr -> cr.candidates
+            | _ -> set []
+
+        let cellCandidateReductions = Set.filter (fun pointer -> cell = pointer.cell) hd.candidateReductions
+        let reductions = 
+            match firstOpt cellCandidateReductions with
+            | Some cr -> cr.candidates
+            | _ -> set []
+
+        let cellPointers = Set.filter (fun pointer -> cell = pointer.cell) hd.pointers
+        let pointers = 
+            match firstOpt cellPointers with
+            | Some cr -> cr.candidates
+            | _ -> set []
+
+        { CellAnnotation.setValue = setValue
+          primaryHintHouse = Set.contains cell primaryHouseCells
+          secondaryHintHouse = Set.contains cell secondaryHouseCells
+          reductions = Set.union setCellReductions reductions
+          pointers = pointers }

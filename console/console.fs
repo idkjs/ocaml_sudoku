@@ -92,7 +92,7 @@ let ConsoleWriteChar(consoleChar : ConsoleChar) =
 
 
 
-let drawAnnotatedSymbol (firstSymbol : AnnotatedSymbol<'a>) (currentSymbol : AnnotatedSymbol<'a>) = 
+let drawAnnotatedSymbol (firstSymbol : CellContents) (currentSymbol : CellContents) = 
     match firstSymbol with
     | ASymbol s -> ColouredString(s.ToString(), ConsoleColor.Blue)
     | ACandidates _ ->
@@ -100,13 +100,12 @@ let drawAnnotatedSymbol (firstSymbol : AnnotatedSymbol<'a>) (currentSymbol : Ann
         | ASymbol s -> ColouredString(s.ToString(), ConsoleColor.Red)
         | ACandidates _ -> CChar '.'
 
-let drawAnnotatedCandidate (ac : AnnotatedCandidate) (candidate : Candidate) = 
-    match ac with
-    | Possible -> CStr(candidate.ToString())
-    | Excluded -> CChar ' '
-    | Removed -> CChar ' '
+let drawAnnotatedCandidate (candidateOpt : Candidate option) = 
+    match candidateOpt with
+    | Some candidate -> CStr(candidate.ToString())
+    | None -> CChar ' '
 
-let drawFLFE centreCandidate candidate (firstSymbol : AnnotatedSymbol<AnnotatedCandidate>) (currentSymbol : AnnotatedSymbol<AnnotatedCandidate>) = 
+let drawFLFE centreCandidate candidate (firstSymbol : CellContents) (currentSymbol : CellContents) = 
 
     let isCentre = centreCandidate = candidate
 
@@ -117,9 +116,12 @@ let drawFLFE centreCandidate candidate (firstSymbol : AnnotatedSymbol<AnnotatedC
         match currentSymbol with
         | ASymbol _ when not isCentre -> CChar ' '
         | ASymbol s -> ColouredString(s.ToString(), ConsoleColor.Red)
-        | ACandidates candidates -> drawAnnotatedCandidate (candidates candidate) candidate
+        | ACandidates candidates ->
+            let candidateOpt = if Set.contains candidate candidates then Some candidate
+                               else None
+            drawAnnotatedCandidate candidateOpt
 
-let drawFL2 centreCandidate candidate (firstSymbol : AnnotatedSymbol<AnnotatedCandidate>) (currentHintSymbol : HintAnnotatedSymbol) = 
+let drawFL2 centreCandidate candidate (firstSymbol : CellContents) (previousHintSymbol : CellContents) (currentSymbol : CellContents) (currentHintSymbol : CellAnnotation) = 
 
     let isCentre = centreCandidate = candidate
 
@@ -130,26 +132,34 @@ let drawFL2 centreCandidate candidate (firstSymbol : AnnotatedSymbol<AnnotatedCa
         else if currentHintSymbol.secondaryHintHouse then ColouredString(s.ToString(), ConsoleColor.DarkBlue)
         else ColouredString(s.ToString(), ConsoleColor.Blue)
     | ACandidates candidates -> 
-        match currentHintSymbol.symbol with
+        match previousHintSymbol with
         | ASymbol _ when not isCentre -> CChar ' '
         | ASymbol s -> 
             if currentHintSymbol.primaryHintHouse then ColouredString(s.ToString(), ConsoleColor.Yellow)
             else if currentHintSymbol.secondaryHintHouse then ColouredString(s.ToString(), ConsoleColor.DarkRed)
             else ColouredString(s.ToString(), ConsoleColor.Red)
-        | ACandidates candidates -> 
-            match candidates candidate with
-            | HACId h -> 
-                if currentHintSymbol.primaryHintHouse then 
-                    match h with
-                    | Possible -> ColouredString(candidate.ToString(), ConsoleColor.DarkGreen)
-                    | Excluded -> CChar ' '
-                    | Removed -> CChar ' '
+        | ACandidates previousCandidates -> 
+            match currentSymbol with
+            | ASymbol s -> ColouredString(s.ToString(), ConsoleColor.Red)
+            | ACandidates currentCandidates -> 
+                if currentHintSymbol.setValue.IsSome && currentHintSymbol.setValue.Value = candidate then
+                    ColouredString(candidate.ToString(), ConsoleColor.Red)
+                else if Set.contains candidate currentHintSymbol.reductions then
+                    ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
+                else if Set.contains candidate currentHintSymbol.pointers then
+                    ColouredString(candidate.ToString(), ConsoleColor.Magenta)
+                else if currentHintSymbol.primaryHintHouse then 
+                    if Set.contains candidate currentCandidates then
+                        ColouredString(candidate.ToString(), ConsoleColor.DarkGreen)
+                    else
+                        CChar ' '
                 else if currentHintSymbol.secondaryHintHouse then 
-                    match h with
-                    | Possible -> ColouredString(candidate.ToString(), ConsoleColor.Green)
-                    | Excluded -> CChar ' '
-                    | Removed -> CChar ' '
-                else drawAnnotatedCandidate h candidate
-            | HACSet -> ColouredString(candidate.ToString(), ConsoleColor.Red)
-            | Pointer -> ColouredString(candidate.ToString(), ConsoleColor.Magenta)
-            | Reduction -> ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
+                    if Set.contains candidate currentCandidates then
+                        ColouredString(candidate.ToString(), ConsoleColor.Green)
+                    else
+                        CChar ' '
+                else
+                    if Set.contains candidate currentCandidates then
+                        CStr(candidate.ToString())
+                    else
+                        CChar ' '
