@@ -72,14 +72,12 @@ let print_step (solution : Solution) (puzzleSpec : Puzzle) (action : Action) =
 
     let drawer (cell : Cell) = drawAnnotatedSymbol (solution.start cell) (solution.current cell)
 
-    let writer = 
-        printGrid puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight defaultGridChars sNL drawer
-
+    let writer = printGrid puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight defaultGridChars sNL drawer
     Seq.iter ConsoleWriteChar writer
 
     match action with
-    | SetCellValue sv -> ConsoleWriteChar (CStr(sv.ToString()))
-    | ClearCandidate cc -> ConsoleWriteChar (CStr(cc.ToString()))
+    | SetCellValue sv -> ConsoleWriteChar(CStr(sv.ToString()))
+    | ClearCandidate cc -> ConsoleWriteChar(CStr(cc.ToString()))
 
     ConsoleWriteChar NL
 
@@ -91,8 +89,8 @@ let print_last (solution : Solution) (puzzleSpec : Puzzle) =
 
 let draw_full (alphabet : Candidate list) (puzzleSpec : Puzzle) (drawCellCandidate : Cell -> Candidate -> ConsoleChar) = 
     let puzzlePrintFull = 
-        print_full puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight defaultSolutionChars sNL alphabet drawCellCandidate
-
+        print_full puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight defaultSolutionChars sNL alphabet 
+            drawCellCandidate
     Seq.iter ConsoleWriteChar puzzlePrintFull
 
 let parse (item : string) (alphabet : Candidate list) (solution : Solution) (puzzleSpec : Puzzle) 
@@ -109,13 +107,11 @@ let parse (item : string) (alphabet : Candidate list) (solution : Solution) (puz
     let puzzleDrawFull = draw_full alphabet puzzleSpec
 
     let centreCandidate = List.nth alphabet ((List.length alphabet) / 2)
-
-    let puzzleDrawer (cell : Cell) (candidate : Candidate) = drawFLFE centreCandidate candidate (solution.start cell) (solution.current cell)
-
+    let puzzleDrawer (cell : Cell) (candidate : Candidate) = 
+        drawFLFE centreCandidate candidate (solution.start cell) (solution.current cell)
     let print_grid2 hd = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup
-
-    let draw_cell2 (k : Cell -> CellContents) (l : Cell -> CellAnnotation) (cell : Cell) (candidate : Candidate) =
-        drawFL2 centreCandidate candidate (solution.start cell) (solution.current cell) (k cell) (l cell)
+    let draw_cell2 (l : Cell -> CellAnnotation) (cell : Cell) (candidate : Candidate) = 
+        drawFL2 centreCandidate candidate (solution.start cell) (solution.current cell) (l cell)
 
     Console.WriteLine item
 
@@ -134,9 +130,9 @@ let parse (item : string) (alphabet : Candidate list) (solution : Solution) (puz
                       candidateReductions = set []
                       setCellValue = Some setCellValue
                       pointers = set [] }
-                
-                puzzleDrawFull (draw_cell2 solution.current (print_grid2 hd))
-                { solution with current = setCellApply setCellValue puzzleHouseCellCells candidateLookup solution.current
+                puzzleDrawFull (draw_cell2 (print_grid2 hd))
+                { solution with current = 
+                                    setCellApply setCellValue puzzleHouseCellCells candidateLookup solution.current
                                 steps = (SetCellValue setCellValue) :: solution.steps }
             | None -> 
                 Console.WriteLine("")
@@ -161,7 +157,7 @@ let parse (item : string) (alphabet : Candidate list) (solution : Solution) (puz
                       setCellValue = None
                       pointers = set [] }
                 
-                puzzleDrawFull (draw_cell2 solution.current (print_grid2 hd))
+                puzzleDrawFull (draw_cell2 (print_grid2 hd))
                 { solution with current = clearCandidateApply clearCandidate solution.current
                                 steps = (ClearCandidate clearCandidate) :: solution.steps }
             | None -> 
@@ -248,14 +244,13 @@ let printHint (candidates : Candidate list) (solution : Solution) (puzzleSpec : 
     let centreCandidate = List.nth candidates ((List.length candidates) / 2)
 
     let print_grid2 hd = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup
-
-    let draw_cell2 (k : Cell -> CellContents) (l : Cell -> CellAnnotation) (cell : Cell) (candidate : Candidate) =
-        drawFL2 centreCandidate candidate (solution.start cell) (solution.current cell) (k cell) (l cell)
+    let draw_cell2 (l : Cell -> CellAnnotation) (cell : Cell) (candidate : Candidate) = 
+        drawFL2 centreCandidate candidate (solution.start cell) (solution.current cell) (l cell)
     
     let draw_full_hint index hint = 
         Console.WriteLine("{0}: {1}", index, hint)
 
-        puzzleDrawFull (draw_cell2 solution.current (print_grid2 hint))
+        puzzleDrawFull (draw_cell2 (print_grid2 hint))
 
     match h with
     | FH hint -> draw_full_hint index hint
@@ -323,27 +318,23 @@ let repl (sudoku : string) (puzzleSpec : Puzzle) =
     let symbolOptionToConsoleChar (cell : Cell) : ConsoleChar = 
 
         let symbolOpt = puzzleGrid cell
-
-        let annotatedSymbol =
+        
+        let annotatedSymbol = 
             match symbolOpt with
             | Some symbol -> ASymbol symbol
             | None -> ACandidates Set.empty
 
         drawAnnotatedSymbol annotatedSymbol annotatedSymbol
-
-    let line = 
-        List.foldBack (symbolOptionToConsoleChar
-                       >> cons) (cells puzzleSpec.size) [ NL ]
+    
+    let line = List.foldBack (symbolOptionToConsoleChar >> cons) (cells puzzleSpec.size) [ NL ]
     List.iter mainWriter line
     mainWriter NL
-
-    let prows = 
-        printRowOnOneLine symbolOptionToConsoleChar (rowCells puzzleSpec.size) sNL (rows puzzleSpec.size)
+    let prows = printRowOnOneLine symbolOptionToConsoleChar (rowCells puzzleSpec.size) sNL (rows puzzleSpec.size)
     Seq.iter mainWriter prows
 
     Seq.iter ConsoleWriteChar 
-        (printGrid puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight defaultGridChars sNL symbolOptionToConsoleChar)
-
+        (printGrid puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight defaultGridChars sNL 
+             symbolOptionToConsoleChar)
     let solution = 
         ref ({ start = solutionGrid
                current = solutionGrid

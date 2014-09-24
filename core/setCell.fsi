@@ -9,9 +9,6 @@ val setCellCandidateReductions : SetCellValue
      -> (Cell -> Set<Cell>) -> (Cell -> Set<Candidate>) -> Set<CandidateReduction>
 
 val setCellApply : SetCellValue
-     -> (Cell -> Set<Cell>)
-     -> (Cell -> Set<Candidate>)
-     -> ((Cell -> CellContents) -> Cell -> CellContents)
-
+     -> (Cell -> Set<Cell>) -> (Cell -> Set<Candidate>) -> ((Cell -> CellContents) -> Cell -> CellContents)
 val setCellTry : Candidate -> (Cell -> CellContents) -> Cell -> SetCellValue option
 

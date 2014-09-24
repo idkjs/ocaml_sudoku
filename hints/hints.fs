@@ -67,7 +67,8 @@ type HintDescription =
         let sb = StringBuilder()
 
         sb.AppendLine(String.Format("Primary Houses {0}", String.Join(",", Set.toArray this.primaryHouses))) |> ignore
-        sb.AppendLine(String.Format("Secondary Houses {0}", String.Join(",", Set.toArray this.secondaryHouses))) |> ignore
+        sb.AppendLine(String.Format("Secondary Houses {0}", String.Join(",", Set.toArray this.secondaryHouses))) 
+        |> ignore
         sb.AppendLine(String.Format("Pointers {0}", String.Join(",", Set.toArray this.pointers))) |> ignore
 
         Set.iter (fun (cr : CandidateReduction) -> sb.AppendLine(String.Format("  {0}", cr)) |> ignore) 
@@ -76,8 +77,7 @@ type HintDescription =
         sb.ToString()
 
 let mhas (hd : HintDescription) (houseCells : House -> Set<Cell>) (cellHouseCells : Cell -> Set<Cell>) 
-    (candidateLookup : Cell -> Set<Candidate>) : (Cell -> CellAnnotation) = 
-
+    (candidateLookup : Cell -> Set<Candidate>) : Cell -> CellAnnotation = 
     let primaryHouseCells = Set.map houseCells hd.primaryHouses |> Set.unionMany
     let secondaryHouseCells = Set.map houseCells hd.secondaryHouses |> Set.unionMany
     
@@ -87,26 +87,29 @@ let mhas (hd : HintDescription) (houseCells : House -> Set<Cell>) (cellHouseCell
         | None -> set []
 
     fun (cell : Cell) -> 
-        let setValue =
+        let setValue = 
             match hd.setCellValue with
-            | Some setCellValue ->
+            | Some setCellValue -> 
                 if setCellValue.cell = cell then Some setCellValue.candidate
                 else None
             | None -> None
-
+        
         let setCellCandidateReductions = Set.filter (fun pointer -> cell = pointer.cell) crs
+        
         let setCellReductions = 
             match firstOpt setCellCandidateReductions with
             | Some cr -> cr.candidates
             | _ -> set []
-
+        
         let cellCandidateReductions = Set.filter (fun pointer -> cell = pointer.cell) hd.candidateReductions
+        
         let reductions = 
             match firstOpt cellCandidateReductions with
             | Some cr -> cr.candidates
             | _ -> set []
-
+        
         let cellPointers = Set.filter (fun pointer -> cell = pointer.cell) hd.pointers
+        
         let pointers = 
             match firstOpt cellPointers with
             | Some cr -> cr.candidates

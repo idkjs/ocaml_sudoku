@@ -52,10 +52,9 @@ let setCellApply (setCellValue : SetCellValue) (cellHouseCells : Cell -> Set<Cel
         match entry with
         | ASymbol _ -> entry
         | ACandidates candidates -> 
-            let candidateToSymbol (Candidate s : Candidate) = ASymbol (Symbol s)
-
+            let candidateToSymbol (Candidate s : Candidate) = ASymbol(Symbol s)
             if setCellValue.cell = cell then candidateToSymbol setCellValue.candidate
-            else if candidateReductions.Contains cr then ACandidates (Set.remove setCellValue.candidate candidates)
+            else if candidateReductions.Contains cr then ACandidates(Set.remove setCellValue.candidate candidates)
             else ACandidates candidates
 
 let setCellTry (candidate : Candidate) (entryLookup : Cell -> CellContents) cell = 

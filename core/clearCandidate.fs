@@ -12,8 +12,7 @@ let clearCandidateApply (clearCandidate : ClearCandidate) : (Cell -> CellContent
         match entry with
         | ASymbol _ -> entry
         | ACandidates candidates -> 
-            if clearCandidate.cell = cell then 
-                ACandidates (Set.remove clearCandidate.candidate candidates)
+            if clearCandidate.cell = cell then ACandidates(Set.remove clearCandidate.candidate candidates)
             else entry
 
 let clearCandidateTry (candidate : Candidate) (entryLookup : Cell -> CellContents) cell = 
@@ -25,6 +24,6 @@ let clearCandidateTry (candidate : Candidate) (entryLookup : Cell -> CellContent
         if Set.contains candidate candidates then 
             Some { ClearCandidate.cell = cell
                    candidate = candidate }
-        else
+        else 
             Console.WriteLine("Cell {0} does not have candidate {1}", cell, candidate)
             None

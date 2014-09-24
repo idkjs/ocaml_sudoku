@@ -26,4 +26,4 @@ val ConsoleWriteChar : ConsoleChar -> Unit
 
 val drawFLFE : Candidate -> Candidate -> CellContents -> CellContents -> ConsoleChar
 
-val drawFL2 : Candidate -> Candidate -> CellContents -> CellContents -> CellContents -> CellAnnotation -> ConsoleChar
+val drawFL2 : Candidate -> Candidate -> CellContents -> CellContents -> CellAnnotation -> ConsoleChar
