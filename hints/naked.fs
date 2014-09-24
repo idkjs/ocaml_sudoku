@@ -19,16 +19,16 @@ let findNaked (candidateLookup : Cell -> Set<Candidate>) (houseCells : Set<Cell>
         let candidateReductions = 
             Set.map (fun cell -> 
                 let candidates = candidateLookup cell
-                { CandidateReduction.symbols = Set.intersect subsetSymbols candidates
+                { CandidateReduction.candidates = Set.intersect subsetSymbols candidates
                   cell = cell }) otherCells
         
-        let nonEmptyCandidateReductions = Set.filter (fun cr -> Set.count cr.symbols > 0) candidateReductions
+        let nonEmptyCandidateReductions = Set.filter (fun cr -> Set.count cr.candidates > 0) candidateReductions
         
         let pointers = 
             Set.map (fun cell -> 
                 let candidates = candidateLookup cell
                 { CandidateReduction.cell = cell
-                  symbols = candidates }) cellSubset
+                  candidates = candidates }) cellSubset
 
         if Set.count nonEmptyCandidateReductions > 0 then 
             Some { HintDescription.primaryHouses = set [ house ]

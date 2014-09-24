@@ -23,7 +23,7 @@ let intersectionsPerHouse (candidateLookup : Cell -> Set<Candidate>) (houseCells
         let pointers = 
             Set.map (fun cell -> 
                 { CandidateReduction.cell = cell
-                  symbols = set [ candidate ] }) pointerCells
+                  candidates = set [ candidate ] }) pointerCells
         
         let hintsPerSecondaryHouse secondaryHouses = 
             if Set.count pointerCells > 1 && Set.count secondaryHouses = 1 then 
@@ -39,7 +39,7 @@ let intersectionsPerHouse (candidateLookup : Cell -> Set<Candidate>) (houseCells
                 let candidateReductions = 
                     Set.map (fun cell -> 
                         { CandidateReduction.cell = cell
-                          symbols = set [ candidate ] }) candidateReductionCells
+                          candidates = set [ candidate ] }) candidateReductionCells
                 
                 if Set.count candidateReductions > 0 then 
                     Some { HintDescription.primaryHouses = set [ primaryHouse ]

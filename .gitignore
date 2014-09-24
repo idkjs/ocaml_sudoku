@@ -2,3 +2,6 @@
 *.bat
 *.userprefs
 *.suo
+bin/
+obj/
+packages/

@@ -8,7 +8,7 @@ let makeHints candidateLookup houseCells pointerCells primaryHouses secondaryHou
     let pointers = 
         Set.map (fun cell -> 
             { CandidateReduction.cell = cell
-              symbols = set [ candidate ] }) pointerCells
+              candidates = set [ candidate ] }) pointerCells
     
     let colCells = Set.map houseCells secondaryHouses |> Set.unionMany
     let secondaryCells = Set.difference colCells pointerCells
@@ -19,7 +19,7 @@ let makeHints candidateLookup houseCells pointerCells primaryHouses secondaryHou
     let candidatesReductions = 
         Set.map (fun (_, cell) -> 
             { CandidateReduction.cell = cell
-              symbols = set [ candidate ] }) potentialCells
+              candidates = set [ candidate ] }) potentialCells
 
     if Set.count candidatesReductions > 0 then 
         Some { HintDescription.candidateReductions = candidatesReductions
@@ -250,9 +250,9 @@ let yWingsPerHouse (candidateLookup : Cell -> Set<Candidate>) (houseCells : Hous
                         if Set.count removee = 1 && ((fst left) <> (fst right)) && 
                             Set.isSubset removee (candidateLookup other) then
 
-                            let candidateReductions = { CandidateReduction.cell = other; symbols = removee }
+                            let candidateReductions = { CandidateReduction.cell = other; candidates = removee }
 
-                            let pointers = List.map (fun (cr, cell) -> { CandidateReduction.cell = cell; symbols = cr } ) triple
+                            let pointers = List.map (fun (cr, cell) -> { CandidateReduction.cell = cell; candidates = cr } ) triple
                                            |> Set.ofList
 
                             Some { HintDescription.candidateReductions = set [ candidateReductions ]

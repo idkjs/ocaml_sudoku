@@ -17,23 +17,23 @@ let findHidden (candidateLookup : Cell -> Set<Candidate>) (houseCells : List<Cel
             
             let pointer = 
                 { CandidateReduction.cell = cell
-                  symbols = Set.intersect candidates candidateSubset }
+                  candidates = Set.intersect candidates candidateSubset }
             
             let crs = 
-                if Set.count pointer.symbols > 0 then Set.difference candidates candidateSubset
+                if Set.count pointer.candidates > 0 then Set.difference candidates candidateSubset
                 else set []
             
             let candidateReduction = 
                 { CandidateReduction.cell = cell
-                  symbols = crs }
+                  candidates = crs }
             
             (pointer, candidateReduction)) houseCells
     
     let pointers, candidateReductions = List.unzip pairs
 
-    let nonEmptyPointers = List.filter (fun cr -> Set.count cr.symbols > 0) pointers
+    let nonEmptyPointers = List.filter (fun cr -> Set.count cr.candidates > 0) pointers
 
-    let nonEmptyCandidateReductions = List.filter (fun cr -> Set.count cr.symbols > 0) candidateReductions
+    let nonEmptyCandidateReductions = List.filter (fun cr -> Set.count cr.candidates > 0) candidateReductions
 
     if List.length nonEmptyPointers = count && List.length nonEmptyCandidateReductions > 0 then 
 
