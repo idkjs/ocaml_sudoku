@@ -5,16 +5,17 @@ open System.Text
 
 open console
 
+open core.setCell
 open core.sudoku
 open hints
 
-let findNaked (candidateLookup : Cell -> Set<Candidate>) (houseCells : Set<Cell>) cellSubset (count : int) house = 
+let findNaked (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) (primaryHouseCells : Set<Cell>) (cellSubset : Set<Cell>) (count : int) (primaryHouse : House) = 
 
     let symbols = Set.map candidateLookup cellSubset
     let subsetSymbols = Set.unionMany symbols
 
     if Set.count subsetSymbols <= count then 
-        let otherCells = Set.filter (fun cell -> Set.contains cell cellSubset = false) houseCells
+        let otherCells = Set.filter (fun cell -> Set.contains cell cellSubset = false) primaryHouseCells
         
         let candidateReductions = 
             Set.map (fun cell -> 
@@ -31,8 +32,10 @@ let findNaked (candidateLookup : Cell -> Set<Candidate>) (houseCells : Set<Cell>
                   candidates = candidates }) cellSubset
 
         if Set.count nonEmptyCandidateReductions > 0 then 
-            Some { HintDescription.primaryHouses = set [ house ]
+            Some { HintDescription.primaryHouses = set [ primaryHouse ]
+                   primaryHouseCells = primaryHouseCells
                    secondaryHouses = set []
+                   secondaryHouseCells = set []
                    candidateReductions = nonEmptyCandidateReductions
                    setCellValue = None
                    pointers = pointers }
@@ -40,32 +43,38 @@ let findNaked (candidateLookup : Cell -> Set<Candidate>) (houseCells : Set<Cell>
         else None
     else None
 
-let nakedNPerHouse (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> Set<Cell>) (count : int) 
-    (house : House) = 
-    let cells = houseCells house
+let nakedNPerHouse (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> Set<Cell>) (count : int) 
+    (primaryHouse : House) = 
+
+    let primaryHouseCells = houseCells primaryHouse
     
     let hht = 
         Set.filter (fun cell -> 
             let candidates = candidateLookup cell
-            Set.count candidates > 1 && Set.count candidates <= count) cells
+            Set.count candidates > 1 && Set.count candidates <= count) primaryHouseCells
     
     let subsets = setSubsets (Set.toList hht) count
 
-    let hs = List.map (fun subset -> findNaked candidateLookup cells (Set.ofList subset) count house) subsets
+    let hs = List.map (fun subset -> findNaked cellHouseCells candidateLookup primaryHouseCells (Set.ofList subset) count primaryHouse) subsets
 
     List.choose id hs
 
-let nakedSingleFind (candidateLookup : Cell -> Set<Candidate>) (cells : Cell list) = 
+let nakedSingleFind (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) (cells : Cell list) = 
     let hs = 
         List.map (fun cell -> 
             let candidates = candidateLookup cell
+
             if Set.count candidates = 1 then 
+                let candidate = first candidates
+
+                let setCellValue = makeSetCellValue cell candidate cellHouseCells candidateLookup
+
                 Some { HintDescription.primaryHouses = set []
+                       primaryHouseCells = set []
                        secondaryHouses = set []
+                       secondaryHouseCells = set []
                        candidateReductions = set []
-                       setCellValue = 
-                           Some { SetCellValue.cell = cell
-                                  candidate = first candidates }
+                       setCellValue = Some setCellValue
                        pointers = set [] }
             else None) cells
     List.choose id hs

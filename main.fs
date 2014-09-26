@@ -109,7 +109,7 @@ let parse (item : string) (alphabet : Candidate list) (solution : Solution) (puz
     let centreCandidate = List.nth alphabet ((List.length alphabet) / 2)
     let puzzleDrawer (cell : Cell) (candidate : Candidate) = 
         drawFLFE centreCandidate candidate (solution.start cell) (solution.current cell)
-    let print_grid2 hd = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup
+    let print_grid2 hd = mhas hd candidateLookup
     let draw_cell2 (l : Cell -> CellAnnotation) (cell : Cell) (candidate : Candidate) = 
         drawFL2 centreCandidate candidate (solution.start cell) (solution.current cell) (l cell)
 
@@ -119,20 +119,22 @@ let parse (item : string) (alphabet : Candidate list) (solution : Solution) (puz
         puzzleDrawFull puzzleDrawer
         (solution, [])
     else if item.StartsWith "s" then 
-        let setCommand = setCellCommand item alphabet solution.current puzzleCells
+        let setCommand = setCellCommand item alphabet solution.current puzzleCells puzzleHouseCellCells candidateLookup
         
         let newSolution = 
             match setCommand with
             | Some setCellValue -> 
                 let hd = 
                     { HintDescription.primaryHouses = set []
+                      primaryHouseCells = set []
                       secondaryHouses = set []
+                      secondaryHouseCells = set []
                       candidateReductions = set []
                       setCellValue = Some setCellValue
                       pointers = set [] }
                 puzzleDrawFull (draw_cell2 (print_grid2 hd))
                 { solution with current = 
-                                    setCellApply setCellValue puzzleHouseCellCells candidateLookup solution.current
+                                    setCellApply setCellValue solution.current
                                 steps = (SetCellValue setCellValue) :: solution.steps }
             | None -> 
                 Console.WriteLine("")
@@ -152,7 +154,9 @@ let parse (item : string) (alphabet : Candidate list) (solution : Solution) (puz
                 
                 let hd = 
                     { HintDescription.primaryHouses = set []
+                      primaryHouseCells = set []
                       secondaryHouses = set []
+                      secondaryHouseCells = set []
                       candidateReductions = set [ cr ]
                       setCellValue = None
                       pointers = set [] }
@@ -168,37 +172,37 @@ let parse (item : string) (alphabet : Candidate list) (solution : Solution) (puz
         (newSolution, [])
 
     else if item = "fh" then 
-        let hints = List.collect (fullHousePerHouse candidateLookup puzzleHouseCells) puzzleHouses
+        let hints = List.collect (fullHousePerHouse puzzleHouseCellCells candidateLookup puzzleHouseCells) puzzleHouses
         (solution, List.map FH hints)
     else if item = "hs" then 
-        let hints = List.collect (hiddenNPerHouse candidateLookup puzzleHouseCells 1) puzzleHouses
+        let hints = List.collect (hiddenNPerHouse puzzleHouseCellCells candidateLookup puzzleHouseCells 1) puzzleHouses
         (solution, List.map HS hints)
     else if item = "hp" then 
-        let hints = List.collect (hiddenNPerHouse candidateLookup puzzleHouseCells 2) puzzleHouses
+        let hints = List.collect (hiddenNPerHouse puzzleHouseCellCells candidateLookup puzzleHouseCells 2) puzzleHouses
         (solution, List.map HP hints)
     else if item = "ht" then 
-        let hints = List.collect (hiddenNPerHouse candidateLookup puzzleHouseCells 3) puzzleHouses
+        let hints = List.collect (hiddenNPerHouse puzzleHouseCellCells candidateLookup puzzleHouseCells 3) puzzleHouses
         (solution, List.map HT hints)
     else if item = "hq" then 
-        let hints = List.collect (hiddenNPerHouse candidateLookup puzzleHouseCells 4) puzzleHouses
+        let hints = List.collect (hiddenNPerHouse puzzleHouseCellCells candidateLookup puzzleHouseCells 4) puzzleHouses
         (solution, List.map HQ hints)
     else if item = "ns" then 
-        let hints = nakedSingleFind candidateLookup puzzleCells
+        let hints = nakedSingleFind puzzleHouseCellCells candidateLookup puzzleCells
 
         (solution, List.map NS hints)
 
     else if item = "np" then 
-        let hints = List.collect (nakedNPerHouse candidateLookup puzzleHouseCells 2) puzzleHouses
+        let hints = List.collect (nakedNPerHouse puzzleHouseCellCells candidateLookup puzzleHouseCells 2) puzzleHouses
 
         (solution, List.map NP hints)
 
     else if item = "nt" then 
-        let hints = List.collect (nakedNPerHouse candidateLookup puzzleHouseCells 3) puzzleHouses
+        let hints = List.collect (nakedNPerHouse puzzleHouseCellCells candidateLookup puzzleHouseCells 3) puzzleHouses
 
         (solution, List.map NT hints)
 
     else if item = "nq" then 
-        let hints = List.collect (nakedNPerHouse candidateLookup puzzleHouseCells 4) puzzleHouses
+        let hints = List.collect (nakedNPerHouse puzzleHouseCellCells candidateLookup puzzleHouseCells 4) puzzleHouses
 
         (solution, List.map NQ hints)
 
@@ -243,7 +247,7 @@ let printHint (candidates : Candidate list) (solution : Solution) (puzzleSpec : 
 
     let centreCandidate = List.nth candidates ((List.length candidates) / 2)
 
-    let print_grid2 hd = mhas hd puzzleHouseCells puzzleHouseCellCells candidateLookup
+    let print_grid2 hd = mhas hd candidateLookup
     let draw_cell2 (l : Cell -> CellAnnotation) (cell : Cell) (candidate : Candidate) = 
         drawFL2 centreCandidate candidate (solution.start cell) (solution.current cell) (l cell)
     
@@ -324,7 +328,7 @@ let repl (sudoku : string) (puzzleSpec : Puzzle) =
             | Some symbol -> ASymbol symbol
             | None -> ACandidates Set.empty
 
-        drawAnnotatedSymbol annotatedSymbol annotatedSymbol
+        drawAnnotatedSymbol symbolOpt annotatedSymbol
     
     let line = List.foldBack (symbolOptionToConsoleChar >> cons) (cells puzzleSpec.size) [ NL ]
     List.iter mainWriter line
@@ -335,8 +339,9 @@ let repl (sudoku : string) (puzzleSpec : Puzzle) =
     Seq.iter ConsoleWriteChar 
         (printGrid puzzleSpec.size puzzleSpec.boxWidth puzzleSpec.boxHeight defaultGridChars sNL 
              symbolOptionToConsoleChar)
+
     let solution = 
-        ref ({ start = solutionGrid
+        ref ({ start = puzzleGrid
                current = solutionGrid
                steps = [] })
     

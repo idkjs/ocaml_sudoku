@@ -22,9 +22,14 @@ let makeHints candidateLookup houseCells pointerCells primaryHouses secondaryHou
               candidates = set [ candidate ] }) potentialCells
 
     if Set.count candidatesReductions > 0 then 
+        let primaryHouseCells = Set.map houseCells primaryHouses |> Set.unionMany
+        let secondaryHouseCells = Set.map houseCells secondaryHouses |> Set.unionMany
+
         Some { HintDescription.candidateReductions = candidatesReductions
                primaryHouses = primaryHouses
+               primaryHouseCells = primaryHouseCells
                secondaryHouses = secondaryHouses
+               secondaryHouseCells = secondaryHouseCells
                pointers = pointers
                setCellValue = None }
     else None
@@ -255,13 +260,19 @@ let yWingsPerHouse (candidateLookup : Cell -> Set<Candidate>) (houseCells : Hous
                             let pointers = List.map (fun (cr, cell) -> { CandidateReduction.cell = cell; candidates = cr } ) triple
                                            |> Set.ofList
 
+                            let primaryHouses = 
+                                set [ Row row1
+                                      Row row2
+                                      Column col1
+                                      Column col2 ]
+
+                            let primaryHouseCells = Set.map houseCells primaryHouses |> Set.unionMany
+
                             Some { HintDescription.candidateReductions = set [ candidateReductions ]
-                                   primaryHouses = 
-                                       set [ Row row1
-                                             Row row2
-                                             Column col1
-                                             Column col2 ]
+                                   primaryHouses = primaryHouses
+                                   primaryHouseCells = primaryHouseCells
                                    secondaryHouses = set []
+                                   secondaryHouseCells = set []
                                    pointers = pointers
                                    setCellValue = None }
                         else None

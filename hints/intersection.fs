@@ -43,7 +43,9 @@ let intersectionsPerHouse (candidateLookup : Cell -> Set<Candidate>) (houseCells
                 
                 if Set.count candidateReductions > 0 then 
                     Some { HintDescription.primaryHouses = set [ primaryHouse ]
+                           primaryHouseCells = primaryHouseCells
                            secondaryHouses = set [ secondaryHouse ]
+                           secondaryHouseCells = secondaryHouseCells
                            candidateReductions = candidateReductions
                            setCellValue = None
                            pointers = pointers }

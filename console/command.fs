@@ -39,14 +39,14 @@ let parseValue (candidates : Candidate list) (term : string) =
         Console.WriteLine("Expect a single digit, not {0}", term)
         None
 
-let setCellCommand (item : string) (alphabet : Candidate list) (lastGrid : Cell -> CellContents) (cells : Cell list) = 
+let setCellCommand (item : string) (alphabet : Candidate list) (lastGrid : Cell -> CellContents) (cells : Cell list) (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) = 
     let terms = item.Split(' ')
     if terms.Length = 4 then 
         let parsedCell = parseCell alphabet.Length cells terms.[1] terms.[2]
         let parsedValue = parseValue alphabet terms.[3]
 
         match (parsedCell, parsedValue) with
-        | (Some cell, Some value) -> setCellTry value lastGrid cell
+        | (Some cell, Some value) -> setCellTry value candidateLookup cellHouseCells lastGrid cell
         | _ -> 
             Console.WriteLine "Expect set <col> <row> <val>"
             None

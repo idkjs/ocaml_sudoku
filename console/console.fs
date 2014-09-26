@@ -90,48 +90,39 @@ let ConsoleWriteChar(consoleChar : ConsoleChar) =
     | ColouredString(c, consoleColour) -> consoleWriteColor c consoleColour
     | NL -> Console.WriteLine ""
 
-
-
-let drawAnnotatedSymbol (firstSymbol : CellContents) (currentSymbol : CellContents) = 
+let drawAnnotatedSymbol (firstSymbol : Symbol option) (currentSymbol : CellContents) = 
     match firstSymbol with
-    | ASymbol s -> ColouredString(s.ToString(), ConsoleColor.Blue)
-    | ACandidates _ -> 
+    | Some s -> ColouredString(s.ToString(), ConsoleColor.Blue)
+    | None _ -> 
         match currentSymbol with
         | ASymbol s -> ColouredString(s.ToString(), ConsoleColor.Red)
         | ACandidates _ -> CChar '.'
 
-let drawAnnotatedCandidate (candidateOpt : Candidate option) = 
-    match candidateOpt with
-    | Some candidate -> CStr(candidate.ToString())
-    | None -> CChar ' '
-
-let drawFLFE centreCandidate candidate (firstSymbol : CellContents) (currentSymbol : CellContents) = 
+let drawFLFE centreCandidate candidate (firstSymbol : Symbol option) (currentSymbol : CellContents) = 
 
     let isCentre = centreCandidate = candidate
 
     match firstSymbol with
-    | ASymbol _ when not isCentre -> CChar ' '
-    | ASymbol s -> ColouredString(s.ToString(), ConsoleColor.Blue)
-    | ACandidates _ -> 
+    | Some _ when not isCentre -> CChar ' '
+    | Some s -> ColouredString(s.ToString(), ConsoleColor.Blue)
+    | None -> 
         match currentSymbol with
         | ASymbol _ when not isCentre -> CChar ' '
         | ASymbol s -> ColouredString(s.ToString(), ConsoleColor.Red)
         | ACandidates candidates -> 
-            let candidateOpt = 
-                if Set.contains candidate candidates then Some candidate
-                else None
-            drawAnnotatedCandidate candidateOpt
+            if Set.contains candidate candidates then CStr(candidate.ToString())
+            else CChar ' '
 
-let drawFL2 centreCandidate candidate (firstSymbol : CellContents) (currentSymbol : CellContents) (currentHintSymbol : CellAnnotation) = 
+let drawFL2 centreCandidate candidate (firstSymbol : Symbol option) (currentSymbol : CellContents) (currentHintSymbol : CellAnnotation) = 
     let isCentre = centreCandidate = candidate
 
     match firstSymbol with
-    | ASymbol _ when not isCentre -> CChar ' '
-    | ASymbol s -> 
+    | Some _ when not isCentre -> CChar ' '
+    | Some s -> 
         if currentHintSymbol.primaryHintHouse then ColouredString(s.ToString(), ConsoleColor.Cyan)
         else if currentHintSymbol.secondaryHintHouse then ColouredString(s.ToString(), ConsoleColor.DarkBlue)
         else ColouredString(s.ToString(), ConsoleColor.Blue)
-    | ACandidates candidates -> 
+    | None -> 
         match currentSymbol with
         | ASymbol _ when not isCentre -> CChar ' '
         | ASymbol s -> 

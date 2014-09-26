@@ -9,8 +9,8 @@ open core.setCell
 open core.sudoku
 open hints
 
-let findHidden (candidateLookup : Cell -> Set<Candidate>) (houseCells : List<Cell>) (candidateSubset : Set<Candidate>) 
-    (count : int) house = 
+let findHidden (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) (primaryHouseCells : Set<Cell>) (candidateSubset : Set<Candidate>) 
+    (count : int) (primaryHouse : House) = 
     let pairs = 
         List.map (fun cell -> 
             let candidates = candidateLookup cell
@@ -27,7 +27,7 @@ let findHidden (candidateLookup : Cell -> Set<Candidate>) (houseCells : List<Cel
                 { CandidateReduction.cell = cell
                   candidates = crs }
             
-            (pointer, candidateReduction)) houseCells
+            (pointer, candidateReduction)) (Set.toList primaryHouseCells)
     
     let pointers, candidateReductions = List.unzip pairs
 
@@ -40,18 +40,24 @@ let findHidden (candidateLookup : Cell -> Set<Candidate>) (houseCells : List<Cel
         let setCellValue = 
             if count = 1 then 
                 let h = List.head nonEmptyPointers
-                Some { SetCellValue.cell = h.cell
-                       candidate = first candidateSubset }
+                let cell = h.cell
+                let candidate = first candidateSubset
+
+                let setCellValue = makeSetCellValue cell candidate cellHouseCells candidateLookup
+
+                Some setCellValue
             else None
 
-        Some { HintDescription.primaryHouses = set [ house ]
+        Some { HintDescription.primaryHouses = set [ primaryHouse ]
+               primaryHouseCells = primaryHouseCells
                secondaryHouses = set []
+               secondaryHouseCells = set []
                candidateReductions = Set.ofList nonEmptyCandidateReductions
                setCellValue = setCellValue
                pointers = Set.ofList nonEmptyPointers }
     else None
 
-let hiddenNPerHouse (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> Set<Cell>) (count : int) 
+let hiddenNPerHouse (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> Set<Cell>) (count : int) 
     (house : House) = 
     let cells = houseCells house
 
@@ -61,5 +67,5 @@ let hiddenNPerHouse (candidateLookup : Cell -> Set<Candidate>) (houseCells : Hou
     let hs = 
         List.map 
             (fun candidateSubset -> 
-            findHidden candidateLookup (Set.toList cells) (Set.ofList candidateSubset) count house) candidateSubsets
+            findHidden cellHouseCells candidateLookup cells (Set.ofList candidateSubset) count house) candidateSubsets
     List.choose id hs

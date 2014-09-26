@@ -146,6 +146,7 @@ type CellAnnotation =
 // Working towards a solution we take one of the following actions:
 type SetCellValue = 
     { cell : Cell
+      reductions : Set<Cell>
       candidate : Candidate }
     override this.ToString() = String.Format("SetCellValue: {0} = {1}", this.cell, this.candidate)
 
@@ -166,6 +167,6 @@ type Action =
 
 [<NoEquality; NoComparison>]
 type Solution = 
-    { start : Cell -> CellContents
+    { start : Cell -> Symbol option
       current : Cell -> CellContents
       steps : Action list }

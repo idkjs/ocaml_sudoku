@@ -20,10 +20,10 @@ val sNL : seq<ConsoleChar>
 
 val defaultSolutionChars : solutionChars<seq<ConsoleChar>>
 
-val drawAnnotatedSymbol : CellContents -> CellContents -> ConsoleChar
+val drawAnnotatedSymbol : Symbol option -> CellContents -> ConsoleChar
 
 val ConsoleWriteChar : ConsoleChar -> Unit
 
-val drawFLFE : Candidate -> Candidate -> CellContents -> CellContents -> ConsoleChar
+val drawFLFE : Candidate -> Candidate -> Symbol option -> CellContents -> ConsoleChar
 
-val drawFL2 : Candidate -> Candidate -> CellContents -> CellContents -> CellAnnotation -> ConsoleChar
+val drawFL2 : Candidate -> Candidate -> Symbol option -> CellContents -> CellAnnotation -> ConsoleChar

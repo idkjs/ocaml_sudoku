@@ -112,6 +112,7 @@ type CellAnnotation =
 // Working towards a solution we take one of the following actions:
 type SetCellValue = 
     { cell : Cell
+      reductions : Set<Cell>
       candidate : Candidate }
 
 type ClearCandidate = 
@@ -124,7 +125,7 @@ type Action =
 
 [<NoEquality; NoComparison>]
 type Solution = 
-    { start : Cell -> CellContents
+    { start : Cell -> Symbol option
       current : Cell -> CellContents
       steps : Action list }
 

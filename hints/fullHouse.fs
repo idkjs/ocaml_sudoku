@@ -2,25 +2,30 @@
 
 // Full House means:
 // For a house there is only one cell that is neither given nor set i.e. has candidates
+open core.setCell
 open core.sudoku
 open hints
 
-let fullHousePerHouse (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> Set<Cell>) (house : House) = 
+let fullHousePerHouse (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> Set<Cell>) (primaryHouse : House) = 
 
-    let cells = houseCells house
+    let primaryHouseCells = houseCells primaryHouse
 
-    let candidateCells = Set.map (fun cell -> ((candidateLookup cell), cell)) cells
+    let candidateCells = Set.map (fun cell -> ((candidateLookup cell), cell)) primaryHouseCells
 
     let hhs = Set.filter (fun (candidates, _) -> Set.isEmpty candidates = false) candidateCells
 
     if hhs.Count = 1 then 
         let h = first hhs
+        let cell = snd h
+        let candidate = first (fst h)
 
-        [ { HintDescription.primaryHouses = set [ house ]
+        let setCellValue = makeSetCellValue cell candidate cellHouseCells candidateLookup
+
+        [ { HintDescription.primaryHouses = set [ primaryHouse ]
+            primaryHouseCells = primaryHouseCells
             secondaryHouses = set []
+            secondaryHouseCells = set []
             candidateReductions = set []
-            setCellValue = 
-                Some { SetCellValue.cell = snd h
-                       candidate = first (fst h) }
+            setCellValue = Some setCellValue
             pointers = set [] } ]
     else []

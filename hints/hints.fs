@@ -59,7 +59,9 @@ let firstOpt (set : Set<'a>) =
 
 type HintDescription = 
     { primaryHouses : Set<House>
+      primaryHouseCells : Set<Cell>
       secondaryHouses : Set<House>
+      secondaryHouseCells : Set<Cell>
       candidateReductions : Set<CandidateReduction>
       setCellValue : SetCellValue option
       pointers : Set<CandidateReduction> }
@@ -76,30 +78,28 @@ type HintDescription =
 
         sb.ToString()
 
-let mhas (hd : HintDescription) (houseCells : House -> Set<Cell>) (cellHouseCells : Cell -> Set<Cell>) 
-    (candidateLookup : Cell -> Set<Candidate>) : Cell -> CellAnnotation = 
-    let primaryHouseCells = Set.map houseCells hd.primaryHouses |> Set.unionMany
-    let secondaryHouseCells = Set.map houseCells hd.secondaryHouses |> Set.unionMany
+let mhas (hd : HintDescription) (candidateLookup : Cell -> Set<Candidate>) : Cell -> CellAnnotation = 
     
     let crs = 
         match hd.setCellValue with
-        | Some scv -> setCellCandidateReductions scv cellHouseCells candidateLookup
+        | Some scv -> scv.reductions
         | None -> set []
 
     fun (cell : Cell) -> 
-        let setValue = 
+        let setValue, setCellReductions = 
             match hd.setCellValue with
             | Some setCellValue -> 
-                if setCellValue.cell = cell then Some setCellValue.candidate
-                else None
-            | None -> None
-        
-        let setCellCandidateReductions = Set.filter (fun pointer -> cell = pointer.cell) crs
-        
-        let setCellReductions = 
-            match firstOpt setCellCandidateReductions with
-            | Some cr -> cr.candidates
-            | _ -> set []
+                let r1 =
+                    if setCellValue.cell = cell then Some setCellValue.candidate
+                    else None
+
+                let r2 = 
+                    if setCellValue.cell = cell then Set.remove setCellValue.candidate (candidateLookup cell)
+                    else if Set.contains cell setCellValue.reductions then set [ setCellValue.candidate ]
+                    else set []
+
+                r1, r2
+            | None -> None, set []
         
         let cellCandidateReductions = Set.filter (fun pointer -> cell = pointer.cell) hd.candidateReductions
         
@@ -116,7 +116,7 @@ let mhas (hd : HintDescription) (houseCells : House -> Set<Cell>) (cellHouseCell
             | _ -> set []
 
         { CellAnnotation.setValue = setValue
-          primaryHintHouse = Set.contains cell primaryHouseCells
-          secondaryHintHouse = Set.contains cell secondaryHouseCells
+          primaryHintHouse = Set.contains cell hd.primaryHouseCells
+          secondaryHintHouse = Set.contains cell hd.secondaryHouseCells
           reductions = Set.union setCellReductions reductions
           pointers = pointers }
