@@ -33,9 +33,7 @@ let findNaked (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Se
 
         if Set.count nonEmptyCandidateReductions > 0 then 
             Some { HintDescription.primaryHouses = set [ primaryHouse ]
-                   primaryHouseCells = primaryHouseCells
                    secondaryHouses = set []
-                   secondaryHouseCells = set []
                    candidateReductions = nonEmptyCandidateReductions
                    setCellValue = None
                    pointers = pointers }
@@ -43,7 +41,7 @@ let findNaked (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Se
         else None
     else None
 
-let nakedNPerHouse (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> Set<Cell>) (count : int) 
+let nakedNPerHouse (cellHouseCells : Cell -> Set<Cell>) (houseCells : House -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) (count : int) 
     (primaryHouse : House) = 
 
     let primaryHouseCells = houseCells primaryHouse
@@ -57,9 +55,9 @@ let nakedNPerHouse (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell 
 
     let hs = List.map (fun subset -> findNaked cellHouseCells candidateLookup primaryHouseCells (Set.ofList subset) count primaryHouse) subsets
 
-    List.choose id hs
+    List.choose id hs |> List.map (mhas cellHouseCells houseCells)
 
-let nakedSingleFind (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) (cells : Cell list) = 
+let nakedSingleFind (cellHouseCells : Cell -> Set<Cell>) (houseCells : House -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) (cells : Cell list) = 
     let hs = 
         List.map (fun cell -> 
             let candidates = candidateLookup cell
@@ -67,14 +65,12 @@ let nakedSingleFind (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell
             if Set.count candidates = 1 then 
                 let candidate = first candidates
 
-                let setCellValue = makeSetCellValue cell candidate cellHouseCells candidateLookup
+                let setCellValue = makeSetCellValue cell candidate cellHouseCells
 
                 Some { HintDescription.primaryHouses = set []
-                       primaryHouseCells = set []
                        secondaryHouses = set []
-                       secondaryHouseCells = set []
                        candidateReductions = set []
                        setCellValue = Some setCellValue
                        pointers = set [] }
             else None) cells
-    List.choose id hs
+    List.choose id hs |> List.map (mhas cellHouseCells houseCells)

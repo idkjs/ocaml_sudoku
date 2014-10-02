@@ -3,6 +3,6 @@
 open core.sudoku
 open hints
 
-val nakedSingleFind : (Cell -> Set<Cell>) -> (Cell -> Set<Candidate>) -> Cell list -> HintDescription list
+val nakedSingleFind : (Cell -> Set<Cell>) -> (House -> Set<Cell>) -> (Cell -> Set<Candidate>) -> Cell list -> HintDescription2 list
 
-val nakedNPerHouse : (Cell -> Set<Cell>) -> (Cell -> Set<Candidate>) -> (House -> Set<Cell>) -> int -> House -> HintDescription list
+val nakedNPerHouse : (Cell -> Set<Cell>) -> (House -> Set<Cell>) -> (Cell -> Set<Candidate>) -> int -> House -> HintDescription2 list

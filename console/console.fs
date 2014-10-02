@@ -135,6 +135,10 @@ let drawFL2 centreCandidate candidate (firstSymbol : Symbol option) (currentSymb
             | ACandidates currentCandidates -> 
                 if currentHintSymbol.setValue.IsSome && currentHintSymbol.setValue.Value = candidate then 
                     ColouredString(candidate.ToString(), ConsoleColor.Red)
+                else if currentHintSymbol.setValue.IsSome && Set.contains candidate currentCandidates then 
+                    ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
+                else if currentHintSymbol.setValueReduction.IsSome && currentHintSymbol.setValueReduction.Value = candidate && Set.contains candidate currentCandidates then 
+                    ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
                 else if Set.contains candidate currentHintSymbol.reductions then 
                     ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
                 else if Set.contains candidate currentHintSymbol.pointers then 

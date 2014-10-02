@@ -3,4 +3,4 @@
 open core.sudoku
 open hints
 
-val hiddenNPerHouse : (Cell -> Set<Cell>) -> (Cell -> Set<Candidate>) -> (House -> Set<Cell>) -> int -> House -> HintDescription list
+val hiddenNPerHouse : (Cell -> Set<Cell>) -> (House -> Set<Cell>) -> (Cell -> Set<Candidate>) -> int -> House -> HintDescription2 list

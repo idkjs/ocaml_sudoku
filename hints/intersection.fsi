@@ -3,6 +3,7 @@
 open core.sudoku
 open hints
 
-val pointingPairsPerBox : (Cell -> Set<Candidate>) -> (House -> Set<Cell>) -> House -> HintDescription list
-val boxLineReductionsPerHouse : (Cell -> Set<Candidate>)
-     -> (House -> Set<Cell>) -> int<width> -> int<height> -> House -> HintDescription list
+val pointingPairsPerBox : (Cell -> Set<Cell>) -> (House -> Set<Cell>) -> (Cell -> Set<Candidate>) -> House -> HintDescription2 list
+
+val boxLineReductionsPerHouse : (Cell -> Set<Cell>) -> (House -> Set<Cell>) -> (Cell -> Set<Candidate>)
+     -> int<width> -> int<height> -> House -> HintDescription2 list

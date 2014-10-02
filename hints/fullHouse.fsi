@@ -3,4 +3,4 @@
 open core.sudoku
 open hints
 
-val fullHousePerHouse : (Cell -> Set<Cell>) -> (Cell -> Set<Candidate>) -> (House -> Set<Cell>) -> House -> HintDescription list
+val fullHousePerHouse : (Cell -> Set<Cell>) -> (House -> Set<Cell>) -> (Cell -> Set<Candidate>) -> House -> HintDescription2 list

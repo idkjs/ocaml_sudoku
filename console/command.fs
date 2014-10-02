@@ -46,7 +46,7 @@ let setCellCommand (item : string) (alphabet : Candidate list) (lastGrid : Cell 
         let parsedValue = parseValue alphabet terms.[3]
 
         match (parsedCell, parsedValue) with
-        | (Some cell, Some value) -> setCellTry value candidateLookup cellHouseCells lastGrid cell
+        | (Some cell, Some value) -> setCellTry value cellHouseCells lastGrid cell
         | _ -> 
             Console.WriteLine "Expect set <col> <row> <val>"
             None

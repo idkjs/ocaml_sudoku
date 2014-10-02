@@ -59,9 +59,7 @@ let firstOpt (set : Set<'a>) =
 
 type HintDescription = 
     { primaryHouses : Set<House>
-      primaryHouseCells : Set<Cell>
       secondaryHouses : Set<House>
-      secondaryHouseCells : Set<Cell>
       candidateReductions : Set<CandidateReduction>
       setCellValue : SetCellValue option
       pointers : Set<CandidateReduction> }
@@ -78,28 +76,30 @@ type HintDescription =
 
         sb.ToString()
 
-let mhas (hd : HintDescription) (candidateLookup : Cell -> Set<Candidate>) : Cell -> CellAnnotation = 
-    
-    let crs = 
-        match hd.setCellValue with
-        | Some scv -> scv.reductions
-        | None -> set []
+[<NoEquality; NoComparison>]
+type HintDescription2 = 
+    { primaryHouses : Set<House>
+      secondaryHouses : Set<House>
+      candidateReductions : Set<CandidateReduction>
+      setCellValue : SetCellValue option
+      annotations : Cell -> CellAnnotation }
 
-    fun (cell : Cell) -> 
-        let setValue, setCellReductions = 
+let mhas (cellHouseCells : Cell -> Set<Cell>) (houseCells : House -> Set<Cell>) (hd : HintDescription) : HintDescription2 = 
+
+    let annotationLookup (cell : Cell) =
+        let setValue, setValueReduction = 
             match hd.setCellValue with
             | Some setCellValue -> 
                 let r1 =
                     if setCellValue.cell = cell then Some setCellValue.candidate
                     else None
 
-                let r2 = 
-                    if setCellValue.cell = cell then Set.remove setCellValue.candidate (candidateLookup cell)
-                    else if Set.contains cell setCellValue.reductions then set [ setCellValue.candidate ]
-                    else set []
+                let r3 =
+                    if Set.contains cell setCellValue.cells then Some setCellValue.candidate
+                    else None
 
-                r1, r2
-            | None -> None, set []
+                r1, r3
+            | None -> None, None
         
         let cellCandidateReductions = Set.filter (fun pointer -> cell = pointer.cell) hd.candidateReductions
         
@@ -115,8 +115,18 @@ let mhas (hd : HintDescription) (candidateLookup : Cell -> Set<Candidate>) : Cel
             | Some cr -> cr.candidates
             | _ -> set []
 
+        let primaryHouseCells = Set.map houseCells hd.primaryHouses |> Set.unionMany
+        let secondaryHouseCells = Set.map houseCells hd.secondaryHouses |> Set.unionMany
+
         { CellAnnotation.setValue = setValue
-          primaryHintHouse = Set.contains cell hd.primaryHouseCells
-          secondaryHintHouse = Set.contains cell hd.secondaryHouseCells
-          reductions = Set.union setCellReductions reductions
+          primaryHintHouse = Set.contains cell primaryHouseCells
+          secondaryHintHouse = Set.contains cell secondaryHouseCells
+          setValueReduction = setValueReduction
+          reductions = reductions
           pointers = pointers }
+
+    { HintDescription2.primaryHouses = hd.primaryHouses
+      secondaryHouses = hd.secondaryHouses
+      candidateReductions = hd.candidateReductions
+      setCellValue = hd.setCellValue
+      annotations = annotationLookup }

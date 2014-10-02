@@ -5,6 +5,6 @@ open sudoku
 
 val setCellApply : SetCellValue -> ((Cell -> CellContents) -> Cell -> CellContents)
 
-val makeSetCellValue : Cell-> Candidate -> (Cell -> Set<Cell>) -> (Cell -> Set<Candidate>) -> SetCellValue
+val makeSetCellValue : Cell-> Candidate -> (Cell -> Set<Cell>) -> SetCellValue
 
-val setCellTry : Candidate -> (Cell -> Set<Candidate>) -> (Cell -> Set<Cell>) -> (Cell -> CellContents) -> Cell -> SetCellValue option
+val setCellTry : Candidate -> (Cell -> Set<Cell>) -> (Cell -> CellContents) -> Cell -> SetCellValue option

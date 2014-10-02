@@ -3,6 +3,6 @@
 open core.sudoku
 open hints
 
-val xWingFind : (Cell -> Set<Candidate>) -> (House -> Set<Cell>) -> Row list -> Column list -> HintDescription list
+val xWingFind : (Cell -> Set<Cell>) -> (House -> Set<Cell>) -> (Cell -> Set<Candidate>) -> Row list -> Column list -> HintDescription2 list
 
-val yWingFind : (Cell -> Set<Candidate>) -> (House -> Set<Cell>) -> Row list -> Column list -> HintDescription list
+val yWingFind : (Cell -> Set<Cell>) -> (House -> Set<Cell>) -> (Cell -> Set<Candidate>) -> Row list -> Column list -> HintDescription2 list

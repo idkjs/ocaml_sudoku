@@ -22,14 +22,10 @@ let makeHints candidateLookup houseCells pointerCells primaryHouses secondaryHou
               candidates = set [ candidate ] }) potentialCells
 
     if Set.count candidatesReductions > 0 then 
-        let primaryHouseCells = Set.map houseCells primaryHouses |> Set.unionMany
-        let secondaryHouseCells = Set.map houseCells secondaryHouses |> Set.unionMany
 
         Some { HintDescription.candidateReductions = candidatesReductions
                primaryHouses = primaryHouses
-               primaryHouseCells = primaryHouseCells
                secondaryHouses = secondaryHouses
-               secondaryHouseCells = secondaryHouseCells
                pointers = pointers
                setCellValue = None }
     else None
@@ -112,7 +108,7 @@ let xWingsPerHouse (candidateLookup : Cell -> Set<Candidate>) (houseCells : Hous
     Seq.map (xWingsPerHouseCandidate candidateLookup houseCells house1 house2 candidateCells1 candidateCells2) 
         commonHouseCandidates
 
-let xWingFind (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> Set<Cell>) (rs : Row list) 
+let xWingFind (cellHouseCells : Cell -> Set<Cell>) (houseCells : House -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) (rs : Row list) 
     (cs : Column list) = 
 
     let rows = List.map Row rs
@@ -130,7 +126,8 @@ let xWingFind (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> 
         |> Seq.concat
         |> Seq.choose id
         |> Seq.toList
-    
+        |> List.map (mhas cellHouseCells houseCells)
+
     let colHints1 = 
         Seq.mapi 
             (fun i col1 -> 
@@ -142,6 +139,7 @@ let xWingFind (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> 
         |> Seq.concat
         |> Seq.choose id
         |> Seq.toList
+        |> List.map (mhas cellHouseCells houseCells)
 
     List.concat [ rowHints; colHints ]
 
@@ -270,9 +268,7 @@ let yWingsPerHouse (candidateLookup : Cell -> Set<Candidate>) (houseCells : Hous
 
                             Some { HintDescription.candidateReductions = set [ candidateReductions ]
                                    primaryHouses = primaryHouses
-                                   primaryHouseCells = primaryHouseCells
                                    secondaryHouses = set []
-                                   secondaryHouseCells = set []
                                    pointers = pointers
                                    setCellValue = None }
                         else None
@@ -281,7 +277,7 @@ let yWingsPerHouse (candidateLookup : Cell -> Set<Candidate>) (houseCells : Hous
             else None) triples
     else []
 
-let yWingFind (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> Set<Cell>) (rows : Row list) 
+let yWingFind (cellHouseCells : Cell -> Set<Cell>) (houseCells : House -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>)  (rows : Row list) 
     (cols : Column list) = 
 
     let hints = 
@@ -301,3 +297,4 @@ let yWingFind (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> 
     |> Seq.concat
     |> Seq.choose id
     |> Seq.toList
+    |> List.map (mhas cellHouseCells houseCells)

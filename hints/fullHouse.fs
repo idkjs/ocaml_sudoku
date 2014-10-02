@@ -6,7 +6,7 @@ open core.setCell
 open core.sudoku
 open hints
 
-let fullHousePerHouse (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> Set<Cell>) (primaryHouse : House) = 
+let fullHousePerHouse (cellHouseCells : Cell -> Set<Cell>) (houseCells : House -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) (primaryHouse : House) = 
 
     let primaryHouseCells = houseCells primaryHouse
 
@@ -14,18 +14,19 @@ let fullHousePerHouse (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Ce
 
     let hhs = Set.filter (fun (candidates, _) -> Set.isEmpty candidates = false) candidateCells
 
-    if hhs.Count = 1 then 
-        let h = first hhs
-        let cell = snd h
-        let candidate = first (fst h)
+    let hhs2 =
+        if hhs.Count = 1 then 
+            let h = first hhs
+            let cell = snd h
+            let candidate = first (fst h)
 
-        let setCellValue = makeSetCellValue cell candidate cellHouseCells candidateLookup
+            let setCellValue = makeSetCellValue cell candidate cellHouseCells
 
-        [ { HintDescription.primaryHouses = set [ primaryHouse ]
-            primaryHouseCells = primaryHouseCells
-            secondaryHouses = set []
-            secondaryHouseCells = set []
-            candidateReductions = set []
-            setCellValue = Some setCellValue
-            pointers = set [] } ]
-    else []
+            [ { HintDescription.primaryHouses = set [ primaryHouse ]
+                secondaryHouses = set []
+                candidateReductions = set []
+                setCellValue = Some setCellValue
+                pointers = set [] } ]
+        else []
+
+    List.map (mhas cellHouseCells houseCells) hhs2

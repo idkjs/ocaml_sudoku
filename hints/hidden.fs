@@ -43,21 +43,19 @@ let findHidden (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> S
                 let cell = h.cell
                 let candidate = first candidateSubset
 
-                let setCellValue = makeSetCellValue cell candidate cellHouseCells candidateLookup
+                let setCellValue = makeSetCellValue cell candidate cellHouseCells
 
                 Some setCellValue
             else None
 
         Some { HintDescription.primaryHouses = set [ primaryHouse ]
-               primaryHouseCells = primaryHouseCells
                secondaryHouses = set []
-               secondaryHouseCells = set []
                candidateReductions = Set.ofList nonEmptyCandidateReductions
                setCellValue = setCellValue
                pointers = Set.ofList nonEmptyPointers }
     else None
 
-let hiddenNPerHouse (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) (houseCells : House -> Set<Cell>) (count : int) 
+let hiddenNPerHouse (cellHouseCells : Cell -> Set<Cell>) (houseCells : House -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) (count : int) 
     (house : House) = 
     let cells = houseCells house
 
@@ -68,4 +66,4 @@ let hiddenNPerHouse (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell
         List.map 
             (fun candidateSubset -> 
             findHidden cellHouseCells candidateLookup cells (Set.ofList candidateSubset) count house) candidateSubsets
-    List.choose id hs
+    List.choose id hs |> List.map (mhas cellHouseCells houseCells)

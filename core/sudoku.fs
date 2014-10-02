@@ -140,14 +140,15 @@ type CellAnnotation =
     { setValue : Candidate option
       primaryHintHouse : bool
       secondaryHintHouse : bool
+      setValueReduction : Candidate option
       reductions : Set<Candidate>
       pointers : Set<Candidate> }
 
 // Working towards a solution we take one of the following actions:
 type SetCellValue = 
     { cell : Cell
-      reductions : Set<Cell>
-      candidate : Candidate }
+      candidate : Candidate
+      cells : Set<Cell> }
     override this.ToString() = String.Format("SetCellValue: {0} = {1}", this.cell, this.candidate)
 
 type ClearCandidate = 
