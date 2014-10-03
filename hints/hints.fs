@@ -84,7 +84,7 @@ type HintDescription2 =
       setCellValue : SetCellValue option
       annotations : Cell -> CellAnnotation }
 
-let mhas (cellHouseCells : Cell -> Set<Cell>) (houseCells : House -> Set<Cell>) (hd : HintDescription) : HintDescription2 = 
+let mhas (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) (hd : HintDescription) : HintDescription2 = 
 
     let annotationLookup (cell : Cell) =
         let setValue, setValueReduction = 
@@ -115,8 +115,8 @@ let mhas (cellHouseCells : Cell -> Set<Cell>) (houseCells : House -> Set<Cell>) 
             | Some cr -> cr.candidates
             | _ -> set []
 
-        let primaryHouseCells = Set.map houseCells hd.primaryHouses |> Set.unionMany
-        let secondaryHouseCells = Set.map houseCells hd.secondaryHouses |> Set.unionMany
+        let primaryHouseCells = Set.map puzzleHouseCells hd.primaryHouses |> Set.unionMany
+        let secondaryHouseCells = Set.map puzzleHouseCells hd.secondaryHouses |> Set.unionMany
 
         { CellAnnotation.setValue = setValue
           primaryHintHouse = Set.contains cell primaryHouseCells

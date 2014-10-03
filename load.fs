@@ -16,7 +16,8 @@ let loadPuzzle (cells : Cell list) (alphabetisedLine : Symbol option list) (cell
         if c = cell then Some symbolOpt
         else None) zs
 
-let load (size : int<size>) (alphabet : Symbol list) (sudoku : string) (cell : Cell) : Symbol option = 
+let load (alphabet : Symbol list) (sudoku : string) (cell : Cell) : Symbol option = 
     let alphabetisedLine = loadLine sudoku alphabet
+    let size = (List.length alphabet) * 1<size>
 
     loadPuzzle (cells size) alphabetisedLine cell

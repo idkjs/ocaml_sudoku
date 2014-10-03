@@ -41,10 +41,10 @@ let findNaked (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Se
         else None
     else None
 
-let nakedNPerHouse (cellHouseCells : Cell -> Set<Cell>) (houseCells : House -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) (count : int) 
+let nakedNPerHouse (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) (count : int) 
     (primaryHouse : House) = 
 
-    let primaryHouseCells = houseCells primaryHouse
+    let primaryHouseCells = puzzleHouseCells primaryHouse
     
     let hht = 
         Set.filter (fun cell -> 
@@ -55,9 +55,9 @@ let nakedNPerHouse (cellHouseCells : Cell -> Set<Cell>) (houseCells : House -> S
 
     let hs = List.map (fun subset -> findNaked cellHouseCells candidateLookup primaryHouseCells (Set.ofList subset) count primaryHouse) subsets
 
-    List.choose id hs |> List.map (mhas cellHouseCells houseCells)
+    List.choose id hs |> List.map (mhas cellHouseCells puzzleHouseCells)
 
-let nakedSingleFind (cellHouseCells : Cell -> Set<Cell>) (houseCells : House -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) (cells : Cell list) = 
+let nakedSingleFind (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) (cells : Cell list) = 
     let hs = 
         List.map (fun cell -> 
             let candidates = candidateLookup cell
@@ -73,4 +73,4 @@ let nakedSingleFind (cellHouseCells : Cell -> Set<Cell>) (houseCells : House -> 
                        setCellValue = Some setCellValue
                        pointers = set [] }
             else None) cells
-    List.choose id hs |> List.map (mhas cellHouseCells houseCells)
+    List.choose id hs |> List.map (mhas cellHouseCells puzzleHouseCells)

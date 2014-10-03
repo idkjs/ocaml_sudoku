@@ -55,9 +55,9 @@ let findHidden (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> S
                pointers = Set.ofList nonEmptyPointers }
     else None
 
-let hiddenNPerHouse (cellHouseCells : Cell -> Set<Cell>) (houseCells : House -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) (count : int) 
+let hiddenNPerHouse (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) (count : int) 
     (house : House) = 
-    let cells = houseCells house
+    let cells = puzzleHouseCells house
 
     let houseCandidates = Set.map candidateLookup cells |> Set.unionMany
 
@@ -66,4 +66,4 @@ let hiddenNPerHouse (cellHouseCells : Cell -> Set<Cell>) (houseCells : House -> 
         List.map 
             (fun candidateSubset -> 
             findHidden cellHouseCells candidateLookup cells (Set.ofList candidateSubset) count house) candidateSubsets
-    List.choose id hs |> List.map (mhas cellHouseCells houseCells)
+    List.choose id hs |> List.map (mhas cellHouseCells puzzleHouseCells)

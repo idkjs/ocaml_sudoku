@@ -6,9 +6,9 @@ open core.setCell
 open core.sudoku
 open hints
 
-let fullHousePerHouse (cellHouseCells : Cell -> Set<Cell>) (houseCells : House -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) (primaryHouse : House) = 
+let fullHousePerHouse (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) (primaryHouse : House) = 
 
-    let primaryHouseCells = houseCells primaryHouse
+    let primaryHouseCells = puzzleHouseCells primaryHouse
 
     let candidateCells = Set.map (fun cell -> ((candidateLookup cell), cell)) primaryHouseCells
 
@@ -29,4 +29,4 @@ let fullHousePerHouse (cellHouseCells : Cell -> Set<Cell>) (houseCells : House -
                 pointers = set [] } ]
         else []
 
-    List.map (mhas cellHouseCells houseCells) hhs2
+    List.map (mhas cellHouseCells puzzleHouseCells) hhs2
