@@ -3,6 +3,8 @@
 open core.puzzlemap
 open core.sudoku
 
+let konst x _ = x
+
 // Printing a row, we need special characters at left, in the middle and on the right
 type gridCharsRow<'a> = 
     { l : 'a

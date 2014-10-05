@@ -2,8 +2,6 @@
 
 open sudoku
 
-let konst x _ = x
-
 let columnCells (length : int<size>) (column : Column) = 
     List.map (fun row -> 
         { col = column

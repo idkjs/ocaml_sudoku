@@ -2,10 +2,11 @@
 
 open System
 
-// A sudoku is a grid of columns...
+// A sudoku is a square grid of size...
 [<Measure>]
 type size
 
+// containing columns...
 [<Measure>]
 type column
 
@@ -41,7 +42,9 @@ let cells (length : int<size>) =
               yield { Cell.col = column
                       row = row } ]
 
-// The grid is divided into boxes
+// The grid is divided into boxes,
+// these do not have to be square, but they are
+// all the same size and cover the grid
 [<Measure>]
 type boxcol
 
@@ -84,7 +87,7 @@ let boxes (length : int<size>) (boxWidth : int<width>) (boxHeight : int<height>)
               yield { Box.stack = stack
                       band = band } ]
 
-// The columns, rows and boxes are called houses
+// The columns, rows and boxes are collectively called houses
 type House = 
     | Column of Column
     | Row of Row
@@ -111,6 +114,16 @@ type Symbol =
         let (Symbol s) = this
         (string) s
 
+type Candidate = 
+    | Candidate of char
+    override this.ToString() = 
+        let (Candidate c) = this
+        (string) c
+
+let symbolToCandidate (Symbol s : Symbol) : Candidate = Candidate s
+
+let candidateToSymbol (Candidate s : Candidate) : Symbol = Symbol s
+
 // A sudoku is defined by the overall grid size (it is always square)
 // which is the same as the symbols in the alphabet
 // and also by the width and height of the boxes
@@ -118,56 +131,45 @@ type Symbol =
 type Puzzle = 
     { boxWidth : int<width>
       boxHeight : int<height>
-      alphabet : Symbol list
-      size : int<size>
-      symbols : Cell -> Symbol option }
-
-type Candidate = 
-    | Candidate of char
-    override this.ToString() = 
-        let (Candidate c) = this
-        (string) c
+      alphabet : Symbol list }
 
 // Whilst working to a solution each cell in the grid
 // that doesn't have a symbol is filled with candidates
+// Candidates are possible symbols
 [<NoEquality; NoComparison>]
 type CellContents = 
     | ASymbol of Symbol
     | ACandidates of Set<Candidate>
 
-[<NoEquality; NoComparison>]
-type CellAnnotation = 
-    { setValue : Candidate option
-      primaryHintHouse : bool
-      secondaryHintHouse : bool
-      setValueReduction : Candidate option
-      reductions : Set<Candidate>
-      pointers : Set<Candidate> }
-
 // Working towards a solution we take one of the following actions:
-type SetCellValue = 
+// Set the cell to have a symbol
+type SetCellSymbol = 
     { cell : Cell
-      candidate : Candidate
-      cells : Set<Cell> }
-    override this.ToString() = String.Format("SetCellValue: {0} = {1}", this.cell, this.candidate)
+      symbol : Symbol }
+    override this.ToString() = String.Format("SetCellSymbol: {0} = {1}", this.cell, this.symbol)
 
-type ClearCandidate = 
+// or remove a candidate
+type ClearCellCandidate = 
     { cell : Cell
       candidate : Candidate }
-    override this.ToString() = String.Format("ClearCandidate: {0} = {1}", this.cell, this.candidate)
-
-type CandidateReduction = 
-    { cell : Cell
-      candidates : Set<Candidate> }
-    override this.ToString() = 
-        String.Format("Cell {0}, Candidates {1}", this.cell, String.Join(",", Set.toArray this.candidates))
+    override this.ToString() = String.Format("ClearCellCandidate: {0} = {1}", this.cell, this.candidate)
 
 type Action = 
-    | SetCellValue of SetCellValue
-    | ClearCandidate of ClearCandidate
+    | SetCellSymbol of SetCellSymbol
+    | ClearCellCandidate of ClearCellCandidate
 
 [<NoEquality; NoComparison>]
 type Solution = 
     { start : Cell -> Symbol option
       current : Cell -> CellContents
       steps : Action list }
+
+// To draw a cell we may want to display extra information...
+[<NoEquality; NoComparison>]
+type CellAnnotation = 
+    { setValue : Symbol option
+      primaryHintHouse : bool
+      secondaryHintHouse : bool
+      setValueReduction : Candidate option
+      reductions : Set<Candidate>
+      pointers : Set<Candidate> }

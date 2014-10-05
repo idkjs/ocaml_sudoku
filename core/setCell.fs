@@ -4,28 +4,29 @@ open System
 
 open core.sudoku
 
-let setCellApply (setCellValue : SetCellValue) : (Cell -> CellContents) -> Cell -> CellContents = 
+let setCellSymbolApply (cellHouseCells : Cell -> Set<Cell>) (setCellValue : SetCellSymbol) : (Cell -> CellContents) -> Cell -> CellContents = 
 
-    fun (entryLookup : Cell -> CellContents) (cell : Cell) -> 
-        let entry = entryLookup cell
+    fun (cellCellContents : Cell -> CellContents) (cell : Cell) -> 
+        let cellContents = cellCellContents cell
+        let cells = cellHouseCells cell
 
-        match entry with
-        | ASymbol _ -> entry
+        match cellContents with
+        | ASymbol _ -> cellContents
         | ACandidates candidates -> 
-            let candidateToSymbol (Candidate s : Candidate) = ASymbol(Symbol s)
-            if setCellValue.cell = cell then candidateToSymbol setCellValue.candidate
-            else if Set.contains cell setCellValue.cells then ACandidates(Set.remove setCellValue.candidate candidates)
-            else entry
+            if setCellValue.cell = cell then ASymbol setCellValue.symbol
+            else if Set.contains cell cells then ACandidates(Set.remove (symbolToCandidate setCellValue.symbol) candidates)
+            else cellContents
 
-let makeSetCellValue (cell : Cell) (candidate : Candidate) (cellHouseCells : Cell -> Set<Cell>) : SetCellValue =
-    { SetCellValue.cell = cell
-      candidate = candidate
-      cells = cellHouseCells cell }
+let makeSetCellSymbol (cell : Cell) (candidate : Candidate) : SetCellSymbol =
+    let symbol = candidateToSymbol candidate
 
-let setCellTry (candidate : Candidate) (cellHouseCells : Cell -> Set<Cell>) (entryLookup : Cell -> CellContents) (cell : Cell) : SetCellValue option= 
-    match entryLookup cell with
+    { SetCellSymbol.cell = cell
+      symbol = symbol }
+
+let setCellSymbolTry (cell : Cell) (candidate : Candidate) (cellCellContents : Cell -> CellContents) : SetCellSymbol option= 
+    match cellCellContents cell with
     | ASymbol symbol -> 
         Console.WriteLine("Cell {0} has been set value {1}", cell, symbol)
         None
     | ACandidates _ -> 
-        Some (makeSetCellValue cell candidate cellHouseCells)
+        Some (makeSetCellSymbol cell candidate)

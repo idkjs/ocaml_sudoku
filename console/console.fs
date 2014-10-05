@@ -96,7 +96,7 @@ let drawAnnotatedSymbol (firstSymbol : Symbol option) (currentSymbol : CellConte
     | None, ASymbol s -> ColouredString(s.ToString(), ConsoleColor.Red)
     | None, ACandidates _ -> CChar '.'
 
-let drawFL2 centreCandidate candidate (firstSymbol : Symbol option) (currentSymbol : CellContents) (currentHintSymbolOpt : CellAnnotation option) = 
+let drawFL2 centreCandidate (candidate : Candidate) (firstSymbol : Symbol option) (currentSymbol : CellContents) (currentHintSymbolOpt : CellAnnotation option) = 
     let isCentre = centreCandidate = candidate
 
     match firstSymbol, currentSymbol with
@@ -114,7 +114,7 @@ let drawFL2 centreCandidate candidate (firstSymbol : Symbol option) (currentSymb
         | _ -> ColouredString(s.ToString(), ConsoleColor.Red)
     | None, ACandidates candidates -> 
         match currentHintSymbolOpt with
-        | Some currentHintSymbol when currentHintSymbol.setValue.IsSome && currentHintSymbol.setValue.Value = candidate -> 
+        | Some currentHintSymbol when currentHintSymbol.setValue.IsSome && currentHintSymbol.setValue.Value = (candidateToSymbol candidate) -> 
                 ColouredString(candidate.ToString(), ConsoleColor.Red)
         | Some currentHintSymbol when currentHintSymbol.setValue.IsSome && Set.contains candidate candidates ->
                 ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)

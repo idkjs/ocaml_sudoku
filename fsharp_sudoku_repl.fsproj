@@ -75,6 +75,7 @@
     <Compile Include="core\puzzlemap.fs" />
     <Compile Include="core\setCell.fsi" />
     <Compile Include="core\setCell.fs" />
+    <Compile Include="core\clearCandidate.fsi" />
     <Compile Include="core\clearCandidate.fs" />
     <Compile Include="console\format.fsi" />
     <Compile Include="console\format.fs" />

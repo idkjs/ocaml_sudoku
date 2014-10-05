@@ -57,11 +57,17 @@ let firstOpt (set : Set<'a>) =
     | s :: _ -> Some s
     | _ -> None
 
+type CandidateReduction = 
+    { cell : Cell
+      candidates : Set<Candidate> }
+    override this.ToString() = 
+        String.Format("Cell {0}, Candidates {1}", this.cell, String.Join(",", Set.toArray this.candidates))
+
 type HintDescription = 
     { primaryHouses : Set<House>
       secondaryHouses : Set<House>
       candidateReductions : Set<CandidateReduction>
-      setCellValue : SetCellValue option
+      setCellValue : SetCellSymbol option
       pointers : Set<CandidateReduction> }
     override this.ToString() = 
         let sb = StringBuilder()
@@ -81,21 +87,23 @@ type HintDescription2 =
     { primaryHouses : Set<House>
       secondaryHouses : Set<House>
       candidateReductions : Set<CandidateReduction>
-      setCellValue : SetCellValue option
+      setCellValue : SetCellSymbol option
       annotations : Cell -> CellAnnotation }
 
 let mhas (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) (hd : HintDescription) : HintDescription2 = 
 
     let annotationLookup (cell : Cell) =
+        let cells = cellHouseCells cell
+
         let setValue, setValueReduction = 
             match hd.setCellValue with
             | Some setCellValue -> 
                 let r1 =
-                    if setCellValue.cell = cell then Some setCellValue.candidate
+                    if setCellValue.cell = cell then Some setCellValue.symbol
                     else None
 
                 let r3 =
-                    if Set.contains cell setCellValue.cells then Some setCellValue.candidate
+                    if Set.contains cell cells then Some (symbolToCandidate setCellValue.symbol)
                     else None
 
                 r1, r3

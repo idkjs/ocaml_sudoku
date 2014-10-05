@@ -65,7 +65,7 @@ let nakedSingleFind (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : Hou
             if Set.count candidates = 1 then 
                 let candidate = first candidates
 
-                let setCellValue = makeSetCellValue cell candidate cellHouseCells
+                let setCellValue = makeSetCellSymbol cell candidate
 
                 Some { HintDescription.primaryHouses = set []
                        secondaryHouses = set []

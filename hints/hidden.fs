@@ -43,7 +43,7 @@ let findHidden (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> S
                 let cell = h.cell
                 let candidate = first candidateSubset
 
-                let setCellValue = makeSetCellValue cell candidate cellHouseCells
+                let setCellValue = makeSetCellSymbol cell candidate
 
                 Some setCellValue
             else None

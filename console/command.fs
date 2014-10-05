@@ -46,7 +46,7 @@ let setCellCommand (item : string) (alphabet : Candidate list) (lastGrid : Cell 
         let parsedValue = parseValue alphabet terms.[3]
 
         match (parsedCell, parsedValue) with
-        | (Some cell, Some value) -> setCellTry value cellHouseCells lastGrid cell
+        | (Some cell, Some value) -> setCellSymbolTry cell value lastGrid
         | _ -> 
             Console.WriteLine "Expect set <col> <row> <val>"
             None
@@ -62,7 +62,7 @@ let candidateClearCommand (item : string) (alphabet : Candidate list) (lastGrid 
         let parsedValue = parseValue alphabet terms.[3]
 
         match (parsedCell, parsedValue) with
-        | (Some cell, Some value) -> clearCandidateTry value lastGrid cell
+        | (Some cell, Some value) -> clearCandidateTry cell value lastGrid
         | _ -> 
             Console.WriteLine "Expect clr <col> <row> <val>"
             None

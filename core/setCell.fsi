@@ -3,8 +3,8 @@
 open puzzlemap
 open sudoku
 
-val setCellApply : SetCellValue -> ((Cell -> CellContents) -> Cell -> CellContents)
+val setCellSymbolApply : (Cell -> Set<Cell>) -> SetCellSymbol -> ((Cell -> CellContents) -> Cell -> CellContents)
 
-val makeSetCellValue : Cell-> Candidate -> (Cell -> Set<Cell>) -> SetCellValue
+val makeSetCellSymbol : Cell-> Candidate -> SetCellSymbol
 
-val setCellTry : Candidate -> (Cell -> Set<Cell>) -> (Cell -> CellContents) -> Cell -> SetCellValue option
+val setCellSymbolTry : Cell -> Candidate -> (Cell -> CellContents) -> SetCellSymbol option
