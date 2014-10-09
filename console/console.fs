@@ -82,7 +82,7 @@ let consoleWriteColor (value : 'a) consoleColour =
     finally
         System.Console.ForegroundColor <- foregroundColour
 
-let ConsoleWriteChar (consoleChar : ConsoleChar) = 
+let drawConsoleChar (consoleChar : ConsoleChar) = 
     match consoleChar with
     | CChar c -> Console.Write c
     | CStr c -> Console.Write c
@@ -90,13 +90,13 @@ let ConsoleWriteChar (consoleChar : ConsoleChar) =
     | ColouredString(c, consoleColour) -> consoleWriteColor c consoleColour
     | NL -> Console.WriteLine ""
 
-let drawAnnotatedSymbol (firstSymbol : Symbol option) (currentSymbol : CellContents) = 
+let drawSymbolCellContents (firstSymbol : Symbol option) (currentSymbol : CellContents) = 
     match firstSymbol, currentSymbol with
     | Some s, _ -> ColouredString(s.ToString(), ConsoleColor.Blue)
     | None, ASymbol s -> ColouredString(s.ToString(), ConsoleColor.Red)
     | None, ACandidates _ -> CChar '.'
 
-let drawFL2 centreCandidate (candidate : Candidate) (firstSymbol : Symbol option) (currentSymbol : CellContents) (currentHintSymbolOpt : CellAnnotation option) = 
+let drawSymbolCellContentAnnotations centreCandidate (candidate : Candidate) (firstSymbol : Symbol option) (currentSymbol : CellContents) (currentHintSymbolOpt : CellAnnotation option) = 
     let isCentre = centreCandidate = candidate
 
     match firstSymbol, currentSymbol with

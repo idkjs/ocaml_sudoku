@@ -48,18 +48,18 @@ type Hint =
 
 let print_last (solution : Solution) puzzlePrintGrid = 
 
-    let drawer (cell : Cell) = drawAnnotatedSymbol (solution.start cell) (solution.current cell)
-    Seq.iter ConsoleWriteChar (puzzlePrintGrid drawer)
+    let drawer (cell : Cell) = drawSymbolCellContents (solution.start cell) (solution.current cell)
+    Seq.iter drawConsoleChar (puzzlePrintGrid drawer)
 
     match solution.steps with
     | action :: _ ->
         match action with
-        | SetCellSymbol sv -> ConsoleWriteChar(CStr(sv.ToString()))
-        | ClearCellCandidate cc -> ConsoleWriteChar(CStr(cc.ToString()))
+        | SetCellSymbol sv -> drawConsoleChar(CStr(sv.ToString()))
+        | ClearCellCandidate cc -> drawConsoleChar(CStr(cc.ToString()))
 
     | [] -> ()
 
-    ConsoleWriteChar NL
+    drawConsoleChar NL
 
 let parse (item : string) (alphabet : Candidate list) (solution : Solution) (puzzle : Puzzle) 
     (candidateLookup : Cell -> Set<Candidate>) puzzlePrintGrid puzzlePrintFull puzzleDrawFull puzzleDrawFull2 : Solution * Hint list = 
@@ -247,7 +247,7 @@ let run (alphabet : Candidate list) (solution : Solution ref) (puzzle : Puzzle) 
         None
 
 
-let mainWriter = ConsoleWriteChar
+let mainWriter = drawConsoleChar
 
 let memoiseCellLookup (cells : Cell list) (cellLookup : Cell -> 'a) : (Cell -> 'a) = 
     let s = List.map (fun cell -> (cell, cellLookup cell)) cells
@@ -293,13 +293,13 @@ let repl (sudoku : string) (puzzle : Puzzle) =
     let candidates = List.map symbolToCandidate puzzle.alphabet
 
     let puzzlePrintFull = 
-        print_full puzzleStacks puzzleStackColumns puzzleBands puzzleBandRows defaultSolutionChars candidates
+        printCellAndCandidates puzzleStacks puzzleStackColumns puzzleBands puzzleBandRows defaultSolutionChars candidates
 
     let cons x y = x :: y
     
     // Print a symbol option, with colours
     let symbolOptionToConsoleChar (cell : Cell) : ConsoleChar = 
-        drawAnnotatedSymbol ((!solution).start cell) ((!solution).current cell)
+        drawSymbolCellContents ((!solution).start cell) ((!solution).current cell)
 
     let line = List.foldBack (symbolOptionToConsoleChar >> cons) (cells puzzleSize) [ NL ]
     List.iter mainWriter line
@@ -308,22 +308,22 @@ let repl (sudoku : string) (puzzle : Puzzle) =
     Seq.iter mainWriter prows
     mainWriter NL
 
-    let puzzlePrintGrid = printGrid puzzleStacks puzzleStackColumns puzzleBands puzzleBandRows defaultGridChars
-    Seq.iter ConsoleWriteChar (puzzlePrintGrid symbolOptionToConsoleChar)
+    let puzzlePrintGrid = printCells puzzleStacks puzzleStackColumns puzzleBands puzzleBandRows defaultGridChars
+    Seq.iter drawConsoleChar (puzzlePrintGrid symbolOptionToConsoleChar)
 
     let centreCandidate = List.nth candidates ((List.length candidates) / 2)
 
     let puzzleDrawFull () =
         let puzzleDrawer (cell : Cell) (candidate : Candidate) = 
-            drawFL2 centreCandidate candidate ((!solution).start cell) ((!solution).current cell) None
+            drawSymbolCellContentAnnotations centreCandidate candidate ((!solution).start cell) ((!solution).current cell) None
 
-        Seq.iter ConsoleWriteChar (puzzlePrintFull puzzleDrawer)
+        Seq.iter drawConsoleChar (puzzlePrintFull puzzleDrawer)
 
     let puzzleDrawFullHint annotations =
         let draw_cell2 (l : Cell -> CellAnnotation) (cell : Cell) (candidate : Candidate) = 
-            drawFL2 centreCandidate candidate ((!solution).start cell) ((!solution).current cell) (Some (l cell))
+            drawSymbolCellContentAnnotations centreCandidate candidate ((!solution).start cell) ((!solution).current cell) (Some (l cell))
 
-        Seq.iter ConsoleWriteChar (puzzlePrintFull (draw_cell2 annotations))
+        Seq.iter drawConsoleChar (puzzlePrintFull (draw_cell2 annotations))
 
     
     let getInput (prompt : string) = 

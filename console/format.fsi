@@ -32,6 +32,6 @@ type solutionChars<'a> =
 
 val printRowOnOneLine : ('b -> 'c) -> ('a -> 'b list) -> seq<'c> -> 'a list -> seq<'c>
 
-val printGrid : (Stack list) -> (Stack -> Column list) -> (Band list) -> (Band -> Row list) -> gridChars<seq<'c>> -> (Cell -> 'c) -> seq<'c>
+val printCells : (Stack list) -> (Stack -> Column list) -> (Band list) -> (Band -> Row list) -> gridChars<seq<'c>> -> (Cell -> 'c) -> seq<'c>
 
-val print_full : (Stack list) -> (Stack -> Column list) -> (Band list) -> (Band -> Row list) -> solutionChars<seq<'c>> -> Candidate list -> (Cell -> Candidate -> 'c) -> seq<'c>
+val printCellAndCandidates : (Stack list) -> (Stack -> Column list) -> (Band list) -> (Band -> Row list) -> solutionChars<seq<'c>> -> Candidate list -> (Cell -> Candidate -> 'c) -> seq<'c>

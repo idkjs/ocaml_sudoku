@@ -96,7 +96,7 @@ let printBand (rowToSeq : Row -> seq<'c>) (rowSeparator : seq<'c>) (puzzleBandRo
     simpleInterleave rowToSeq rowSeparator (puzzleBandRows band)
 
 // Print a puzzle grid, supply callback to draw each cell
-let printGrid (puzzleStacks : Stack list) (puzzleStackColumns : Stack -> Column list) (puzzleBands : Band list) (puzzleBandRows : Band -> Row list) (gridChars : gridChars<seq<'c>>) (symbolTo : Cell -> 'c) = 
+let printCells (puzzleStacks : Stack list) (puzzleStackColumns : Stack -> Column list) (puzzleBands : Band list) (puzzleBandRows : Band -> Row list) (gridChars : gridChars<seq<'c>>) (symbolTo : Cell -> 'c) = 
 
     let doPrintColumn = printColumn (printCell symbolTo)
 
@@ -114,9 +114,10 @@ let printGrid (puzzleStacks : Stack list) (puzzleStackColumns : Stack -> Column 
 
     sinterleave doPrintBand t m b Seq.empty puzzleBands
 
-let print_full (puzzleStacks : Stack list) (puzzleStackColumns : Stack -> Column list) (puzzleBands : Band list) (puzzleBandRows : Band -> Row list) 
+let printCellAndCandidates (puzzleStacks : Stack list) (puzzleStackColumns : Stack -> Column list) (puzzleBands : Band list) (puzzleBandRows : Band -> Row list) 
     (solutionChars : solutionChars<seq<'c>>) (alphabet : Candidate list) 
     (draw_cell : Cell -> Candidate -> 'c) = 
+
     let d = Seq.collect (konst solutionChars.h) (puzzleStackColumns puzzleStacks.Head)
     let i = Seq.collect (konst solutionChars.hi) (puzzleStackColumns puzzleStacks.Head)
     

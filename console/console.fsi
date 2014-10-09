@@ -18,8 +18,8 @@ val defaultGridChars : gridChars<seq<ConsoleChar>>
 
 val defaultSolutionChars : solutionChars<seq<ConsoleChar>>
 
-val drawAnnotatedSymbol : Symbol option -> CellContents -> ConsoleChar
+val drawConsoleChar : ConsoleChar -> Unit
 
-val ConsoleWriteChar : ConsoleChar -> Unit
+val drawSymbolCellContents : Symbol option -> CellContents -> ConsoleChar
 
-val drawFL2 : Candidate -> Candidate -> Symbol option -> CellContents -> CellAnnotation option -> ConsoleChar
+val drawSymbolCellContentAnnotations : Candidate -> Candidate -> Symbol option -> CellContents -> CellAnnotation option -> ConsoleChar
