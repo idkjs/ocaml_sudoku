@@ -111,18 +111,18 @@ type CellContents =
 
 // Working towards a solution we take one of the following actions:
 // Set the cell to have a symbol
-type SetCellSymbol = 
+type SetCellSymbolAction = 
     { cell : Cell
       symbol : Symbol }
 
 // or remove a candidate
-type ClearCellCandidate = 
+type ClearCellCandidateAction = 
     { cell : Cell
       candidate : Candidate }
 
 type Action = 
-    | SetCellSymbol of SetCellSymbol
-    | ClearCellCandidate of ClearCellCandidate
+    | SetCellSymbol of SetCellSymbolAction
+    | ClearCellCandidate of ClearCellCandidateAction
 
 [<NoEquality; NoComparison>]
 type Solution = 
@@ -139,3 +139,8 @@ type CellAnnotation =
       setValueReduction : Candidate option
       reductions : Set<Candidate>
       pointers : Set<Candidate> }
+
+// From http://www.fssnip.net/ji
+type Either<'a, 'b> = 
+    | Left of 'a
+    | Right of 'b

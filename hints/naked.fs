@@ -1,16 +1,13 @@
 ﻿module hints.naked
 
-open System
-open System.Text
-
 open console
 
 open core.setCell
 open core.sudoku
 open hints
 
-let findNaked (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) (primaryHouseCells : Set<Cell>) (cellSubset : Set<Cell>) (count : int) (primaryHouse : House) = 
-
+let findNaked (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) 
+    (primaryHouseCells : Set<Cell>) (cellSubset : Set<Cell>) (count : int) (primaryHouse : House) = 
     let symbols = Set.map candidateLookup cellSubset
     let subsetSymbols = Set.unionMany symbols
 
@@ -35,15 +32,14 @@ let findNaked (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Se
             Some { HintDescription.primaryHouses = set [ primaryHouse ]
                    secondaryHouses = set []
                    candidateReductions = nonEmptyCandidateReductions
-                   setCellValue = None
+                   setCellValueAction = None
                    pointers = pointers }
 
         else None
     else None
 
-let nakedNPerHouse (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) (count : int) 
-    (primaryHouse : House) = 
-
+let nakedNPerHouse (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) 
+    (candidateLookup : Cell -> Set<Candidate>) (count : int) (primaryHouse : House) = 
     let primaryHouseCells = puzzleHouseCells primaryHouse
     
     let hht = 
@@ -52,12 +48,14 @@ let nakedNPerHouse (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : Hous
             Set.count candidates > 1 && Set.count candidates <= count) primaryHouseCells
     
     let subsets = setSubsets (Set.toList hht) count
-
-    let hs = List.map (fun subset -> findNaked cellHouseCells candidateLookup primaryHouseCells (Set.ofList subset) count primaryHouse) subsets
-
+    let hs = 
+        List.map 
+            (fun subset -> 
+            findNaked cellHouseCells candidateLookup primaryHouseCells (Set.ofList subset) count primaryHouse) subsets
     List.choose id hs |> List.map (mhas cellHouseCells puzzleHouseCells)
 
-let nakedSingleFind (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) (cells : Cell list) = 
+let nakedSingleFind (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) 
+    (candidateLookup : Cell -> Set<Candidate>) (cells : Cell list) = 
     let hs = 
         List.map (fun cell -> 
             let candidates = candidateLookup cell
@@ -70,7 +68,7 @@ let nakedSingleFind (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : Hou
                 Some { HintDescription.primaryHouses = set []
                        secondaryHouses = set []
                        candidateReductions = set []
-                       setCellValue = Some setCellValue
+                       setCellValueAction = Some setCellValue
                        pointers = set [] }
             else None) cells
     List.choose id hs |> List.map (mhas cellHouseCells puzzleHouseCells)

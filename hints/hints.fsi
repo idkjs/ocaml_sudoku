@@ -10,7 +10,7 @@ type HintDescription =
     { primaryHouses : Set<House>
       secondaryHouses : Set<House>
       candidateReductions : Set<CandidateReduction>
-      setCellValue : SetCellSymbol option
+      setCellValueAction : SetCellSymbolAction option
       pointers : Set<CandidateReduction> }
 
 val first : Set<'a> -> 'a
@@ -22,7 +22,7 @@ type HintDescription2 =
     { primaryHouses : Set<House>
       secondaryHouses : Set<House>
       candidateReductions : Set<CandidateReduction>
-      setCellValue : SetCellSymbol option
+      setCellValueAction : SetCellSymbolAction option
       annotations : Cell -> CellAnnotation }
 
 val mhas : (Cell -> Set<Cell>) -> (House -> Set<Cell>) -> HintDescription -> HintDescription2

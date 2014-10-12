@@ -67,7 +67,7 @@ type HintDescription =
     { primaryHouses : Set<House>
       secondaryHouses : Set<House>
       candidateReductions : Set<CandidateReduction>
-      setCellValue : SetCellSymbol option
+      setCellValueAction : SetCellSymbolAction option
       pointers : Set<CandidateReduction> }
     override this.ToString() = 
         let sb = StringBuilder()
@@ -87,25 +87,26 @@ type HintDescription2 =
     { primaryHouses : Set<House>
       secondaryHouses : Set<House>
       candidateReductions : Set<CandidateReduction>
-      setCellValue : SetCellSymbol option
+      setCellValueAction : SetCellSymbolAction option
       annotations : Cell -> CellAnnotation }
 
 let mhas (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) (hd : HintDescription) : HintDescription2 = 
 
-    let annotationLookup (cell : Cell) =
-        let cells = cellHouseCells cell
+    let annotationLookup (cell : Cell) = 
 
         let setValue, setValueReduction = 
-            match hd.setCellValue with
-            | Some setCellValue -> 
-                let r1 =
-                    if setCellValue.cell = cell then Some setCellValue.symbol
+            match hd.setCellValueAction with
+            | Some setCellValueAction -> 
+                let cells = cellHouseCells setCellValueAction.cell
+                
+                let r1 = 
+                    if setCellValueAction.cell = cell then Some setCellValueAction.symbol
                     else None
-
-                let r3 =
-                    if Set.contains cell cells then Some (symbolToCandidate setCellValue.symbol)
+                
+                let r3 = 
+                    if Set.contains cell cells then Some(symbolToCandidate setCellValueAction.symbol)
                     else None
-
+                
                 r1, r3
             | None -> None, None
         
@@ -122,7 +123,7 @@ let mhas (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<C
             match firstOpt cellPointers with
             | Some cr -> cr.candidates
             | _ -> set []
-
+        
         let primaryHouseCells = Set.map puzzleHouseCells hd.primaryHouses |> Set.unionMany
         let secondaryHouseCells = Set.map puzzleHouseCells hd.secondaryHouses |> Set.unionMany
 
@@ -136,5 +137,5 @@ let mhas (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<C
     { HintDescription2.primaryHouses = hd.primaryHouses
       secondaryHouses = hd.secondaryHouses
       candidateReductions = hd.candidateReductions
-      setCellValue = hd.setCellValue
+      setCellValueAction = hd.setCellValueAction
       annotations = annotationLookup }

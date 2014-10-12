@@ -1,6 +1,5 @@
 ﻿module console.format
 
-open core.puzzlemap
 open core.sudoku
 
 let konst x _ = x
@@ -141,7 +140,7 @@ let printCellAndCandidates (puzzleStacks : Stack list) (puzzleStackColumns : Sta
     let doPrintColumn (symbols : seq<Candidate>) = 
         let doPrintCell cell = Seq.map (fun symbol -> draw_cell cell symbol) symbols
         printColumn doPrintCell
-
+    
     let doPrintStack (symbols : seq<Candidate>) = printStack (doPrintColumn symbols) solutionChars.vi puzzleStackColumns
 
     let doPrintRow (row : Row) = 

@@ -9,12 +9,12 @@ let loadPuzzle (cells : Cell list) (alphabetisedLine : Symbol option list) (cell
         if c = cell then Some symbolOpt
         else None) zs
 
-let load (alphabet : Symbol list) (sudoku : char list) (contentsTransformer : (Cell -> Symbol option) -> (Cell -> CellContents)) : Solution = 
-
+let load (alphabet : Symbol list) (sudoku : char list) 
+    (contentsTransformer : (Cell -> Symbol option) -> Cell -> CellContents) : Solution = 
     let charToAlphabet (trialSymbol : char) : Symbol option = 
         let compareAlpha (Symbol charSymbol) = trialSymbol = charSymbol
         List.tryFind compareAlpha alphabet
-
+    
     let alphabetisedLine = List.map charToAlphabet sudoku
 
     let size = (List.length alphabet) * 1<size>
@@ -22,7 +22,7 @@ let load (alphabet : Symbol list) (sudoku : char list) (contentsTransformer : (C
     let puzzleGrid cell = loadPuzzle (cells size) alphabetisedLine cell
 
     let solutionGrid = contentsTransformer puzzleGrid
-
+    
     let solution = 
         { start = puzzleGrid
           current = solutionGrid

@@ -2,7 +2,6 @@
 
 open System
 
-open core.puzzlemap
 open core.sudoku
 
 open format
@@ -96,42 +95,45 @@ let drawSymbolCellContents (firstSymbol : Symbol option) (currentSymbol : CellCo
     | None, ASymbol s -> ColouredString(s.ToString(), ConsoleColor.Red)
     | None, ACandidates _ -> CChar '.'
 
-let drawSymbolCellContentAnnotations centreCandidate (candidate : Candidate) (firstSymbol : Symbol option) (currentSymbol : CellContents) (currentHintSymbolOpt : CellAnnotation option) = 
+let drawSymbolCellContentAnnotations centreCandidate (candidate : Candidate) (firstSymbol : Symbol option) 
+    (currentSymbol : CellContents) (currentHintSymbolOpt : CellAnnotation option) = 
     let isCentre = centreCandidate = candidate
 
     match firstSymbol, currentSymbol with
     | Some _, _ when not isCentre -> CChar ' '
     | Some s, _ -> 
         match currentHintSymbolOpt with
-        | Some currentHintSymbol when currentHintSymbol.primaryHintHouse -> ColouredString(s.ToString(), ConsoleColor.Cyan)
-        | Some currentHintSymbol when currentHintSymbol.secondaryHintHouse -> ColouredString(s.ToString(), ConsoleColor.DarkBlue)
+        | Some currentHintSymbol when currentHintSymbol.primaryHintHouse -> 
+            ColouredString(s.ToString(), ConsoleColor.Cyan)
+        | Some currentHintSymbol when currentHintSymbol.secondaryHintHouse -> 
+            ColouredString(s.ToString(), ConsoleColor.DarkBlue)
         | _ -> ColouredString(s.ToString(), ConsoleColor.Blue)
     | None, ASymbol _ when not isCentre -> CChar ' '
     | None, ASymbol s -> 
         match currentHintSymbolOpt with
-        | Some currentHintSymbol when currentHintSymbol.primaryHintHouse -> ColouredString(s.ToString(), ConsoleColor.Yellow)
-        | Some currentHintSymbol when currentHintSymbol.secondaryHintHouse -> ColouredString(s.ToString(), ConsoleColor.DarkRed)
+        | Some currentHintSymbol when currentHintSymbol.primaryHintHouse -> 
+            ColouredString(s.ToString(), ConsoleColor.Yellow)
+        | Some currentHintSymbol when currentHintSymbol.secondaryHintHouse -> 
+            ColouredString(s.ToString(), ConsoleColor.DarkRed)
         | _ -> ColouredString(s.ToString(), ConsoleColor.Red)
     | None, ACandidates candidates -> 
         match currentHintSymbolOpt with
         | Some currentHintSymbol when currentHintSymbol.setValue.IsSome && currentHintSymbol.setValue.Value = (candidateToSymbol candidate) -> 
                 ColouredString(candidate.ToString(), ConsoleColor.Red)
-        | Some currentHintSymbol when currentHintSymbol.setValue.IsSome && Set.contains candidate candidates ->
-                ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
+        | Some currentHintSymbol when currentHintSymbol.setValue.IsSome && Set.contains candidate candidates -> 
+            ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
         | Some currentHintSymbol when currentHintSymbol.setValueReduction.IsSome && currentHintSymbol.setValueReduction.Value = candidate && Set.contains candidate candidates -> 
                 ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
         | Some currentHintSymbol when Set.contains candidate currentHintSymbol.reductions -> 
-                ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
+            ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
         | Some currentHintSymbol when Set.contains candidate currentHintSymbol.pointers -> 
-                ColouredString(candidate.ToString(), ConsoleColor.Magenta)
+            ColouredString(candidate.ToString(), ConsoleColor.Magenta)
         | Some currentHintSymbol when currentHintSymbol.primaryHintHouse -> 
-                if Set.contains candidate candidates then 
-                    ColouredString(candidate.ToString(), ConsoleColor.DarkGreen)
-                else CChar ' '
+            if Set.contains candidate candidates then ColouredString(candidate.ToString(), ConsoleColor.DarkGreen)
+            else CChar ' '
         | Some currentHintSymbol when currentHintSymbol.secondaryHintHouse -> 
-                if Set.contains candidate candidates then 
-                    ColouredString(candidate.ToString(), ConsoleColor.Green)
-                else CChar ' '
-        | _ ->
+            if Set.contains candidate candidates then ColouredString(candidate.ToString(), ConsoleColor.Green)
+            else CChar ' '
+        | _ -> 
             if Set.contains candidate candidates then CStr(candidate.ToString())
             else CChar ' '

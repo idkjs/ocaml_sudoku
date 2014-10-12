@@ -6,15 +6,15 @@ open core.setCell
 open core.sudoku
 open hints
 
-let fullHousePerHouse (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) (primaryHouse : House) = 
-
+let fullHousePerHouse (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) 
+    (candidateLookup : Cell -> Set<Candidate>) (primaryHouse : House) = 
     let primaryHouseCells = puzzleHouseCells primaryHouse
 
     let candidateCells = Set.map (fun cell -> ((candidateLookup cell), cell)) primaryHouseCells
 
     let hhs = Set.filter (fun (candidates, _) -> Set.isEmpty candidates = false) candidateCells
-
-    let hhs2 =
+    
+    let hhs2 = 
         if hhs.Count = 1 then 
             let h = first hhs
             let cell = snd h
@@ -25,7 +25,7 @@ let fullHousePerHouse (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : H
             [ { HintDescription.primaryHouses = set [ primaryHouse ]
                 secondaryHouses = set []
                 candidateReductions = set []
-                setCellValue = Some setCellValue
+                setCellValueAction = Some setCellValue
                 pointers = set [] } ]
         else []
 

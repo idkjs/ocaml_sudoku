@@ -22,4 +22,5 @@ val drawConsoleChar : ConsoleChar -> Unit
 
 val drawSymbolCellContents : Symbol option -> CellContents -> ConsoleChar
 
-val drawSymbolCellContentAnnotations : Candidate -> Candidate -> Symbol option -> CellContents -> CellAnnotation option -> ConsoleChar
+val drawSymbolCellContentAnnotations : Candidate
+     -> Candidate -> Symbol option -> CellContents -> CellAnnotation option -> ConsoleChar

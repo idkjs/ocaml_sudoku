@@ -2,6 +2,11 @@
 
 open sudoku
 
-val clearCandidateApply : ClearCellCandidate -> (Cell -> CellContents) -> Cell -> CellContents
+val clearCandidateApply : ClearCellCandidateAction -> (Cell -> CellContents) -> Cell -> CellContents
 
-val clearCandidateTry : Cell -> Candidate -> (Cell -> CellContents) -> ClearCellCandidate option
+type ClearCellCandidateError = 
+    | AlreadySet of Symbol
+    | NotACandidate
+
+val clearCandidateTry : Cell
+     -> Candidate -> (Cell -> CellContents) -> Either<ClearCellCandidateAction, ClearCellCandidateError>

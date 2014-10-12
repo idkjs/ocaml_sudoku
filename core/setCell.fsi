@@ -1,10 +1,14 @@
 ﻿module core.setCell
 
-open puzzlemap
 open sudoku
 
-val setCellSymbolApply : (Cell -> Set<Cell>) -> SetCellSymbol -> ((Cell -> CellContents) -> Cell -> CellContents)
+val setCellSymbolApply : (Cell -> Set<Cell>) -> SetCellSymbolAction -> ((Cell -> CellContents) -> Cell -> CellContents)
 
-val makeSetCellSymbol : Cell-> Candidate -> SetCellSymbol
+val makeSetCellSymbol : Cell -> Candidate -> SetCellSymbolAction
 
-val setCellSymbolTry : Cell -> Candidate -> (Cell -> CellContents) -> SetCellSymbol option
+type SetCellSymbolError = 
+    { cell : Cell
+      candidate : Candidate
+      symbol : Symbol }
+
+val setCellSymbolTry : Cell -> Candidate -> (Cell -> CellContents) -> Either<SetCellSymbolAction, SetCellSymbolError>

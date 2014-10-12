@@ -1,10 +1,8 @@
 ﻿module core.clearCandidate
 
-open System
+open sudoku
 
-open core.sudoku
-
-let clearCandidateApply (clearCandidate : ClearCellCandidate) : (Cell -> CellContents) -> Cell -> CellContents = 
+let clearCandidateApply (clearCandidate : ClearCellCandidateAction) : (Cell -> CellContents) -> Cell -> CellContents = 
 
     fun (cellCellContents : Cell -> CellContents) (cell : Cell) -> 
         let cellContents = cellCellContents cell
@@ -15,15 +13,15 @@ let clearCandidateApply (clearCandidate : ClearCellCandidate) : (Cell -> CellCon
             if clearCandidate.cell = cell then ACandidates(Set.remove clearCandidate.candidate candidates)
             else cellContents
 
-let clearCandidateTry (cell : Cell) (candidate : Candidate) (cellCellContents : Cell -> CellContents) : ClearCellCandidate option = 
+type ClearCellCandidateError = 
+    | AlreadySet of Symbol
+    | NotACandidate
+
+let clearCandidateTry (cell : Cell) (candidate : Candidate) (cellCellContents : Cell -> CellContents) : Either<ClearCellCandidateAction, ClearCellCandidateError> = 
     match cellCellContents cell with
-    | ASymbol symbol -> 
-        Console.WriteLine("Cell {0} has been set value {1}", cell, symbol)
-        None
+    | ASymbol symbol -> Right(AlreadySet symbol)
     | ACandidates candidates -> 
         if Set.contains candidate candidates then 
-            Some { ClearCellCandidate.cell = cell
+            Left { ClearCellCandidateAction.cell = cell
                    candidate = candidate }
-        else 
-            Console.WriteLine("Cell {0} does not have candidate {1}", cell, candidate)
-            None
+        else Right NotACandidate

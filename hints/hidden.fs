@@ -1,16 +1,13 @@
 ﻿module hints.hidden
 
-open System
-open System.Text
-
 open console
 
 open core.setCell
 open core.sudoku
 open hints
 
-let findHidden (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) (primaryHouseCells : Set<Cell>) (candidateSubset : Set<Candidate>) 
-    (count : int) (primaryHouse : House) = 
+let findHidden (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) 
+    (primaryHouseCells : Set<Cell>) (candidateSubset : Set<Candidate>) (count : int) (primaryHouse : House) = 
     let pairs = 
         List.map (fun cell -> 
             let candidates = candidateLookup cell
@@ -51,12 +48,12 @@ let findHidden (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> S
         Some { HintDescription.primaryHouses = set [ primaryHouse ]
                secondaryHouses = set []
                candidateReductions = Set.ofList nonEmptyCandidateReductions
-               setCellValue = setCellValue
+               setCellValueAction = setCellValue
                pointers = Set.ofList nonEmptyPointers }
     else None
 
-let hiddenNPerHouse (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) (count : int) 
-    (house : House) = 
+let hiddenNPerHouse (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) 
+    (candidateLookup : Cell -> Set<Candidate>) (count : int) (house : House) = 
     let cells = puzzleHouseCells house
 
     let houseCandidates = Set.map candidateLookup cells |> Set.unionMany

@@ -143,20 +143,20 @@ type CellContents =
 
 // Working towards a solution we take one of the following actions:
 // Set the cell to have a symbol
-type SetCellSymbol = 
+type SetCellSymbolAction = 
     { cell : Cell
       symbol : Symbol }
-    override this.ToString() = String.Format("SetCellSymbol: {0} = {1}", this.cell, this.symbol)
+    override this.ToString() = String.Format("SetCellSymbolAction: {0} = {1}", this.cell, this.symbol)
 
 // or remove a candidate
-type ClearCellCandidate = 
+type ClearCellCandidateAction = 
     { cell : Cell
       candidate : Candidate }
-    override this.ToString() = String.Format("ClearCellCandidate: {0} = {1}", this.cell, this.candidate)
+    override this.ToString() = String.Format("ClearCellCandidateAction: {0} = {1}", this.cell, this.candidate)
 
 type Action = 
-    | SetCellSymbol of SetCellSymbol
-    | ClearCellCandidate of ClearCellCandidate
+    | SetCellSymbol of SetCellSymbolAction
+    | ClearCellCandidate of ClearCellCandidateAction
 
 [<NoEquality; NoComparison>]
 type Solution = 
@@ -173,3 +173,8 @@ type CellAnnotation =
       setValueReduction : Candidate option
       reductions : Set<Candidate>
       pointers : Set<Candidate> }
+
+// From http://www.fssnip.net/ji
+type Either<'a, 'b> = 
+    | Left of 'a
+    | Right of 'b

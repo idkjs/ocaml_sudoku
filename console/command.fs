@@ -39,14 +39,21 @@ let parseValue (candidates : Candidate list) (term : string) =
         Console.WriteLine("Expect a single digit, not {0}", term)
         None
 
-let setCellCommand (item : string) (alphabet : Candidate list) (lastGrid : Cell -> CellContents) (cells : Cell list) (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) = 
+let setCellCommand (item : string) (alphabet : Candidate list) (lastGrid : Cell -> CellContents) (cells : Cell list) 
+    (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) : SetCellSymbolAction option = 
     let terms = item.Split(' ')
     if terms.Length = 4 then 
         let parsedCell = parseCell alphabet.Length cells terms.[1] terms.[2]
         let parsedValue = parseValue alphabet terms.[3]
 
         match (parsedCell, parsedValue) with
-        | (Some cell, Some value) -> setCellSymbolTry cell value lastGrid
+        | (Some cell, Some value) -> 
+            let either = setCellSymbolTry cell value lastGrid
+            match either with
+            | Left setCellSymbolAction -> Some setCellSymbolAction
+            | Right setCellSymbolError -> 
+                Console.WriteLine("Cell {0} has been set value {1}", cell, setCellSymbolError.symbol)
+                None
         | _ -> 
             Console.WriteLine "Expect set <col> <row> <val>"
             None
@@ -55,18 +62,25 @@ let setCellCommand (item : string) (alphabet : Candidate list) (lastGrid : Cell 
         None
 
 let candidateClearCommand (item : string) (alphabet : Candidate list) (lastGrid : Cell -> CellContents) 
-    (cells : Cell list) = 
+    (cells : Cell list) : ClearCellCandidateAction option = 
     let terms = item.Split(' ')
     if terms.Length = 4 then 
         let parsedCell = parseCell alphabet.Length cells terms.[1] terms.[2]
-        let parsedValue = parseValue alphabet terms.[3]
+        let parsedCandidate = parseValue alphabet terms.[3]
 
-        match (parsedCell, parsedValue) with
-        | (Some cell, Some value) -> clearCandidateTry cell value lastGrid
+        match (parsedCell, parsedCandidate) with
+        | (Some cell, Some candidate) -> 
+            match clearCandidateTry cell candidate lastGrid with
+            | Left clearCellCandidateAction -> Some clearCellCandidateAction
+            | Right(AlreadySet symbol) -> 
+                Console.WriteLine("Cell {0} has been set value {1}", cell, symbol)
+                None
+            | Right NotACandidate -> 
+                Console.WriteLine("Cell {0} does not have candidate {1}", cell, candidate)
+                None
         | _ -> 
             Console.WriteLine "Expect clr <col> <row> <val>"
             None
     else 
         Console.WriteLine "Expect clr <col> <row> <val>"
         None
-
