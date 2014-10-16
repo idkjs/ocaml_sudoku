@@ -2,35 +2,35 @@
 
 open sudoku
 
-let setCellSymbolApply (cellHouseCells : Cell -> Set<Cell>) (setCellValue : SetCellSymbolAction) : (Cell -> CellContents) -> Cell -> CellContents = 
+let setCellDigitApply (cellHouseCells : Cell -> Set<Cell>) (setCellValue : SetCellDigitAction) : (Cell -> CellContents) -> Cell -> CellContents = 
 
     fun (cellCellContents : Cell -> CellContents) (cell : Cell) -> 
         let cellContents = cellCellContents cell
         let cells = cellHouseCells cell
 
         match cellContents with
-        | ASymbol _ -> cellContents
+        | ADigit _ -> cellContents
         | ACandidates candidates -> 
-            if setCellValue.cell = cell then ASymbol setCellValue.symbol
+            if setCellValue.cell = cell then ADigit setCellValue.digit
             else if Set.contains cell cells then 
-                ACandidates(Set.remove (symbolToCandidate setCellValue.symbol) candidates)
+                ACandidates(Set.remove (digitToCandidate setCellValue.digit) candidates)
             else cellContents
 
-let makeSetCellSymbol (cell : Cell) (candidate : Candidate) : SetCellSymbolAction = 
-    let symbol = candidateToSymbol candidate
+let makeSetCellDigit (cell : Cell) (candidate : Candidate) : SetCellDigitAction = 
+    let Digit = candidateToDigit candidate
 
-    { SetCellSymbolAction.cell = cell
-      symbol = symbol }
+    { SetCellDigitAction.cell = cell
+      digit = Digit }
 
-type SetCellSymbolError = 
+type SetCellDigitError = 
     { cell : Cell
       candidate : Candidate
-      symbol : Symbol }
+      digit : Digit }
 
-let setCellSymbolTry (cell : Cell) (candidate : Candidate) (cellCellContents : Cell -> CellContents) : Either<SetCellSymbolAction, SetCellSymbolError> = 
+let setCellDigitTry (cell : Cell) (candidate : Candidate) (cellCellContents : Cell -> CellContents) : Either<SetCellDigitAction, SetCellDigitError> = 
     match cellCellContents cell with
-    | ASymbol symbol -> 
-        Right { SetCellSymbolError.cell = cell
+    | ADigit digit -> 
+        Right { SetCellDigitError.cell = cell
                 candidate = candidate
-                symbol = symbol }
-    | ACandidates _ -> Left(makeSetCellSymbol cell candidate)
+                digit = digit }
+    | ACandidates _ -> Left(makeSetCellDigit cell candidate)

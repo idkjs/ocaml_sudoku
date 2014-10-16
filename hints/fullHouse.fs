@@ -20,7 +20,7 @@ let fullHousePerHouse (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : H
             let cell = snd h
             let candidate = first (fst h)
 
-            let setCellValue = makeSetCellSymbol cell candidate
+            let setCellValue = makeSetCellDigit cell candidate
 
             [ { HintDescription.primaryHouses = set [ primaryHouse ]
                 secondaryHouses = set []

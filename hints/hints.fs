@@ -67,7 +67,7 @@ type HintDescription =
     { primaryHouses : Set<House>
       secondaryHouses : Set<House>
       candidateReductions : Set<CandidateReduction>
-      setCellValueAction : SetCellSymbolAction option
+      setCellValueAction : SetCellDigitAction option
       pointers : Set<CandidateReduction> }
     override this.ToString() = 
         let sb = StringBuilder()
@@ -87,8 +87,21 @@ type HintDescription2 =
     { primaryHouses : Set<House>
       secondaryHouses : Set<House>
       candidateReductions : Set<CandidateReduction>
-      setCellValueAction : SetCellSymbolAction option
+      setCellValueAction : SetCellDigitAction option
       annotations : Cell -> CellAnnotation }
+    override this.ToString() = 
+        let sb = StringBuilder()
+
+        sb.AppendLine(String.Format("Primary Houses {0}", String.Join(",", Set.toArray this.primaryHouses))) |> ignore
+        sb.AppendLine(String.Format("Secondary Houses {0}", String.Join(",", Set.toArray this.secondaryHouses))) 
+        |> ignore
+
+        Set.iter (fun (cr : CandidateReduction) -> sb.AppendLine(String.Format("  {0}", cr)) |> ignore) 
+            this.candidateReductions
+
+        sb.AppendLine(String.Format("Set Cell {0}", this.setCellValueAction)) |> ignore
+
+        sb.ToString()
 
 let mhas (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) (hd : HintDescription) : HintDescription2 = 
 
@@ -100,11 +113,11 @@ let mhas (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<C
                 let cells = cellHouseCells setCellValueAction.cell
                 
                 let r1 = 
-                    if setCellValueAction.cell = cell then Some setCellValueAction.symbol
+                    if setCellValueAction.cell = cell then Some setCellValueAction.digit
                     else None
                 
                 let r3 = 
-                    if Set.contains cell cells then Some(symbolToCandidate setCellValueAction.symbol)
+                    if Set.contains cell cells then Some(digitToCandidate setCellValueAction.digit)
                     else None
                 
                 r1, r3

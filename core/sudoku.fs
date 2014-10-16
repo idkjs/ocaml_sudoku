@@ -34,7 +34,7 @@ let rows (length : int<size>) = List.map makeRow [ 1..(int) length ]
 type Cell = 
     { col : Column
       row : Row }
-    override this.ToString() = String.Format("c{0}r{1}", (int) this.col.col, (int) this.row.row)
+    override this.ToString() = String.Format("r{0}c{1}", (int) this.row.row, (int) this.col.col)
 
 let cells (length : int<size>) = 
     [ for row in (rows length) do
@@ -107,11 +107,11 @@ let houses (length : int<size>) (boxWidth : int<width>) (boxHeight : int<height>
 
     List.concat [ chs; rhs; bhs ]
 
-// Each cell in the grid contains a symbol, usually numbers 1..9
-type Symbol = 
-    | Symbol of char
+// Each cell in the grid contains a Digit, usually numbers 1..9
+type Digit = 
+    | Digit of char
     override this.ToString() = 
-        let (Symbol s) = this
+        let (Digit s) = this
         (string) s
 
 type Candidate = 
@@ -120,54 +120,54 @@ type Candidate =
         let (Candidate c) = this
         (string) c
 
-let symbolToCandidate (Symbol s : Symbol) : Candidate = Candidate s
+let digitToCandidate (Digit s : Digit) : Candidate = Candidate s
 
-let candidateToSymbol (Candidate s : Candidate) : Symbol = Symbol s
+let candidateToDigit (Candidate s : Candidate) : Digit = Digit s
 
 // A sudoku is defined by the overall grid size (it is always square)
-// which is the same as the symbols in the alphabet
+// which is the same as the Digits in the alphabet
 // and also by the width and height of the boxes
 [<NoEquality; NoComparison>]
 type Puzzle = 
     { boxWidth : int<width>
       boxHeight : int<height>
-      alphabet : Symbol list }
+      alphabet : Digit list }
 
 // Whilst working to a solution each cell in the grid
-// that doesn't have a symbol is filled with candidates
-// Candidates are possible symbols
+// that doesn't have a Digit is filled with candidates
+// Candidates are possible Digits
 [<NoEquality; NoComparison>]
 type CellContents = 
-    | ASymbol of Symbol
+    | ADigit of Digit
     | ACandidates of Set<Candidate>
 
 // Working towards a solution we take one of the following actions:
-// Set the cell to have a symbol
-type SetCellSymbolAction = 
+// Set the cell to have a Digit
+type SetCellDigitAction = 
     { cell : Cell
-      symbol : Symbol }
-    override this.ToString() = String.Format("SetCellSymbolAction: {0} = {1}", this.cell, this.symbol)
+      digit : Digit }
+    override this.ToString() = String.Format("{0}={1}", this.cell, this.digit)
 
 // or remove a candidate
-type ClearCellCandidateAction = 
+type EliminateCandidateAction = 
     { cell : Cell
       candidate : Candidate }
-    override this.ToString() = String.Format("ClearCellCandidateAction: {0} = {1}", this.cell, this.candidate)
+    override this.ToString() = String.Format("{0}<>{1}", this.cell, this.candidate)
 
 type Action = 
-    | SetCellSymbol of SetCellSymbolAction
-    | ClearCellCandidate of ClearCellCandidateAction
+    | SetCellDigit of SetCellDigitAction
+    | EliminateCandidate of EliminateCandidateAction
 
 [<NoEquality; NoComparison>]
 type Solution = 
-    { start : Cell -> Symbol option
+    { given : Cell -> Digit option
       current : Cell -> CellContents
       steps : Action list }
 
 // To draw a cell we may want to display extra information...
 [<NoEquality; NoComparison>]
 type CellAnnotation = 
-    { setValue : Symbol option
+    { setValue : Digit option
       primaryHintHouse : bool
       secondaryHintHouse : bool
       setValueReduction : Candidate option

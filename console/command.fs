@@ -4,7 +4,7 @@ open System
 
 open console.console
 open console.format
-open core.clearCandidate
+open core.eliminateCandidate
 open core.setCell
 open core.sudoku
 
@@ -28,8 +28,8 @@ let parseCell gridSize cells termColumn termRow =
         Console.WriteLine("({0},{1} is not a cell", termColumn, termRow)
         None
 
-let charToCandidate (candidates : Candidate list) (trialSymbol : char) = 
-    let compareAlpha (Candidate charSymbol) = trialSymbol = charSymbol
+let charToCandidate (candidates : Candidate list) (trialDigit : char) = 
+    let compareAlpha (Candidate charDigit) = trialDigit = charDigit
     List.tryFind compareAlpha candidates
 
 // find an element of the alphabet
@@ -40,7 +40,7 @@ let parseValue (candidates : Candidate list) (term : string) =
         None
 
 let setCellCommand (item : string) (alphabet : Candidate list) (lastGrid : Cell -> CellContents) (cells : Cell list) 
-    (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) : SetCellSymbolAction option = 
+    (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) : SetCellDigitAction option = 
     let terms = item.Split(' ')
     if terms.Length = 4 then 
         let parsedCell = parseCell alphabet.Length cells terms.[1] terms.[2]
@@ -48,11 +48,11 @@ let setCellCommand (item : string) (alphabet : Candidate list) (lastGrid : Cell 
 
         match (parsedCell, parsedValue) with
         | (Some cell, Some value) -> 
-            let either = setCellSymbolTry cell value lastGrid
+            let either = setCellDigitTry cell value lastGrid
             match either with
-            | Left setCellSymbolAction -> Some setCellSymbolAction
-            | Right setCellSymbolError -> 
-                Console.WriteLine("Cell {0} has been set value {1}", cell, setCellSymbolError.symbol)
+            | Left setCellDigitAction -> Some setCellDigitAction
+            | Right setCellDigitError -> 
+                Console.WriteLine("Cell {0} has been set value {1}", cell, setCellDigitError.digit)
                 None
         | _ -> 
             Console.WriteLine "Expect set <col> <row> <val>"
@@ -62,7 +62,7 @@ let setCellCommand (item : string) (alphabet : Candidate list) (lastGrid : Cell 
         None
 
 let candidateClearCommand (item : string) (alphabet : Candidate list) (lastGrid : Cell -> CellContents) 
-    (cells : Cell list) : ClearCellCandidateAction option = 
+    (cells : Cell list) : EliminateCandidateAction option = 
     let terms = item.Split(' ')
     if terms.Length = 4 then 
         let parsedCell = parseCell alphabet.Length cells terms.[1] terms.[2]
@@ -70,10 +70,10 @@ let candidateClearCommand (item : string) (alphabet : Candidate list) (lastGrid 
 
         match (parsedCell, parsedCandidate) with
         | (Some cell, Some candidate) -> 
-            match clearCandidateTry cell candidate lastGrid with
-            | Left clearCellCandidateAction -> Some clearCellCandidateAction
-            | Right(AlreadySet symbol) -> 
-                Console.WriteLine("Cell {0} has been set value {1}", cell, symbol)
+            match eliminateCandidateTry cell candidate lastGrid with
+            | Left eliminateCandidateAction -> Some eliminateCandidateAction
+            | Right(AlreadySet digit) -> 
+                Console.WriteLine("Cell {0} has been set value {1}", cell, digit)
                 None
             | Right NotACandidate -> 
                 Console.WriteLine("Cell {0} does not have candidate {1}", cell, candidate)

@@ -2,4 +2,4 @@ module load
 
 open core.sudoku
 
-val load : Symbol list -> char list -> ((Cell -> Symbol option) -> Cell -> CellContents) -> Solution
+val load : Digit list -> char list -> ((Cell -> Digit option) -> Cell -> CellContents) -> Solution

@@ -3,16 +3,16 @@ module load
 open core.sudoku
 
 // Load a sudoku given as a single line of gridSize*gridSize characters
-let loadPuzzle (cells : Cell list) (alphabetisedLine : Symbol option list) (cell : Cell) : Symbol option = 
+let loadPuzzle (cells : Cell list) (alphabetisedLine : Digit option list) (cell : Cell) : Digit option = 
     let zs = List.zip alphabetisedLine cells
-    List.pick (fun (symbolOpt, c) -> 
-        if c = cell then Some symbolOpt
+    List.pick (fun (digitOpt, c) -> 
+        if c = cell then Some digitOpt
         else None) zs
 
-let load (alphabet : Symbol list) (sudoku : char list) 
-    (contentsTransformer : (Cell -> Symbol option) -> Cell -> CellContents) : Solution = 
-    let charToAlphabet (trialSymbol : char) : Symbol option = 
-        let compareAlpha (Symbol charSymbol) = trialSymbol = charSymbol
+let load (alphabet : Digit list) (sudoku : char list) 
+    (contentsTransformer : (Cell -> Digit option) -> Cell -> CellContents) : Solution = 
+    let charToAlphabet (trialDigit : char) : Digit option = 
+        let compareAlpha (Digit charDigit) = trialDigit = charDigit
         List.tryFind compareAlpha alphabet
     
     let alphabetisedLine = List.map charToAlphabet sudoku
@@ -24,7 +24,7 @@ let load (alphabet : Symbol list) (sudoku : char list)
     let solutionGrid = contentsTransformer puzzleGrid
     
     let solution = 
-        { start = puzzleGrid
+        { given = puzzleGrid
           current = solutionGrid
           steps = [] }
 

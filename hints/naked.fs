@@ -8,16 +8,16 @@ open hints
 
 let findNaked (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) 
     (primaryHouseCells : Set<Cell>) (cellSubset : Set<Cell>) (count : int) (primaryHouse : House) = 
-    let symbols = Set.map candidateLookup cellSubset
-    let subsetSymbols = Set.unionMany symbols
+    let digits = Set.map candidateLookup cellSubset
+    let subsetDigits = Set.unionMany digits
 
-    if Set.count subsetSymbols <= count then 
+    if Set.count subsetDigits <= count then 
         let otherCells = Set.filter (fun cell -> Set.contains cell cellSubset = false) primaryHouseCells
         
         let candidateReductions = 
             Set.map (fun cell -> 
                 let candidates = candidateLookup cell
-                { CandidateReduction.candidates = Set.intersect subsetSymbols candidates
+                { CandidateReduction.candidates = Set.intersect subsetDigits candidates
                   cell = cell }) otherCells
         
         let nonEmptyCandidateReductions = Set.filter (fun cr -> Set.count cr.candidates > 0) candidateReductions
@@ -63,7 +63,7 @@ let nakedSingleFind (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : Hou
             if Set.count candidates = 1 then 
                 let candidate = first candidates
 
-                let setCellValue = makeSetCellSymbol cell candidate
+                let setCellValue = makeSetCellDigit cell candidate
 
                 Some { HintDescription.primaryHouses = set []
                        secondaryHouses = set []

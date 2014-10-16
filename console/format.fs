@@ -20,19 +20,19 @@ type gridChars<'a> =
       b : gridCharsRow<'a>
       n : 'a }
 
-type solutionCharsRow<'a> = 
+type candidateGridCharsRow<'a> = 
     { mi : 'a
       x : gridCharsRow<'a> }
 
-type solutionChars<'a> = 
+type candidateGridChars<'a> = 
     { h : 'a
       hi : 'a
       v : gridCharsRow<'a>
       vi : 'a
-      t : solutionCharsRow<'a>
-      m : solutionCharsRow<'a>
-      mi : solutionCharsRow<'a>
-      b : solutionCharsRow<'a>
+      t : candidateGridCharsRow<'a>
+      m : candidateGridCharsRow<'a>
+      mi : candidateGridCharsRow<'a>
+      b : candidateGridCharsRow<'a>
       n : 'a }
 
 // Combine fences with posts (there's one more fence than posts: f p f p ... p f)
@@ -62,13 +62,8 @@ let sinterleave (fenceToSeq : 'a -> seq<'c>) (firstPost : seq<'c>) (midPost : se
         yield! eol
     }
 
-let printRowOnOneLine (symbolTo : 'b -> 'c) (containerItems : 'a -> 'b list) (midPost : seq<'c>) (containers : 'a list) = 
-    let containerToSeq container = Seq.map symbolTo (containerItems container)
-
-    sinterleave containerToSeq midPost midPost midPost Seq.empty containers
-
 // Print a column
-let printCell (symbolTo : Cell -> 'c) cell = symbolTo cell |> Seq.singleton
+let printCell (digitTo : Cell -> 'c) cell = digitTo cell |> Seq.singleton
 
 let printColumn (printCell : Cell -> seq<'c>) row column : seq<'c> = 
     let cell = 
@@ -95,9 +90,9 @@ let printBand (rowToSeq : Row -> seq<'c>) (rowSeparator : seq<'c>) (puzzleBandRo
     simpleInterleave rowToSeq rowSeparator (puzzleBandRows band)
 
 // Print a puzzle grid, supply callback to draw each cell
-let printCells (puzzleStacks : Stack list) (puzzleStackColumns : Stack -> Column list) (puzzleBands : Band list) (puzzleBandRows : Band -> Row list) (gridChars : gridChars<seq<'c>>) (symbolTo : Cell -> 'c) = 
+let printGrid (puzzleStacks : Stack list) (puzzleStackColumns : Stack -> Column list) (puzzleBands : Band list) (puzzleBandRows : Band -> Row list) (gridChars : gridChars<seq<'c>>) (digitTo : Cell -> 'c) = 
 
-    let doPrintColumn = printColumn (printCell symbolTo)
+    let doPrintColumn = printColumn (printCell digitTo)
 
     let doPrintStack = printStack doPrintColumn Seq.empty puzzleStackColumns
 
@@ -113,17 +108,17 @@ let printCells (puzzleStacks : Stack list) (puzzleStackColumns : Stack -> Column
 
     sinterleave doPrintBand t m b Seq.empty puzzleBands
 
-let printCellAndCandidates (puzzleStacks : Stack list) (puzzleStackColumns : Stack -> Column list) (puzzleBands : Band list) (puzzleBandRows : Band -> Row list) 
-    (solutionChars : solutionChars<seq<'c>>) (alphabet : Candidate list) 
+let printCandidateGrid (puzzleStacks : Stack list) (puzzleStackColumns : Stack -> Column list) (puzzleBands : Band list) (puzzleBandRows : Band -> Row list) 
+    (candidateGridChars : candidateGridChars<seq<'c>>) (alphabet : Candidate list) 
     (draw_cell : Cell -> Candidate -> 'c) = 
 
-    let d = Seq.collect (konst solutionChars.h) (puzzleStackColumns puzzleStacks.Head)
-    let i = Seq.collect (konst solutionChars.hi) (puzzleStackColumns puzzleStacks.Head)
+    let d = Seq.collect (konst candidateGridChars.h) (puzzleStackColumns puzzleStacks.Head)
+    let i = Seq.collect (konst candidateGridChars.hi) (puzzleStackColumns puzzleStacks.Head)
     
-    let printFullHorizontal (x : solutionCharsRow<seq<'c>>) i = 
+    let printFullHorizontal (x : candidateGridCharsRow<seq<'c>>) i = 
         let s = simpleInterleave (konst i) x.mi (puzzleStackColumns puzzleStacks.Head)
 
-        sinterleave (konst s) x.x.l x.x.m x.x.r solutionChars.n puzzleStacks
+        sinterleave (konst s) x.x.l x.x.m x.x.r candidateGridChars.n puzzleStacks
     
     let c = List.length (puzzleStackColumns puzzleStacks.Head)
     let s = List.toSeq alphabet
@@ -137,20 +132,20 @@ let printCellAndCandidates (puzzleStacks : Stack list) (puzzleStackColumns : Sta
     let sss = List.ofSeq ss
     let ssss = List.map List.ofSeq sss
     
-    let doPrintColumn (symbols : seq<Candidate>) = 
-        let doPrintCell cell = Seq.map (fun symbol -> draw_cell cell symbol) symbols
+    let doPrintColumn (digits : seq<Candidate>) = 
+        let doPrintCell cell = Seq.map (fun digit -> draw_cell cell digit) digits
         printColumn doPrintCell
     
-    let doPrintStack (symbols : seq<Candidate>) = printStack (doPrintColumn symbols) solutionChars.vi puzzleStackColumns
+    let doPrintStack (digits : seq<Candidate>) = printStack (doPrintColumn digits) candidateGridChars.vi puzzleStackColumns
 
     let doPrintRow (row : Row) = 
-        Seq.collect (fun symbols -> printRow (doPrintStack symbols row) solutionChars.v solutionChars.n puzzleStacks) 
+        Seq.collect (fun digits -> printRow (doPrintStack digits row) candidateGridChars.v candidateGridChars.n puzzleStacks) 
             ssss
-    let t = printFullHorizontal solutionChars.t d
-    let m = printFullHorizontal solutionChars.m d
-    let b = printFullHorizontal solutionChars.b d
+    let t = printFullHorizontal candidateGridChars.t d
+    let m = printFullHorizontal candidateGridChars.m d
+    let b = printFullHorizontal candidateGridChars.b d
 
-    let rowSeparator = printFullHorizontal solutionChars.mi i
+    let rowSeparator = printFullHorizontal candidateGridChars.mi i
 
     let doPrintBand = printBand doPrintRow rowSeparator puzzleBandRows
 

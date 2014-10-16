@@ -18,27 +18,27 @@ let cs = CChar >> Seq.singleton
 
 // Some predefined characters - for smaller grid
 let defaultGridChars : gridChars<seq<ConsoleChar>> = 
-    { h = cs '─'
+    { h = cs '-'
       v = 
-          { l = cs '│'
-            m = cs '│'
-            r = cs '│' }
+          { l = cs '|'
+            m = cs '|'
+            r = cs '|' }
       t = 
-          { l = cs '┌'
-            m = cs '┬'
-            r = cs '┐' }
+          { l = cs '.'
+            m = cs '.'
+            r = cs '.' }
       m = 
-          { l = cs '├'
-            m = cs '┼'
-            r = cs '┤' }
+          { l = cs ':'
+            m = cs ' '
+            r = cs ':' }
       b = 
-          { l = cs '└'
-            m = cs '┴'
-            r = cs '┘' }
+          { l = cs '''
+            m = cs '''
+            r = cs ''' }
       n = Seq.singleton NL }
 
 // Some predefined characters - for smaller grid
-let defaultSolutionChars : solutionChars<seq<ConsoleChar>> = 
+let defaultCandidateGridChars : candidateGridChars<seq<ConsoleChar>> = 
     { h = cs '═'
       hi = cs '─'
       v = 
@@ -89,49 +89,49 @@ let drawConsoleChar (consoleChar : ConsoleChar) =
     | ColouredString(c, consoleColour) -> consoleWriteColor c consoleColour
     | NL -> Console.WriteLine ""
 
-let drawSymbolCellContents (firstSymbol : Symbol option) (currentSymbol : CellContents) = 
-    match firstSymbol, currentSymbol with
+let drawDigitCellContents (firstDigit : Digit option) (currentDigit : CellContents) = 
+    match firstDigit, currentDigit with
     | Some s, _ -> ColouredString(s.ToString(), ConsoleColor.Blue)
-    | None, ASymbol s -> ColouredString(s.ToString(), ConsoleColor.Red)
+    | None, ADigit s -> ColouredString(s.ToString(), ConsoleColor.Red)
     | None, ACandidates _ -> CChar '.'
 
-let drawSymbolCellContentAnnotations centreCandidate (candidate : Candidate) (firstSymbol : Symbol option) 
-    (currentSymbol : CellContents) (currentHintSymbolOpt : CellAnnotation option) = 
+let drawDigitCellContentAnnotations centreCandidate (candidate : Candidate) (firstDigit : Digit option) 
+    (currentDigit : CellContents) (currentHintDigitOpt : CellAnnotation option) = 
     let isCentre = centreCandidate = candidate
 
-    match firstSymbol, currentSymbol with
+    match firstDigit, currentDigit with
     | Some _, _ when not isCentre -> CChar ' '
     | Some s, _ -> 
-        match currentHintSymbolOpt with
-        | Some currentHintSymbol when currentHintSymbol.primaryHintHouse -> 
+        match currentHintDigitOpt with
+        | Some currentHintDigit when currentHintDigit.primaryHintHouse -> 
             ColouredString(s.ToString(), ConsoleColor.Cyan)
-        | Some currentHintSymbol when currentHintSymbol.secondaryHintHouse -> 
+        | Some currentHintDigit when currentHintDigit.secondaryHintHouse -> 
             ColouredString(s.ToString(), ConsoleColor.DarkBlue)
         | _ -> ColouredString(s.ToString(), ConsoleColor.Blue)
-    | None, ASymbol _ when not isCentre -> CChar ' '
-    | None, ASymbol s -> 
-        match currentHintSymbolOpt with
-        | Some currentHintSymbol when currentHintSymbol.primaryHintHouse -> 
+    | None, ADigit _ when not isCentre -> CChar ' '
+    | None, ADigit s -> 
+        match currentHintDigitOpt with
+        | Some currentHintDigit when currentHintDigit.primaryHintHouse -> 
             ColouredString(s.ToString(), ConsoleColor.Yellow)
-        | Some currentHintSymbol when currentHintSymbol.secondaryHintHouse -> 
+        | Some currentHintDigit when currentHintDigit.secondaryHintHouse -> 
             ColouredString(s.ToString(), ConsoleColor.DarkRed)
         | _ -> ColouredString(s.ToString(), ConsoleColor.Red)
     | None, ACandidates candidates -> 
-        match currentHintSymbolOpt with
-        | Some currentHintSymbol when currentHintSymbol.setValue.IsSome && currentHintSymbol.setValue.Value = (candidateToSymbol candidate) -> 
+        match currentHintDigitOpt with
+        | Some currentHintDigit when currentHintDigit.setValue.IsSome && currentHintDigit.setValue.Value = (candidateToDigit candidate) -> 
                 ColouredString(candidate.ToString(), ConsoleColor.Red)
-        | Some currentHintSymbol when currentHintSymbol.setValue.IsSome && Set.contains candidate candidates -> 
+        | Some currentHintDigit when currentHintDigit.setValue.IsSome && Set.contains candidate candidates -> 
             ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
-        | Some currentHintSymbol when currentHintSymbol.setValueReduction.IsSome && currentHintSymbol.setValueReduction.Value = candidate && Set.contains candidate candidates -> 
+        | Some currentHintDigit when currentHintDigit.setValueReduction.IsSome && currentHintDigit.setValueReduction.Value = candidate && Set.contains candidate candidates -> 
                 ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
-        | Some currentHintSymbol when Set.contains candidate currentHintSymbol.reductions -> 
+        | Some currentHintDigit when Set.contains candidate currentHintDigit.reductions -> 
             ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
-        | Some currentHintSymbol when Set.contains candidate currentHintSymbol.pointers -> 
+        | Some currentHintDigit when Set.contains candidate currentHintDigit.pointers -> 
             ColouredString(candidate.ToString(), ConsoleColor.Magenta)
-        | Some currentHintSymbol when currentHintSymbol.primaryHintHouse -> 
+        | Some currentHintDigit when currentHintDigit.primaryHintHouse -> 
             if Set.contains candidate candidates then ColouredString(candidate.ToString(), ConsoleColor.DarkGreen)
             else CChar ' '
-        | Some currentHintSymbol when currentHintSymbol.secondaryHintHouse -> 
+        | Some currentHintDigit when currentHintDigit.secondaryHintHouse -> 
             if Set.contains candidate candidates then ColouredString(candidate.ToString(), ConsoleColor.Green)
             else CChar ' '
         | _ -> 

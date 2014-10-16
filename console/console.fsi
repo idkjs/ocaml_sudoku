@@ -16,11 +16,11 @@ type ConsoleChar =
 
 val defaultGridChars : gridChars<seq<ConsoleChar>>
 
-val defaultSolutionChars : solutionChars<seq<ConsoleChar>>
+val defaultCandidateGridChars : candidateGridChars<seq<ConsoleChar>>
 
 val drawConsoleChar : ConsoleChar -> Unit
 
-val drawSymbolCellContents : Symbol option -> CellContents -> ConsoleChar
+val drawDigitCellContents : Digit option -> CellContents -> ConsoleChar
 
-val drawSymbolCellContentAnnotations : Candidate
-     -> Candidate -> Symbol option -> CellContents -> CellAnnotation option -> ConsoleChar
+val drawDigitCellContentAnnotations : Candidate
+     -> Candidate -> Digit option -> CellContents -> CellAnnotation option -> ConsoleChar

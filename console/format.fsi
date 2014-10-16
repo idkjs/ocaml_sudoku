@@ -15,27 +15,25 @@ type gridChars<'a> =
       b : gridCharsRow<'a>
       n : 'a }
 
-type solutionCharsRow<'a> = 
+type candidateGridCharsRow<'a> = 
     { mi : 'a
       x : gridCharsRow<'a> }
 
-type solutionChars<'a> = 
+type candidateGridChars<'a> = 
     { h : 'a
       hi : 'a
       v : gridCharsRow<'a>
       vi : 'a
-      t : solutionCharsRow<'a>
-      m : solutionCharsRow<'a>
-      mi : solutionCharsRow<'a>
-      b : solutionCharsRow<'a>
+      t : candidateGridCharsRow<'a>
+      m : candidateGridCharsRow<'a>
+      mi : candidateGridCharsRow<'a>
+      b : candidateGridCharsRow<'a>
       n : 'a }
 
-val printRowOnOneLine : ('b -> 'c) -> ('a -> 'b list) -> seq<'c> -> 'a list -> seq<'c>
-
-val printCells : Stack list
+val printGrid : Stack list
      -> (Stack -> Column list) -> Band list -> (Band -> Row list) -> gridChars<seq<'c>> -> (Cell -> 'c) -> seq<'c>
 
-val printCellAndCandidates : Stack list
+val printCandidateGrid : Stack list
      -> (Stack -> Column list)
      -> Band list
-     -> (Band -> Row list) -> solutionChars<seq<'c>> -> Candidate list -> (Cell -> Candidate -> 'c) -> seq<'c>
+     -> (Band -> Row list) -> candidateGridChars<seq<'c>> -> Candidate list -> (Cell -> Candidate -> 'c) -> seq<'c>
