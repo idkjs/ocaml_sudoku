@@ -48,22 +48,8 @@ type HintType =
 
 type Hint = HintType * HintDescription2
 
-let print_last (solution : Solution) puzzlePrintGrid = 
-
-    let drawer (cell : Cell) = drawDigitCellContents (solution.given cell) (solution.current cell)
-    Seq.iter drawConsoleChar (puzzlePrintGrid drawer)
-
-    match solution.steps with
-    | action :: _ -> 
-        match action with
-        | SetCellDigit sv -> drawConsoleChar (CStr(sv.ToString()))
-        | EliminateCandidate cc -> drawConsoleChar (CStr(cc.ToString()))
-    | [] -> ()
-
-    drawConsoleChar NL
-
-let parse (item : string) (alphabet : Candidate list) (solution : Solution) (puzzle : Puzzle) 
-    (candidateLookup : Cell -> Set<Candidate>) puzzlePrintGrid puzzlePrintFull puzzleDrawFull puzzleDrawFull2 : Solution * HintType option * HintDescription2 list = 
+let parse (item : string) (alphabet : Digit list) (solution : Solution) (puzzle : Puzzle) 
+    (candidateLookup : Cell -> Set<Digit>) puzzlePrintGrid puzzlePrintFull puzzleDrawFull puzzleDrawFull2 print_last : Solution * HintType option * HintDescription2 list = 
 
     let puzzleSize = (List.length alphabet) * 1<size>
     let puzzleHouseCells = houseCells puzzleSize puzzle.boxWidth puzzle.boxHeight
@@ -80,7 +66,16 @@ let parse (item : string) (alphabet : Candidate list) (solution : Solution) (puz
     Console.WriteLine item
 
     if item = "print" then 
-        puzzleDrawFull()
+        puzzleDrawFull None
+        (solution, None, [])
+    else if item.StartsWith "focus" then
+        let terms = item.Split(' ')
+        let focusDigit =
+            if terms.Length = 2 then 
+                parseValue alphabet terms.[1]
+            else
+                None
+        puzzleDrawFull focusDigit
         (solution, None, [])
     else if item.StartsWith "s" then 
         let setCommand = setCellCommand item alphabet solution.current puzzleCells puzzleHouseCellCells candidateLookup
@@ -98,11 +93,11 @@ let parse (item : string) (alphabet : Candidate list) (solution : Solution) (puz
                 let hd2 = mhas puzzleHouseCellCells puzzleHouseCells hd
                 puzzleDrawFull2 hd2.annotations
                 { solution with current = setCellDigitApply puzzleHouseCellCells setCellValue solution.current
-                                steps = (SetCellDigit setCellValue) :: solution.steps }
+                                steps = (Placement setCellValue) :: solution.steps }
             | None -> 
                 Console.WriteLine("")
                 solution
-        print_last newSolution puzzlePrintGrid
+        print_last newSolution
         (newSolution, None, [])
 
     else if item.StartsWith "c" then 
@@ -110,10 +105,10 @@ let parse (item : string) (alphabet : Candidate list) (solution : Solution) (puz
         
         let newSolution = 
             match clearCommand with
-            | Some eliminateCandidate -> 
+            | Some candidate -> 
                 let cr = 
-                    { CandidateReduction.cell = eliminateCandidate.cell
-                      candidates = set [ eliminateCandidate.candidate ] }
+                    { CandidateReduction.cell = candidate.cell
+                      candidates = set [ candidate.digit ] }
                 
                 let hd = 
                     { HintDescription.primaryHouses = set []
@@ -124,13 +119,13 @@ let parse (item : string) (alphabet : Candidate list) (solution : Solution) (puz
                 
                 let hd2 = mhas puzzleHouseCellCells puzzleHouseCells hd
                 puzzleDrawFull2 hd2.annotations
-                { solution with current = eliminateCandidateApply eliminateCandidate solution.current
-                                steps = (EliminateCandidate eliminateCandidate) :: solution.steps }
+                { solution with current = eliminateCandidateApply candidate solution.current
+                                steps = (Eliminate candidate) :: solution.steps }
             | None -> 
                 Console.WriteLine("")
                 solution
 
-        print_last newSolution puzzlePrintGrid
+        print_last newSolution
         (newSolution, None, [])
 
     else if item = "fh" then 
@@ -205,33 +200,30 @@ let printHint puzzleHouseCells puzzleHouseCellCells drawHint (index : int) (hint
 
     Console.Read() |> ignore
 
-let run (alphabet : Candidate list) (solution : Solution ref) (puzzle : Puzzle) puzzlePrintGrid puzzlePrintFull 
-    puzzleDrawFull puzzleDrawFullHint item = 
+let run (solution : Solution ref) (puzzle : Puzzle) puzzlePrintGrid puzzlePrintFull 
+    puzzleDrawFull puzzleDrawFullHint print_last item = 
     if item = "quit" then Some "quit"
     else 
-        let alphaset = Set.ofList alphabet
+        let alphaset = Set.ofList puzzle.alphabet
 
-        let puzzleSize = (List.length alphabet) * 1<size>
+        let puzzleSize = (List.length puzzle.alphabet) * 1<size>
         let puzzleHouseCells = houseCells puzzleSize puzzle.boxWidth puzzle.boxHeight
         let puzzleHouseCellCells = houseCellCells puzzleSize puzzle.boxWidth puzzle.boxHeight
         
         let getCandidateEntries (annotatedDigit : CellContents) = 
             match annotatedDigit with
-            | ADigit _ -> Set.empty
-            | ACandidates s -> s
+            | BigNumber _ -> Set.empty
+            | PencilMarks s -> s
         
         let candidateLookup = (!solution).current >> getCandidateEntries
         let (soln, hintTypeOpt, hints) = 
-            parse item alphabet !solution puzzle candidateLookup puzzlePrintGrid puzzlePrintFull puzzleDrawFull 
-                puzzleDrawFullHint
+            parse item puzzle.alphabet !solution puzzle candidateLookup puzzlePrintGrid puzzlePrintFull puzzleDrawFull 
+                puzzleDrawFullHint print_last
         solution := soln
 
         List.iteri (printHint puzzleHouseCells puzzleHouseCellCells puzzleDrawFullHint) hints
 
         None
-
-
-let mainWriter = drawConsoleChar
 
 let memoiseCellLookup (cells : Cell list) (cellLookup : Cell -> 'a) : Cell -> 'a = 
     let s = List.map (fun cell -> (cell, cellLookup cell)) cells
@@ -246,13 +238,12 @@ let digitToEntry (cellDigitLookup : Cell -> Digit option) (alphabet : Set<Digit>
     (houseCellCells : Cell -> Set<Cell>) : Cell -> CellContents = 
     fun (cell : Cell) -> 
         match cellDigitLookup cell with
-        | Some(e) -> ADigit(e)
+        | Some(e) -> BigNumber(e)
         | None -> 
             let cells = houseCellCells cell |> Set.toList
             let digits = List.choose cellDigitLookup cells |> Set.ofList
             let possibleDigits = Set.difference alphabet digits
-            let possibleCandidates = Set.map digitToCandidate possibleDigits
-            ACandidates possibleCandidates
+            PencilMarks possibleDigits
 
 let repl (sudoku : string) (puzzle : Puzzle) = 
 
@@ -274,45 +265,65 @@ let repl (sudoku : string) (puzzle : Puzzle) =
     
     let solution = ref (load puzzle.alphabet (List.ofSeq sudoku) transformer)
 
-    let candidates = List.map digitToCandidate puzzle.alphabet
+    let centreDigit : Digit = List.nth puzzle.alphabet ((List.length puzzle.alphabet) / 2)
 
-    let puzzlePrintFull = 
-        printCandidateGrid puzzleStacks puzzleStackColumns puzzleBands puzzleBandRows defaultCandidateGridChars 
-            candidates
-    let cons x y = x :: y
-    // Print a Digit option, with colours
-    let digitOptionToConsoleChar (cell : Cell) : ConsoleChar = 
-        drawDigitCellContents ((!solution).given cell) ((!solution).current cell)
-
-    let line = List.foldBack (digitOptionToConsoleChar >> cons) (cells puzzleSize) [ NL ]
-    List.iter mainWriter line
-    mainWriter NL
+    let puzzlePrintLine = printLine puzzleCells
 
     let puzzlePrintGrid = printGrid puzzleStacks puzzleStackColumns puzzleBands puzzleBandRows defaultGridChars
-    Seq.iter drawConsoleChar (puzzlePrintGrid digitOptionToConsoleChar)
 
-    let centreCandidate = List.nth candidates ((List.length candidates) / 2)
-    
-    let puzzleDrawFull() = 
-        let puzzleDrawer (cell : Cell) (candidate : Candidate) = 
-            drawDigitCellContentAnnotations centreCandidate candidate ((!solution).given cell) 
-                ((!solution).current cell) None
-        Seq.iter drawConsoleChar (puzzlePrintFull puzzleDrawer)
-    
-    let puzzleDrawFullHint annotations = 
-        let draw_cell2 (l : Cell -> CellAnnotation) (cell : Cell) (candidate : Candidate) = 
-            drawDigitCellContentAnnotations centreCandidate candidate ((!solution).given cell) 
-                ((!solution).current cell) (Some(l cell))
-        Seq.iter drawConsoleChar (puzzlePrintFull (draw_cell2 annotations))
+    let puzzlePrintCandidateGrid = 
+        printCandidateGrid puzzleStacks puzzleStackColumns puzzleBands puzzleBandRows defaultCandidateGridChars 
+            puzzle.alphabet
 
+    // Print a Digit option, with colours
+    let puzzleDrawCell (solution : Solution) (cell : Cell) : ConsoleChar = 
+        drawDigitCellContents (solution.given cell) (solution.current cell)
+
+    let puzzleDrawCellDigit (focus : Digit option) (solution : Solution) (cell : Cell) (digit : Digit) : ConsoleChar = 
+        drawDigitCellContentAnnotations centreDigit focus digit (solution.given cell) 
+            (solution.current cell) None
+
+    let puzzleDrawCellDigitAnnotations (solution : Solution) (l : Cell -> CellAnnotation) (cell : Cell) (digit : Digit) : ConsoleChar = 
+        drawDigitCellContentAnnotations centreDigit None digit (solution.given cell) 
+            (solution.current cell) (Some(l cell))
+
+    let puzzleDrawLine () =
+        Seq.iter drawConsoleChar (puzzlePrintLine (puzzleDrawCell !solution))
+
+    let puzzleDrawGrid () =
+        Seq.iter drawConsoleChar (puzzlePrintGrid (puzzleDrawCell !solution))
     
+    let puzzleDrawCandidateGrid (focus : Digit option) : unit = 
+        Seq.iter drawConsoleChar (puzzlePrintCandidateGrid (puzzleDrawCellDigit focus !solution))
+    
+    let puzzleDrawCandidateGridAnnotations annotations = 
+        Seq.iter drawConsoleChar (puzzlePrintCandidateGrid (puzzleDrawCellDigitAnnotations !solution annotations))
+
+    let print_last (solution : Solution) = 
+        let puzzleDrawCell' (cell : Cell) = drawDigitCellContents (solution.given cell) (solution.current cell)
+        Seq.iter drawConsoleChar (puzzlePrintGrid puzzleDrawCell')
+
+        match solution.steps with
+        | action :: _ -> 
+            match action with
+            | Placement sv -> drawConsoleChar (CStr(sv.ToString()))
+            | Eliminate candidate -> drawConsoleChar (CStr(candidate.ToString()))
+        | [] -> ()
+
+        drawConsoleChar NL
+
     let getInput (prompt : string) = 
         Console.Write prompt
         Console.ReadLine()
     
     let readlines = Seq.initInfinite (fun _ -> getInput (">"))
 
-    Seq.tryPick (run candidates solution puzzle puzzlePrintGrid puzzlePrintFull puzzleDrawFull puzzleDrawFullHint) 
+    puzzleDrawLine()
+    drawConsoleChar NL
+
+    puzzleDrawGrid()
+
+    Seq.tryPick (run solution puzzle puzzlePrintGrid puzzlePrintCandidateGrid puzzleDrawCandidateGrid puzzleDrawCandidateGridAnnotations print_last) 
         readlines |> ignore
 
 let defaultPuzzleSpec = 

@@ -71,6 +71,11 @@ type Box =
 
 val boxes : int<size> -> int<width> -> int<height> -> Box list
 
+// The columns and rows are collectively called lines
+type Line = 
+    | LColumn of Column
+    | LRow of Row
+
 // The columns, rows and boxes are collectively called houses
 type House = 
     | Column of Column
@@ -83,14 +88,10 @@ val houses : int<size> -> int<width> -> int<height> -> House list
 type Digit = 
     | Digit of char
 
-// these are just the same as Digits, just call them candidates
-// when we're still working out which it's to be
+// A candidate is a digit in a cell, which is still a pencilmark
 type Candidate = 
-    | Candidate of char
-
-val digitToCandidate : Digit -> Candidate
-
-val candidateToDigit : Candidate -> Digit
+    { cell : Cell
+      digit : Digit }
 
 // A sudoku is defined by the overall grid size (it is always square)
 // which is the same as the Digits in the alphabet
@@ -106,23 +107,21 @@ type Puzzle =
 // Candidates are possible Digits
 [<NoEquality; NoComparison>]
 type CellContents = 
-    | ADigit of Digit
-    | ACandidates of Set<Candidate>
+    | BigNumber of Digit
+    | PencilMarks of Set<Digit>
 
 // Working towards a solution we take one of the following actions:
 // Set the cell to have a Digit
-type SetCellDigitAction = 
+type Value = 
     { cell : Cell
       digit : Digit }
 
+// Working towards a solution we take one of the following actions:
+// Set the cell to have a Digit
 // or remove a candidate
-type EliminateCandidateAction = 
-    { cell : Cell
-      candidate : Candidate }
-
 type Action = 
-    | SetCellDigit of SetCellDigitAction
-    | EliminateCandidate of EliminateCandidateAction
+    | Placement of Value
+    | Eliminate of Candidate
 
 [<NoEquality; NoComparison>]
 type Solution = 
@@ -136,9 +135,9 @@ type CellAnnotation =
     { setValue : Digit option
       primaryHintHouse : bool
       secondaryHintHouse : bool
-      setValueReduction : Candidate option
-      reductions : Set<Candidate>
-      pointers : Set<Candidate> }
+      setValueReduction : Digit option
+      reductions : Set<Digit>
+      pointers : Set<Digit> }
 
 // From http://www.fssnip.net/ji
 type Either<'a, 'b> = 

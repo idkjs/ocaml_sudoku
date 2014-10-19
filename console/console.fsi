@@ -22,5 +22,5 @@ val drawConsoleChar : ConsoleChar -> Unit
 
 val drawDigitCellContents : Digit option -> CellContents -> ConsoleChar
 
-val drawDigitCellContentAnnotations : Candidate
-     -> Candidate -> Digit option -> CellContents -> CellAnnotation option -> ConsoleChar
+val drawDigitCellContentAnnotations : Digit
+     -> Digit option -> Digit -> Digit option -> CellContents -> CellAnnotation option -> ConsoleChar

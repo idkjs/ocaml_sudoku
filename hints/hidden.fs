@@ -6,8 +6,8 @@ open core.setCell
 open core.sudoku
 open hints
 
-let findHidden (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) 
-    (primaryHouseCells : Set<Cell>) (candidateSubset : Set<Candidate>) (count : int) (primaryHouse : House) = 
+let findHidden (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Digit>) 
+    (primaryHouseCells : Set<Cell>) (candidateSubset : Set<Digit>) (count : int) (primaryHouse : House) = 
     let pairs = 
         List.map (fun cell -> 
             let candidates = candidateLookup cell
@@ -53,7 +53,7 @@ let findHidden (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> S
     else None
 
 let hiddenNPerHouse (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) 
-    (candidateLookup : Cell -> Set<Candidate>) (count : int) (house : House) = 
+    (candidateLookup : Cell -> Set<Digit>) (count : int) (house : House) = 
     let cells = puzzleHouseCells house
 
     let houseCandidates = Set.map candidateLookup cells |> Set.unionMany

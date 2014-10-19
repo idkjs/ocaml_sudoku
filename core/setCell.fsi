@@ -2,13 +2,13 @@
 
 open sudoku
 
-val setCellDigitApply : (Cell -> Set<Cell>) -> SetCellDigitAction -> ((Cell -> CellContents) -> Cell -> CellContents)
+val setCellDigitApply : (Cell -> Set<Cell>) -> Value -> ((Cell -> CellContents) -> Cell -> CellContents)
 
-val makeSetCellDigit : Cell -> Candidate -> SetCellDigitAction
+val makeSetCellDigit : Cell -> Digit -> Value
 
 type SetCellDigitError = 
     { cell : Cell
-      candidate : Candidate
+      candidate : Digit
       digit : Digit }
 
-val setCellDigitTry : Cell -> Candidate -> (Cell -> CellContents) -> Either<SetCellDigitAction, SetCellDigitError>
+val setCellDigitTry : Cell -> Digit -> (Cell -> CellContents) -> Either<Value, SetCellDigitError>

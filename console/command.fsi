@@ -2,10 +2,12 @@
 
 open core.sudoku
 
+val parseValue : Digit list -> string -> Digit option
+
 val setCellCommand : string
-     -> Candidate list
+     -> Digit list
      -> (Cell -> CellContents)
-     -> Cell list -> (Cell -> Set<Cell>) -> (Cell -> Set<Candidate>) -> SetCellDigitAction option
+     -> Cell list -> (Cell -> Set<Cell>) -> (Cell -> Set<Digit>) -> Value option
 
 val candidateClearCommand : string
-     -> Candidate list -> (Cell -> CellContents) -> Cell list -> EliminateCandidateAction option
+     -> Digit list -> (Cell -> CellContents) -> Cell list -> Candidate option

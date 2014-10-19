@@ -35,6 +35,10 @@ type candidateGridChars<'a> =
       b : candidateGridCharsRow<'a>
       n : 'a }
 
+let printLine (cells : Cell list) (digitTo : Cell -> 'c) : List<'c> = 
+    let cons x y = x :: y
+    List.foldBack (digitTo >> cons) cells []
+
 // Combine fences with posts (there's one more fence than posts: f p f p ... p f)
 let simpleInterleave (fenceToSeq : 'a -> seq<'c>) (post : seq<'c>) (fences : 'a list) = 
     seq { 
@@ -109,8 +113,8 @@ let printGrid (puzzleStacks : Stack list) (puzzleStackColumns : Stack -> Column 
     sinterleave doPrintBand t m b Seq.empty puzzleBands
 
 let printCandidateGrid (puzzleStacks : Stack list) (puzzleStackColumns : Stack -> Column list) (puzzleBands : Band list) (puzzleBandRows : Band -> Row list) 
-    (candidateGridChars : candidateGridChars<seq<'c>>) (alphabet : Candidate list) 
-    (draw_cell : Cell -> Candidate -> 'c) = 
+    (candidateGridChars : candidateGridChars<seq<'c>>) (alphabet : Digit list) 
+    (draw_cell : Cell -> Digit -> 'c) = 
 
     let d = Seq.collect (konst candidateGridChars.h) (puzzleStackColumns puzzleStacks.Head)
     let i = Seq.collect (konst candidateGridChars.hi) (puzzleStackColumns puzzleStacks.Head)
@@ -132,11 +136,11 @@ let printCandidateGrid (puzzleStacks : Stack list) (puzzleStackColumns : Stack -
     let sss = List.ofSeq ss
     let ssss = List.map List.ofSeq sss
     
-    let doPrintColumn (digits : seq<Candidate>) = 
+    let doPrintColumn (digits : seq<Digit>) = 
         let doPrintCell cell = Seq.map (fun digit -> draw_cell cell digit) digits
         printColumn doPrintCell
     
-    let doPrintStack (digits : seq<Candidate>) = printStack (doPrintColumn digits) candidateGridChars.vi puzzleStackColumns
+    let doPrintStack (digits : seq<Digit>) = printStack (doPrintColumn digits) candidateGridChars.vi puzzleStackColumns
 
     let doPrintRow (row : Row) = 
         Seq.collect (fun digits -> printRow (doPrintStack digits row) candidateGridChars.v candidateGridChars.n puzzleStacks) 

@@ -59,7 +59,7 @@ let firstOpt (set : Set<'a>) =
 
 type CandidateReduction = 
     { cell : Cell
-      candidates : Set<Candidate> }
+      candidates : Set<Digit> }
     override this.ToString() = 
         String.Format("Cell {0}, Candidates {1}", this.cell, String.Join(",", Set.toArray this.candidates))
 
@@ -67,7 +67,7 @@ type HintDescription =
     { primaryHouses : Set<House>
       secondaryHouses : Set<House>
       candidateReductions : Set<CandidateReduction>
-      setCellValueAction : SetCellDigitAction option
+      setCellValueAction : Value option
       pointers : Set<CandidateReduction> }
     override this.ToString() = 
         let sb = StringBuilder()
@@ -87,7 +87,7 @@ type HintDescription2 =
     { primaryHouses : Set<House>
       secondaryHouses : Set<House>
       candidateReductions : Set<CandidateReduction>
-      setCellValueAction : SetCellDigitAction option
+      setCellValueAction : Value option
       annotations : Cell -> CellAnnotation }
     override this.ToString() = 
         let sb = StringBuilder()
@@ -117,7 +117,7 @@ let mhas (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<C
                     else None
                 
                 let r3 = 
-                    if Set.contains cell cells then Some(digitToCandidate setCellValueAction.digit)
+                    if Set.contains cell cells then Some(setCellValueAction.digit)
                     else None
                 
                 r1, r3

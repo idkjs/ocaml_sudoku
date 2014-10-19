@@ -28,19 +28,19 @@ let parseCell gridSize cells termColumn termRow =
         Console.WriteLine("({0},{1} is not a cell", termColumn, termRow)
         None
 
-let charToCandidate (candidates : Candidate list) (trialDigit : char) = 
-    let compareAlpha (Candidate charDigit) = trialDigit = charDigit
+let charToCandidate (candidates : Digit list) (trialDigit : char) = 
+    let compareAlpha (Digit charDigit) = trialDigit = charDigit
     List.tryFind compareAlpha candidates
 
 // find an element of the alphabet
-let parseValue (candidates : Candidate list) (term : string) = 
+let parseValue (candidates : Digit list) (term : string) = 
     if term.Length = 1 then charToCandidate candidates (term.Chars 0)
     else 
         Console.WriteLine("Expect a single digit, not {0}", term)
         None
 
-let setCellCommand (item : string) (alphabet : Candidate list) (lastGrid : Cell -> CellContents) (cells : Cell list) 
-    (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) : SetCellDigitAction option = 
+let setCellCommand (item : string) (alphabet : Digit list) (lastGrid : Cell -> CellContents) (cells : Cell list) 
+    (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Digit>) : Value option = 
     let terms = item.Split(' ')
     if terms.Length = 4 then 
         let parsedCell = parseCell alphabet.Length cells terms.[1] terms.[2]
@@ -61,8 +61,8 @@ let setCellCommand (item : string) (alphabet : Candidate list) (lastGrid : Cell 
         Console.WriteLine "Expect set <col> <row> <val>"
         None
 
-let candidateClearCommand (item : string) (alphabet : Candidate list) (lastGrid : Cell -> CellContents) 
-    (cells : Cell list) : EliminateCandidateAction option = 
+let candidateClearCommand (item : string) (alphabet : Digit list) (lastGrid : Cell -> CellContents) 
+    (cells : Cell list) : Candidate option = 
     let terms = item.Split(' ')
     if terms.Length = 4 then 
         let parsedCell = parseCell alphabet.Length cells terms.[1] terms.[2]

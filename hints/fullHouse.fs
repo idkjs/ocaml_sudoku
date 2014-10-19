@@ -7,7 +7,7 @@ open core.sudoku
 open hints
 
 let fullHousePerHouse (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) 
-    (candidateLookup : Cell -> Set<Candidate>) (primaryHouse : House) = 
+    (candidateLookup : Cell -> Set<Digit>) (primaryHouse : House) = 
     let primaryHouseCells = puzzleHouseCells primaryHouse
 
     let candidateCells = Set.map (fun cell -> ((candidateLookup cell), cell)) primaryHouseCells

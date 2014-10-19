@@ -29,8 +29,8 @@ let makeHints candidateLookup puzzleHouseCells pointerCells primaryHouses second
                setCellValueAction = None }
     else None
 
-let xWingsPerHouseCandidate (candidateLookup : Cell -> Set<Candidate>) (puzzleHouseCells : House -> Set<Cell>) 
-    (house1 : House) (house2 : House) houseCandidateCells1 houseCandidateCells2 (candidate : Candidate) = 
+let xWingsPerHouseCandidate (candidateLookup : Cell -> Set<Digit>) (puzzleHouseCells : House -> Set<Cell>) 
+    (house1 : House) (house2 : House) houseCandidateCells1 houseCandidateCells2 (candidate : Digit) = 
     let hht1 = Set.filter (fun (candidates, _) -> Set.contains candidate candidates) houseCandidateCells1
     let hht2 = Set.filter (fun (candidates, _) -> Set.contains candidate candidates) houseCandidateCells2
 
@@ -88,7 +88,7 @@ let xWingsPerHouseCandidate (candidateLookup : Cell -> Set<Candidate>) (puzzleHo
         else None
     | _ -> None
 
-let xWingsPerHouse (candidateLookup : Cell -> Set<Candidate>) (puzzleHouseCells : House -> Set<Cell>) (house1 : House) 
+let xWingsPerHouse (candidateLookup : Cell -> Set<Digit>) (puzzleHouseCells : House -> Set<Cell>) (house1 : House) 
     (house2 : House) = 
     let cells1 = puzzleHouseCells house1
 
@@ -108,7 +108,7 @@ let xWingsPerHouse (candidateLookup : Cell -> Set<Candidate>) (puzzleHouseCells 
         commonHouseCandidates
 
 let xWingFind (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) 
-    (candidateLookup : Cell -> Set<Candidate>) (rs : Row list) (cs : Column list) = 
+    (candidateLookup : Cell -> Set<Digit>) (rs : Row list) (cs : Column list) = 
     let rows = List.map Row rs
 
     let cols = List.map Column cs
@@ -143,8 +143,8 @@ let xWingFind (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> 
 
     List.concat [ rowHints; colHints ]
 
-let yWingsPerHouseCandidate (candidateLookup : Cell -> Set<Candidate>) (puzzleHouseCells : House -> Set<Cell>) 
-    (house1 : House) (house2 : House) houseCandidateCells1 houseCandidateCells2 (candidate : Candidate) = 
+let yWingsPerHouseCandidate (candidateLookup : Cell -> Set<Digit>) (puzzleHouseCells : House -> Set<Cell>) 
+    (house1 : House) (house2 : House) houseCandidateCells1 houseCandidateCells2 (candidate : Digit) = 
     let hht1 = Set.filter (fun (candidates, _) -> Set.contains candidate candidates) houseCandidateCells1
     let hht2 = Set.filter (fun (candidates, _) -> Set.contains candidate candidates) houseCandidateCells2
 
@@ -201,7 +201,7 @@ let yWingsPerHouseCandidate (candidateLookup : Cell -> Set<Candidate>) (puzzleHo
         else None
     | _ -> None
 
-let yWingsPerHouse (candidateLookup : Cell -> Set<Candidate>) (puzzleHouseCells : House -> Set<Cell>) (row1 : Row) 
+let yWingsPerHouse (candidateLookup : Cell -> Set<Digit>) (puzzleHouseCells : House -> Set<Cell>) (row1 : Row) 
     (row2 : Row) (col1 : Column) (col2 : Column) = 
     let cell11 = 
         { Cell.col = col1
@@ -278,7 +278,7 @@ let yWingsPerHouse (candidateLookup : Cell -> Set<Candidate>) (puzzleHouseCells 
     else []
 
 let yWingFind (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) 
-    (candidateLookup : Cell -> Set<Candidate>) (rows : Row list) (cols : Column list) = 
+    (candidateLookup : Cell -> Set<Digit>) (rows : Row list) (cols : Column list) = 
     let hints = 
         Seq.mapi 
             (fun i row1 -> 

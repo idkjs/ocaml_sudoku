@@ -6,7 +6,7 @@ open core.setCell
 open core.sudoku
 open hints
 
-let findNaked (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Candidate>) 
+let findNaked (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Digit>) 
     (primaryHouseCells : Set<Cell>) (cellSubset : Set<Cell>) (count : int) (primaryHouse : House) = 
     let digits = Set.map candidateLookup cellSubset
     let subsetDigits = Set.unionMany digits
@@ -39,7 +39,7 @@ let findNaked (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Se
     else None
 
 let nakedNPerHouse (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) 
-    (candidateLookup : Cell -> Set<Candidate>) (count : int) (primaryHouse : House) = 
+    (candidateLookup : Cell -> Set<Digit>) (count : int) (primaryHouse : House) = 
     let primaryHouseCells = puzzleHouseCells primaryHouse
     
     let hht = 
@@ -55,7 +55,7 @@ let nakedNPerHouse (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : Hous
     List.choose id hs |> List.map (mhas cellHouseCells puzzleHouseCells)
 
 let nakedSingleFind (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) 
-    (candidateLookup : Cell -> Set<Candidate>) (cells : Cell list) = 
+    (candidateLookup : Cell -> Set<Digit>) (cells : Cell list) = 
     let hs = 
         List.map (fun cell -> 
             let candidates = candidateLookup cell

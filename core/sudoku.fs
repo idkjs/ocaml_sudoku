@@ -87,6 +87,11 @@ let boxes (length : int<size>) (boxWidth : int<width>) (boxHeight : int<height>)
               yield { Box.stack = stack
                       band = band } ]
 
+// The columns and rows are collectively called lines
+type Line = 
+    | LColumn of Column
+    | LRow of Row
+
 // The columns, rows and boxes are collectively called houses
 type House = 
     | Column of Column
@@ -114,15 +119,11 @@ type Digit =
         let (Digit s) = this
         (string) s
 
+// A candidate is a digit in a cell, which is still a pencilmark
 type Candidate = 
-    | Candidate of char
-    override this.ToString() = 
-        let (Candidate c) = this
-        (string) c
-
-let digitToCandidate (Digit s : Digit) : Candidate = Candidate s
-
-let candidateToDigit (Candidate s : Candidate) : Digit = Digit s
+    { cell : Cell
+      digit : Digit }
+    override this.ToString() = String.Format("({0}){1}", this.digit, this.cell)
 
 // A sudoku is defined by the overall grid size (it is always square)
 // which is the same as the Digits in the alphabet
@@ -138,25 +139,24 @@ type Puzzle =
 // Candidates are possible Digits
 [<NoEquality; NoComparison>]
 type CellContents = 
-    | ADigit of Digit
-    | ACandidates of Set<Candidate>
+    | BigNumber of Digit
+    | PencilMarks of Set<Digit>
 
-// Working towards a solution we take one of the following actions:
-// Set the cell to have a Digit
-type SetCellDigitAction = 
+type Value = 
     { cell : Cell
       digit : Digit }
     override this.ToString() = String.Format("{0}={1}", this.cell, this.digit)
 
+// Working towards a solution we take one of the following actions:
+// Set the cell to have a Digit
 // or remove a candidate
-type EliminateCandidateAction = 
-    { cell : Cell
-      candidate : Candidate }
-    override this.ToString() = String.Format("{0}<>{1}", this.cell, this.candidate)
-
 type Action = 
-    | SetCellDigit of SetCellDigitAction
-    | EliminateCandidate of EliminateCandidateAction
+    | Placement of Value
+    | Eliminate of Candidate
+    override this.ToString() =
+        match this with
+        | Placement a -> String.Format("{0}={1}", a.cell, a.digit)
+        | Eliminate candidate -> String.Format("{0}<>{1}", candidate.cell, candidate.digit)
 
 [<NoEquality; NoComparison>]
 type Solution = 
@@ -170,9 +170,9 @@ type CellAnnotation =
     { setValue : Digit option
       primaryHintHouse : bool
       secondaryHintHouse : bool
-      setValueReduction : Candidate option
-      reductions : Set<Candidate>
-      pointers : Set<Candidate> }
+      setValueReduction : Digit option
+      reductions : Set<Digit>
+      pointers : Set<Digit> }
 
 // From http://www.fssnip.net/ji
 type Either<'a, 'b> = 
