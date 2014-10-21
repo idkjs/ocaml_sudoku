@@ -10,6 +10,7 @@ open console.console
 open console.format
 
 open core.eliminateCandidate
+open core.force
 open core.puzzlemap
 open core.setCell
 open core.sudoku
@@ -265,6 +266,7 @@ let repl (sudoku : string) (puzzle : Puzzle) =
     
     let solution = ref (load puzzle.alphabet (List.ofSeq sudoku) transformer)
 
+
     let centreDigit : Digit = List.nth puzzle.alphabet ((List.length puzzle.alphabet) / 2)
 
     let puzzlePrintLine = printLine puzzleCells
@@ -323,6 +325,16 @@ let repl (sudoku : string) (puzzle : Puzzle) =
 
     puzzleDrawGrid()
 
+
+    let forcedSolutions = solve (!solution) puzzleCells puzzleHouseCellCells
+    //puzzleDrawGrid solve
+    if List.length forcedSolutions > 0 then
+        List.iter
+            (fun solve -> Seq.iter drawConsoleChar (puzzlePrintGrid (puzzleDrawCell solve)))
+            forcedSolutions
+    else Console.WriteLine("No solutions")
+
+
     Seq.tryPick (run solution puzzle puzzlePrintGrid puzzlePrintCandidateGrid puzzleDrawCandidateGrid puzzleDrawCandidateGridAnnotations print_last) 
         readlines |> ignore
 
@@ -369,6 +381,7 @@ let example = "00010500014000067008000240006307001090000000301009052000720008002
 // http://www.sudokuwiki.org/Y_Wing_Strategy
 //let example = "900240000050690231020050090090700320002935607070002900069020073510079062207086009"
 //let example = "273005081810302004009010200100953728792186345538724196021060500300201869080530412"
+
 
 repl example defaultPuzzleSpec
 

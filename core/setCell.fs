@@ -6,7 +6,7 @@ let setCellDigitApply (cellHouseCells : Cell -> Set<Cell>) (setCellValue : Value
 
     fun (cellCellContents : Cell -> CellContents) (cell : Cell) -> 
         let cellContents = cellCellContents cell
-        let cells = cellHouseCells cell
+        let cells = cellHouseCells setCellValue.cell
 
         match cellContents with
         | BigNumber _ -> cellContents

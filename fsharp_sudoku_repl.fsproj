@@ -77,6 +77,8 @@
     <Compile Include="core\setCell.fs" />
     <Compile Include="core\eliminateCandidate.fsi" />
     <Compile Include="core\eliminateCandidate.fs" />
+    <Compile Include="core\force.fsi" />
+    <Compile Include="core\force.fs" />
     <Compile Include="console\format.fsi" />
     <Compile Include="console\format.fs" />
     <Compile Include="console\console.fsi" />
