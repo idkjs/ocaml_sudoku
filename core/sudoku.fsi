@@ -143,3 +143,5 @@ type CellAnnotation =
 type Either<'a, 'b> = 
     | Left of 'a
     | Right of 'b
+
+val memoiseLookup : 'a list -> ('a -> 'b) -> ('a -> 'b) when 'a : comparison

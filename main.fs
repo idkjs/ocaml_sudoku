@@ -53,16 +53,18 @@ let parse (item : string) (alphabet : Digit list) (solution : Solution) (puzzle 
     (candidateLookup : Cell -> Set<Digit>) puzzlePrintGrid puzzlePrintFull puzzleDrawFull puzzleDrawFull2 print_last : Solution * HintType option * HintDescription2 list = 
 
     let puzzleSize = (List.length alphabet) * 1<size>
-    let puzzleHouseCells = houseCells puzzleSize puzzle.boxWidth puzzle.boxHeight
-    let puzzleHouseCellCells = houseCellCells puzzleSize puzzle.boxWidth puzzle.boxHeight
     let puzzleCells = cells puzzleSize
     let puzzleHouses = houses puzzleSize puzzle.boxWidth puzzle.boxHeight
     let puzzleBoxes = boxes puzzleSize puzzle.boxWidth puzzle.boxHeight
     let puzzleRows = rows puzzleSize
     let puzzleCols = columns puzzleSize
-    let puzzleCellBox = cellBox puzzle.boxWidth puzzle.boxHeight
 
-
+    let puzzleHouseCells' = houseCells puzzleSize puzzle.boxWidth puzzle.boxHeight
+    let puzzleHouseCells = memoiseLookup puzzleHouses puzzleHouseCells'
+    let puzzleHouseCellCells' = houseCellCells puzzleSize puzzle.boxWidth puzzle.boxHeight
+    let puzzleHouseCellCells = memoiseLookup puzzleCells puzzleHouseCellCells'
+    let puzzleCellBox' = cellBox puzzle.boxWidth puzzle.boxHeight
+    let puzzleCellBox = memoiseLookup puzzleCells puzzleCellBox'
 
     Console.WriteLine item
 
@@ -208,9 +210,13 @@ let run (solution : Solution ref) (puzzle : Puzzle) puzzlePrintGrid puzzlePrintF
         let alphaset = Set.ofList puzzle.alphabet
 
         let puzzleSize = (List.length puzzle.alphabet) * 1<size>
-        let puzzleHouseCells = houseCells puzzleSize puzzle.boxWidth puzzle.boxHeight
-        let puzzleHouseCellCells = houseCellCells puzzleSize puzzle.boxWidth puzzle.boxHeight
-        
+        let puzzleCells = cells puzzleSize
+        let puzzleHouses = houses puzzleSize puzzle.boxWidth puzzle.boxHeight
+        let puzzleHouseCells' = houseCells puzzleSize puzzle.boxWidth puzzle.boxHeight
+        let puzzleHouseCells = memoiseLookup puzzleHouses puzzleHouseCells'
+        let puzzleHouseCellCells' = houseCellCells puzzleSize puzzle.boxWidth puzzle.boxHeight
+        let puzzleHouseCellCells = memoiseLookup puzzleCells puzzleHouseCellCells'
+
         let getCandidateEntries (annotatedDigit : CellContents) = 
             match annotatedDigit with
             | BigNumber _ -> Set.empty
@@ -225,15 +231,6 @@ let run (solution : Solution ref) (puzzle : Puzzle) puzzlePrintGrid puzzlePrintF
         List.iteri (printHint puzzleHouseCells puzzleHouseCellCells puzzleDrawFullHint) hints
 
         None
-
-let memoiseCellLookup (cells : Cell list) (cellLookup : Cell -> 'a) : Cell -> 'a = 
-    let s = List.map (fun cell -> (cell, cellLookup cell)) cells
-
-    let s2 = s |> Map.ofList
-
-    let solutionGrid = new System.Collections.Generic.Dictionary<Cell, 'a>(s2)
-
-    fun cell -> solutionGrid.[cell]
 
 let digitToEntry (cellDigitLookup : Cell -> Digit option) (alphabet : Set<Digit>) 
     (houseCellCells : Cell -> Set<Cell>) : Cell -> CellContents = 
@@ -252,20 +249,25 @@ let repl (sudoku : string) (puzzle : Puzzle) =
 
     let puzzleSize = (List.length puzzle.alphabet) * 1<size>
     let puzzleCells = cells puzzleSize
-    let puzzleRowCells = rowCells puzzleSize
+    let puzzleHouses = houses puzzleSize puzzle.boxWidth puzzle.boxHeight
     let puzzleStacks = stacks puzzleSize puzzle.boxWidth
-    let puzzleStackColumns = stackColumns puzzle.boxWidth
     let puzzleBands = bands puzzleSize puzzle.boxHeight
+
+    let puzzleRowCells = rowCells puzzleSize
+    let puzzleStackColumns = stackColumns puzzle.boxWidth
     let puzzleBandRows = bandRows puzzle.boxHeight
-    let puzzleHouseCellCells = houseCellCells puzzleSize puzzle.boxWidth puzzle.boxHeight
-    
+
+    let puzzleHouseCells' = houseCells puzzleSize puzzle.boxWidth puzzle.boxHeight
+    let puzzleHouseCells = memoiseLookup puzzleHouses puzzleHouseCells'
+    let puzzleHouseCellCells' = houseCellCells puzzleSize puzzle.boxWidth puzzle.boxHeight
+    let puzzleHouseCellCells = memoiseLookup puzzleCells puzzleHouseCellCells'
+
     let transformer (puzzleGrid : Cell -> Digit option) : Cell -> CellContents = 
         let stoe = digitToEntry puzzleGrid (Set.ofList puzzle.alphabet) puzzleHouseCellCells
 
-        memoiseCellLookup puzzleCells stoe
+        memoiseLookup puzzleCells stoe
     
     let solution = ref (load puzzle.alphabet (List.ofSeq sudoku) transformer)
-
 
     let centreDigit : Digit = List.nth puzzle.alphabet ((List.length puzzle.alphabet) / 2)
 
@@ -324,7 +326,6 @@ let repl (sudoku : string) (puzzle : Puzzle) =
     drawConsoleChar NL
 
     puzzleDrawGrid()
-
 
     let forcedSolutions = solve (!solution) puzzleCells puzzleHouseCellCells
     //puzzleDrawGrid solve

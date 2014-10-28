@@ -178,3 +178,12 @@ type CellAnnotation =
 type Either<'a, 'b> = 
     | Left of 'a
     | Right of 'b
+
+let memoiseLookup (objects : 'a list) (lookup : 'a -> 'b) : ('a -> 'b) =
+    let s = List.map (fun o -> (o, lookup o)) objects
+
+    let s2 = s |> Map.ofList
+
+    let memo = new System.Collections.Generic.Dictionary<'a, 'b>(s2)
+
+    fun o -> memo.[o]

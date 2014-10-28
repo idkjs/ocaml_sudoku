@@ -37,9 +37,13 @@ let rec searchr (solution : Solution) (cells : Cell list) (puzzleHouseCellCells 
             (fun digit ->
                 let setCellValue = makeSetCellDigit cell digit
                 
+                let current = setCellDigitApply puzzleHouseCellCells setCellValue solution.current
+
+                let memoCurrent = memoiseLookup cells current
+
                 let newSolution =
                     { solution with
-                        current = setCellDigitApply puzzleHouseCellCells setCellValue solution.current
+                        current = memoCurrent
                         steps = (Placement setCellValue) :: solution.steps }
 
                 //Console.WriteLine ("Trying {0}", setCellValue)
@@ -66,4 +70,12 @@ let rec searchr (solution : Solution) (cells : Cell list) (puzzleHouseCellCells 
     | None -> solution :: existing
 
 let solve (solution : Solution) (cells : Cell list) (puzzleHouseCellCells : Cell -> Set<Cell>) : Solution list =
-    searchr solution cells puzzleHouseCellCells []
+    let stopwatch = new Stopwatch()
+    stopwatch.Start()
+
+    let results = searchr solution cells puzzleHouseCellCells []
+
+    stopwatch.Stop()
+    Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed)
+
+    results
