@@ -37,39 +37,39 @@ val cells : int<size> -> Cell list
 // these do not have to be square, but they are
 // all the same size and cover the grid
 [<Measure>]
-type boxcol
+type stack
 
 // A column of vertical boxes is a stack
 type Stack = 
-    { stack : int<boxcol> }
+    { stack : int<stack> }
 
 [<Measure>]
-type width
+type boxWidth
 
 val makeStack : int -> Stack
 
-val stacks : int<size> -> int<width> -> Stack list
+val stacks : int<size> -> int<boxWidth> -> Stack list
 
 [<Measure>]
-type boxrow
+type band
 
 // A row of horizontal boxes is a band
 type Band = 
-    { band : int<boxrow> }
+    { band : int<band> }
 
 [<Measure>]
-type height
+type boxHeight
 
 val makeBand : int -> Band
 
-val bands : int<size> -> int<height> -> Band list
+val bands : int<size> -> int<boxHeight> -> Band list
 
 // A box is the intersection of a stack and a band
 type Box = 
     { stack : Stack
       band : Band }
 
-val boxes : int<size> -> int<width> -> int<height> -> Box list
+val boxes : int<size> -> int<boxWidth> -> int<boxHeight> -> Box list
 
 // The columns and rows are collectively called lines
 type Line = 
@@ -78,28 +78,24 @@ type Line =
 
 // The columns, rows and boxes are collectively called houses
 type House = 
-    | Column of Column
-    | Row of Row
-    | Box of Box
+    | HColumn of Column
+    | HRow of Row
+    | HBox of Box
 
-val houses : int<size> -> int<width> -> int<height> -> House list
+val houses : int<size> -> int<boxWidth> -> int<boxHeight> -> House list
 
 // Each cell in the grid contains a Digit, usually numbers 1..9
 type Digit = 
     | Digit of char
 
-// A candidate is a digit in a cell, which is still a pencilmark
-type Candidate = 
-    { cell : Cell
-      digit : Digit }
-
 // A sudoku is defined by the overall grid size (it is always square)
 // which is the same as the Digits in the alphabet
 // and also by the width and height of the boxes
 [<NoEquality; NoComparison>]
-type Puzzle = 
-    { boxWidth : int<width>
-      boxHeight : int<height>
+type PuzzleShape = 
+    { size : int<size>
+      boxWidth : int<boxWidth>
+      boxHeight : int<boxHeight>
       alphabet : Digit list }
 
 // Whilst working to a solution each cell in the grid
@@ -113,6 +109,11 @@ type CellContents =
 // Working towards a solution we take one of the following actions:
 // Set the cell to have a Digit
 type Value = 
+    { cell : Cell
+      digit : Digit }
+
+// A candidate is a digit in a cell, which is still a pencilmark
+type Candidate = 
     { cell : Cell
       digit : Digit }
 

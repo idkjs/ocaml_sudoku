@@ -49,10 +49,10 @@ type HintType =
 
 type Hint = HintType * HintDescription2
 
-let parse (item : string) (alphabet : Digit list) (solution : Solution) (puzzle : Puzzle) 
+let parse (item : string) (solution : Solution) (puzzle : PuzzleShape) 
     (candidateLookup : Cell -> Set<Digit>) puzzlePrintGrid puzzlePrintFull puzzleDrawFull puzzleDrawFull2 print_last : Solution * HintType option * HintDescription2 list = 
 
-    let puzzleSize = (List.length alphabet) * 1<size>
+    let puzzleSize = (List.length puzzle.alphabet) * 1<size>
     let puzzleCells = cells puzzleSize
     let puzzleHouses = houses puzzleSize puzzle.boxWidth puzzle.boxHeight
     let puzzleBoxes = boxes puzzleSize puzzle.boxWidth puzzle.boxHeight
@@ -75,13 +75,13 @@ let parse (item : string) (alphabet : Digit list) (solution : Solution) (puzzle 
         let terms = item.Split(' ')
         let focusDigit =
             if terms.Length = 2 then 
-                parseValue alphabet terms.[1]
+                parseValue puzzle.alphabet terms.[1]
             else
                 None
         puzzleDrawFull focusDigit
         (solution, None, [])
     else if item.StartsWith "s" then 
-        let setCommand = setCellCommand item alphabet solution.current puzzleCells puzzleHouseCellCells candidateLookup
+        let setCommand = setCellCommand item puzzle.alphabet solution.current puzzleCells puzzleHouseCellCells candidateLookup
         
         let newSolution = 
             match setCommand with
@@ -104,7 +104,7 @@ let parse (item : string) (alphabet : Digit list) (solution : Solution) (puzzle 
         (newSolution, None, [])
 
     else if item.StartsWith "c" then 
-        let clearCommand = candidateClearCommand item alphabet solution.current puzzleCells
+        let clearCommand = candidateClearCommand item puzzle.alphabet solution.current puzzleCells
         
         let newSolution = 
             match clearCommand with
@@ -169,16 +169,16 @@ let parse (item : string) (alphabet : Digit list) (solution : Solution) (puzzle 
     else if item = "pp" then 
         let hints = 
             List.collect (pointingPairsPerBox puzzleHouseCellCells puzzleHouseCells candidateLookup) 
-                (List.map Box puzzleBoxes)
+                (List.map HBox puzzleBoxes)
         (solution, Some PP, hints)
 
     else if item = "bl" then 
         let rowHints = 
             List.collect (boxLineReductionsPerHouse puzzleHouseCellCells puzzleHouseCells candidateLookup puzzleCellBox) 
-                (List.map Row puzzleRows)
+                (List.map HRow puzzleRows)
         let colHints = 
             List.collect (boxLineReductionsPerHouse puzzleHouseCellCells puzzleHouseCells candidateLookup puzzleCellBox) 
-                (List.map Column puzzleCols)
+                (List.map HColumn puzzleCols)
         let hints = List.concat [ rowHints; colHints ]
 
         (solution, Some BL, hints)
@@ -203,32 +203,23 @@ let printHint puzzleHouseCells puzzleHouseCellCells drawHint (index : int) (hint
 
     Console.Read() |> ignore
 
-let run (solution : Solution ref) (puzzle : Puzzle) puzzlePrintGrid puzzlePrintFull 
-    puzzleDrawFull puzzleDrawFullHint print_last item = 
+let run (solution : Solution ref) (puzzle : PuzzleShape) puzzlePrintGrid puzzlePrintFull 
+    puzzleDrawFull puzzleDrawCandidateGridAnnotations print_last puzzlePrintHint item = 
     if item = "quit" then Some "quit"
     else 
-        let alphaset = Set.ofList puzzle.alphabet
-
-        let puzzleSize = (List.length puzzle.alphabet) * 1<size>
-        let puzzleCells = cells puzzleSize
-        let puzzleHouses = houses puzzleSize puzzle.boxWidth puzzle.boxHeight
-        let puzzleHouseCells' = houseCells puzzleSize puzzle.boxWidth puzzle.boxHeight
-        let puzzleHouseCells = memoiseLookup puzzleHouses puzzleHouseCells'
-        let puzzleHouseCellCells' = houseCellCells puzzleSize puzzle.boxWidth puzzle.boxHeight
-        let puzzleHouseCellCells = memoiseLookup puzzleCells puzzleHouseCellCells'
-
         let getCandidateEntries (annotatedDigit : CellContents) = 
             match annotatedDigit with
             | BigNumber _ -> Set.empty
             | PencilMarks s -> s
-        
+
         let candidateLookup = (!solution).current >> getCandidateEntries
+
         let (soln, hintTypeOpt, hints) = 
-            parse item puzzle.alphabet !solution puzzle candidateLookup puzzlePrintGrid puzzlePrintFull puzzleDrawFull 
-                puzzleDrawFullHint print_last
+            parse item !solution puzzle candidateLookup puzzlePrintGrid puzzlePrintFull puzzleDrawFull 
+                puzzleDrawCandidateGridAnnotations print_last
         solution := soln
 
-        List.iteri (printHint puzzleHouseCells puzzleHouseCellCells puzzleDrawFullHint) hints
+        List.iteri puzzlePrintHint hints
 
         None
 
@@ -243,7 +234,7 @@ let digitToEntry (cellDigitLookup : Cell -> Digit option) (alphabet : Set<Digit>
             let possibleDigits = Set.difference alphabet digits
             PencilMarks possibleDigits
 
-let repl (sudoku : string) (puzzle : Puzzle) = 
+let repl (sudoku : string) (puzzle : PuzzleShape) = 
 
     Console.WriteLine sudoku
 
@@ -261,6 +252,10 @@ let repl (sudoku : string) (puzzle : Puzzle) =
     let puzzleHouseCells = memoiseLookup puzzleHouses puzzleHouseCells'
     let puzzleHouseCellCells' = houseCellCells puzzleSize puzzle.boxWidth puzzle.boxHeight
     let puzzleHouseCellCells = memoiseLookup puzzleCells puzzleHouseCellCells'
+
+
+
+
 
     let transformer (puzzleGrid : Cell -> Digit option) : Cell -> CellContents = 
         let stoe = digitToEntry puzzleGrid (Set.ofList puzzle.alphabet) puzzleHouseCellCells
@@ -335,13 +330,15 @@ let repl (sudoku : string) (puzzle : Puzzle) =
             forcedSolutions
     else Console.WriteLine("No solutions")
 
+    let puzzlePrintHint = printHint puzzleHouseCells puzzleHouseCellCells puzzleDrawCandidateGridAnnotations
 
-    Seq.tryPick (run solution puzzle puzzlePrintGrid puzzlePrintCandidateGrid puzzleDrawCandidateGrid puzzleDrawCandidateGridAnnotations print_last) 
+    Seq.tryPick (run solution puzzle puzzlePrintGrid puzzlePrintCandidateGrid puzzleDrawCandidateGrid puzzleDrawCandidateGridAnnotations print_last puzzlePrintHint) 
         readlines |> ignore
 
 let defaultPuzzleSpec = 
-    { boxWidth = 3 * 1<width>
-      boxHeight = 3 * 1<height>
+    { size = 9 * 1<size>
+      boxWidth = 3 * 1<boxWidth>
+      boxHeight = 3 * 1<boxHeight>
       alphabet = 
           [ for i in 1..9 -> (char) i + '0'
                              |> Digit ] }

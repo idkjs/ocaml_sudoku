@@ -56,10 +56,10 @@ let intersectionsPerHouse (cellHouseCells : Cell -> Set<Cell>) (candidateLookup 
 
 let pointingPairsPerBox (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) 
     (candidateLookup : Cell -> Set<Digit>) (primaryHouse : House) = 
-    intersectionsPerHouse cellHouseCells candidateLookup puzzleHouseCells primaryHouse [ (fun cell -> Row cell.row)
-                                                                                         (fun cell -> Column cell.col) ]
+    intersectionsPerHouse cellHouseCells candidateLookup puzzleHouseCells primaryHouse [ (fun cell -> HRow cell.row)
+                                                                                         (fun cell -> HColumn cell.col) ]
 
 let boxLineReductionsPerHouse (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) 
     (candidateLookup : Cell -> Set<Digit>) (puzzleCellBox : Cell -> Box) (primaryHouse : House) = 
     intersectionsPerHouse cellHouseCells candidateLookup puzzleHouseCells primaryHouse 
-        [ (fun cell -> Box(puzzleCellBox cell)) ]
+        [ (fun cell -> HBox(puzzleCellBox cell)) ]

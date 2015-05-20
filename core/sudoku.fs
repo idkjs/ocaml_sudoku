@@ -46,34 +46,34 @@ let cells (length : int<size>) =
 // these do not have to be square, but they are
 // all the same size and cover the grid
 [<Measure>]
-type boxcol
+type stack
 
 // A column of vertical boxes is a stack
 type Stack = 
-    { stack : int<boxcol> }
+    { stack : int<stack> }
     override this.ToString() = String.Format("stk{0}", (int) this.stack)
 
 [<Measure>]
-type width
+type boxWidth
 
-let makeStack i = { Stack.stack = i * 1<boxcol> }
+let makeStack i = { Stack.stack = i * 1<stack> }
 
-let stacks (length : int<size>) (boxWidth : int<width>) = List.map makeStack [ 1..((int) length / (int) boxWidth) ]
+let stacks (length : int<size>) (boxWidth : int<boxWidth>) = List.map makeStack [ 1..((int) length / (int) boxWidth) ]
 
 [<Measure>]
-type boxrow
+type band
 
 // A row of horizontal boxes is a band
 type Band = 
-    { band : int<boxrow> }
+    { band : int<band> }
     override this.ToString() = String.Format("bnd{0}", (int) this.band)
 
 [<Measure>]
-type height
+type boxHeight
 
-let makeBand i = { Band.band = i * 1<boxrow> }
+let makeBand i = { Band.band = i * 1<band> }
 
-let bands (length : int<size>) (boxHeight : int<height>) = List.map makeBand [ 1..((int) length / (int) boxHeight) ]
+let bands (length : int<size>) (boxHeight : int<boxHeight>) = List.map makeBand [ 1..((int) length / (int) boxHeight) ]
 
 // A box is the intersection of a stack and a band
 type Box = 
@@ -81,7 +81,7 @@ type Box =
       band : Band }
     override this.ToString() = String.Format("stk{0}bnd{1}", (int) this.stack.stack, (int) this.band.band)
 
-let boxes (length : int<size>) (boxWidth : int<width>) (boxHeight : int<height>) = 
+let boxes (length : int<size>) (boxWidth : int<boxWidth>) (boxHeight : int<boxHeight>) = 
     [ for band in bands length boxHeight do
           for stack in stacks length boxWidth do
               yield { Box.stack = stack
@@ -94,21 +94,21 @@ type Line =
 
 // The columns, rows and boxes are collectively called houses
 type House = 
-    | Column of Column
-    | Row of Row
-    | Box of Box
+    | HColumn of Column
+    | HRow of Row
+    | HBox of Box
     override this.ToString() = 
         match this with
-        | Column c -> c.ToString()
-        | Row r -> r.ToString()
-        | Box b -> b.ToString()
+        | HColumn c -> c.ToString()
+        | HRow r -> r.ToString()
+        | HBox b -> b.ToString()
 
-let houses (length : int<size>) (boxWidth : int<width>) (boxHeight : int<height>) = 
-    let chs = List.map (fun c -> Column c) (columns length)
+let houses (length : int<size>) (boxWidth : int<boxWidth>) (boxHeight : int<boxHeight>) = 
+    let chs = List.map (fun c -> HColumn c) (columns length)
 
-    let rhs = List.map (fun r -> Row r) (rows length)
+    let rhs = List.map (fun r -> HRow r) (rows length)
 
-    let bhs = List.map (fun b -> Box b) (boxes length boxWidth boxHeight)
+    let bhs = List.map (fun b -> HBox b) (boxes length boxWidth boxHeight)
 
     List.concat [ chs; rhs; bhs ]
 
@@ -119,19 +119,14 @@ type Digit =
         let (Digit s) = this
         (string) s
 
-// A candidate is a digit in a cell, which is still a pencilmark
-type Candidate = 
-    { cell : Cell
-      digit : Digit }
-    override this.ToString() = String.Format("({0}){1}", this.digit, this.cell)
-
 // A sudoku is defined by the overall grid size (it is always square)
 // which is the same as the Digits in the alphabet
 // and also by the width and height of the boxes
 [<NoEquality; NoComparison>]
-type Puzzle = 
-    { boxWidth : int<width>
-      boxHeight : int<height>
+type PuzzleShape = 
+    { size : int<size>
+      boxWidth : int<boxWidth>
+      boxHeight : int<boxHeight>
       alphabet : Digit list }
 
 // Whilst working to a solution each cell in the grid
@@ -146,6 +141,12 @@ type Value =
     { cell : Cell
       digit : Digit }
     override this.ToString() = String.Format("{0}={1}", this.cell, this.digit)
+
+// A candidate is a digit in a cell, which is still a pencilmark
+type Candidate = 
+    { cell : Cell
+      digit : Digit }
+    override this.ToString() = String.Format("({0}){1}", this.digit, this.cell)
 
 // Working towards a solution we take one of the following actions:
 // Set the cell to have a Digit

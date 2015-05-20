@@ -35,7 +35,7 @@ let xWingsPerHouseCandidate (candidateLookup : Cell -> Set<Digit>) (puzzleHouseC
     let hht2 = Set.filter (fun (candidates, _) -> Set.contains candidate candidates) houseCandidateCells2
 
     match house1, house2 with
-    | Row row1, Row row2 -> 
+    | HRow row1, HRow row2 -> 
         let cols1 = Set.map (fun (_, cell) -> cell.col) hht1
         let cols2 = Set.map (fun (_, cell) -> cell.col) hht2
 
@@ -55,13 +55,13 @@ let xWingsPerHouseCandidate (candidateLookup : Cell -> Set<Digit>) (puzzleHouseC
             let pointerCells = Set.union row1Cells row2Cells
 
             let primaryHouses = set [ house1; house2 ]
-            let secondaryHouses = Set.map Column cols
+            let secondaryHouses = Set.map HColumn cols
 
             makeHints candidateLookup puzzleHouseCells pointerCells primaryHouses secondaryHouses candidate
 
         else None
 
-    | Column col1, Column col2 -> 
+    | HColumn col1, HColumn col2 -> 
         let rows1 = Set.map (fun (_, cell) -> cell.row) hht1
         let rows2 = Set.map (fun (_, cell) -> cell.row) hht2
 
@@ -81,7 +81,7 @@ let xWingsPerHouseCandidate (candidateLookup : Cell -> Set<Digit>) (puzzleHouseC
             let pointerCells = Set.union col1Cells col2Cells
 
             let primaryHouses = set [ house1; house2 ]
-            let secondaryHouses = Set.map Row rows
+            let secondaryHouses = Set.map HRow rows
 
             makeHints candidateLookup puzzleHouseCells pointerCells primaryHouses secondaryHouses candidate
 
@@ -109,9 +109,9 @@ let xWingsPerHouse (candidateLookup : Cell -> Set<Digit>) (puzzleHouseCells : Ho
 
 let xWingFind (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) 
     (candidateLookup : Cell -> Set<Digit>) (rs : Row list) (cs : Column list) = 
-    let rows = List.map Row rs
+    let rows = List.map HRow rs
 
-    let cols = List.map Column cs
+    let cols = List.map HColumn cs
 
     let rowHints1 = 
         Seq.mapi 
@@ -149,7 +149,7 @@ let yWingsPerHouseCandidate (candidateLookup : Cell -> Set<Digit>) (puzzleHouseC
     let hht2 = Set.filter (fun (candidates, _) -> Set.contains candidate candidates) houseCandidateCells2
 
     match house1, house2 with
-    | Row row1, Row row2 -> 
+    | HRow row1, HRow row2 -> 
         let cols1 = Set.map (fun (_, cell) -> cell.col) hht1
         let cols2 = Set.map (fun (_, cell) -> cell.col) hht2
 
@@ -169,13 +169,13 @@ let yWingsPerHouseCandidate (candidateLookup : Cell -> Set<Digit>) (puzzleHouseC
             let pointerCells = Set.union row1Cells row2Cells
 
             let primaryHouses = set [ house1; house2 ]
-            let secondaryHouses = Set.map Column cols
+            let secondaryHouses = Set.map HColumn cols
 
             makeHints candidateLookup puzzleHouseCells pointerCells primaryHouses secondaryHouses candidate
 
         else None
 
-    | Column col1, Column col2 -> 
+    | HColumn col1, HColumn col2 -> 
         let rows1 = Set.map (fun (_, cell) -> cell.row) hht1
         let rows2 = Set.map (fun (_, cell) -> cell.row) hht2
 
@@ -194,7 +194,7 @@ let yWingsPerHouseCandidate (candidateLookup : Cell -> Set<Digit>) (puzzleHouseC
             let pointerCells = Set.union col1Cells col2Cells
 
             let primaryHouses = set [ house1; house2 ]
-            let secondaryHouses = Set.map Row rows
+            let secondaryHouses = Set.map HRow rows
 
             makeHints candidateLookup puzzleHouseCells pointerCells primaryHouses secondaryHouses candidate
 
@@ -259,10 +259,10 @@ let yWingsPerHouse (candidateLookup : Cell -> Set<Digit>) (puzzleHouseCells : Ho
                                            |> Set.ofList
 
                             let primaryHouses = 
-                                set [ Row row1
-                                      Row row2
-                                      Column col1
-                                      Column col2 ]
+                                set [ HRow row1
+                                      HRow row2
+                                      HColumn col1
+                                      HColumn col2 ]
                             
                             let primaryHouseCells = Set.map puzzleHouseCells primaryHouses |> Set.unionMany
 

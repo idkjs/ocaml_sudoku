@@ -6,24 +6,28 @@ open System.Diagnostics
 open setCell
 open sudoku
 
-let isValid (solution : Solution) (cells : Cell list) =
-    List.forall
-        (fun cell ->
-            let cellContents = solution.current cell
-            match cellContents with
-            | BigNumber _ -> true
-            | PencilMarks candidates -> Set.count candidates > 0)
-        cells
+let isPencilMarksCellContents (cellContents : CellContents) : bool =
+    match cellContents with
+    | BigNumber _ -> false
+    | PencilMarks _ -> true
+
+let isValidCellContents (cellContents : CellContents) : bool =
+    match cellContents with
+    | BigNumber _ -> true
+    | PencilMarks candidates -> Set.count candidates > 0
+
+let cellCellContents (solution : Solution) (cell : Cell) : CellContents =
+    solution.current cell
+
+let isValid (solution : Solution) (cells : Cell list) : bool =
+    cells
+    |> List.map (cellCellContents solution)
+    |> List.forall isValidCellContents
 
 let rec searchr (solution : Solution) (cells : Cell list) (puzzleHouseCellCells : Cell -> Set<Cell>) (existing : Solution list) : Solution list = 
-    let emptyCell =
-        List.tryFind
-            (fun cell ->
-                let cellContents = solution.current cell
-                match cellContents with
-                | BigNumber _ -> false
-                | PencilMarks _ -> true)
-            cells
+    let emptyCell : Cell option =
+        cells
+        |> List.tryFind ((cellCellContents solution) >> isPencilMarksCellContents)
 
     match emptyCell with
     | Some cell ->

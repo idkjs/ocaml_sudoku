@@ -9,25 +9,25 @@ val columnCells : int<size> -> Column -> Cell list
 val rowCells : int<size> -> Row -> Cell list
 
 // for a column, which stack is it in?
-val columnStack : int<width> -> Column -> Stack
+val columnStack : int<boxWidth> -> Column -> Stack
 
 // for a stack, return the columns in it
-val stackColumns : int<width> -> Stack -> Column list
+val stackColumns : int<boxWidth> -> Stack -> Column list
 
 // for a row, which band is it in?
-val rowBand : int<height> -> Row -> Band
+val rowBand : int<boxHeight> -> Row -> Band
 
 // for a band, return the rows in it
-val bandRows : int<height> -> Band -> Row list
+val bandRows : int<boxHeight> -> Band -> Row list
 
 // for a cell, which box is it in?
-val cellBox : int<width> -> int<height> -> Cell -> Box
+val cellBox : int<boxWidth> -> int<boxHeight> -> Cell -> Box
 
 // for a box, return the cells in it
-val boxCells : int<width> -> int<height> -> Box -> Cell list
+val boxCells : int<boxWidth> -> int<boxHeight> -> Box -> Cell list
 
 // for a house, return the cells in it
-val houseCells : int<size> -> int<width> -> int<height> -> House -> Set<Cell>
+val houseCells : int<size> -> int<boxWidth> -> int<boxHeight> -> House -> Set<Cell>
 
 // for a cell, return the cells in the column, row and box it belongs to
-val houseCellCells : int<size> -> int<width> -> int<height> -> Cell -> Set<Cell>
+val houseCellCells : int<size> -> int<boxWidth> -> int<boxHeight> -> Cell -> Set<Cell>
