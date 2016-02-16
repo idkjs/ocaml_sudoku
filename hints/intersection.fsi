@@ -1,10 +1,11 @@
 ﻿module hints.intersection
 
 open core.sudoku
+open core.puzzlemap
 open hints
 
-val pointingPairsPerBox : (Cell -> Set<Cell>)
-     -> (House -> Set<Cell>) -> (Cell -> Set<Digit>) -> House -> HintDescription2 list
+val pointingPairsPerBox : MapCellHouseCells
+     -> (House -> Set<Cell>) -> MapCellCandidates -> House -> HintDescription2 list
 
-val boxLineReductionsPerHouse : (Cell -> Set<Cell>)
-     -> (House -> Set<Cell>) -> (Cell -> Set<Digit>) -> (Cell -> Box) -> House -> HintDescription2 list
+val boxLineReductionsPerHouse : MapCellHouseCells
+     -> (House -> Set<Cell>) -> MapCellCandidates -> (Cell -> Box) -> House -> HintDescription2 list

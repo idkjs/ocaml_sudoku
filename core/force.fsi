@@ -1,5 +1,6 @@
 ﻿module core.force
 
 open sudoku
+open puzzlemap
 
-val solve : Solution -> Cell list -> (Cell -> Set<Cell>) -> Solution list
+val solve : Solution -> Cell list -> MapCellHouseCells -> Solution list

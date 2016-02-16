@@ -5,6 +5,7 @@ open System.Diagnostics
 
 open setCell
 open sudoku
+open puzzlemap
 
 let isPencilMarksCellContents (cellContents : CellContents) : bool =
     match cellContents with
@@ -17,14 +18,14 @@ let isValidCellContents (cellContents : CellContents) : bool =
     | PencilMarks candidates -> Set.count candidates > 0
 
 let cellCellContents (solution : Solution) (cell : Cell) : CellContents =
-    solution.current cell
+    solution.current.Item cell
 
 let isValid (solution : Solution) (cells : Cell list) : bool =
     cells
     |> List.map (cellCellContents solution)
     |> List.forall isValidCellContents
 
-let rec searchr (solution : Solution) (cells : Cell list) (puzzleHouseCellCells : Cell -> Set<Cell>) (existing : Solution list) : Solution list = 
+let rec searchr (solution : Solution) (cells : Cell list) (puzzleHouseCellCells : MapCellHouseCells) (existing : Solution list) : Solution list = 
     let emptyCell : Cell option =
         cells
         |> List.tryFind ((cellCellContents solution) >> isPencilMarksCellContents)
@@ -32,7 +33,7 @@ let rec searchr (solution : Solution) (cells : Cell list) (puzzleHouseCellCells 
     match emptyCell with
     | Some cell ->
         let candidates =
-            let cellContents = solution.current cell
+            let cellContents = solution.current.Item cell
             match cellContents with
             | BigNumber _ -> []
             | PencilMarks candidates -> candidates |> Set.toList
@@ -43,11 +44,9 @@ let rec searchr (solution : Solution) (cells : Cell list) (puzzleHouseCellCells 
                 
                 let current = setCellDigitApply puzzleHouseCellCells setCellValue solution.current
 
-                let memoCurrent = memoiseLookup cells current
-
                 let newSolution =
                     { solution with
-                        current = memoCurrent
+                        current = current
                         steps = (Placement setCellValue) :: solution.steps }
 
                 //Console.WriteLine ("Trying {0}", setCellValue)
@@ -73,7 +72,7 @@ let rec searchr (solution : Solution) (cells : Cell list) (puzzleHouseCellCells 
 
     | None -> solution :: existing
 
-let solve (solution : Solution) (cells : Cell list) (puzzleHouseCellCells : Cell -> Set<Cell>) : Solution list =
+let solve (solution : Solution) (cells : Cell list) (puzzleHouseCellCells : MapCellHouseCells) : Solution list =
     let stopwatch = new Stopwatch()
     stopwatch.Start()
 

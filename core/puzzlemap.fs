@@ -2,6 +2,43 @@
 
 open sudoku
 
+let makeColumn i = { Column.col = i * 1<column> }
+
+let columns (length : int<size>) : Column list = List.map makeColumn [ 1..(int) length ]
+
+let makeRow i = { Row.row = i * 1<row> }
+
+let rows (length : int<size>) = List.map makeRow [ 1..(int) length ]
+
+let cells (length : int<size>) = 
+    [ for row in (rows length) do
+          for column in (columns length) do
+              yield { Cell.col = column
+                      row = row } ]
+
+let makeStack i = { Stack.stack = i * 1<stack> }
+
+let stacks (length : int<size>) (boxWidth : int<boxWidth>) = List.map makeStack [ 1..((int) length / (int) boxWidth) ]
+
+let makeBand i = { Band.band = i * 1<band> }
+
+let bands (length : int<size>) (boxHeight : int<boxHeight>) = List.map makeBand [ 1..((int) length / (int) boxHeight) ]
+
+let boxes (length : int<size>) (boxWidth : int<boxWidth>) (boxHeight : int<boxHeight>) = 
+    [ for band in bands length boxHeight do
+          for stack in stacks length boxWidth do
+              yield { Box.stack = stack
+                      band = band } ]
+
+let houses (length : int<size>) (boxWidth : int<boxWidth>) (boxHeight : int<boxHeight>) = 
+    let chs = List.map (fun c -> HColumn c) (columns length)
+
+    let rhs = List.map (fun r -> HRow r) (rows length)
+
+    let bhs = List.map (fun b -> HBox b) (boxes length boxWidth boxHeight)
+
+    List.concat [ chs; rhs; bhs ]
+
 let columnCells (length : int<size>) (column : Column) = 
     List.map (fun row -> 
         { col = column
@@ -51,11 +88,14 @@ let houseCells (length : int<size>) (boxWidth : int<boxWidth>) (boxHeight : int<
     | HRow r -> rowCells length r |> Set.ofList
     | HBox b -> boxCells boxWidth boxHeight b |> Set.ofList
 
-let houseCellCells (length : int<size>) (boxWidth : int<boxWidth>) (boxHeight : int<boxHeight>) (cell : Cell) = 
-    let r = rowCells length cell.row |> Set.ofList
+type MapCellHouseCells = Cell -> Set<Cell>
 
-    let c = columnCells length cell.col |> Set.ofList
+let houseCellCells (length : int<size>) (boxWidth : int<boxWidth>) (boxHeight : int<boxHeight>) : MapCellHouseCells =
+    fun (cell : Cell) ->
+        let r = rowCells length cell.row |> Set.ofList
 
-    let b = boxCells boxWidth boxHeight (cellBox boxWidth boxHeight cell) |> Set.ofList
+        let c = columnCells length cell.col |> Set.ofList
 
-    Set.unionMany [ r; c; b ]
+        let b = boxCells boxWidth boxHeight (cellBox boxWidth boxHeight cell) |> Set.ofList
+
+        Set.unionMany [ r; c; b ]

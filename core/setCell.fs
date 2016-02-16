@@ -1,11 +1,11 @@
 ﻿module core.setCell
 
 open sudoku
+open puzzlemap
 
-let setCellDigitApply (cellHouseCells : Cell -> Set<Cell>) (setCellValue : Value) : (Cell -> CellContents) -> Cell -> CellContents = 
+let setCellDigitApply (cellHouseCells : MapCellHouseCells) (setCellValue : Value) : Current -> Current = 
 
-    fun (cellCellContents : Cell -> CellContents) (cell : Cell) -> 
-        let cellContents = cellCellContents cell
+    let update (cell : Cell) (cellContents : CellContents) : CellContents =
         let cells = cellHouseCells setCellValue.cell
 
         match cellContents with
@@ -16,6 +16,8 @@ let setCellDigitApply (cellHouseCells : Cell -> Set<Cell>) (setCellValue : Value
                 PencilMarks(Set.remove setCellValue.digit candidates)
             else cellContents
 
+    Map.map update
+
 let makeSetCellDigit (cell : Cell) (digit : Digit) : Value = 
     { Value.cell = cell
       digit = digit }
@@ -25,8 +27,8 @@ type SetCellDigitError =
       candidate : Digit
       digit : Digit }
 
-let setCellDigitTry (cell : Cell) (candidate : Digit) (cellCellContents : Cell -> CellContents) : Either<Value, SetCellDigitError> = 
-    match cellCellContents cell with
+let setCellDigitTry (cell : Cell) (candidate : Digit) (current : Current) : Either<Value, SetCellDigitError> = 
+    match current.Item cell with
     | BigNumber digit -> 
         Right { SetCellDigitError.cell = cell
                 candidate = candidate

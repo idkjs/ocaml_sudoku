@@ -1,21 +1,22 @@
 ﻿module hints.intersection
 
 open core.sudoku
+open core.puzzlemap
 open hints
 
-let intersectionsPerHouse (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Digit>) 
+let intersectionsPerHouse (cellHouseCells : MapCellHouseCells) (candidateLookup : MapCellCandidates) 
     (puzzleHouseCells : House -> Set<Cell>) (primaryHouse : House) (secondaryHouseLookups : (Cell -> House) list) = 
     let primaryHouseCells = puzzleHouseCells primaryHouse
     
     let primaryHouseCandidates = 
-        Set.map candidateLookup primaryHouseCells
+        Set.map (fun cell -> candidateLookup.Item cell) primaryHouseCells
         |> Set.unionMany
         |> Set.toList
     
     let uniqueSecondaryForCandidate candidate = 
         let pointerCells = 
             Set.filter (fun cell -> 
-                let candidates = candidateLookup cell
+                let candidates = candidateLookup.Item cell
                 Set.contains candidate candidates) primaryHouseCells
         
         let pointers = 
@@ -31,7 +32,7 @@ let intersectionsPerHouse (cellHouseCells : Cell -> Set<Cell>) (candidateLookup 
                 
                 let candidateReductionCells = 
                     Set.filter (fun cell -> 
-                        let candidates = candidateLookup cell
+                        let candidates = candidateLookup.Item cell
                         Set.contains candidate candidates) otherHouseCells
                 
                 let candidateReductions = 
@@ -54,12 +55,12 @@ let intersectionsPerHouse (cellHouseCells : Cell -> Set<Cell>) (candidateLookup 
     
     List.collect uniqueSecondaryForCandidate primaryHouseCandidates |> List.map (mhas cellHouseCells puzzleHouseCells)
 
-let pointingPairsPerBox (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) 
-    (candidateLookup : Cell -> Set<Digit>) (primaryHouse : House) = 
+let pointingPairsPerBox (cellHouseCells : MapCellHouseCells) (puzzleHouseCells : House -> Set<Cell>) 
+    (candidateLookup : MapCellCandidates) (primaryHouse : House) = 
     intersectionsPerHouse cellHouseCells candidateLookup puzzleHouseCells primaryHouse [ (fun cell -> HRow cell.row)
                                                                                          (fun cell -> HColumn cell.col) ]
 
-let boxLineReductionsPerHouse (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) 
-    (candidateLookup : Cell -> Set<Digit>) (puzzleCellBox : Cell -> Box) (primaryHouse : House) = 
+let boxLineReductionsPerHouse (cellHouseCells : MapCellHouseCells) (puzzleHouseCells : House -> Set<Cell>) 
+    (candidateLookup : MapCellCandidates) (puzzleCellBox : Cell -> Box) (primaryHouse : House) = 
     intersectionsPerHouse cellHouseCells candidateLookup puzzleHouseCells primaryHouse 
         [ (fun cell -> HBox(puzzleCellBox cell)) ]

@@ -7,6 +7,7 @@ open console.format
 open core.eliminateCandidate
 open core.setCell
 open core.sudoku
+open core.puzzlemap
 
 // find a column or row
 let parseColumnRow what gridSize term = 
@@ -39,8 +40,8 @@ let parseValue (candidates : Digit list) (term : string) =
         Console.WriteLine("Expect a single digit, not {0}", term)
         None
 
-let setCellCommand (item : string) (alphabet : Digit list) (lastGrid : Cell -> CellContents) (cells : Cell list) 
-    (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Digit>) : Value option = 
+let setCellCommand (item : string) (alphabet : Digit list) (lastGrid : Current) (cells : Cell list) 
+    (cellHouseCells : MapCellHouseCells) (candidateLookup : MapCellCandidates) : Value option = 
     let terms = item.Split(' ')
     if terms.Length = 4 then 
         let parsedCell = parseCell alphabet.Length cells terms.[1] terms.[2]
@@ -61,7 +62,7 @@ let setCellCommand (item : string) (alphabet : Digit list) (lastGrid : Cell -> C
         Console.WriteLine "Expect set <col> <row> <val>"
         None
 
-let candidateClearCommand (item : string) (alphabet : Digit list) (lastGrid : Cell -> CellContents) 
+let candidateClearCommand (item : string) (alphabet : Digit list) (lastGrid : Current) 
     (cells : Cell list) : Candidate option = 
     let terms = item.Split(' ')
     if terms.Length = 4 then 

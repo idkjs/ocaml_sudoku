@@ -4,13 +4,14 @@ open console
 
 open core.setCell
 open core.sudoku
+open core.puzzlemap
 open hints
 
-let findHidden (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Digit>) 
+let findHidden (cellHouseCells : MapCellHouseCells) (candidateLookup : MapCellCandidates) 
     (primaryHouseCells : Set<Cell>) (candidateSubset : Set<Digit>) (count : int) (primaryHouse : House) = 
     let pairs = 
         List.map (fun cell -> 
-            let candidates = candidateLookup cell
+            let candidates = candidateLookup.Item cell
             
             let pointer = 
                 { CandidateReduction.cell = cell
@@ -52,11 +53,11 @@ let findHidden (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> S
                pointers = Set.ofList nonEmptyPointers }
     else None
 
-let hiddenNPerHouse (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) 
-    (candidateLookup : Cell -> Set<Digit>) (count : int) (house : House) = 
+let hiddenNPerHouse (cellHouseCells : MapCellHouseCells) (puzzleHouseCells : House -> Set<Cell>) 
+    (candidateLookup : MapCellCandidates) (count : int) (house : House) = 
     let cells = puzzleHouseCells house
 
-    let houseCandidates = Set.map candidateLookup cells |> Set.unionMany
+    let houseCandidates = Set.map (fun cell -> candidateLookup.Item cell) cells |> Set.unionMany
 
     let candidateSubsets = setSubsets (Set.toList houseCandidates) count
     let hs = 

@@ -4,13 +4,15 @@
 // For a house there is only one cell that is neither given nor set i.e. has candidates
 open core.setCell
 open core.sudoku
+open core.puzzlemap
+
 open hints
 
-let fullHousePerHouse (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) 
-    (candidateLookup : Cell -> Set<Digit>) (primaryHouse : House) = 
+let fullHousePerHouse (cellHouseCells : MapCellHouseCells) (puzzleHouseCells : House -> Set<Cell>) 
+    (candidateLookup : MapCellCandidates) (primaryHouse : House) = 
     let primaryHouseCells = puzzleHouseCells primaryHouse
 
-    let candidateCells = Set.map (fun cell -> ((candidateLookup cell), cell)) primaryHouseCells
+    let candidateCells = Set.map (fun cell -> ((candidateLookup.Item cell), cell)) primaryHouseCells
 
     let hhs = Set.filter (fun (candidates, _) -> Set.isEmpty candidates = false) candidateCells
     

@@ -5,6 +5,7 @@ open System.Text
 
 open core.setCell
 open core.sudoku
+open core.puzzlemap
 
 exception CellStateInvalid
 
@@ -103,7 +104,7 @@ type HintDescription2 =
 
         sb.ToString()
 
-let mhas (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) (hd : HintDescription) : HintDescription2 = 
+let mhas (cellHouseCells : MapCellHouseCells) (puzzleHouseCells : House -> Set<Cell>) (hd : HintDescription) : HintDescription2 = 
 
     let annotationLookup (cell : Cell) = 
 

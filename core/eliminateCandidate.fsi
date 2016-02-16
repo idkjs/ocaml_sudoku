@@ -2,11 +2,11 @@
 
 open sudoku
 
-val eliminateCandidateApply : Candidate -> (Cell -> CellContents) -> Cell -> CellContents
+val eliminateCandidateApply : Candidate -> (Current -> Current)
 
 type EliminateCandidateError = 
     | AlreadySet of Digit
     | NotACandidate
 
 val eliminateCandidateTry : Cell
-     -> Digit -> (Cell -> CellContents) -> Either<Candidate, EliminateCandidateError>
+     -> Digit -> Current -> Either<Candidate, EliminateCandidateError>

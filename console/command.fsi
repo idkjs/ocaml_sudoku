@@ -1,13 +1,14 @@
 ﻿module console.command
 
 open core.sudoku
+open core.puzzlemap
 
 val parseValue : Digit list -> string -> Digit option
 
 val setCellCommand : string
      -> Digit list
-     -> (Cell -> CellContents)
-     -> Cell list -> (Cell -> Set<Cell>) -> (Cell -> Set<Digit>) -> Value option
+     -> Current
+     -> Cell list -> MapCellHouseCells -> MapCellCandidates -> Value option
 
 val candidateClearCommand : string
-     -> Digit list -> (Cell -> CellContents) -> Cell list -> Candidate option
+     -> Digit list -> Current -> Cell list -> Candidate option

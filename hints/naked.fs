@@ -4,11 +4,12 @@ open console
 
 open core.setCell
 open core.sudoku
+open core.puzzlemap
 open hints
 
-let findNaked (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Set<Digit>) 
+let findNaked (cellHouseCells : MapCellHouseCells) (candidateLookup : MapCellCandidates) 
     (primaryHouseCells : Set<Cell>) (cellSubset : Set<Cell>) (count : int) (primaryHouse : House) = 
-    let digits = Set.map candidateLookup cellSubset
+    let digits = Set.map (fun cell -> candidateLookup.Item cell) cellSubset
     let subsetDigits = Set.unionMany digits
 
     if Set.count subsetDigits <= count then 
@@ -16,7 +17,7 @@ let findNaked (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Se
         
         let candidateReductions = 
             Set.map (fun cell -> 
-                let candidates = candidateLookup cell
+                let candidates = candidateLookup.Item cell
                 { CandidateReduction.candidates = Set.intersect subsetDigits candidates
                   cell = cell }) otherCells
         
@@ -24,7 +25,7 @@ let findNaked (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Se
         
         let pointers = 
             Set.map (fun cell -> 
-                let candidates = candidateLookup cell
+                let candidates = candidateLookup.Item cell
                 { CandidateReduction.cell = cell
                   candidates = candidates }) cellSubset
 
@@ -38,13 +39,13 @@ let findNaked (cellHouseCells : Cell -> Set<Cell>) (candidateLookup : Cell -> Se
         else None
     else None
 
-let nakedNPerHouse (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) 
-    (candidateLookup : Cell -> Set<Digit>) (count : int) (primaryHouse : House) = 
+let nakedNPerHouse (cellHouseCells : MapCellHouseCells) (puzzleHouseCells : House -> Set<Cell>) 
+    (candidateLookup : MapCellCandidates) (count : int) (primaryHouse : House) = 
     let primaryHouseCells = puzzleHouseCells primaryHouse
     
     let hht = 
         Set.filter (fun cell -> 
-            let candidates = candidateLookup cell
+            let candidates = candidateLookup.Item cell
             Set.count candidates > 1 && Set.count candidates <= count) primaryHouseCells
     
     let subsets = setSubsets (Set.toList hht) count
@@ -54,11 +55,11 @@ let nakedNPerHouse (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : Hous
             findNaked cellHouseCells candidateLookup primaryHouseCells (Set.ofList subset) count primaryHouse) subsets
     List.choose id hs |> List.map (mhas cellHouseCells puzzleHouseCells)
 
-let nakedSingleFind (cellHouseCells : Cell -> Set<Cell>) (puzzleHouseCells : House -> Set<Cell>) 
-    (candidateLookup : Cell -> Set<Digit>) (cells : Cell list) = 
+let nakedSingleFind (cellHouseCells : MapCellHouseCells) (puzzleHouseCells : House -> Set<Cell>) 
+    (candidateLookup : MapCellCandidates) (cells : Cell list) = 
     let hs = 
         List.map (fun cell -> 
-            let candidates = candidateLookup cell
+            let candidates = candidateLookup.Item cell
 
             if Set.count candidates = 1 then 
                 let candidate = first candidates

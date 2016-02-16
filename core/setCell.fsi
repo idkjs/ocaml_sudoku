@@ -1,8 +1,9 @@
 ﻿module core.setCell
 
 open sudoku
+open puzzlemap
 
-val setCellDigitApply : (Cell -> Set<Cell>) -> Value -> ((Cell -> CellContents) -> Cell -> CellContents)
+val setCellDigitApply : MapCellHouseCells -> Value -> (Current -> Current)
 
 val makeSetCellDigit : Cell -> Digit -> Value
 
@@ -11,4 +12,4 @@ type SetCellDigitError =
       candidate : Digit
       digit : Digit }
 
-val setCellDigitTry : Cell -> Digit -> (Cell -> CellContents) -> Either<Value, SetCellDigitError>
+val setCellDigitTry : Cell -> Digit -> Current -> Either<Value, SetCellDigitError>

@@ -1,10 +1,11 @@
 ﻿module hints.naked
 
 open core.sudoku
+open core.puzzlemap
 open hints
 
-val nakedSingleFind : (Cell -> Set<Cell>)
-     -> (House -> Set<Cell>) -> (Cell -> Set<Digit>) -> Cell list -> HintDescription2 list
+val nakedSingleFind : MapCellHouseCells
+     -> (House -> Set<Cell>) -> MapCellCandidates -> Cell list -> HintDescription2 list
 
-val nakedNPerHouse : (Cell -> Set<Cell>)
-     -> (House -> Set<Cell>) -> (Cell -> Set<Digit>) -> int -> House -> HintDescription2 list
+val nakedNPerHouse : MapCellHouseCells
+     -> (House -> Set<Cell>) -> MapCellCandidates -> int -> House -> HintDescription2 list

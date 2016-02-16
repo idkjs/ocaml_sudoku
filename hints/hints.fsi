@@ -1,6 +1,7 @@
 ﻿module hints.hints
 
 open core.sudoku
+open core.puzzlemap
 
 type CandidateReduction = 
     { cell : Cell
@@ -25,4 +26,4 @@ type HintDescription2 =
       setCellValueAction : Value option
       annotations : Cell -> CellAnnotation }
 
-val mhas : (Cell -> Set<Cell>) -> (House -> Set<Cell>) -> HintDescription -> HintDescription2
+val mhas : MapCellHouseCells -> (House -> Set<Cell>) -> HintDescription -> HintDescription2

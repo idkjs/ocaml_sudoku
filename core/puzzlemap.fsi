@@ -2,6 +2,28 @@
 
 open sudoku
 
+val makeColumn : int -> Column
+
+val columns : int<size> -> Column list
+
+val makeRow : int -> Row
+
+val rows : int<size> -> Row list
+
+val cells : int<size> -> Cell list
+
+val makeStack : int -> Stack
+
+val stacks : int<size> -> int<boxWidth> -> Stack list
+
+val makeBand : int -> Band
+
+val bands : int<size> -> int<boxHeight> -> Band list
+
+val boxes : int<size> -> int<boxWidth> -> int<boxHeight> -> Box list
+
+val houses : int<size> -> int<boxWidth> -> int<boxHeight> -> House list
+
 // for a column, return the cells in it
 val columnCells : int<size> -> Column -> Cell list
 
@@ -30,4 +52,6 @@ val boxCells : int<boxWidth> -> int<boxHeight> -> Box -> Cell list
 val houseCells : int<size> -> int<boxWidth> -> int<boxHeight> -> House -> Set<Cell>
 
 // for a cell, return the cells in the column, row and box it belongs to
-val houseCellCells : int<size> -> int<boxWidth> -> int<boxHeight> -> Cell -> Set<Cell>
+type MapCellHouseCells = Cell -> Set<Cell>
+
+val houseCellCells : int<size> -> int<boxWidth> -> int<boxHeight> -> MapCellHouseCells

@@ -14,10 +14,6 @@ type Column =
     { col : int<column> }
     override this.ToString() = String.Format("c{0}", this.col)
 
-let makeColumn i = { Column.col = i * 1<column> }
-
-let columns (length : int<size>) : Column list = List.map makeColumn [ 1..(int) length ]
-
 // ... by rows
 [<Measure>]
 type row
@@ -26,21 +22,11 @@ type Row =
     { row : int<row> }
     override this.ToString() = String.Format("r{0}", this.row)
 
-let makeRow i = { Row.row = i * 1<row> }
-
-let rows (length : int<size>) = List.map makeRow [ 1..(int) length ]
-
 // Each cell is identified by (col, row)
 type Cell = 
     { col : Column
       row : Row }
     override this.ToString() = String.Format("r{0}c{1}", (int) this.row.row, (int) this.col.col)
-
-let cells (length : int<size>) = 
-    [ for row in (rows length) do
-          for column in (columns length) do
-              yield { Cell.col = column
-                      row = row } ]
 
 // The grid is divided into boxes,
 // these do not have to be square, but they are
@@ -56,10 +42,6 @@ type Stack =
 [<Measure>]
 type boxWidth
 
-let makeStack i = { Stack.stack = i * 1<stack> }
-
-let stacks (length : int<size>) (boxWidth : int<boxWidth>) = List.map makeStack [ 1..((int) length / (int) boxWidth) ]
-
 [<Measure>]
 type band
 
@@ -71,21 +53,11 @@ type Band =
 [<Measure>]
 type boxHeight
 
-let makeBand i = { Band.band = i * 1<band> }
-
-let bands (length : int<size>) (boxHeight : int<boxHeight>) = List.map makeBand [ 1..((int) length / (int) boxHeight) ]
-
 // A box is the intersection of a stack and a band
 type Box = 
     { stack : Stack
       band : Band }
     override this.ToString() = String.Format("stk{0}bnd{1}", (int) this.stack.stack, (int) this.band.band)
-
-let boxes (length : int<size>) (boxWidth : int<boxWidth>) (boxHeight : int<boxHeight>) = 
-    [ for band in bands length boxHeight do
-          for stack in stacks length boxWidth do
-              yield { Box.stack = stack
-                      band = band } ]
 
 // The columns and rows are collectively called lines
 type Line = 
@@ -102,15 +74,6 @@ type House =
         | HColumn c -> c.ToString()
         | HRow r -> r.ToString()
         | HBox b -> b.ToString()
-
-let houses (length : int<size>) (boxWidth : int<boxWidth>) (boxHeight : int<boxHeight>) = 
-    let chs = List.map (fun c -> HColumn c) (columns length)
-
-    let rhs = List.map (fun r -> HRow r) (rows length)
-
-    let bhs = List.map (fun b -> HBox b) (boxes length boxWidth boxHeight)
-
-    List.concat [ chs; rhs; bhs ]
 
 // Each cell in the grid contains a Digit, usually numbers 1..9
 type Digit = 
@@ -137,6 +100,8 @@ type CellContents =
     | BigNumber of Digit
     | PencilMarks of Set<Digit>
 
+// Working towards a solution we take one of the following actions:
+// Set the cell to have a Digit
 type Value = 
     { cell : Cell
       digit : Digit }
@@ -159,10 +124,14 @@ type Action =
         | Placement a -> String.Format("{0}={1}", a.cell, a.digit)
         | Eliminate candidate -> String.Format("{0}<>{1}", candidate.cell, candidate.digit)
 
+type Given = Map<Cell, Digit option>
+
+type Current = Map<Cell, CellContents>
+
 [<NoEquality; NoComparison>]
 type Solution = 
-    { given : Cell -> Digit option
-      current : Cell -> CellContents
+    { given : Given
+      current : Current
       steps : Action list }
 
 // To draw a cell we may want to display extra information...
@@ -180,11 +149,4 @@ type Either<'a, 'b> =
     | Left of 'a
     | Right of 'b
 
-let memoiseLookup (objects : 'a list) (lookup : 'a -> 'b) : ('a -> 'b) =
-    let s = List.map (fun o -> (o, lookup o)) objects
-
-    let s2 = s |> Map.ofList
-
-    let memo = new System.Collections.Generic.Dictionary<'a, 'b>(s2)
-
-    fun o -> memo.[o]
+type MapCellCandidates = Map<Cell, Set<Digit>>
