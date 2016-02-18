@@ -4,8 +4,8 @@ open core.sudoku
 open core.puzzlemap
 open hints
 
-val nakedSingleFind : MapCellHouseCells
-     -> (House -> Set<Cell>) -> MapCellCandidates -> Cell list -> HintDescription2 list
+val nakedSingleFind : Set<Cell> -> MapCellHouseCells
+     -> (House -> Set<Cell>) -> MapCellCandidates -> Set<Cell> -> Set<HintDescription2>
 
-val nakedNPerHouse : MapCellHouseCells
-     -> (House -> Set<Cell>) -> MapCellCandidates -> int -> House -> HintDescription2 list
+val nakedNPerHouse : Set<Cell> -> MapCellHouseCells
+     -> (House -> Set<Cell>) -> MapCellCandidates -> int -> House -> Set<HintDescription2>

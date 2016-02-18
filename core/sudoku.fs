@@ -11,22 +11,25 @@ type size
 type column
 
 type Column = 
-    { col : int<column> }
-    override this.ToString() = String.Format("c{0}", this.col)
+    | CColumn of int<column>
+    override this.ToString() =
+        match this with CColumn c -> String.Format("c{0}", c)
 
 // ... by rows
 [<Measure>]
 type row
 
 type Row = 
-    { row : int<row> }
-    override this.ToString() = String.Format("r{0}", this.row)
+    | RRow of int<row>
+    override this.ToString() =
+        match this with RRow r -> String.Format("r{0}", r)
 
 // Each cell is identified by (col, row)
 type Cell = 
     { col : Column
       row : Row }
-    override this.ToString() = String.Format("r{0}c{1}", (int) this.row.row, (int) this.col.col)
+    override this.ToString() =
+        String.Format("{0}{1}", this.row, this.col)
 
 // The grid is divided into boxes,
 // these do not have to be square, but they are
@@ -36,8 +39,9 @@ type stack
 
 // A column of vertical boxes is a stack
 type Stack = 
-    { stack : int<stack> }
-    override this.ToString() = String.Format("stk{0}", (int) this.stack)
+    | SStack of int<stack>
+    override this.ToString() =
+        match this with SStack s -> String.Format("stk{0}", s)
 
 [<Measure>]
 type boxWidth
@@ -47,8 +51,9 @@ type band
 
 // A row of horizontal boxes is a band
 type Band = 
-    { band : int<band> }
-    override this.ToString() = String.Format("bnd{0}", (int) this.band)
+    | BBand of int<band>
+    override this.ToString() =
+        match this with BBand b -> String.Format("bnd{0}", b)
 
 [<Measure>]
 type boxHeight
@@ -57,7 +62,8 @@ type boxHeight
 type Box = 
     { stack : Stack
       band : Band }
-    override this.ToString() = String.Format("stk{0}bnd{1}", (int) this.stack.stack, (int) this.band.band)
+    override this.ToString() =
+        String.Format("{0}{1}", this.stack, this.band)
 
 // The columns and rows are collectively called lines
 type Line = 
@@ -78,14 +84,12 @@ type House =
 // Each cell in the grid contains a Digit, usually numbers 1..9
 type Digit = 
     | Digit of char
-    override this.ToString() = 
-        let (Digit s) = this
-        (string) s
+    override this.ToString() =
+        match this with Digit s -> (string) s
 
 // A sudoku is defined by the overall grid size (it is always square)
 // which is the same as the Digits in the alphabet
 // and also by the width and height of the boxes
-[<NoEquality; NoComparison>]
 type PuzzleShape = 
     { size : int<size>
       boxWidth : int<boxWidth>
@@ -95,7 +99,6 @@ type PuzzleShape =
 // Whilst working to a solution each cell in the grid
 // that doesn't have a Digit is filled with candidates
 // Candidates are possible Digits
-[<NoEquality; NoComparison>]
 type CellContents = 
     | BigNumber of Digit
     | PencilMarks of Set<Digit>
@@ -105,13 +108,15 @@ type CellContents =
 type Value = 
     { cell : Cell
       digit : Digit }
-    override this.ToString() = String.Format("{0}={1}", this.cell, this.digit)
+    override this.ToString() =
+        String.Format("{0}={1}", this.cell, this.digit)
 
 // A candidate is a digit in a cell, which is still a pencilmark
 type Candidate = 
     { cell : Cell
       digit : Digit }
-    override this.ToString() = String.Format("({0}){1}", this.digit, this.cell)
+    override this.ToString() =
+        String.Format("({0}){1}", this.digit, this.cell)
 
 // Working towards a solution we take one of the following actions:
 // Set the cell to have a Digit
@@ -128,14 +133,12 @@ type Given = Map<Cell, Digit option>
 
 type Current = Map<Cell, CellContents>
 
-[<NoEquality; NoComparison>]
 type Solution = 
     { given : Given
       current : Current
       steps : Action list }
 
 // To draw a cell we may want to display extra information...
-[<NoEquality; NoComparison>]
 type CellAnnotation = 
     { setValue : Digit option
       primaryHintHouse : bool

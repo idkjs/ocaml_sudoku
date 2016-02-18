@@ -31,7 +31,6 @@ let Maximize() =
     let p = Process.GetCurrentProcess()
     ShowWindow(p.MainWindowHandle, 3) //SW_MAXIMIZE = 3
 
-[<NoEquality; NoComparison>]
 type HintType = 
     | FH
     | HS
@@ -50,7 +49,7 @@ type HintType =
 type Hint = HintType * HintDescription2
 
 let parse (item : string) (solution : Solution) (puzzle : PuzzleShape) 
-    (candidateLookup : Map<Cell, Set<Digit>>) puzzlePrintGrid puzzlePrintFull puzzleDrawFull puzzleDrawFull2 print_last : Solution * HintType option * HintDescription2 list = 
+    (candidateLookup : Map<Cell, Set<Digit>>) puzzlePrintGrid puzzlePrintFull puzzleDrawFull puzzleDrawFull2 print_last : Solution * HintType option * Set<HintDescription2> = 
 
     let puzzleSize = (List.length puzzle.alphabet) * 1<size>
     let puzzleCells = cells puzzleSize
@@ -67,7 +66,7 @@ let parse (item : string) (solution : Solution) (puzzle : PuzzleShape)
 
     if item = "print" then 
         puzzleDrawFull None
-        (solution, None, [])
+        (solution, None, Set.empty)
     else if item.StartsWith "focus" then
         let terms = item.Split(' ')
         let focusDigit =
@@ -76,7 +75,7 @@ let parse (item : string) (solution : Solution) (puzzle : PuzzleShape)
             else
                 None
         puzzleDrawFull focusDigit
-        (solution, None, [])
+        (solution, None, Set.empty)
     else if item.StartsWith "s" then 
         let setCommand = setCellCommand item puzzle.alphabet solution.current puzzleCells puzzleHouseCellCells candidateLookup
         
@@ -90,7 +89,7 @@ let parse (item : string) (solution : Solution) (puzzle : PuzzleShape)
                       setCellValueAction = Some setCellValue
                       pointers = set [] }
                 
-                let hd2 = mhas puzzleHouseCellCells puzzleHouseCells hd
+                let hd2 = mhas puzzleCells puzzleHouseCellCells puzzleHouseCells hd
                 puzzleDrawFull2 hd2.annotations
                 { solution with current = setCellDigitApply puzzleHouseCellCells setCellValue solution.current
                                 steps = (Placement setCellValue) :: solution.steps }
@@ -98,7 +97,7 @@ let parse (item : string) (solution : Solution) (puzzle : PuzzleShape)
                 Console.WriteLine("")
                 solution
         print_last newSolution
-        (newSolution, None, [])
+        (newSolution, None, Set.empty)
 
     else if item.StartsWith "c" then 
         let clearCommand = candidateClearCommand item puzzle.alphabet solution.current puzzleCells
@@ -117,7 +116,7 @@ let parse (item : string) (solution : Solution) (puzzle : PuzzleShape)
                       setCellValueAction = None
                       pointers = set [] }
                 
-                let hd2 = mhas puzzleHouseCellCells puzzleHouseCells hd
+                let hd2 = mhas puzzleCells puzzleHouseCellCells puzzleHouseCells hd
                 puzzleDrawFull2 hd2.annotations
                 { solution with current = eliminateCandidateApply candidate solution.current
                                 steps = (Eliminate candidate) :: solution.steps }
@@ -126,73 +125,109 @@ let parse (item : string) (solution : Solution) (puzzle : PuzzleShape)
                 solution
 
         print_last newSolution
-        (newSolution, None, [])
+        (newSolution, None, Set.empty)
 
     else if item = "fh" then 
-        let hints = List.collect (fullHousePerHouse puzzleHouseCellCells puzzleHouseCells candidateLookup) puzzleHouses
+        let hints =
+            puzzleHouses
+            |> Set.map (fullHousePerHouse puzzleCells puzzleHouseCellCells puzzleHouseCells candidateLookup)
+            |> Set.unionMany
         (solution, Some FH, hints)
     else if item = "hs" then 
-        let hints = List.collect (hiddenNPerHouse puzzleHouseCellCells puzzleHouseCells candidateLookup 1) puzzleHouses
+        let hints =
+            puzzleHouses
+            |> Set.map (hiddenNPerHouse puzzleCells puzzleHouseCellCells puzzleHouseCells candidateLookup 1)
+            |> Set.unionMany
         (solution, Some HS, hints)
-    else if item = "hp" then 
-        let hints = List.collect (hiddenNPerHouse puzzleHouseCellCells puzzleHouseCells candidateLookup 2) puzzleHouses
-        (solution, Some HP, hints)
-    else if item = "ht" then 
-        let hints = List.collect (hiddenNPerHouse puzzleHouseCellCells puzzleHouseCells candidateLookup 3) puzzleHouses
-        (solution, Some HT, hints)
-    else if item = "hq" then 
-        let hints = List.collect (hiddenNPerHouse puzzleHouseCellCells puzzleHouseCells candidateLookup 4) puzzleHouses
-        (solution, Some HQ, hints)
-    else if item = "ns" then 
-        let hints = nakedSingleFind puzzleHouseCellCells puzzleHouseCells candidateLookup puzzleCells
 
+    else if item = "hp" then 
+        let hints =
+            puzzleHouses
+            |> Set.map (hiddenNPerHouse puzzleCells puzzleHouseCellCells puzzleHouseCells candidateLookup 2)
+            |> Set.unionMany
+        (solution, Some HP, hints)
+
+    else if item = "ht" then 
+        let hints =
+            puzzleHouses
+            |> Set.map (hiddenNPerHouse puzzleCells puzzleHouseCellCells puzzleHouseCells candidateLookup 3)
+            |> Set.unionMany
+        (solution, Some HT, hints)
+
+    else if item = "hq" then 
+        let hints =
+            puzzleHouses
+            |> Set.map (hiddenNPerHouse puzzleCells puzzleHouseCellCells puzzleHouseCells candidateLookup 4)
+            |> Set.unionMany
+        (solution, Some HQ, hints)
+
+    else if item = "ns" then 
+        let hints = nakedSingleFind puzzleCells puzzleHouseCellCells puzzleHouseCells candidateLookup puzzleCells
         (solution, Some NS, hints)
 
     else if item = "np" then 
-        let hints = List.collect (nakedNPerHouse puzzleHouseCellCells puzzleHouseCells candidateLookup 2) puzzleHouses
-
+        let hints =
+            puzzleHouses
+            |> Set.map (nakedNPerHouse puzzleCells puzzleHouseCellCells puzzleHouseCells candidateLookup 2) 
+            |> Set.unionMany
         (solution, Some NP, hints)
 
     else if item = "nt" then 
-        let hints = List.collect (nakedNPerHouse puzzleHouseCellCells puzzleHouseCells candidateLookup 3) puzzleHouses
-
+        let hints =
+            puzzleHouses
+            |> Set.map (nakedNPerHouse puzzleCells puzzleHouseCellCells puzzleHouseCells candidateLookup 3) 
+            |> Set.unionMany
         (solution, Some NT, hints)
 
     else if item = "nq" then 
-        let hints = List.collect (nakedNPerHouse puzzleHouseCellCells puzzleHouseCells candidateLookup 4) puzzleHouses
-
+        let hints =
+            puzzleHouses
+            |> Set.map (nakedNPerHouse puzzleCells puzzleHouseCellCells puzzleHouseCells candidateLookup 4)
+            |> Set.unionMany
         (solution, Some NQ, hints)
 
     else if item = "pp" then 
-        let hints = 
-            List.collect (pointingPairsPerBox puzzleHouseCellCells puzzleHouseCells candidateLookup) 
-                (List.map HBox puzzleBoxes)
+        let hints =
+            puzzleBoxes
+            |> Set.map HBox
+            |> Set.map (pointingPairsPerBox puzzleCells puzzleHouseCellCells puzzleHouseCells candidateLookup) 
+            |> Set.unionMany
+
         (solution, Some PP, hints)
 
     else if item = "bl" then 
-        let rowHints = 
-            List.collect (boxLineReductionsPerHouse puzzleHouseCellCells puzzleHouseCells candidateLookup puzzleCellBox) 
-                (List.map HRow puzzleRows)
-        let colHints = 
-            List.collect (boxLineReductionsPerHouse puzzleHouseCellCells puzzleHouseCells candidateLookup puzzleCellBox) 
-                (List.map HColumn puzzleCols)
-        let hints = List.concat [ rowHints; colHints ]
+        let rowHints =
+            puzzleRows
+            |> Set.map HRow
+            |> Set.map (boxLineReductionsPerHouse puzzleCells puzzleHouseCellCells puzzleHouseCells candidateLookup puzzleCellBox)
+            |> Set.unionMany
+
+        let colHints =
+            puzzleCols
+            |> Set.map HColumn
+            |> Set.map (boxLineReductionsPerHouse puzzleCells puzzleHouseCellCells puzzleHouseCells candidateLookup puzzleCellBox)
+            |> Set.unionMany
+
+        let hints =
+            [rowHints; colHints]
+            |> Set.ofList
+            |> Set.unionMany
 
         (solution, Some BL, hints)
 
     else if item = "x" then 
-        let hints = xWingFind puzzleHouseCellCells puzzleHouseCells candidateLookup puzzleRows puzzleCols
+        let hints = xWingFind puzzleCells puzzleHouseCellCells puzzleHouseCells candidateLookup puzzleRows puzzleCols
 
         (solution, Some X, hints)
 
     else if item = "y" then 
-        let hints = yWingFind puzzleHouseCellCells puzzleHouseCells candidateLookup puzzleRows puzzleCols
+        let hints = yWingFind puzzleCells puzzleHouseCellCells puzzleHouseCells candidateLookup puzzleRows puzzleCols
 
         (solution, Some Y, hints)
 
-    else (solution, None, [])
+    else (solution, None, Set.empty)
 
-let printHint puzzleHouseCells puzzleHouseCellCells drawHint (index : int) (hint : HintDescription2) = 
+let printHint puzzleHouseCells puzzleHouseCellCells drawHint (index : int) (hint : HintDescription2) : unit = 
 
     Console.WriteLine("{0}: {1}", index, hint)
 
@@ -217,7 +252,7 @@ let run (solution : Solution ref) (puzzle : PuzzleShape) puzzlePrintGrid puzzleP
                 puzzleDrawCandidateGridAnnotations print_last
         solution := soln
 
-        List.iteri puzzlePrintHint hints
+        Seq.iteri puzzlePrintHint hints
 
         None
 
@@ -227,7 +262,7 @@ let digitToEntry (cellDigitLookup : Given) (alphabet : Set<Digit>)
         match dop with
         | Some(e) -> BigNumber(e)
         | None -> 
-            let cells = houseCellCells cell |> Set.toList
+            let cells = houseCellCells.Item cell |> Set.toList
             let digits = List.choose (fun cell -> cellDigitLookup.Item cell) cells |> Set.ofList
             let possibleDigits = Set.difference alphabet digits
             PencilMarks possibleDigits
@@ -251,6 +286,11 @@ let repl (sudoku : string) (puzzle : PuzzleShape) =
     let puzzleHouseCellCells = houseCellCells puzzleSize puzzle.boxWidth puzzle.boxHeight
 
 
+    let orderedPuzzleCells = orderedCells puzzleSize
+    let orderedPuzzleStacks = orderedStacks puzzleSize puzzle.boxWidth
+    let orderedPuzzleStackColumns = orderedStackColumns puzzle.boxWidth
+    let orderedPuzzleBands = orderedBands puzzleSize puzzle.boxHeight
+    let orderedPuzzleBandRows = orderedBandRows puzzle.boxHeight
 
 
 
@@ -261,12 +301,12 @@ let repl (sudoku : string) (puzzle : PuzzleShape) =
 
     let centreDigit : Digit = List.nth puzzle.alphabet ((List.length puzzle.alphabet) / 2)
 
-    let puzzlePrintLine = printLine puzzleCells
+    let puzzlePrintLine = printLine orderedPuzzleCells
 
-    let puzzlePrintGrid = printGrid puzzleStacks puzzleStackColumns puzzleBands puzzleBandRows defaultGridChars
+    let puzzlePrintGrid = printGrid orderedPuzzleStacks orderedPuzzleStackColumns orderedPuzzleBands orderedPuzzleBandRows defaultGridChars
 
     let puzzlePrintCandidateGrid = 
-        printCandidateGrid puzzleStacks puzzleStackColumns puzzleBands puzzleBandRows defaultCandidateGridChars 
+        printCandidateGrid orderedPuzzleStacks orderedPuzzleStackColumns orderedPuzzleBands orderedPuzzleBandRows defaultCandidateGridChars 
             puzzle.alphabet
 
     // Print a Digit option, with colours
@@ -277,9 +317,9 @@ let repl (sudoku : string) (puzzle : PuzzleShape) =
         drawDigitCellContentAnnotations centreDigit focus digit (solution.given.Item cell) 
             (solution.current.Item cell) None
 
-    let puzzleDrawCellDigitAnnotations (solution : Solution) (l : Cell -> CellAnnotation) (cell : Cell) (digit : Digit) : ConsoleChar = 
+    let puzzleDrawCellDigitAnnotations (solution : Solution) (l : Map<Cell, CellAnnotation>) (cell : Cell) (digit : Digit) : ConsoleChar = 
         drawDigitCellContentAnnotations centreDigit None digit (solution.given.Item cell) 
-            (solution.current.Item cell) (Some(l cell))
+            (solution.current.Item cell) (Some(l.Item cell))
 
     let puzzleDrawLine () =
         Seq.iter drawConsoleChar (puzzlePrintLine (puzzleDrawCell !solution))
@@ -317,13 +357,13 @@ let repl (sudoku : string) (puzzle : PuzzleShape) =
 
     puzzleDrawGrid()
 
-    let forcedSolutions = solve (!solution) puzzleCells puzzleHouseCellCells
-    //puzzleDrawGrid solve
-    if List.length forcedSolutions > 0 then
-        List.iter
-            (fun solve -> Seq.iter drawConsoleChar (puzzlePrintGrid (puzzleDrawCell solve)))
-            forcedSolutions
-    else Console.WriteLine("No solutions")
+    //let forcedSolutions = solve (!solution) puzzleCells puzzleHouseCellCells
+    //puzzleDrawGrid()
+    //if List.length forcedSolutions > 0 then
+    //    List.iter
+    //        (fun solve -> Seq.iter drawConsoleChar (puzzlePrintGrid (puzzleDrawCell solve)))
+    //        forcedSolutions
+    //else Console.WriteLine("No solutions")
 
     let puzzlePrintHint = printHint puzzleHouseCells puzzleHouseCellCells puzzleDrawCandidateGridAnnotations
 

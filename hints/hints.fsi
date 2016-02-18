@@ -18,12 +18,11 @@ val first : Set<'a> -> 'a
 
 val setSubsets : List<'a> -> int -> List<List<'a>>
 
-[<NoEquality; NoComparison>]
 type HintDescription2 = 
     { primaryHouses : Set<House>
       secondaryHouses : Set<House>
       candidateReductions : Set<CandidateReduction>
       setCellValueAction : Value option
-      annotations : Cell -> CellAnnotation }
+      annotations : Map<Cell, CellAnnotation> }
 
-val mhas : MapCellHouseCells -> (House -> Set<Cell>) -> HintDescription -> HintDescription2
+val mhas : Set<Cell> -> MapCellHouseCells -> (House -> Set<Cell>) -> HintDescription -> HintDescription2

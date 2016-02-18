@@ -7,227 +7,257 @@ open NUnit.Framework
 
 [<Test>]
 let ``Can make columns``() = 
-    let actual : Column list = columns (9 * 1<size>)
+    let actual : Set<Column> = columns (9 * 1<size>)
 
-    let expected : Column list =
+    let expected : Set<Column> =
         [1..9]
-        |> List.map
+        |> Set.ofList
+        |> Set.map
             (fun c ->
-                { Column.col = c * 1<column> })
+                c * 1<column> |> CColumn)
 
     Assert.AreEqual(expected, actual)
 
 [<Test>]
 let ``Can make rows``() = 
-    let actual : Row list = rows (9 * 1<size>)
+    let actual : Set<Row> = rows (9 * 1<size>)
 
-    let expected : Row list =
+    let expected : Set<Row> =
         [1..9]
-        |> List.map
+        |> Set.ofList
+        |> Set.map
             (fun r ->
-                { Row.row = r * 1<row> })
+                r * 1<row> |> RRow)
 
     Assert.AreEqual(expected, actual)
 
 [<Test>]
 let ``Can make cells``() = 
-    let actual : Cell list = cells (9 * 1<size>)
+    let actual : Set<Cell> = cells (9 * 1<size>)
 
-    let expected : Cell list =
+    let expected : Set<Cell> =
         [1..9]
-        |> List.collect
+        |> Set.ofList
+        |> Set.map
             (fun r ->
                 [1..9]
-                |> List.map
+                |> Set.ofList
+                |> Set.map
                     (fun c ->
-                        { Cell.col = { Column.col = c * 1<column>}
-                          row = { Row.row = r * 1<row>} }))
+                        { Cell.col = (c * 1<column> |> CColumn)
+                          row = (r * 1<row> |> RRow) }))
+        |> Set.unionMany
 
     Assert.AreEqual(expected, actual)
 
 [<Test>]
 let ``Can make stacks``() = 
-    let actual : Stack list = stacks (8 * 1<size>) (2 * 1<boxWidth>)
+    let actual : Set<Stack> = stacks (8 * 1<size>) (2 * 1<boxWidth>)
 
-    let expected : Stack list =
+    let expected : Set<Stack> =
         [1..4]
-        |> List.map
+        |> Set.ofList
+        |> Set.map
             (fun s ->
-                { Stack.stack = s * 1<stack> })
+                s * 1<stack> |> SStack)
 
     Assert.AreEqual(expected, actual)
 
 [<Test>]
 let ``Can make bands``() = 
-    let actual : Band list = bands (8 * 1<size>) (4 * 1<boxHeight>)
+    let actual : Set<Band> = bands (8 * 1<size>) (4 * 1<boxHeight>)
 
-    let expected : Band list =
+    let expected : Set<Band> =
         [1..2]
-        |> List.map
+        |> Set.ofList
+        |> Set.map
             (fun b ->
-                { Band.band = b * 1<band> })
+                b * 1<band> |> BBand )
 
     Assert.AreEqual(expected, actual)
 
 [<Test>]
 let ``Can make boxes``() = 
-    let actual : Box list = boxes (9 * 1<size>) (2 * 1<boxWidth>) (4 * 1<boxHeight>)
+    let actual : Set<Box> = boxes (9 * 1<size>) (2 * 1<boxWidth>) (4 * 1<boxHeight>)
 
-    let expected : Box list =
+    let expected : Set<Box> =
         [1..2]
-        |> List.collect
+        |> Set.ofList
+        |> Set.map
             (fun b ->
                 [1..4]
-                |> List.map
+                |> Set.ofList
+                |> Set.map
                     (fun s ->
-                        { Box.stack = { Stack.stack = s * 1<stack>}
-                          band = { Band.band = b * 1<band>} }))
+                        { Box.stack = s * 1<stack> |> SStack
+                          band = b * 1<band> |> BBand }))
+        |> Set.unionMany
 
     Assert.AreEqual(expected, actual)
 
 [<Test>]
 let ``Can make houses``() = 
-    let actual : House list = houses (9 * 1<size>) (2 * 1<boxWidth>) (4 * 1<boxHeight>)
+    let actual : Set<House> = houses (9 * 1<size>) (2 * 1<boxWidth>) (4 * 1<boxHeight>)
 
-    let expectedColumns : House list =
+    let expectedColumns : Set<House> =
         [1..9]
-        |> List.map
+        |> Set.ofList
+        |> Set.map
             (fun c ->
-                { Column.col = c * 1<column> })
-        |> List.map HColumn
+                c * 1<column> |> CColumn)
+        |> Set.map HColumn
 
-    let expectedRows : House list =
+    let expectedRows : Set<House> =
         [1..9]
-        |> List.map
+        |> Set.ofList
+        |> Set.map
             (fun r ->
-                { Row.row = r * 1<row> })
-        |> List.map HRow
+                r * 1<row> |> RRow)
+        |> Set.map HRow
 
-    let expectedBoxes : House list =
+    let expectedBoxes : Set<House> =
         [1..2]
-        |> List.collect
+        |> Set.ofList
+        |> Set.map
             (fun b ->
                 [1..4]
-                |> List.map
+                |> Set.ofList
+                |> Set.map
                     (fun s ->
-                        { Box.stack = { Stack.stack = s * 1<stack>}
-                          band = { Band.band = b * 1<band>} }))
-        |> List.map HBox
+                        { Box.stack = s * 1<stack> |> SStack
+                          band = b * 1<band> |> BBand }))
+        |> Set.unionMany
+        |> Set.map HBox
 
     let expected =
         [ expectedColumns; expectedRows; expectedBoxes]
-        |> List.concat
+        |> Set.ofList
+        |> Set.unionMany
 
     Assert.AreEqual(expected, actual)
 
 [<Test>]
 let ``Get column cells``() = 
-    let actual : Cell list = columnCells (9 * 1<size>) { Column.col = 2 * 1<column> }
+    let actual : Set<Cell> = columnCells (9 * 1<size>) (2 * 1<column> |> CColumn)
 
-    let expected : Cell list =
+    let expected : Set<Cell> =
         [1..9]
-        |> List.map
+        |> Set.ofList
+        |> Set.map
             (fun r ->
-                { Cell.col = { Column.col = 2 * 1<column> }
-                  row = { Row.row = r * 1<row> }})
+                { Cell.col = (2 * 1<column> |> CColumn)
+                  row = (r * 1<row> |> RRow) })
 
     Assert.AreEqual(expected, actual)
 
 [<Test>]
 let ``Get row cells``() = 
-    let actual : Cell list = rowCells (9 * 1<size>) { Row.row = 7 * 1<row> }
+    let actual : Set<Cell> = rowCells (9 * 1<size>) (7 * 1<row> |> RRow)
 
-    let expected : Cell list =
+    let expected : Set<Cell> =
         [1..9]
-        |> List.map
+        |> Set.ofList
+        |> Set.map
             (fun c ->
-                { Cell.col = { Column.col = c * 1<column> }
-                  row = { Row.row = 7 * 1<row> }})
+                { Cell.col = (c * 1<column> |> CColumn)
+                  row = (7 * 1<row> |> RRow) })
 
     Assert.AreEqual(expected, actual)
 
 [<Test>]
 let ``Get stack for a column``() =
-    let columns : Column list = columns (9 * 1<size>)
-    let actual : Stack list =
+    let columns : Set<Column> = columns (9 * 1<size>)
+    let actual : Set<Stack> =
         columns
-        |> List.map (columnStack (3 * 1<boxWidth>))
+        |> Set.map (columnStack (3 * 1<boxWidth>))
 
-    let expected : Stack list =
+    let expected : Set<Stack> =
         [1..3]
-        |> List.collect
+        |> Set.ofList
+        |> Set.map
             (fun s ->
                 [1..3]
-                |> List.map
+                |> Set.ofList
+                |> Set.map
                     (fun _ ->
-                        { Stack.stack = s * 1<stack> }))
+                        s * 1<stack> |> SStack))
+        |> Set.unionMany
 
     Assert.AreEqual(expected, actual)
 
 [<Test>]
 let ``Get stack columns``() = 
-    let actual : Column list = stackColumns (3 * 1<boxWidth>) { Stack.stack = 2 * 1<stack> }
+    let actual : Set<Column> = stackColumns (3 * 1<boxWidth>) (2 * 1<stack> |> SStack)
 
-    let expected : Column list =
+    let expected : Set<Column> =
         [4..6]
-        |> List.map
+        |> Set.ofList
+        |> Set.map
             (fun c ->
-                { Column.col = c * 1<column> })
+                c * 1<column> |> CColumn)
 
     Assert.AreEqual(expected, actual)
 
 [<Test>]
 let ``Get band for a row``() =
-    let rows : Row list = rows (9 * 1<size>)
-    let actual : Band list =
+    let rows : Set<Row> = rows (9 * 1<size>)
+    let actual : Set<Band> =
         rows
-        |> List.map (rowBand (3 * 1<boxHeight>))
+        |> Set.map (rowBand (3 * 1<boxHeight>))
 
-    let expected : Band list =
+    let expected : Set<Band> =
         [1..3]
-        |> List.collect
+        |> Set.ofList
+        |> Set.map
             (fun b ->
                 [1..3]
-                |> List.map
+                |> Set.ofList
+                |> Set.map
                     (fun _ ->
-                        { Band.band = b * 1<band> }))
+                        b * 1<band> |> BBand))
+        |> Set.unionMany
 
     Assert.AreEqual(expected, actual)
 
 [<Test>]
 let ``Get band rows``() = 
-    let actual : Row list = bandRows (3 * 1<boxHeight>) { Band.band = 2 * 1<band> }
+    let actual : Set<Row> = bandRows (3 * 1<boxHeight>) (2 * 1<band> |> BBand)
 
-    let expected : Row list =
+    let expected : Set<Row> =
         [4..6]
-        |> List.map
+        |> Set.ofList
+        |> Set.map
             (fun r ->
-                { Row.row = r * 1<row> })
+                r * 1<row> |> RRow)
 
     Assert.AreEqual(expected, actual)
 
 [<Test>]
 let ``Get box for a cell``() =
-    let cells : Cell list =
+    let cells : Set<Cell> =
         [1..9]
-        |> List.map
+        |> Set.ofList
+        |> Set.map
             (fun r ->
-                { Cell.col = { Column.col = 5 * 1<column>}
-                  row = { Row.row = r * 1<row>} })
+                { Cell.col = (5 * 1<column> |> CColumn)
+                  row = (r * 1<row> |> RRow) })
 
-    let actual : Box list =
+    let actual : Set<Box> =
         cells
-        |> List.map (cellBox (3 * 1<boxWidth>) (3 * 1<boxHeight>))
+        |> Set.map (cellBox (3 * 1<boxWidth>) (3 * 1<boxHeight>))
 
-    let expected : Box list =
+    let expected : Set<Box> =
         [1..3]
-        |> List.collect
+        |> Set.ofList
+        |> Set.map
             (fun b ->
                 [1..3]
-                |> List.map
+                |> Set.ofList
+                |> Set.map
                     (fun _ ->
-                        { Box.stack = { Stack.stack = 2 * 1<stack>}
-                          band = { Band.band = b * 1<band>} }))
+                        { Box.stack = 2 * 1<stack> |> SStack
+                          band = (b * 1<band>) |> BBand }))
+        |> Set.unionMany
 
     Assert.AreEqual(expected, actual)
 

@@ -20,14 +20,15 @@ let isValidCellContents (cellContents : CellContents) : bool =
 let cellCellContents (solution : Solution) (cell : Cell) : CellContents =
     solution.current.Item cell
 
-let isValid (solution : Solution) (cells : Cell list) : bool =
+let isValid (solution : Solution) (cells : Set<Cell>) : bool =
     cells
-    |> List.map (cellCellContents solution)
-    |> List.forall isValidCellContents
+    |> Set.map (cellCellContents solution)
+    |> Set.forall isValidCellContents
 
-let rec searchr (solution : Solution) (cells : Cell list) (puzzleHouseCellCells : MapCellHouseCells) (existing : Solution list) : Solution list = 
+let rec searchr (solution : Solution) (cells : Set<Cell>) (puzzleHouseCellCells : MapCellHouseCells) (existing : Set<Solution>) : Set<Solution> = 
     let emptyCell : Cell option =
         cells
+        |> Set.toList
         |> List.tryFind ((cellCellContents solution) >> isPencilMarksCellContents)
 
     match emptyCell with
@@ -37,8 +38,10 @@ let rec searchr (solution : Solution) (cells : Cell list) (puzzleHouseCellCells 
             match cellContents with
             | BigNumber _ -> []
             | PencilMarks candidates -> candidates |> Set.toList
-
-        List.collect
+        
+        candidates
+        |> Set.ofList
+        |> Set.map
             (fun digit ->
                 let setCellValue = makeSetCellDigit cell digit
                 
@@ -67,16 +70,17 @@ let rec searchr (solution : Solution) (cells : Cell list) (puzzleHouseCellCells 
 
                     Console.WriteLine(String.Format("< {0}", cell))
                     *)
-                    [])
-            candidates
+                    Set.empty)
+            |> Set.unionMany
 
-    | None -> solution :: existing
 
-let solve (solution : Solution) (cells : Cell list) (puzzleHouseCellCells : MapCellHouseCells) : Solution list =
+    | None -> Set.add solution existing
+
+let solve (solution : Solution) (cells : Set<Cell>) (puzzleHouseCellCells : MapCellHouseCells) : Set<Solution> =
     let stopwatch = new Stopwatch()
     stopwatch.Start()
 
-    let results = searchr solution cells puzzleHouseCellCells []
+    let results = searchr solution cells puzzleHouseCellCells Set.empty
 
     stopwatch.Stop()
     Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed)

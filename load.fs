@@ -18,7 +18,7 @@ let load (alphabet : Digit list) (sudoku : char list)
 
     let size = (List.length alphabet) * 1<size>
 
-    let puzzleGrid = loadPuzzle (cells size) alphabetisedLine
+    let puzzleGrid = loadPuzzle (orderedCells size) alphabetisedLine
 
     let given = puzzleGrid
 

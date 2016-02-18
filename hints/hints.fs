@@ -83,13 +83,12 @@ type HintDescription =
 
         sb.ToString()
 
-[<NoEquality; NoComparison>]
 type HintDescription2 = 
     { primaryHouses : Set<House>
       secondaryHouses : Set<House>
       candidateReductions : Set<CandidateReduction>
       setCellValueAction : Value option
-      annotations : Cell -> CellAnnotation }
+      annotations : Map<Cell, CellAnnotation> }
     override this.ToString() = 
         let sb = StringBuilder()
 
@@ -104,14 +103,14 @@ type HintDescription2 =
 
         sb.ToString()
 
-let mhas (cellHouseCells : MapCellHouseCells) (puzzleHouseCells : House -> Set<Cell>) (hd : HintDescription) : HintDescription2 = 
+let mhas (allCells : Set<Cell>) (cellHouseCells : MapCellHouseCells) (puzzleHouseCells : House -> Set<Cell>) (hd : HintDescription) : HintDescription2 = 
 
-    let annotationLookup (cell : Cell) = 
+    let annotationLookup (cell : Cell) : CellAnnotation = 
 
         let setValue, setValueReduction = 
             match hd.setCellValueAction with
             | Some setCellValueAction -> 
-                let cells = cellHouseCells setCellValueAction.cell
+                let cells = cellHouseCells.Item setCellValueAction.cell
                 
                 let r1 = 
                     if setCellValueAction.cell = cell then Some setCellValueAction.digit
@@ -148,8 +147,13 @@ let mhas (cellHouseCells : MapCellHouseCells) (puzzleHouseCells : House -> Set<C
           reductions = reductions
           pointers = pointers }
 
+    let annotations =
+        allCells
+        |> Set.map (fun cell -> (cell, annotationLookup cell))
+        |> Map.ofSeq
+
     { HintDescription2.primaryHouses = hd.primaryHouses
       secondaryHouses = hd.secondaryHouses
       candidateReductions = hd.candidateReductions
       setCellValueAction = hd.setCellValueAction
-      annotations = annotationLookup }
+      annotations = annotations }

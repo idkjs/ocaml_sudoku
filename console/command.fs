@@ -18,13 +18,15 @@ let parseColumnRow what gridSize term =
         None
 
 // find a cell from a pair of strings
-let parseCell gridSize cells termColumn termRow = 
+let parseCell (gridSize : int) (cells : Set<Cell>) (termColumn : string) (termRow : string) : Cell option =
     let parsedCol = parseColumnRow "Column" gridSize termColumn
     let parsedRow = parseColumnRow "Row" gridSize termRow
 
     match (parsedCol, parsedRow) with
-    | (Some col, Some row) -> 
-        List.tryFind (fun cell -> cell.col.col = col * 1<column> && cell.row.row = row * 1<row>) cells
+    | (Some col, Some row) ->
+        cells
+        |> Set.toList
+        |> List.tryFind (fun cell -> cell.col = (makeColumn col) && cell.row = (makeRow row))
     | _ -> 
         Console.WriteLine("({0},{1} is not a cell", termColumn, termRow)
         None
@@ -40,7 +42,7 @@ let parseValue (candidates : Digit list) (term : string) =
         Console.WriteLine("Expect a single digit, not {0}", term)
         None
 
-let setCellCommand (item : string) (alphabet : Digit list) (lastGrid : Current) (cells : Cell list) 
+let setCellCommand (item : string) (alphabet : Digit list) (lastGrid : Current) (cells : Set<Cell>) 
     (cellHouseCells : MapCellHouseCells) (candidateLookup : MapCellCandidates) : Value option = 
     let terms = item.Split(' ')
     if terms.Length = 4 then 
@@ -63,7 +65,7 @@ let setCellCommand (item : string) (alphabet : Digit list) (lastGrid : Current) 
         None
 
 let candidateClearCommand (item : string) (alphabet : Digit list) (lastGrid : Current) 
-    (cells : Cell list) : Candidate option = 
+    (cells : Set<Cell>) : Candidate option = 
     let terms = item.Split(' ')
     if terms.Length = 4 then 
         let parsedCell = parseCell alphabet.Length cells terms.[1] terms.[2]

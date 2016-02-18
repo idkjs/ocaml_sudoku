@@ -4,8 +4,8 @@ open core.sudoku
 open core.puzzlemap
 open hints
 
-let intersectionsPerHouse (cellHouseCells : MapCellHouseCells) (candidateLookup : MapCellCandidates) 
-    (puzzleHouseCells : House -> Set<Cell>) (primaryHouse : House) (secondaryHouseLookups : (Cell -> House) list) = 
+let intersectionsPerHouse (allCells : Set<Cell>) (cellHouseCells : MapCellHouseCells) (candidateLookup : MapCellCandidates) 
+    (puzzleHouseCells : House -> Set<Cell>) (primaryHouse : House) (secondaryHouseLookups : Map<Cell, Set<House>>) : Set<HintDescription2> = 
     let primaryHouseCells = puzzleHouseCells primaryHouse
     
     let primaryHouseCandidates = 
@@ -13,7 +13,7 @@ let intersectionsPerHouse (cellHouseCells : MapCellHouseCells) (candidateLookup 
         |> Set.unionMany
         |> Set.toList
     
-    let uniqueSecondaryForCandidate candidate = 
+    let uniqueSecondaryForCandidate candidate : Set<HintDescription> = 
         let pointerCells = 
             Set.filter (fun cell -> 
                 let candidates = candidateLookup.Item cell
@@ -24,7 +24,7 @@ let intersectionsPerHouse (cellHouseCells : MapCellHouseCells) (candidateLookup 
                 { CandidateReduction.cell = cell
                   candidates = set [ candidate ] }) pointerCells
         
-        let hintsPerSecondaryHouse secondaryHouses = 
+        let hintsPerSecondaryHouse (secondaryHouses : Set<House>) : HintDescription option = 
             if Set.count pointerCells > 1 && Set.count secondaryHouses = 1 then 
                 let secondaryHouse = first secondaryHouses
                 let secondaryHouseCells = puzzleHouseCells secondaryHouse
@@ -49,18 +49,39 @@ let intersectionsPerHouse (cellHouseCells : MapCellHouseCells) (candidateLookup 
                 else None
             else None
         
-        List.choose (fun secondaryHouseLookup -> 
-            let secondaryHouses = Set.map secondaryHouseLookup pointerCells
-            hintsPerSecondaryHouse secondaryHouses) secondaryHouseLookups
+        pointerCells
+        |> Set.map (fun cell -> 
+                        let secondaryHouses : Set<House> = secondaryHouseLookups.Item cell
+                        hintsPerSecondaryHouse secondaryHouses)
+        |> Set.filter Option.isSome
+        |> Set.map Option.get
     
-    List.collect uniqueSecondaryForCandidate primaryHouseCandidates |> List.map (mhas cellHouseCells puzzleHouseCells)
+    primaryHouseCandidates
+    |> Set.ofList
+    |> Set.map uniqueSecondaryForCandidate
+    |> Set.unionMany
+    |> Set.map (mhas allCells cellHouseCells puzzleHouseCells)
 
-let pointingPairsPerBox (cellHouseCells : MapCellHouseCells) (puzzleHouseCells : House -> Set<Cell>) 
-    (candidateLookup : MapCellCandidates) (primaryHouse : House) = 
-    intersectionsPerHouse cellHouseCells candidateLookup puzzleHouseCells primaryHouse [ (fun cell -> HRow cell.row)
-                                                                                         (fun cell -> HColumn cell.col) ]
+let pointingPairsPerBox (allCells : Set<Cell>) (cellHouseCells : MapCellHouseCells) (puzzleHouseCells : House -> Set<Cell>) 
+    (candidateLookup : MapCellCandidates) (primaryHouse : House) : Set<HintDescription2> =
+    let secondaryHouseLookups : Map<Cell, Set<House>> =
+        let ch (cell : Cell) : Set<House> =
+            [HRow cell.row; HColumn cell.col ]
+            |> Set.ofList
+        allCells
+        |> Set.map (fun cell -> (cell, ch cell))
+        |> Map.ofSeq
 
-let boxLineReductionsPerHouse (cellHouseCells : MapCellHouseCells) (puzzleHouseCells : House -> Set<Cell>) 
-    (candidateLookup : MapCellCandidates) (puzzleCellBox : Cell -> Box) (primaryHouse : House) = 
-    intersectionsPerHouse cellHouseCells candidateLookup puzzleHouseCells primaryHouse 
-        [ (fun cell -> HBox(puzzleCellBox cell)) ]
+    intersectionsPerHouse allCells cellHouseCells candidateLookup puzzleHouseCells primaryHouse secondaryHouseLookups
+
+let boxLineReductionsPerHouse (allCells : Set<Cell>) (cellHouseCells : MapCellHouseCells) (puzzleHouseCells : House -> Set<Cell>) 
+    (candidateLookup : MapCellCandidates) (puzzleCellBox : Cell -> Box) (primaryHouse : House) : Set<HintDescription2> = 
+    let secondaryHouseLookups : Map<Cell, Set<House>> =
+        let ch (cell : Cell) : Set<House> =
+            [HBox(puzzleCellBox cell) ]
+            |> Set.ofList
+        allCells
+        |> Set.map (fun cell -> (cell, ch cell))
+        |> Map.ofSeq
+
+    intersectionsPerHouse allCells cellHouseCells candidateLookup puzzleHouseCells primaryHouse secondaryHouseLookups

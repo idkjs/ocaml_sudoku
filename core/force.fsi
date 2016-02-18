@@ -3,4 +3,4 @@
 open sudoku
 open puzzlemap
 
-val solve : Solution -> Cell list -> MapCellHouseCells -> Solution list
+val solve : Solution -> Set<Cell> -> MapCellHouseCells -> Set<Solution>

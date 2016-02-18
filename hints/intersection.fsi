@@ -4,8 +4,8 @@ open core.sudoku
 open core.puzzlemap
 open hints
 
-val pointingPairsPerBox : MapCellHouseCells
-     -> (House -> Set<Cell>) -> MapCellCandidates -> House -> HintDescription2 list
+val pointingPairsPerBox : Set<Cell> -> MapCellHouseCells
+     -> (House -> Set<Cell>) -> MapCellCandidates -> House -> Set<HintDescription2>
 
-val boxLineReductionsPerHouse : MapCellHouseCells
-     -> (House -> Set<Cell>) -> MapCellCandidates -> (Cell -> Box) -> House -> HintDescription2 list
+val boxLineReductionsPerHouse : Set<Cell> -> MapCellHouseCells
+     -> (House -> Set<Cell>) -> MapCellCandidates -> (Cell -> Box) -> House -> Set<HintDescription2>

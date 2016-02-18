@@ -6,7 +6,7 @@ open puzzlemap
 let setCellDigitApply (cellHouseCells : MapCellHouseCells) (setCellValue : Value) : Current -> Current = 
 
     let update (cell : Cell) (cellContents : CellContents) : CellContents =
-        let cells = cellHouseCells setCellValue.cell
+        let cells = cellHouseCells.Item setCellValue.cell
 
         match cellContents with
         | BigNumber _ -> cellContents

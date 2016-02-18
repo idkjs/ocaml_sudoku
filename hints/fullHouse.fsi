@@ -5,5 +5,5 @@ open core.puzzlemap
 
 open hints
 
-val fullHousePerHouse : MapCellHouseCells
-     -> (House -> Set<Cell>) -> MapCellCandidates -> House -> HintDescription2 list
+val fullHousePerHouse : Set<Cell> -> MapCellHouseCells
+     -> (House -> Set<Cell>) -> MapCellCandidates -> House -> Set<HintDescription2>

@@ -39,8 +39,8 @@ let findNaked (cellHouseCells : MapCellHouseCells) (candidateLookup : MapCellCan
         else None
     else None
 
-let nakedNPerHouse (cellHouseCells : MapCellHouseCells) (puzzleHouseCells : House -> Set<Cell>) 
-    (candidateLookup : MapCellCandidates) (count : int) (primaryHouse : House) = 
+let nakedNPerHouse (allCells : Set<Cell>) (cellHouseCells : MapCellHouseCells) (puzzleHouseCells : House -> Set<Cell>) 
+    (candidateLookup : MapCellCandidates) (count : int) (primaryHouse : House) : Set<HintDescription2> =
     let primaryHouseCells = puzzleHouseCells primaryHouse
     
     let hht = 
@@ -50,15 +50,22 @@ let nakedNPerHouse (cellHouseCells : MapCellHouseCells) (puzzleHouseCells : Hous
     
     let subsets = setSubsets (Set.toList hht) count
     let hs = 
-        List.map 
+        subsets
+        |> Set.ofList
+        |> Set.map 
             (fun subset -> 
-            findNaked cellHouseCells candidateLookup primaryHouseCells (Set.ofList subset) count primaryHouse) subsets
-    List.choose id hs |> List.map (mhas cellHouseCells puzzleHouseCells)
+            findNaked cellHouseCells candidateLookup primaryHouseCells (Set.ofList subset) count primaryHouse)
+        |> Set.filter Option.isSome
+        |> Set.map Option.get
 
-let nakedSingleFind (cellHouseCells : MapCellHouseCells) (puzzleHouseCells : House -> Set<Cell>) 
-    (candidateLookup : MapCellCandidates) (cells : Cell list) = 
-    let hs = 
-        List.map (fun cell -> 
+    hs
+    |> Set.map (mhas allCells cellHouseCells puzzleHouseCells)
+
+let nakedSingleFind (allCells : Set<Cell>) (cellHouseCells : MapCellHouseCells) (puzzleHouseCells : House -> Set<Cell>) 
+    (candidateLookup : MapCellCandidates) (cells : Set<Cell>) : Set<HintDescription2> = 
+    let hs =
+        cells
+        |> Set.map (fun cell -> 
             let candidates = candidateLookup.Item cell
 
             if Set.count candidates = 1 then 
@@ -71,5 +78,8 @@ let nakedSingleFind (cellHouseCells : MapCellHouseCells) (puzzleHouseCells : Hou
                        candidateReductions = set []
                        setCellValueAction = Some setCellValue
                        pointers = set [] }
-            else None) cells
-    List.choose id hs |> List.map (mhas cellHouseCells puzzleHouseCells)
+            else None)
+    hs
+    |> Set.filter Option.isSome
+    |> Set.map Option.get
+    |> Set.map (mhas allCells cellHouseCells puzzleHouseCells)

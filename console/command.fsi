@@ -8,7 +8,7 @@ val parseValue : Digit list -> string -> Digit option
 val setCellCommand : string
      -> Digit list
      -> Current
-     -> Cell list -> MapCellHouseCells -> MapCellCandidates -> Value option
+     -> Set<Cell> -> MapCellHouseCells -> MapCellCandidates -> Value option
 
 val candidateClearCommand : string
-     -> Digit list -> Current -> Cell list -> Candidate option
+     -> Digit list -> Current -> Set<Cell> -> Candidate option
