@@ -3,14 +3,14 @@
 open sudoku
 open puzzlemap
 
-let setCellDigitApply (cellHouseCells : MapCellHouseCells) (setCellValue : Value) : Current -> Current = 
+let setCellDigitApply (cellHouseCells : CellHouseCells) (setCellValue : Value) : Current -> Current = 
 
     let update (cell : Cell) (cellContents : CellContents) : CellContents =
-        let cells = cellHouseCells.Item setCellValue.cell
-
         match cellContents with
         | BigNumber _ -> cellContents
         | PencilMarks candidates -> 
+            let cells = cellHouseCells.Get setCellValue.cell
+
             if setCellValue.cell = cell then BigNumber setCellValue.digit
             else if Set.contains cell cells then 
                 PencilMarks(Set.remove setCellValue.digit candidates)
@@ -33,4 +33,5 @@ let setCellDigitTry (cell : Cell) (candidate : Digit) (current : Current) : Eith
         Right { SetCellDigitError.cell = cell
                 candidate = candidate
                 digit = digit }
-    | PencilMarks _ -> Left(makeSetCellDigit cell candidate)
+    | PencilMarks _ ->
+        Left(makeSetCellDigit cell candidate)

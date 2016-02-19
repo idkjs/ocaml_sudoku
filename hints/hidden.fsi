@@ -4,5 +4,5 @@ open core.sudoku
 open core.puzzlemap
 open hints
 
-val hiddenNPerHouse : Set<Cell> -> MapCellHouseCells
-     -> MapHouseCells -> MapCellCandidates -> int -> House -> Set<HintDescription2>
+val hiddenNPerHouse : Set<Cell> -> CellHouseCells
+     -> HouseCells -> CellCandidates -> int -> House -> Set<HintDescription2>

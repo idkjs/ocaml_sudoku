@@ -49,7 +49,7 @@ type HintType =
 type Hint = HintType * HintDescription2
 
 let parse (item : string) (solution : Solution) (puzzle : PuzzleShape) 
-    (candidateLookup : Map<Cell, Set<Digit>>) puzzlePrintGrid puzzlePrintFull puzzleDrawFull puzzleDrawFull2 print_last : Solution * HintType option * Set<HintDescription2> = 
+    (candidateLookup : CellCandidates) puzzlePrintGrid puzzlePrintFull puzzleDrawFull puzzleDrawFull2 print_last : Solution * HintType option * Set<HintDescription2> = 
 
     let puzzleSize = (List.length puzzle.alphabet) * 1<size>
     let puzzleCells = cells puzzleSize
@@ -62,21 +62,23 @@ let parse (item : string) (solution : Solution) (puzzle : PuzzleShape)
     let puzzleHouseCellCellsLookup = houseCellCells puzzleSize puzzle.boxWidth puzzle.boxHeight
     let puzzleCellBoxLookup = cellBox puzzle.boxWidth puzzle.boxHeight
 
-    let puzzleHouseCells =
+    let houseCells =
         puzzleHouses
         |> Set.map (fun house -> (house, puzzleHouseCellsLookup house))
         |> Map.ofSeq
+    let puzzleHouseCells = MapHouseCells(houseCells) :> HouseCells
 
-    let puzzleHouseCellCells = 
+    let houseCellCells =
         puzzleCells
         |> Set.map (fun cell -> (cell, puzzleHouseCellCellsLookup cell))
         |> Map.ofSeq
+    let puzzleHouseCellCells = MapCellHouseCells(houseCellCells) :> CellHouseCells
 
-    let puzzleCellBox =
+    let cellBox =
         puzzleCells
         |> Set.map (fun cell -> (cell, puzzleCellBoxLookup cell))
         |> Map.ofSeq
-
+    let puzzleCellBox = MapCellBox(cellBox) :> CellBox
 
     Console.WriteLine item
 
@@ -243,7 +245,7 @@ let parse (item : string) (solution : Solution) (puzzle : PuzzleShape)
 
     else (solution, None, Set.empty)
 
-let printHint puzzleHouseCells puzzleHouseCellCells drawHint (index : int) (hint : HintDescription2) : unit = 
+let printHint drawHint (index : int) (hint : HintDescription2) : unit = 
 
     Console.WriteLine("{0}: {1}", index, hint)
 
@@ -260,11 +262,14 @@ let run (solution : Solution ref) (puzzle : PuzzleShape) puzzlePrintGrid puzzleP
             | BigNumber _ -> Set.empty
             | PencilMarks s -> s
 
-        let candidateLookup : MapCellCandidates =
-            (!solution).current |> Map.map getCandidateEntries
+        let candidateLookup =
+            (!solution).current
+            |> Map.map getCandidateEntries
+
+        let mapCandidateCandidates = MapCellCandidates candidateLookup :> CellCandidates
 
         let (soln, hintTypeOpt, hints) = 
-            parse item !solution puzzle candidateLookup puzzlePrintGrid puzzlePrintFull puzzleDrawFull 
+            parse item !solution puzzle mapCandidateCandidates puzzlePrintGrid puzzlePrintFull puzzleDrawFull 
                 puzzleDrawCandidateGridAnnotations print_last
         solution := soln
 
@@ -273,16 +278,24 @@ let run (solution : Solution ref) (puzzle : PuzzleShape) puzzlePrintGrid puzzleP
         None
 
 let digitToEntry (cellDigitLookup : Given) (alphabet : Set<Digit>) 
-    (houseCellCells : MapCellHouseCells) : Current = 
+    (houseCellCells : CellHouseCells) : Current = 
     let m (cell : Cell) (dop : Digit option) : CellContents =
         match dop with
         | Some(e) -> BigNumber(e)
         | None -> 
-            let cells = houseCellCells.Item cell |> Set.toList
-            let digits = List.choose (fun cell -> cellDigitLookup.Item cell) cells |> Set.ofList
-            let possibleDigits = Set.difference alphabet digits
-            PencilMarks possibleDigits
-    Map.map m cellDigitLookup
+            let cells =
+                cell
+                |> houseCellCells.Get
+                |> Set.toList
+            let digits =
+                cells
+                |> List.choose (fun cell -> cellDigitLookup.Item cell)
+                |> Set.ofList
+
+            Set.difference alphabet digits
+            |> PencilMarks
+    cellDigitLookup
+    |> Map.map m
 
 let repl (sudoku : string) (puzzle : PuzzleShape) = 
 
@@ -306,7 +319,7 @@ let repl (sudoku : string) (puzzle : PuzzleShape) =
         |> Set.map (fun house -> (house, puzzleHouseCellsLookup house))
         |> Map.ofSeq
 
-    let puzzleHouseCellCells = 
+    let houseCellCells = 
         puzzleCells
         |> Set.map (fun cell -> (cell, puzzleHouseCellCellsLookup cell))
         |> Map.ofSeq
@@ -318,6 +331,7 @@ let repl (sudoku : string) (puzzle : PuzzleShape) =
     let orderedPuzzleBandRows = orderedBandRows puzzle.boxHeight
 
 
+    let puzzleHouseCellCells = MapCellHouseCells(houseCellCells) :> CellHouseCells
 
     let transformer (puzzleGrid : Given) : Current = 
         digitToEntry puzzleGrid (Set.ofList puzzle.alphabet) puzzleHouseCellCells
@@ -390,7 +404,7 @@ let repl (sudoku : string) (puzzle : PuzzleShape) =
     //        forcedSolutions
     //else Console.WriteLine("No solutions")
 
-    let puzzlePrintHint = printHint puzzleHouseCells puzzleHouseCellCells puzzleDrawCandidateGridAnnotations
+    let puzzlePrintHint = printHint puzzleDrawCandidateGridAnnotations
 
     Seq.tryPick (run solution puzzle puzzlePrintGrid puzzlePrintCandidateGrid puzzleDrawCandidateGrid puzzleDrawCandidateGridAnnotations print_last puzzlePrintHint) 
         readlines |> ignore

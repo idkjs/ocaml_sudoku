@@ -3,7 +3,7 @@
 open sudoku
 open puzzlemap
 
-val setCellDigitApply : MapCellHouseCells -> Value -> (Current -> Current)
+val setCellDigitApply : CellHouseCells -> Value -> (Current -> Current)
 
 val makeSetCellDigit : Cell -> Digit -> Value
 

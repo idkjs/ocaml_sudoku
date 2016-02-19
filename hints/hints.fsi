@@ -23,6 +23,6 @@ type HintDescription2 =
       secondaryHouses : Set<House>
       candidateReductions : Set<CandidateReduction>
       setCellValueAction : Value option
-      annotations : Map<Cell, CellAnnotation> }
+      annotations : Annotations }
 
-val mhas : Set<Cell> -> MapCellHouseCells -> MapHouseCells -> HintDescription -> HintDescription2
+val mhas : Set<Cell> -> CellHouseCells -> HouseCells -> HintDescription -> HintDescription2

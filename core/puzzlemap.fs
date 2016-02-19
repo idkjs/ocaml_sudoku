@@ -156,8 +156,6 @@ let houseCells (length : int<size>) (boxWidth : int<boxWidth>) (boxHeight : int<
     | HRow r -> rowCells length r
     | HBox b -> boxCells boxWidth boxHeight b
 
-type MapCellHouseCells = Map<Cell, Set<Cell>>
-
 let houseCellCells (length : int<size>) (boxWidth : int<boxWidth>) (boxHeight : int<boxHeight>) (cell : Cell) : Set<Cell> =
     let r : Set<Cell> =
         rowCells length cell.row

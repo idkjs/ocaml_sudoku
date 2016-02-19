@@ -43,7 +43,7 @@ let parseValue (candidates : Digit list) (term : string) =
         None
 
 let setCellCommand (item : string) (alphabet : Digit list) (lastGrid : Current) (cells : Set<Cell>) 
-    (cellHouseCells : MapCellHouseCells) (candidateLookup : MapCellCandidates) : Value option = 
+    (cellHouseCells : CellHouseCells) (candidateLookup : CellCandidates) : Value option = 
     let terms = item.Split(' ')
     if terms.Length = 4 then 
         let parsedCell = parseCell alphabet.Length cells terms.[1] terms.[2]

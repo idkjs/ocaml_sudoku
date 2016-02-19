@@ -8,12 +8,13 @@ open core.puzzlemap
 
 open hints
 
-let fullHousePerHouse (allCells : Set<Cell>) (cellHouseCells : MapCellHouseCells) (puzzleHouseCells : MapHouseCells) 
-    (candidateLookup : MapCellCandidates) (primaryHouse : House) : Set<HintDescription2> =
+let fullHousePerHouse (allCells : Set<Cell>) (cellHouseCells : CellHouseCells) (puzzleHouseCells : HouseCells) 
+    (candidateLookup : CellCandidates) (primaryHouse : House) : Set<HintDescription2> =
 
     let candidateCells =
-        puzzleHouseCells.Item primaryHouse
-        |> Set.map (fun cell -> ((candidateLookup.Item cell), cell))
+        primaryHouse
+        |> puzzleHouseCells.Get
+        |> Set.map (fun cell -> ((candidateLookup.Get cell), cell))
 
     let hhs =
         candidateCells
@@ -32,8 +33,8 @@ let fullHousePerHouse (allCells : Set<Cell>) (cellHouseCells : MapCellHouseCells
                 candidateReductions = set []
                 setCellValueAction = Some setCellValue
                 pointers = set [] } ]
-        else []
+            |> Set.ofList
+        else Set.empty
 
     hhs2
-    |> Set.ofList
     |> Set.map (mhas allCells cellHouseCells puzzleHouseCells)

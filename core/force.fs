@@ -25,7 +25,7 @@ let isValid (solution : Solution) (cells : Set<Cell>) : bool =
     |> Set.map (cellCellContents solution)
     |> Set.forall isValidCellContents
 
-let rec searchr (solution : Solution) (cells : Set<Cell>) (puzzleHouseCellCells : MapCellHouseCells) (existing : Set<Solution>) : Set<Solution> = 
+let rec searchr (solution : Solution) (cells : Set<Cell>) (puzzleHouseCellCells : CellHouseCells) (existing : Set<Solution>) : Set<Solution> = 
     let emptyCell : Cell option =
         cells
         |> Set.toList
@@ -76,7 +76,7 @@ let rec searchr (solution : Solution) (cells : Set<Cell>) (puzzleHouseCellCells 
 
     | None -> Set.add solution existing
 
-let solve (solution : Solution) (cells : Set<Cell>) (puzzleHouseCellCells : MapCellHouseCells) : Set<Solution> =
+let solve (solution : Solution) (cells : Set<Cell>) (puzzleHouseCellCells : CellHouseCells) : Set<Solution> =
     let stopwatch = new Stopwatch()
     stopwatch.Start()
 

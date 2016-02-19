@@ -88,7 +88,7 @@ type HintDescription2 =
       secondaryHouses : Set<House>
       candidateReductions : Set<CandidateReduction>
       setCellValueAction : Value option
-      annotations : Map<Cell, CellAnnotation> }
+      annotations : Annotations }
     override this.ToString() = 
         let sb = StringBuilder()
 
@@ -103,34 +103,39 @@ type HintDescription2 =
 
         sb.ToString()
 
-let mhas (allCells : Set<Cell>) (cellHouseCells : MapCellHouseCells) (puzzleHouseCells : MapHouseCells) (hd : HintDescription) : HintDescription2 = 
+let mhas (allCells : Set<Cell>) (cellHouseCells : CellHouseCells) (puzzleHouseCells : HouseCells) (hd : HintDescription) : HintDescription2 = 
 
     let annotationLookup (cell : Cell) : CellAnnotation = 
 
         let setValue, setValueReduction = 
             match hd.setCellValueAction with
             | Some setCellValueAction -> 
-                let cells = cellHouseCells.Item setCellValueAction.cell
                 
                 let r1 = 
                     if setCellValueAction.cell = cell then Some setCellValueAction.digit
                     else None
                 
                 let r3 = 
-                    if Set.contains cell cells then Some(setCellValueAction.digit)
+                    let cells = cellHouseCells.Get setCellValueAction.cell
+
+                    if Set.contains cell cells then Some setCellValueAction.digit
                     else None
                 
                 r1, r3
             | None -> None, None
         
-        let cellCandidateReductions = Set.filter (fun pointer -> cell = pointer.cell) hd.candidateReductions
+        let cellCandidateReductions =
+            hd.candidateReductions
+            |> Set.filter (fun pointer -> cell = pointer.cell) 
         
         let reductions = 
             match firstOpt cellCandidateReductions with
             | Some cr -> cr.candidates
             | _ -> set []
         
-        let cellPointers = Set.filter (fun pointer -> cell = pointer.cell) hd.pointers
+        let cellPointers =
+            hd.pointers
+            |> Set.filter (fun pointer -> cell = pointer.cell)
         
         let pointers = 
             match firstOpt cellPointers with
@@ -139,12 +144,12 @@ let mhas (allCells : Set<Cell>) (cellHouseCells : MapCellHouseCells) (puzzleHous
         
         let primaryHouseCells =
             hd.primaryHouses
-            |> Set.map (fun house -> puzzleHouseCells.Item house)
+            |> Set.map puzzleHouseCells.Get
             |> Set.unionMany
 
         let secondaryHouseCells =
             hd.secondaryHouses
-            |> Set.map (fun house -> puzzleHouseCells.Item house)
+            |> Set.map puzzleHouseCells.Get
             |> Set.unionMany
 
         { CellAnnotation.setValue = setValue
