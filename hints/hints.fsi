@@ -25,4 +25,4 @@ type HintDescription2 =
       setCellValueAction : Value option
       annotations : Map<Cell, CellAnnotation> }
 
-val mhas : Set<Cell> -> MapCellHouseCells -> (House -> Set<Cell>) -> HintDescription -> HintDescription2
+val mhas : Set<Cell> -> MapCellHouseCells -> MapHouseCells -> HintDescription -> HintDescription2

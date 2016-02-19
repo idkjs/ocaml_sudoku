@@ -39,14 +39,15 @@ let findNaked (cellHouseCells : MapCellHouseCells) (candidateLookup : MapCellCan
         else None
     else None
 
-let nakedNPerHouse (allCells : Set<Cell>) (cellHouseCells : MapCellHouseCells) (puzzleHouseCells : House -> Set<Cell>) 
+let nakedNPerHouse (allCells : Set<Cell>) (cellHouseCells : MapCellHouseCells) (puzzleHouseCells : MapHouseCells) 
     (candidateLookup : MapCellCandidates) (count : int) (primaryHouse : House) : Set<HintDescription2> =
-    let primaryHouseCells = puzzleHouseCells primaryHouse
+    let primaryHouseCells = puzzleHouseCells.Item primaryHouse
     
     let hht = 
-        Set.filter (fun cell -> 
+        primaryHouseCells
+        |> Set.filter (fun cell -> 
             let candidates = candidateLookup.Item cell
-            Set.count candidates > 1 && Set.count candidates <= count) primaryHouseCells
+            Set.count candidates > 1 && Set.count candidates <= count) 
     
     let subsets = setSubsets (Set.toList hht) count
     let hs = 
@@ -61,7 +62,7 @@ let nakedNPerHouse (allCells : Set<Cell>) (cellHouseCells : MapCellHouseCells) (
     hs
     |> Set.map (mhas allCells cellHouseCells puzzleHouseCells)
 
-let nakedSingleFind (allCells : Set<Cell>) (cellHouseCells : MapCellHouseCells) (puzzleHouseCells : House -> Set<Cell>) 
+let nakedSingleFind (allCells : Set<Cell>) (cellHouseCells : MapCellHouseCells) (puzzleHouseCells : MapHouseCells) 
     (candidateLookup : MapCellCandidates) (cells : Set<Cell>) : Set<HintDescription2> = 
     let hs =
         cells

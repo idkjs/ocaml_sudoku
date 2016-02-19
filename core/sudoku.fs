@@ -153,3 +153,12 @@ type Either<'a, 'b> =
     | Right of 'b
 
 type MapCellCandidates = Map<Cell, Set<Digit>>
+
+// for a cell, return the cells in the column, row and box it belongs to
+type MapCellHouseCells = Map<Cell, Set<Cell>>
+
+// for a house, return the cells in it
+type MapHouseCells = Map<House, Set<Cell>>
+
+// for a cell, return the box it is in
+type MapCellBox = Map<Cell, Box>

@@ -58,9 +58,25 @@ let parse (item : string) (solution : Solution) (puzzle : PuzzleShape)
     let puzzleRows = rows puzzleSize
     let puzzleCols = columns puzzleSize
 
-    let puzzleHouseCells = houseCells puzzleSize puzzle.boxWidth puzzle.boxHeight
-    let puzzleHouseCellCells = houseCellCells puzzleSize puzzle.boxWidth puzzle.boxHeight
-    let puzzleCellBox = cellBox puzzle.boxWidth puzzle.boxHeight
+    let puzzleHouseCellsLookup = houseCells puzzleSize puzzle.boxWidth puzzle.boxHeight
+    let puzzleHouseCellCellsLookup = houseCellCells puzzleSize puzzle.boxWidth puzzle.boxHeight
+    let puzzleCellBoxLookup = cellBox puzzle.boxWidth puzzle.boxHeight
+
+    let puzzleHouseCells =
+        puzzleHouses
+        |> Set.map (fun house -> (house, puzzleHouseCellsLookup house))
+        |> Map.ofSeq
+
+    let puzzleHouseCellCells = 
+        puzzleCells
+        |> Set.map (fun cell -> (cell, puzzleHouseCellCellsLookup cell))
+        |> Map.ofSeq
+
+    let puzzleCellBox =
+        puzzleCells
+        |> Set.map (fun cell -> (cell, puzzleCellBoxLookup cell))
+        |> Map.ofSeq
+
 
     Console.WriteLine item
 
@@ -282,9 +298,18 @@ let repl (sudoku : string) (puzzle : PuzzleShape) =
     let puzzleStackColumns = stackColumns puzzle.boxWidth
     let puzzleBandRows = bandRows puzzle.boxHeight
 
-    let puzzleHouseCells = houseCells puzzleSize puzzle.boxWidth puzzle.boxHeight
-    let puzzleHouseCellCells = houseCellCells puzzleSize puzzle.boxWidth puzzle.boxHeight
+    let puzzleHouseCellsLookup = houseCells puzzleSize puzzle.boxWidth puzzle.boxHeight
+    let puzzleHouseCellCellsLookup = houseCellCells puzzleSize puzzle.boxWidth puzzle.boxHeight
 
+    let puzzleHouseCells =
+        puzzleHouses
+        |> Set.map (fun house -> (house, puzzleHouseCellsLookup house))
+        |> Map.ofSeq
+
+    let puzzleHouseCellCells = 
+        puzzleCells
+        |> Set.map (fun cell -> (cell, puzzleHouseCellCellsLookup cell))
+        |> Map.ofSeq
 
     let orderedPuzzleCells = orderedCells puzzleSize
     let orderedPuzzleStacks = orderedStacks puzzleSize puzzle.boxWidth

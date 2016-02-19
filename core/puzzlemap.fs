@@ -158,20 +158,15 @@ let houseCells (length : int<size>) (boxWidth : int<boxWidth>) (boxHeight : int<
 
 type MapCellHouseCells = Map<Cell, Set<Cell>>
 
-let houseCellCells (length : int<size>) (boxWidth : int<boxWidth>) (boxHeight : int<boxHeight>) : MapCellHouseCells =
-    let lookup (cell : Cell) : Set<Cell> =
-        let r : Set<Cell> =
-            rowCells length cell.row
+let houseCellCells (length : int<size>) (boxWidth : int<boxWidth>) (boxHeight : int<boxHeight>) (cell : Cell) : Set<Cell> =
+    let r : Set<Cell> =
+        rowCells length cell.row
 
-        let c : Set<Cell> =
-            columnCells length cell.col
+    let c : Set<Cell> =
+        columnCells length cell.col
 
-        let b : Set<Cell> =
-            boxCells boxWidth boxHeight (cellBox boxWidth boxHeight cell)
+    let b : Set<Cell> =
+        boxCells boxWidth boxHeight (cellBox boxWidth boxHeight cell)
 
-        [ r; c; b ]
-        |> Set.unionMany
-
-    cells length
-    |> Set.map (fun cell -> (cell, lookup cell))
-    |> Map.ofSeq
+    [ r; c; b ]
+    |> Set.unionMany

@@ -103,7 +103,7 @@ type HintDescription2 =
 
         sb.ToString()
 
-let mhas (allCells : Set<Cell>) (cellHouseCells : MapCellHouseCells) (puzzleHouseCells : House -> Set<Cell>) (hd : HintDescription) : HintDescription2 = 
+let mhas (allCells : Set<Cell>) (cellHouseCells : MapCellHouseCells) (puzzleHouseCells : MapHouseCells) (hd : HintDescription) : HintDescription2 = 
 
     let annotationLookup (cell : Cell) : CellAnnotation = 
 
@@ -137,8 +137,15 @@ let mhas (allCells : Set<Cell>) (cellHouseCells : MapCellHouseCells) (puzzleHous
             | Some cr -> cr.candidates
             | _ -> set []
         
-        let primaryHouseCells = Set.map puzzleHouseCells hd.primaryHouses |> Set.unionMany
-        let secondaryHouseCells = Set.map puzzleHouseCells hd.secondaryHouses |> Set.unionMany
+        let primaryHouseCells =
+            hd.primaryHouses
+            |> Set.map (fun house -> puzzleHouseCells.Item house)
+            |> Set.unionMany
+
+        let secondaryHouseCells =
+            hd.secondaryHouses
+            |> Set.map (fun house -> puzzleHouseCells.Item house)
+            |> Set.unionMany
 
         { CellAnnotation.setValue = setValue
           primaryHintHouse = Set.contains cell primaryHouseCells

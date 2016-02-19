@@ -66,7 +66,4 @@ val boxCells : int<boxWidth> -> int<boxHeight> -> Box -> Set<Cell>
 // for a house, return the cells in it
 val houseCells : int<size> -> int<boxWidth> -> int<boxHeight> -> House -> Set<Cell>
 
-// for a cell, return the cells in the column, row and box it belongs to
-type MapCellHouseCells = Map<Cell, Set<Cell>>
-
-val houseCellCells : int<size> -> int<boxWidth> -> int<boxHeight> -> MapCellHouseCells
+val houseCellCells : int<size> -> int<boxWidth> -> int<boxHeight> -> Cell -> Set<Cell>

@@ -5,4 +5,4 @@ open core.puzzlemap
 open hints
 
 val hiddenNPerHouse : Set<Cell> -> MapCellHouseCells
-     -> (House -> Set<Cell>) -> MapCellCandidates -> int -> House -> Set<HintDescription2>
+     -> MapHouseCells -> MapCellCandidates -> int -> House -> Set<HintDescription2>
