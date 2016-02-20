@@ -3,7 +3,7 @@
 open System
 
 open core.sudoku
-
+open hints.hints
 open format
 
 // Things we may want to write

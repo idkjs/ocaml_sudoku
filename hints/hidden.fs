@@ -1,7 +1,5 @@
 ﻿module hints.hidden
 
-open console
-
 open core.setCell
 open core.sudoku
 open core.puzzlemap
@@ -76,3 +74,9 @@ let hiddenNPerHouse (allCells : Set<Cell>) (cellHouseCells : CellHouseCells) (pu
     |> Set.filter Option.isSome
     |> Set.map Option.get
     |> Set.map (mhas allCells cellHouseCells puzzleHouseCells)
+
+let hiddenN (i : int) (p : PuzzleMap) (candidateLookup : CellCandidates) : Set<HintDescription2> =
+    p.houses
+    |> Set.map (hiddenNPerHouse p.cells p.cellHouseCells p.houseCells candidateLookup i)
+    |> Set.unionMany
+

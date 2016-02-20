@@ -8,7 +8,7 @@ let loadPuzzle (cells : Cell list) (alphabetisedLine : Digit option list) : Map<
     List.zip cells alphabetisedLine
     |> Map.ofList
 
-let load (alphabet : Digit list) (sudoku : char list) 
+let load (orderedCells : Cell list) (alphabet : Digit list) (sudoku : char list) 
     (contentsTransformer : Given -> Current) : Solution = 
     let charToAlphabet (trialDigit : char) : Digit option = 
         let compareAlpha (Digit charDigit) = trialDigit = charDigit
@@ -16,9 +16,7 @@ let load (alphabet : Digit list) (sudoku : char list)
     
     let alphabetisedLine = List.map charToAlphabet sudoku
 
-    let size = (List.length alphabet) * 1<size>
-
-    let puzzleGrid = loadPuzzle (orderedCells size) alphabetisedLine
+    let puzzleGrid = loadPuzzle orderedCells alphabetisedLine
 
     let given = puzzleGrid
 

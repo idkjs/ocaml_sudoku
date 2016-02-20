@@ -38,3 +38,8 @@ let fullHousePerHouse (allCells : Set<Cell>) (cellHouseCells : CellHouseCells) (
 
     hhs2
     |> Set.map (mhas allCells cellHouseCells puzzleHouseCells)
+
+let fullHouses (p : PuzzleMap) (candidateLookup : CellCandidates) : Set<HintDescription2> =
+    p.houses
+    |> Set.map (fullHousePerHouse p.cells p.cellHouseCells p.houseCells candidateLookup)
+    |> Set.unionMany

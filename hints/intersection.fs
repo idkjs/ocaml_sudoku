@@ -91,3 +91,26 @@ let boxLineReductionsPerHouse (allCells : Set<Cell>) (cellHouseCells : CellHouse
         |> Map.ofSeq
 
     intersectionsPerHouse allCells cellHouseCells cellCandidates puzzleHouseCells primaryHouse secondaryHouseLookups
+
+let pointingPairs (p : PuzzleMap) (candidateLookup : CellCandidates) : Set<HintDescription2> =
+    p.boxes
+    |> Set.map HBox
+    |> Set.map (pointingPairsPerBox p.cells p.cellHouseCells p.houseCells candidateLookup) 
+    |> Set.unionMany
+
+let boxLineReductions (p : PuzzleMap) (candidateLookup : CellCandidates) : Set<HintDescription2> =
+    let rowHints =
+        p.rows
+        |> Set.map HRow
+        |> Set.map (boxLineReductionsPerHouse p.cells p.cellHouseCells p.houseCells candidateLookup p.cellBox)
+        |> Set.unionMany
+
+    let colHints =
+        p.columns
+        |> Set.map HColumn
+        |> Set.map (boxLineReductionsPerHouse p.cells p.cellHouseCells p.houseCells candidateLookup p.cellBox)
+        |> Set.unionMany
+
+    [rowHints; colHints]
+    |> Set.ofList
+    |> Set.unionMany

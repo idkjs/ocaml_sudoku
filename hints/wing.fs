@@ -321,3 +321,8 @@ let yWingFind (allCells : Set<Cell>) (cellHouseCells : CellHouseCells) (puzzleHo
     |> Seq.map (mhas allCells cellHouseCells puzzleHouseCells)
     |> Set.ofSeq
 
+let xWings (p : PuzzleMap) (candidateLookup : CellCandidates) : Set<HintDescription2> =
+    xWingFind p.cells p.cellHouseCells p.houseCells candidateLookup p.rows p.columns
+
+let yWings (p : PuzzleMap) (candidateLookup : CellCandidates) : Set<HintDescription2> =
+    yWingFind p.cells p.cellHouseCells p.houseCells candidateLookup p.rows p.columns

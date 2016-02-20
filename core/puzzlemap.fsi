@@ -7,63 +7,86 @@ val makeRow : int -> Row
 val makeStack : int -> Stack
 val makeBand : int -> Band
 
-// The order they are normally written in
+type ColumnCells = Lookup<Column, Set<Cell>>
 
-val orderedColumns : int<size> -> Column list
+type RowCells = Lookup<Row, Set<Cell>>
 
-val orderedRows : int<size> -> Row list
+type ColumnStack = Lookup<Column, Stack>
 
-val orderedCells : int<size> -> Cell list
+type StackColumns = Lookup<Stack, Set<Column>>
 
-val orderedStacks : int<size> -> int<boxWidth> -> Stack list
+type RowBand = Lookup<Row, Band>
 
-val orderedBands : int<size> -> int<boxHeight> -> Band list
+type BandRows = Lookup<Band, Set<Row>>
 
-// for a stack, return the columns in it
-val orderedStackColumns : int<boxWidth> -> Stack -> Column list
+type CellBox = Lookup<Cell, Box>
 
-// for a band, return the rows in it
-val orderedBandRows : int<boxHeight> -> Band -> Row list
-
-val columns : int<size> -> Set<Column>
-
-val rows : int<size> -> Set<Row>
-
-val cells : int<size> -> Set<Cell>
-
-val stacks : int<size> -> int<boxWidth> -> Set<Stack>
-
-val bands : int<size> -> int<boxHeight> -> Set<Band>
-
-val boxes : int<size> -> int<boxWidth> -> int<boxHeight> -> Set<Box>
-
-val houses : int<size> -> int<boxWidth> -> int<boxHeight> -> Set<House>
-
-// for a column, return the cells in it
-val columnCells : int<size> -> Column -> Set<Cell>
-
-// for a row, return the cells in it
-val rowCells : int<size> -> Row -> Set<Cell>
-
-// for a column, which stack is it in?
-val columnStack : int<boxWidth> -> Column -> Stack
-
-// for a stack, return the columns in it
-val stackColumns : int<boxWidth> -> Stack -> Set<Column>
-
-// for a row, which band is it in?
-val rowBand : int<boxHeight> -> Row -> Band
-
-// for a band, return the rows in it
-val bandRows : int<boxHeight> -> Band -> Set<Row>
-
-// for a cell, which box is it in?
-val cellBox : int<boxWidth> -> int<boxHeight> -> Cell -> Box
-
-// for a box, return the cells in it
-val boxCells : int<boxWidth> -> int<boxHeight> -> Box -> Set<Cell>
+type BoxCells = Lookup<Box, Set<Cell>>
 
 // for a house, return the cells in it
-val houseCells : int<size> -> int<boxWidth> -> int<boxHeight> -> House -> Set<Cell>
+type HouseCells = Lookup<House, Set<Cell>>
 
-val houseCellCells : int<size> -> int<boxWidth> -> int<boxHeight> -> Cell -> Set<Cell>
+// for a cell, return the cells in the column, row and box it belongs to
+type CellHouseCells =Lookup<Cell, Set<Cell>>
+
+type PuzzleMap =
+    // The order they are normally written in
+    abstract member orderedColumns : Column list
+    abstract member orderedRows : Row list
+    abstract member orderedCells : Cell list
+    abstract member orderedStacks : Stack list
+    abstract member orderedBands : Band list
+
+    // for a stack, return the columns in it
+    abstract member orderedStackColumns : Stack -> Column list
+
+    // for a band, return the rows in it
+    abstract member orderedBandRows : Band -> Row list
+
+    abstract member columns : Set<Column>
+
+    abstract member rows : Set<Row>
+
+    abstract member cells : Set<Cell>
+
+    abstract member stacks : Set<Stack>
+
+    abstract member bands : Set<Band>
+
+    abstract member boxes : Set<Box>
+
+    abstract member houses : Set<House>
+
+    // for a column, return the cells in it
+    abstract member columnCells : ColumnCells
+
+    // for a row, return the cells in it
+    abstract member rowCells : RowCells
+
+    // for a column, which stack is it in?
+    abstract member columnStack : ColumnStack
+
+    // for a stack, return the columns in it
+    abstract member stackColumns : StackColumns
+
+    // for a row, which band is it in?
+    abstract member rowBand : RowBand
+
+    // for a band, return the rows in it
+    abstract member bandRows : BandRows
+
+    // for a cell, which box is it in?
+    abstract member cellBox : CellBox
+
+    // for a box, return the cells in it
+    abstract member boxCells : BoxCells
+
+    // for a house, return the cells in it
+    abstract member houseCells : HouseCells
+
+    abstract member cellHouseCells : CellHouseCells
+
+type TPuzzleMap =
+    interface PuzzleMap
+
+    new : PuzzleShape -> TPuzzleMap

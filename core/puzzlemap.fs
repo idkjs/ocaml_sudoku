@@ -14,6 +14,34 @@ let makeStack (i : int) : Stack =
 let makeBand (i : int) : Band =
     i * 1<band> |> BBand
 
+type ColumnCells = Lookup<Column, Set<Cell>>
+
+type RowCells = Lookup<Row, Set<Cell>>
+
+type ColumnStack = Lookup<Column, Stack>
+
+type StackColumns = Lookup<Stack, Set<Column>>
+
+type RowBand = Lookup<Row, Band>
+
+type BandRows = Lookup<Band, Set<Row>>
+
+type CellBox = Lookup<Cell, Box>
+
+type BoxCells = Lookup<Box, Set<Cell>>
+
+// for a house, return the cells in it
+type HouseCells = Lookup<House, Set<Cell>>
+
+// for a cell, return the cells in the column, row and box it belongs to
+type CellHouseCells =Lookup<Cell, Set<Cell>>
+
+let makeMapLookup<'a, 'b when 'a : comparison and 'b : comparison> (as' : Set<'a>) (fn : 'a -> 'b) : MapLookup<'a, 'b> =
+    as'
+    |> Set.map (fun a -> (a, fn a))
+    |> Map.ofSeq
+    |> MapLookup<'a, 'b>
+
 let orderedColumns (length : int<size>) : Column list =
     [ 1..(int) length ]
     |> List.map makeColumn
@@ -156,7 +184,7 @@ let houseCells (length : int<size>) (boxWidth : int<boxWidth>) (boxHeight : int<
     | HRow r -> rowCells length r
     | HBox b -> boxCells boxWidth boxHeight b
 
-let houseCellCells (length : int<size>) (boxWidth : int<boxWidth>) (boxHeight : int<boxHeight>) (cell : Cell) : Set<Cell> =
+let cellHouseCells (length : int<size>) (boxWidth : int<boxWidth>) (boxHeight : int<boxHeight>) (cell : Cell) : Set<Cell> =
     let r : Set<Cell> =
         rowCells length cell.row
 
@@ -168,3 +196,175 @@ let houseCellCells (length : int<size>) (boxWidth : int<boxWidth>) (boxHeight : 
 
     [ r; c; b ]
     |> Set.unionMany
+
+
+type PuzzleMap =
+    // The order they are normally written in
+    abstract member orderedColumns : Column list
+    abstract member orderedRows : Row list
+    abstract member orderedCells : Cell list
+    abstract member orderedStacks : Stack list
+    abstract member orderedBands : Band list
+
+    // for a stack, return the columns in it
+    abstract member orderedStackColumns : Stack -> Column list
+
+    // for a band, return the rows in it
+    abstract member orderedBandRows : Band -> Row list
+
+    abstract member columns : Set<Column>
+
+    abstract member rows : Set<Row>
+
+    abstract member cells : Set<Cell>
+
+    abstract member stacks : Set<Stack>
+
+    abstract member bands : Set<Band>
+
+    abstract member boxes : Set<Box>
+
+    abstract member houses : Set<House>
+
+    // for a column, return the cells in it
+    abstract member columnCells : ColumnCells
+
+    // for a row, return the cells in it
+    abstract member rowCells : RowCells
+
+    // for a column, which stack is it in?
+    abstract member columnStack : ColumnStack
+
+    // for a stack, return the columns in it
+    abstract member stackColumns : StackColumns
+
+    // for a row, which band is it in?
+    abstract member rowBand : RowBand
+
+    // for a band, return the rows in it
+    abstract member bandRows : BandRows
+
+    // for a cell, which box is it in?
+    abstract member cellBox : CellBox
+
+    // for a box, return the cells in it
+    abstract member boxCells : BoxCells
+
+    // for a house, return the cells in it
+    abstract member houseCells : HouseCells
+
+    abstract member cellHouseCells : CellHouseCells
+
+type TPuzzleMap(puzzleShape : PuzzleShape) =
+
+    let _orderedColumns = orderedColumns puzzleShape.size
+    let _orderedRows = orderedRows puzzleShape.size
+    let _orderedCells = orderedCells puzzleShape.size
+    let _orderedStacks = orderedStacks puzzleShape.size puzzleShape.boxWidth
+    let _orderedBands = orderedBands puzzleShape.size puzzleShape.boxHeight
+
+    let _columns = columns puzzleShape.size
+    let _rows = rows puzzleShape.size
+    let _cells = cells puzzleShape.size
+    let _stacks = stacks puzzleShape.size puzzleShape.boxWidth
+    let _bands = bands puzzleShape.size puzzleShape.boxHeight
+    let _boxes = boxes puzzleShape.size puzzleShape.boxWidth puzzleShape.boxHeight
+    let _houses = houses puzzleShape.size puzzleShape.boxWidth puzzleShape.boxHeight
+
+    let _columnCells =
+        makeMapLookup<Column, Set<Cell>> _columns (fun column -> columnCells puzzleShape.size column)
+        :> ColumnCells
+
+    let _rowCells =
+        makeMapLookup<Row, Set<Cell>> _rows (fun row -> rowCells puzzleShape.size row)
+        :> RowCells
+
+    let _columnStack =
+        makeMapLookup<Column, Stack> _columns (fun column -> columnStack puzzleShape.boxWidth column)
+        :> ColumnStack
+
+    let _stackColumns =
+        makeMapLookup<Stack, Set<Column>> _stacks (fun stack -> stackColumns puzzleShape.boxWidth stack)
+        :> StackColumns
+
+    let _rowBand =
+        makeMapLookup<Row, Band> _rows (fun row -> rowBand puzzleShape.boxHeight row)
+        :> RowBand
+
+    let _bandRows =
+        makeMapLookup<Band, Set<Row>> _bands (fun band -> bandRows puzzleShape.boxHeight band)
+        :> BandRows
+
+    let _cellBox =
+        makeMapLookup<Cell, Box> _cells (fun cell -> cellBox puzzleShape.boxWidth puzzleShape.boxHeight cell)
+        :> CellBox
+
+    let _boxCells =
+        makeMapLookup<Box, Set<Cell>> _boxes (fun box -> boxCells puzzleShape.boxWidth puzzleShape.boxHeight box)
+        :> BoxCells
+
+    let _houseCells =
+        makeMapLookup<House, Set<Cell>> _houses (fun house -> houseCells puzzleShape.size puzzleShape.boxWidth puzzleShape.boxHeight house)
+        :> HouseCells
+
+    let _cellHouseCells =
+        makeMapLookup<Cell, Set<Cell>> _cells (fun cell -> cellHouseCells puzzleShape.size puzzleShape.boxWidth puzzleShape.boxHeight cell)
+        :> CellHouseCells
+
+    interface PuzzleMap with
+
+        // The order they are normally written in
+        member this.orderedColumns : Column list = _orderedColumns
+        member this.orderedRows : Row list = _orderedRows
+        member this.orderedCells : Cell list = _orderedCells
+        member this.orderedStacks : Stack list = _orderedStacks
+        member this.orderedBands : Band list = _orderedBands
+
+        // for a stack, return the columns in it
+        member this.orderedStackColumns (stack : Stack) : Column list = orderedStackColumns puzzleShape.boxWidth stack
+
+        // for a band, return the rows in it
+        member this.orderedBandRows (band : Band) : Row list = orderedBandRows puzzleShape.boxHeight band
+
+        member this.columns : Set<Column> = _columns
+
+        member this.rows : Set<Row> = _rows
+
+        member this.cells : Set<Cell> = _cells
+
+        member this.stacks : Set<Stack> = _stacks
+
+        member this.bands : Set<Band> = _bands
+
+        member this.boxes : Set<Box> = _boxes
+
+        member this.houses : Set<House> = _houses
+
+        // for a column, return the cells in it
+        member this.columnCells : ColumnCells = _columnCells
+
+        // for a row, return the cells in it
+        member this.rowCells : RowCells = _rowCells
+
+        // for a column, which stack is it in?
+        member this.columnStack : ColumnStack = _columnStack
+
+        // for a stack, return the columns in it
+        member this.stackColumns : StackColumns = _stackColumns
+
+        // for a row, which band is it in?
+        member this.rowBand : RowBand = _rowBand
+
+        // for a band, return the rows in it
+        member this.bandRows : BandRows = _bandRows
+
+        // for a cell, which box is it in?
+        member this.cellBox : CellBox = _cellBox
+
+        // for a box, return the cells in it
+        member this.boxCells : BoxCells = _boxCells
+
+        // for a house, return the cells in it
+        member this.houseCells : HouseCells = _houseCells
+
+        member this.cellHouseCells : CellHouseCells = _cellHouseCells

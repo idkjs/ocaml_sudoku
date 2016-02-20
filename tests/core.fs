@@ -5,9 +5,27 @@ open core.puzzlemap
 
 open NUnit.Framework
 
+let defaultPuzzleSpec = 
+    { size = 9 * 1<size>
+      boxWidth = 3 * 1<boxWidth>
+      boxHeight = 3 * 1<boxHeight>
+      alphabet = 
+          [ for i in 1..9 -> (char) i + '0'
+                             |> Digit ] }
+
+let twoByFourPuzzleSpec =
+    { size = 8 * 1<size>
+      boxWidth = 2 * 1<boxWidth>
+      boxHeight = 4 * 1<boxHeight>
+      alphabet = 
+          [ for i in 1..8 -> (char) i + '0'
+                             |> Digit ] }
+
 [<Test>]
-let ``Can make columns``() = 
-    let actual : Set<Column> = columns (9 * 1<size>)
+let ``Can make columns``() =
+    let p = TPuzzleMap defaultPuzzleSpec :> PuzzleMap
+
+    let actual : Set<Column> = p.columns
 
     let expected : Set<Column> =
         [1..9]
@@ -20,7 +38,9 @@ let ``Can make columns``() =
 
 [<Test>]
 let ``Can make rows``() = 
-    let actual : Set<Row> = rows (9 * 1<size>)
+    let p = TPuzzleMap defaultPuzzleSpec :> PuzzleMap
+
+    let actual : Set<Row> = p.rows
 
     let expected : Set<Row> =
         [1..9]
@@ -33,7 +53,9 @@ let ``Can make rows``() =
 
 [<Test>]
 let ``Can make cells``() = 
-    let actual : Set<Cell> = cells (9 * 1<size>)
+    let p = TPuzzleMap defaultPuzzleSpec :> PuzzleMap
+
+    let actual : Set<Cell> = p.cells
 
     let expected : Set<Cell> =
         [1..9]
@@ -52,7 +74,9 @@ let ``Can make cells``() =
 
 [<Test>]
 let ``Can make stacks``() = 
-    let actual : Set<Stack> = stacks (8 * 1<size>) (2 * 1<boxWidth>)
+    let p = TPuzzleMap twoByFourPuzzleSpec :> PuzzleMap
+
+    let actual : Set<Stack> = p.stacks
 
     let expected : Set<Stack> =
         [1..4]
@@ -65,7 +89,9 @@ let ``Can make stacks``() =
 
 [<Test>]
 let ``Can make bands``() = 
-    let actual : Set<Band> = bands (8 * 1<size>) (4 * 1<boxHeight>)
+    let p = TPuzzleMap twoByFourPuzzleSpec :> PuzzleMap
+
+    let actual : Set<Band> = p.bands
 
     let expected : Set<Band> =
         [1..2]
@@ -78,7 +104,9 @@ let ``Can make bands``() =
 
 [<Test>]
 let ``Can make boxes``() = 
-    let actual : Set<Box> = boxes (9 * 1<size>) (2 * 1<boxWidth>) (4 * 1<boxHeight>)
+    let p = TPuzzleMap twoByFourPuzzleSpec :> PuzzleMap
+
+    let actual : Set<Box> = p.boxes
 
     let expected : Set<Box> =
         [1..2]
@@ -97,7 +125,9 @@ let ``Can make boxes``() =
 
 [<Test>]
 let ``Can make houses``() = 
-    let actual : Set<House> = houses (9 * 1<size>) (2 * 1<boxWidth>) (4 * 1<boxHeight>)
+    let p = TPuzzleMap twoByFourPuzzleSpec :> PuzzleMap
+
+    let actual : Set<House> = p.houses
 
     let expectedColumns : Set<House> =
         [1..9]
@@ -138,7 +168,9 @@ let ``Can make houses``() =
 
 [<Test>]
 let ``Get column cells``() = 
-    let actual : Set<Cell> = columnCells (9 * 1<size>) (2 * 1<column> |> CColumn)
+    let p = TPuzzleMap defaultPuzzleSpec :> PuzzleMap
+
+    let actual : Set<Cell> = p.columnCells.Get (2 * 1<column> |> CColumn)
 
     let expected : Set<Cell> =
         [1..9]
@@ -152,7 +184,9 @@ let ``Get column cells``() =
 
 [<Test>]
 let ``Get row cells``() = 
-    let actual : Set<Cell> = rowCells (9 * 1<size>) (7 * 1<row> |> RRow)
+    let p = TPuzzleMap defaultPuzzleSpec :> PuzzleMap
+
+    let actual : Set<Cell> = p.rowCells.Get (7 * 1<row> |> RRow)
 
     let expected : Set<Cell> =
         [1..9]
@@ -166,10 +200,13 @@ let ``Get row cells``() =
 
 [<Test>]
 let ``Get stack for a column``() =
-    let columns : Set<Column> = columns (9 * 1<size>)
+    let p = TPuzzleMap defaultPuzzleSpec :> PuzzleMap
+
+    let columns : Set<Column> = p.columns
+
     let actual : Set<Stack> =
         columns
-        |> Set.map (columnStack (3 * 1<boxWidth>))
+        |> Set.map p.columnStack.Get
 
     let expected : Set<Stack> =
         [1..3]
@@ -187,7 +224,9 @@ let ``Get stack for a column``() =
 
 [<Test>]
 let ``Get stack columns``() = 
-    let actual : Set<Column> = stackColumns (3 * 1<boxWidth>) (2 * 1<stack> |> SStack)
+    let p = TPuzzleMap defaultPuzzleSpec :> PuzzleMap
+
+    let actual : Set<Column> = p.stackColumns.Get (2 * 1<stack> |> SStack)
 
     let expected : Set<Column> =
         [4..6]
@@ -200,10 +239,13 @@ let ``Get stack columns``() =
 
 [<Test>]
 let ``Get band for a row``() =
-    let rows : Set<Row> = rows (9 * 1<size>)
+    let p = TPuzzleMap defaultPuzzleSpec :> PuzzleMap
+
+    let rows : Set<Row> = p.rows
+
     let actual : Set<Band> =
         rows
-        |> Set.map (rowBand (3 * 1<boxHeight>))
+        |> Set.map p.rowBand.Get
 
     let expected : Set<Band> =
         [1..3]
@@ -221,7 +263,9 @@ let ``Get band for a row``() =
 
 [<Test>]
 let ``Get band rows``() = 
-    let actual : Set<Row> = bandRows (3 * 1<boxHeight>) (2 * 1<band> |> BBand)
+    let p = TPuzzleMap defaultPuzzleSpec :> PuzzleMap
+
+    let actual : Set<Row> = p.bandRows.Get (2 * 1<band> |> BBand)
 
     let expected : Set<Row> =
         [4..6]
@@ -234,6 +278,8 @@ let ``Get band rows``() =
 
 [<Test>]
 let ``Get box for a cell``() =
+    let p = TPuzzleMap defaultPuzzleSpec :> PuzzleMap
+
     let cells : Set<Cell> =
         [1..9]
         |> Set.ofList
@@ -244,7 +290,7 @@ let ``Get box for a cell``() =
 
     let actual : Set<Box> =
         cells
-        |> Set.map (cellBox (3 * 1<boxWidth>) (3 * 1<boxHeight>))
+        |> Set.map p.cellBox.Get
 
     let expected : Set<Box> =
         [1..3]

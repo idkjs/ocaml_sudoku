@@ -83,12 +83,23 @@ type HintDescription =
 
         sb.ToString()
 
+// To draw a cell we may want to display extra information...
+type CellAnnotation = 
+    { setValue : Digit option
+      primaryHintHouse : bool
+      secondaryHintHouse : bool
+      setValueReduction : Digit option
+      reductions : Set<Digit>
+      pointers : Set<Digit> }
+
+type CellAnnotations = Map<Cell, CellAnnotation>
+
 type HintDescription2 = 
     { primaryHouses : Set<House>
       secondaryHouses : Set<House>
       candidateReductions : Set<CandidateReduction>
       setCellValueAction : Value option
-      annotations : Annotations }
+      annotations : CellAnnotations }
     override this.ToString() = 
         let sb = StringBuilder()
 

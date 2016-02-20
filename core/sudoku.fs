@@ -138,54 +138,20 @@ type Solution =
       current : Current
       steps : Action list }
 
-// To draw a cell we may want to display extra information...
-type CellAnnotation = 
-    { setValue : Digit option
-      primaryHintHouse : bool
-      secondaryHintHouse : bool
-      setValueReduction : Digit option
-      reductions : Set<Digit>
-      pointers : Set<Digit> }
-
-type Annotations = Map<Cell, CellAnnotation>
-
 // From http://www.fssnip.net/ji
 type Either<'a, 'b> = 
     | Left of 'a
     | Right of 'b
 
+type Lookup<'a, 'b> = 
+    abstract member Get: 'a -> 'b
+
+type MapLookup<'a, 'b when 'a : comparison>(data : Map<'a, 'b>) =
+    interface Lookup<'a, 'b> with
+        member this.Get (a : 'a) =
+            data.Item a
+
 // for a cell, return a set of candidates
-type CellCandidates =
-    abstract member Get: Cell -> Set<Digit>
+type CellCandidates = Lookup<Cell, Set<Digit>>
 
-type MapCellCandidates(data : Map<Cell, Set<Digit>>) =
-    interface CellCandidates with
-        member this.Get (cell : Cell) =
-            data.Item cell
-
-// for a cell, return the cells in the column, row and box it belongs to
-type CellHouseCells =
-    abstract member Get: Cell -> Set<Cell>
-
-type MapCellHouseCells(data : Map<Cell, Set<Cell>>) =
-    interface CellHouseCells with
-        member this.Get (cell : Cell) =
-            data.Item cell
-
-// for a house, return the cells in it
-type HouseCells =
-    abstract member Get: House -> Set<Cell>
-
-type MapHouseCells(data : Map<House, Set<Cell>>) =
-    interface HouseCells with
-        member this.Get (house : House) =
-            data.Item house
-
-// for a cell, return the box it is in
-type CellBox =
-    abstract member Get: Cell -> Box
-
-type MapCellBox(data : Map<Cell, Box>) =
-    interface CellBox with
-        member this.Get (cell : Cell) =
-            data.Item cell
+type MapCellCandidates = MapLookup<Cell, Set<Digit>>

@@ -78,12 +78,6 @@
     <Compile Include="core\eliminateCandidate.fs" />
     <Compile Include="core\force.fsi" />
     <Compile Include="core\force.fs" />
-    <Compile Include="console\format.fsi" />
-    <Compile Include="console\format.fs" />
-    <Compile Include="console\console.fsi" />
-    <Compile Include="console\console.fs" />
-    <Compile Include="console\command.fsi" />
-    <Compile Include="console\command.fs" />
     <Compile Include="hints\hints.fsi" />
     <Compile Include="hints\hints.fs" />
     <Compile Include="hints\fullHouse.fsi" />
@@ -96,6 +90,12 @@
     <Compile Include="hints\intersection.fs" />
     <Compile Include="hints\wing.fsi" />
     <Compile Include="hints\wing.fs" />
+    <Compile Include="console\format.fsi" />
+    <Compile Include="console\format.fs" />
+    <Compile Include="console\console.fsi" />
+    <Compile Include="console\console.fs" />
+    <Compile Include="console\command.fsi" />
+    <Compile Include="console\command.fs" />
     <Compile Include="tests\core.fs" />
     <Compile Include="load.fsi" />
     <Compile Include="load.fs" />
