@@ -1,9 +1,8 @@
 ﻿module hints.hidden
 
-open core.setCell
 open core.sudoku
 open core.puzzlemap
-open hints
+open core.hints
 
 let findHidden (cellHouseCells : CellHouseCells) (candidateLookup : CellCandidates) 
     (primaryHouseCells : Set<Cell>) (candidateSubset : Set<Digit>) (count : int) (primaryHouse : House) = 

@@ -2,10 +2,9 @@
 
 open sudoku
 open puzzlemap
+open hints
 
 val setCellDigitApply : CellHouseCells -> Value -> (Current -> Current)
-
-val makeSetCellDigit : Cell -> Digit -> Value
 
 type SetCellDigitError = 
     { cell : Cell
@@ -13,3 +12,7 @@ type SetCellDigitError =
       digit : Digit }
 
 val setCellDigitTry : Cell -> Digit -> Current -> Either<Value, SetCellDigitError>
+
+val setCellHintDescription : PuzzleMap -> Value -> HintDescription2
+
+val setCellStep : PuzzleMap -> Value -> Solution -> Solution

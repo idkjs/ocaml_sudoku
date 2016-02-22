@@ -1,9 +1,8 @@
 ﻿module hints.naked
 
-open core.setCell
 open core.sudoku
 open core.puzzlemap
-open hints
+open core.hints
 
 let findNaked (cellHouseCells : CellHouseCells) (candidateLookup : CellCandidates) 
     (primaryHouseCells : Set<Cell>) (cellSubset : Set<Cell>) (count : int) (primaryHouse : House) = 

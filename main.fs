@@ -5,22 +5,22 @@ open System.Diagnostics
 open System.Runtime.InteropServices
 open System.Text
 
-open console.command
-open console.console
-open console.format
-
+open core.sudoku
+open core.puzzlemap
+open core.hints
+open core.setCell
 open core.eliminateCandidate
 open core.force
-open core.puzzlemap
-open core.setCell
-open core.sudoku
 
 open hints.fullHouse
 open hints.hidden
-open hints.hints
 open hints.intersection
 open hints.naked
 open hints.wing
+
+open console.command
+open console.console
+open console.format
 
 open load
 
@@ -46,10 +46,28 @@ type HintType =
     | X
     | Y
 
+let SupportedHints : Map<string, HintType * (PuzzleMap -> CellCandidates -> Set<HintDescription2>)> =
+    [
+        ("fh", (FH, fullHouses))
+        ("hs", (HS, hiddenN 1))
+        ("hp", (HP, hiddenN 2))
+        ("ht", (HT, hiddenN 3))
+        ("hq", (HQ, hiddenN 4))
+        ("ns", (NS, nakedSingle))
+        ("np", (NP, nakedN 2))
+        ("nt", (NT, nakedN 3))
+        ("nq", (NQ, nakedN 4))
+        ("pp", (PP, pointingPairs))
+        ("bl", (BL, boxLineReductions))
+        ("x",  (X,  xWings))
+        ("y",  (Y,  yWings))
+    ]
+    |> Map.ofList
+
 type Hint = HintType * HintDescription2
 
 let parse (item : string) (solution : Solution) (puzzle : PuzzleShape) 
-    (candidateLookup : CellCandidates) puzzlePrintGrid puzzlePrintFull puzzleDrawFull puzzleDrawFull2 print_last : Solution * HintType option * Set<HintDescription2> = 
+    (candidateLookup : CellCandidates) puzzleDrawFull puzzleDrawFull2 print_last : Solution * HintType option * Set<HintDescription2> = 
 
     let p = TPuzzleMap puzzle :> PuzzleMap
 
@@ -73,17 +91,10 @@ let parse (item : string) (solution : Solution) (puzzle : PuzzleShape)
         let newSolution = 
             match setCommand with
             | Some setCellValue -> 
-                let hd = 
-                    { HintDescription.primaryHouses = set []
-                      secondaryHouses = set []
-                      candidateReductions = set []
-                      setCellValueAction = Some setCellValue
-                      pointers = set [] }
-                
-                let hd2 = mhas p.cells p.cellHouseCells p.houseCells hd
+                let hd2 = setCellHintDescription p setCellValue
                 puzzleDrawFull2 hd2.annotations
-                { solution with current = setCellDigitApply p.cellHouseCells setCellValue solution.current
-                                steps = (Placement setCellValue) :: solution.steps }
+
+                setCellStep p setCellValue solution
             | None -> 
                 Console.WriteLine("")
                 solution
@@ -118,59 +129,13 @@ let parse (item : string) (solution : Solution) (puzzle : PuzzleShape)
         print_last newSolution
         (newSolution, None, Set.empty)
 
-    else if item = "fh" then 
-        let hints = fullHouses p candidateLookup
-        (solution, Some FH, hints)
-
-    else if item = "hs" then 
-        let hints = hiddenN 1 p candidateLookup
-        (solution, Some HS, hints)
-
-    else if item = "hp" then 
-        let hints = hiddenN 2 p candidateLookup
-        (solution, Some HP, hints)
-
-    else if item = "ht" then 
-        let hints = hiddenN 3 p candidateLookup
-        (solution, Some HT, hints)
-
-    else if item = "hq" then 
-        let hints = hiddenN 4 p candidateLookup
-        (solution, Some HQ, hints)
-
-    else if item = "ns" then 
-        let hints = nakedSingle p candidateLookup
-        (solution, Some NS, hints)
-
-    else if item = "np" then 
-        let hints = nakedN 2 p candidateLookup
-        (solution, Some NP, hints)
-
-    else if item = "nt" then 
-        let hints = nakedN 3 p candidateLookup
-        (solution, Some NT, hints)
-
-    else if item = "nq" then 
-        let hints = nakedN 4 p candidateLookup
-        (solution, Some NQ, hints)
-
-    else if item = "pp" then 
-        let hints = pointingPairs p candidateLookup
-        (solution, Some PP, hints)
-
-    else if item = "bl" then 
-        let hints = boxLineReductions p candidateLookup
-        (solution, Some BL, hints)
-
-    else if item = "x" then 
-        let hints = xWings p candidateLookup
-        (solution, Some X, hints)
-
-    else if item = "y" then 
-        let hints = yWings p candidateLookup
-        (solution, Some Y, hints)
-
-    else (solution, None, Set.empty)
+    else
+        let supportedHintOpt = SupportedHints.TryFind item
+        match supportedHintOpt with
+        | Some supportedHint ->
+            let hints = (snd supportedHint) p candidateLookup
+            (solution, Some (fst supportedHint), hints)
+        | None -> (solution, None, Set.empty)
 
 let printHint drawHint (index : int) (hint : HintDescription2) : unit = 
 
@@ -180,7 +145,7 @@ let printHint drawHint (index : int) (hint : HintDescription2) : unit =
 
     Console.Read() |> ignore
 
-let run (solution : Solution ref) (puzzle : PuzzleShape) puzzlePrintGrid puzzlePrintFull 
+let run (solution : Solution ref) (puzzle : PuzzleShape) 
     puzzleDrawFull puzzleDrawCandidateGridAnnotations print_last puzzlePrintHint item = 
     if item = "quit" then Some "quit"
     else 
@@ -196,7 +161,7 @@ let run (solution : Solution ref) (puzzle : PuzzleShape) puzzlePrintGrid puzzleP
         let mapCandidateCandidates = MapCellCandidates candidateLookup :> CellCandidates
 
         let (soln, hintTypeOpt, hints) = 
-            parse item !solution puzzle mapCandidateCandidates puzzlePrintGrid puzzlePrintFull puzzleDrawFull 
+            parse item !solution puzzle mapCandidateCandidates puzzleDrawFull 
                 puzzleDrawCandidateGridAnnotations print_last
         solution := soln
 
@@ -303,7 +268,7 @@ let repl (sudoku : string) (puzzle : PuzzleShape) =
 
     let puzzlePrintHint = printHint puzzleDrawCandidateGridAnnotations
 
-    Seq.tryPick (run solution puzzle puzzlePrintGrid puzzlePrintCandidateGrid puzzleDrawCandidateGrid puzzleDrawCandidateGridAnnotations print_last puzzlePrintHint) 
+    Seq.tryPick (run solution puzzle puzzleDrawCandidateGrid puzzleDrawCandidateGridAnnotations print_last puzzlePrintHint) 
         readlines |> ignore
 
 let defaultPuzzleSpec = 

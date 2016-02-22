@@ -2,7 +2,7 @@
 
 open core.sudoku
 open core.puzzlemap
-open hints
+open core.hints
 
 val xWings : PuzzleMap -> CellCandidates -> Set<HintDescription2>
 

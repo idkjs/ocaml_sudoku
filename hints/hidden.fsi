@@ -2,6 +2,6 @@
 
 open core.sudoku
 open core.puzzlemap
-open hints
+open core.hints
 
 val hiddenN : int -> PuzzleMap -> CellCandidates -> Set<HintDescription2>

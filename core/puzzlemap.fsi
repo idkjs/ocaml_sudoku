@@ -7,6 +7,8 @@ val makeRow : int -> Row
 val makeStack : int -> Stack
 val makeBand : int -> Band
 
+val makeSetCellDigit : Cell -> Digit -> Value
+
 type ColumnCells = Lookup<Column, Set<Cell>>
 
 type RowCells = Lookup<Row, Set<Cell>>

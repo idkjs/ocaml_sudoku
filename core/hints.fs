@@ -1,11 +1,10 @@
-﻿module hints.hints
+﻿module core.hints
 
 open System
 open System.Text
 
-open core.setCell
-open core.sudoku
-open core.puzzlemap
+open sudoku
+open puzzlemap
 
 exception CellStateInvalid
 

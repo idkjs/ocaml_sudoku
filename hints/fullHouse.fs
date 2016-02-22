@@ -2,11 +2,9 @@
 
 // Full House means:
 // For a house there is only one cell that is neither given nor set i.e. has candidates
-open core.setCell
 open core.sudoku
 open core.puzzlemap
-
-open hints
+open core.hints
 
 let fullHousePerHouse (allCells : Set<Cell>) (cellHouseCells : CellHouseCells) (puzzleHouseCells : HouseCells) 
     (candidateLookup : CellCandidates) (primaryHouse : House) : Set<HintDescription2> =

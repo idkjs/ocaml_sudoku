@@ -2,7 +2,7 @@
 
 open core.sudoku
 open core.puzzlemap
-open hints
+open core.hints
 
 let makeHints (candidateLookup : CellCandidates) (puzzleHouseCells : HouseCells) pointerCells primaryHouses secondaryHouses candidate = 
     let pointers =

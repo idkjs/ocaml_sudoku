@@ -2,6 +2,7 @@
 
 open sudoku
 open puzzlemap
+open hints
 
 let setCellDigitApply (cellHouseCells : CellHouseCells) (setCellValue : Value) : Current -> Current = 
 
@@ -18,10 +19,6 @@ let setCellDigitApply (cellHouseCells : CellHouseCells) (setCellValue : Value) :
 
     Map.map update
 
-let makeSetCellDigit (cell : Cell) (digit : Digit) : Value = 
-    { Value.cell = cell
-      digit = digit }
-
 type SetCellDigitError = 
     { cell : Cell
       candidate : Digit
@@ -35,3 +32,17 @@ let setCellDigitTry (cell : Cell) (candidate : Digit) (current : Current) : Eith
                 digit = digit }
     | PencilMarks _ ->
         Left(makeSetCellDigit cell candidate)
+
+let setCellHintDescription (p : PuzzleMap) (setCellValue : Value) : HintDescription2 =
+    let hd = 
+        { HintDescription.primaryHouses = set []
+          secondaryHouses = set []
+          candidateReductions = set []
+          setCellValueAction = Some setCellValue
+          pointers = set [] }
+                
+    mhas p.cells p.cellHouseCells p.houseCells hd
+
+let setCellStep (p : PuzzleMap) (setCellValue : Value) (solution : Solution) : Solution =
+    { solution with current = setCellDigitApply p.cellHouseCells setCellValue solution.current
+                    steps = (Placement setCellValue) :: solution.steps }

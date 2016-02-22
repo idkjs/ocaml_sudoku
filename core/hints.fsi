@@ -1,7 +1,7 @@
-﻿module hints.hints
+﻿module core.hints
 
-open core.sudoku
-open core.puzzlemap
+open sudoku
+open puzzlemap
 
 type CandidateReduction = 
     { cell : Cell

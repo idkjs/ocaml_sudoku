@@ -72,14 +72,14 @@
     <Compile Include="core\sudoku.fs" />
     <Compile Include="core\puzzlemap.fsi" />
     <Compile Include="core\puzzlemap.fs" />
+    <Compile Include="core\hints.fsi" />
+    <Compile Include="core\hints.fs" />
     <Compile Include="core\setCell.fsi" />
     <Compile Include="core\setCell.fs" />
     <Compile Include="core\eliminateCandidate.fsi" />
     <Compile Include="core\eliminateCandidate.fs" />
     <Compile Include="core\force.fsi" />
     <Compile Include="core\force.fs" />
-    <Compile Include="hints\hints.fsi" />
-    <Compile Include="hints\hints.fs" />
     <Compile Include="hints\fullHouse.fsi" />
     <Compile Include="hints\fullHouse.fs" />
     <Compile Include="hints\hidden.fsi" />

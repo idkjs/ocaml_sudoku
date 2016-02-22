@@ -2,7 +2,7 @@
 
 open core.sudoku
 open core.puzzlemap
-open hints
+open core.hints
 
 let intersectionsPerHouse (allCells : Set<Cell>) (cellHouseCells : CellHouseCells) (cellCandidates : CellCandidates) 
     (puzzleHouseCells : HouseCells) (primaryHouse : House) (secondaryHouseLookups : Map<Cell, Set<House>>) : Set<HintDescription2> = 

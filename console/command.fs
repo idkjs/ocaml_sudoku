@@ -2,12 +2,13 @@
 
 open System
 
-open console.console
-open console.format
-open core.eliminateCandidate
-open core.setCell
 open core.sudoku
 open core.puzzlemap
+open core.setCell
+open core.eliminateCandidate
+
+open console.console
+open console.format
 
 // find a column or row
 let parseColumnRow what gridSize term = 
