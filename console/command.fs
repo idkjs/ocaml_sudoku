@@ -50,6 +50,24 @@ let parseValue (candidates : Digit list) (term : string) =
         Console.WriteLine("Expect a single digit, not {0}", term)
         None
 
+let focusCommandParse (s: PuzzleShape) (item : string) : Digit option =
+    let terms = item.Split(' ')
+    if terms.Length = 2 then 
+        parseValue s.alphabet terms.[1]
+    else
+        None
+
+let focusCommandHintDescription (p : PuzzleMap) (digit : Digit) : HintDescription2 =
+    let hd = 
+        { HintDescription.primaryHouses = set []
+          secondaryHouses = set []
+          candidateReductions = set []
+          setCellValueAction = None
+          pointers = set []
+          focus = set [digit] }
+
+    mhas p.cells p.cellHouseCells p.houseCells hd
+
 let setCellCommandParse (s: PuzzleShape) (item : string) (p : PuzzleMap) : Value option = 
     let terms = item.Split(' ')
     if terms.Length = 4 then 

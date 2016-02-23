@@ -6,6 +6,10 @@ open core.hints
 
 val parseValue : Digit list -> string -> Digit option
 
+val focusCommandParse : PuzzleShape -> string -> Digit option
+
+val focusCommandHintDescription : PuzzleMap -> Digit -> HintDescription2
+
 val setCellCommandParse : PuzzleShape -> string -> PuzzleMap -> Value option
 
 val setCellCommandCheck : Given -> CellCandidates -> Value -> Value option

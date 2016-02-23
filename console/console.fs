@@ -96,27 +96,20 @@ let drawDigitCellContents (firstDigit : Digit option) (currentDigit : CellConten
     | None, BigNumber s -> ColouredString(s.ToString(), ConsoleColor.Red)
     | None, PencilMarks _ -> CChar '.'
 
-let drawDigitCellContentAnnotations centreCandidate (focusDigit : Digit option) (candidate : Digit) (firstDigit : Digit option) 
+let drawDigitCellContentAnnotations centreCandidate (candidate : Digit) (firstDigit : Digit option) 
     (currentDigit : CellContents) (currentHintDigitOpt : CellAnnotation option) = 
     let isCentre = centreCandidate = candidate
 
     match firstDigit, currentDigit with
     | Some _, _ when not isCentre -> CChar ' '
     | Some s, _ -> 
-        let isFocus =
-            match focusDigit with
-            | Some d when d = s -> true
-            | Some _ -> false
-            | None -> true
+        match currentHintDigitOpt with
+        | Some currentHintDigit when currentHintDigit.primaryHintHouse -> 
+            ColouredString(s.ToString(), ConsoleColor.Cyan)
+        | Some currentHintDigit when currentHintDigit.secondaryHintHouse -> 
+            ColouredString(s.ToString(), ConsoleColor.DarkBlue)
+        | _ -> ColouredString(s.ToString(), ConsoleColor.Blue)
 
-        if isFocus then
-            match currentHintDigitOpt with
-            | Some currentHintDigit when currentHintDigit.primaryHintHouse -> 
-                ColouredString(s.ToString(), ConsoleColor.Cyan)
-            | Some currentHintDigit when currentHintDigit.secondaryHintHouse -> 
-                ColouredString(s.ToString(), ConsoleColor.DarkBlue)
-            | _ -> ColouredString(s.ToString(), ConsoleColor.Blue)
-        else ColouredString(s.ToString(), ConsoleColor.Gray)
     | None, BigNumber _ when not isCentre -> CChar ' '
     | None, BigNumber s -> 
         match currentHintDigitOpt with
@@ -126,37 +119,25 @@ let drawDigitCellContentAnnotations centreCandidate (focusDigit : Digit option) 
             ColouredString(s.ToString(), ConsoleColor.DarkRed)
         | _ -> ColouredString(s.ToString(), ConsoleColor.Red)
     | None, PencilMarks candidates -> 
-        let isFocus =
-            match focusDigit with
-            | Some d when d = candidate -> true
-            | Some _ -> false
-            | None -> true
-
-        if focusDigit.IsNone then
-            match currentHintDigitOpt with
-            | Some currentHintDigit when currentHintDigit.setValue.IsSome && currentHintDigit.setValue.Value = candidate -> 
-                    ColouredString(candidate.ToString(), ConsoleColor.Red)
-            | Some currentHintDigit when currentHintDigit.setValue.IsSome && Set.contains candidate candidates -> 
+        match currentHintDigitOpt with
+        | Some currentHintDigit when currentHintDigit.setValue.IsSome && currentHintDigit.setValue.Value = candidate -> 
+                ColouredString(candidate.ToString(), ConsoleColor.Red)
+        | Some currentHintDigit when currentHintDigit.setValue.IsSome && Set.contains candidate candidates -> 
+            ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
+        | Some currentHintDigit when currentHintDigit.setValueReduction.IsSome && currentHintDigit.setValueReduction.Value = candidate && Set.contains candidate candidates -> 
                 ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
-            | Some currentHintDigit when currentHintDigit.setValueReduction.IsSome && currentHintDigit.setValueReduction.Value = candidate && Set.contains candidate candidates -> 
-                    ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
-            | Some currentHintDigit when Set.contains candidate currentHintDigit.reductions -> 
-                ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
-            | Some currentHintDigit when Set.contains candidate currentHintDigit.pointers -> 
-                ColouredString(candidate.ToString(), ConsoleColor.Magenta)
-            | Some currentHintDigit when currentHintDigit.primaryHintHouse -> 
-                if Set.contains candidate candidates then ColouredString(candidate.ToString(), ConsoleColor.DarkGreen)
-                else CChar ' '
-            | Some currentHintDigit when currentHintDigit.secondaryHintHouse -> 
-                if Set.contains candidate candidates then ColouredString(candidate.ToString(), ConsoleColor.Green)
-                else CChar ' '
-            | _ -> 
-                if Set.contains candidate candidates then CStr(candidate.ToString())
-                else CChar ' '
-        else
-            if focusDigit.Value = candidate then
-                if Set.contains candidate candidates then ColouredString(candidate.ToString(), ConsoleColor.Blue)
-                else CChar ' '
-            else
-                if Set.contains candidate candidates then ColouredString(candidate.ToString(), ConsoleColor.Gray)
-                else CChar ' '
+        | Some currentHintDigit when Set.contains candidate currentHintDigit.reductions -> 
+            ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
+        | Some currentHintDigit when Set.contains candidate currentHintDigit.pointers -> 
+            ColouredString(candidate.ToString(), ConsoleColor.Magenta)
+        | Some currentHintDigit when Set.contains candidate currentHintDigit.focus && Set.contains candidate candidates -> 
+            ColouredString(candidate.ToString(), ConsoleColor.Yellow)
+        | Some currentHintDigit when currentHintDigit.primaryHintHouse -> 
+            if Set.contains candidate candidates then ColouredString(candidate.ToString(), ConsoleColor.DarkGreen)
+            else CChar ' '
+        | Some currentHintDigit when currentHintDigit.secondaryHintHouse -> 
+            if Set.contains candidate candidates then ColouredString(candidate.ToString(), ConsoleColor.Green)
+            else CChar ' '
+        | _ -> 
+            if Set.contains candidate candidates then CStr(candidate.ToString())
+            else CChar ' '

@@ -52,7 +52,8 @@ let intersectionsPerHouse (allCells : Set<Cell>) (cellHouseCells : CellHouseCell
                            secondaryHouses = set [ secondaryHouse ]
                            candidateReductions = candidateReductions
                            setCellValueAction = None
-                           pointers = pointers }
+                           pointers = pointers
+                           focus = set [] }
                 else None
             else None
         

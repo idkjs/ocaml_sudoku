@@ -53,7 +53,8 @@ let findHidden (cellHouseCells : CellHouseCells) (candidateLookup : CellCandidat
                secondaryHouses = set []
                candidateReductions = Set.ofList nonEmptyCandidateReductions
                setCellValueAction = setCellValue
-               pointers = Set.ofList nonEmptyPointers }
+               pointers = Set.ofList nonEmptyPointers
+               focus = set [] }
     else None
 
 let hiddenNPerHouse (allCells : Set<Cell>) (cellHouseCells : CellHouseCells) (puzzleHouseCells : HouseCells) 

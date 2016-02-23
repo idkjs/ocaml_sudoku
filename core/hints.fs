@@ -68,7 +68,8 @@ type HintDescription =
       secondaryHouses : Set<House>
       candidateReductions : Set<CandidateReduction>
       setCellValueAction : Value option
-      pointers : Set<CandidateReduction> }
+      pointers : Set<CandidateReduction>
+      focus : Set<Digit> }
     override this.ToString() = 
         let sb = StringBuilder()
 
@@ -89,7 +90,8 @@ type CellAnnotation =
       secondaryHintHouse : bool
       setValueReduction : Digit option
       reductions : Set<Digit>
-      pointers : Set<Digit> }
+      pointers : Set<Digit>
+      focus : Set<Digit> }
 
 type CellAnnotations = Map<Cell, CellAnnotation>
 
@@ -167,7 +169,8 @@ let mhas (allCells : Set<Cell>) (cellHouseCells : CellHouseCells) (puzzleHouseCe
           secondaryHintHouse = Set.contains cell secondaryHouseCells
           setValueReduction = setValueReduction
           reductions = reductions
-          pointers = pointers }
+          pointers = pointers
+          focus = hd.focus }
 
     let annotations =
         allCells

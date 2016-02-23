@@ -38,7 +38,8 @@ let setCellHintDescription (p : PuzzleMap) (setCellValue : Value) : HintDescript
           secondaryHouses = set []
           candidateReductions = set []
           setCellValueAction = Some setCellValue
-          pointers = set [] }
+          pointers = set []
+          focus = set [] }
                 
     mhas p.cells p.cellHouseCells p.houseCells hd
 

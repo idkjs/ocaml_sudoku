@@ -30,7 +30,8 @@ let fullHousePerHouse (allCells : Set<Cell>) (cellHouseCells : CellHouseCells) (
                 secondaryHouses = set []
                 candidateReductions = set []
                 setCellValueAction = Some setCellValue
-                pointers = set [] } ]
+                pointers = set []
+                focus = set [] } ]
             |> Set.ofList
         else Set.empty
 

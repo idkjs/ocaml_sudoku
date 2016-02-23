@@ -29,7 +29,8 @@ let makeHints (candidateLookup : CellCandidates) (puzzleHouseCells : HouseCells)
                primaryHouses = primaryHouses
                secondaryHouses = secondaryHouses
                pointers = pointers
-               setCellValueAction = None }
+               setCellValueAction = None
+               focus = set [] }
     else None
 
 let xWingsPerHouseCandidate (candidateLookup : CellCandidates) (puzzleHouseCells : HouseCells) 
@@ -292,7 +293,8 @@ let yWingsPerHouse (candidateLookup : CellCandidates) (puzzleHouseCells : HouseC
                                    primaryHouses = primaryHouses
                                    secondaryHouses = set []
                                    pointers = pointers
-                                   setCellValueAction = None }
+                                   setCellValueAction = None
+                                   focus = set [] }
                         else None
                     | _ -> None
                 else None

@@ -40,7 +40,8 @@ let findNaked (cellHouseCells : CellHouseCells) (candidateLookup : CellCandidate
                    secondaryHouses = set []
                    candidateReductions = nonEmptyCandidateReductions
                    setCellValueAction = None
-                   pointers = pointers }
+                   pointers = pointers
+                   focus = set [] }
 
         else None
     else None
@@ -82,7 +83,8 @@ let nakedSingleFind (allCells : Set<Cell>) (cellHouseCells : CellHouseCells) (pu
                    secondaryHouses = set []
                    candidateReductions = set []
                    setCellValueAction = Some setCellValue
-                   pointers = set [] }
+                   pointers = set []
+                   focus = set [] }
         else None)
     |> Set.filter Option.isSome
     |> Set.map Option.get

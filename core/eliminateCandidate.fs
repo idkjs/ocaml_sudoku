@@ -25,7 +25,8 @@ let eliminateCandidateHintDescription (p: PuzzleMap) (candidate : Candidate) : H
           secondaryHouses = set []
           candidateReductions = set [ cr ]
           setCellValueAction = None
-          pointers = set [] }
+          pointers = set []
+          focus = set [] }
 
     mhas p.cells p.cellHouseCells p.houseCells hd
 

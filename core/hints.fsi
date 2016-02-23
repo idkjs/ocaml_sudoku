@@ -12,7 +12,8 @@ type HintDescription =
       secondaryHouses : Set<House>
       candidateReductions : Set<CandidateReduction>
       setCellValueAction : Value option
-      pointers : Set<CandidateReduction> }
+      pointers : Set<CandidateReduction>
+      focus : Set<Digit> }
 
 val first : Set<'a> -> 'a
 
@@ -25,7 +26,8 @@ type CellAnnotation =
       secondaryHintHouse : bool
       setValueReduction : Digit option
       reductions : Set<Digit>
-      pointers : Set<Digit> }
+      pointers : Set<Digit>
+      focus : Set<Digit> }
 
 type CellAnnotations = Map<Cell, CellAnnotation>
 
