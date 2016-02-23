@@ -154,4 +154,14 @@ type MapLookup<'a, 'b when 'a : comparison>(data : Map<'a, 'b>) =
 // for a cell, return a set of candidates
 type CellCandidates = Lookup<Cell, Set<Digit>>
 
-type MapCellCandidates = MapLookup<Cell, Set<Digit>>
+let currentCellCandidates (current : Current) : CellCandidates =
+    let getCandidateEntries (_ : Cell) (annotatedDigit : CellContents) : Set<Digit> =
+        match annotatedDigit with
+        | BigNumber _ -> Set.empty
+        | PencilMarks s -> s
+
+    let candidateLookup =
+        current
+        |> Map.map getCandidateEntries
+
+    MapLookup<Cell, Set<Digit>> candidateLookup :> CellCandidates

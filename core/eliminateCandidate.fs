@@ -1,6 +1,8 @@
 ﻿module core.eliminateCandidate
 
 open sudoku
+open puzzlemap
+open hints
 
 let eliminateCandidateApply (candidate : Candidate) : Current -> Current = 
 
@@ -13,15 +15,20 @@ let eliminateCandidateApply (candidate : Candidate) : Current -> Current =
 
     Map.map update
 
-type EliminateCandidateError = 
-    | AlreadySet of Digit
-    | NotACandidate
+let eliminateCandidateHintDescription (p: PuzzleMap) (candidate : Candidate) : HintDescription2 =
+    let cr = 
+        { CandidateReduction.cell = candidate.cell
+          candidates = set [ candidate.digit ] }
 
-let eliminateCandidateTry (cell : Cell) (digit : Digit) (current : Current) : Either<Candidate, EliminateCandidateError> = 
-    match current.Item cell with
-    | BigNumber digit -> Right(AlreadySet digit)
-    | PencilMarks digits -> 
-        if Set.contains digit digits then 
-            Left { Candidate.cell = cell
-                   digit = digit }
-        else Right NotACandidate
+    let hd = 
+        { HintDescription.primaryHouses = set []
+          secondaryHouses = set []
+          candidateReductions = set [ cr ]
+          setCellValueAction = None
+          pointers = set [] }
+
+    mhas p.cells p.cellHouseCells p.houseCells hd
+
+let eliminateCandidateStep (p : PuzzleMap) (candidate : Candidate) (solution : Solution) : Solution =
+    { solution with current = eliminateCandidateApply candidate solution.current
+                    steps = (Eliminate candidate) :: solution.steps }

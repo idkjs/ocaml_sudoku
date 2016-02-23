@@ -18,6 +18,10 @@ let makeSetCellDigit (cell : Cell) (digit : Digit) : Value =
     { Value.cell = cell
       digit = digit }
 
+let makeCandidate (cell : Cell) (digit : Digit) : Candidate =
+    { Candidate.cell = cell
+      digit = digit }
+
 type ColumnCells = Lookup<Column, Set<Cell>>
 
 type RowCells = Lookup<Row, Set<Cell>>

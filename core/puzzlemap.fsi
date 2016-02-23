@@ -9,6 +9,8 @@ val makeBand : int -> Band
 
 val makeSetCellDigit : Cell -> Digit -> Value
 
+val makeCandidate : Cell -> Digit -> Candidate
+
 type ColumnCells = Lookup<Column, Set<Cell>>
 
 type RowCells = Lookup<Row, Set<Cell>>

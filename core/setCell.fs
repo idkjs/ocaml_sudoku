@@ -24,14 +24,13 @@ type SetCellDigitError =
       candidate : Digit
       digit : Digit }
 
-let setCellDigitTry (cell : Cell) (candidate : Digit) (current : Current) : Either<Value, SetCellDigitError> = 
-    match current.Item cell with
-    | BigNumber digit -> 
-        Right { SetCellDigitError.cell = cell
-                candidate = candidate
-                digit = digit }
-    | PencilMarks _ ->
-        Left(makeSetCellDigit cell candidate)
+let setCellDigitTry (cell : Cell) (candidate : Digit) (cellCandidates : CellCandidates) : Value option = 
+    let candidates = cellCandidates.Get cell
+
+    if Set.contains candidate candidates then
+        makeSetCellDigit cell candidate
+        |> Some
+    else None
 
 let setCellHintDescription (p : PuzzleMap) (setCellValue : Value) : HintDescription2 =
     let hd = 

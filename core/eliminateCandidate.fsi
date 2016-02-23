@@ -1,12 +1,9 @@
 ﻿module core.eliminateCandidate
 
 open sudoku
+open puzzlemap
+open hints
 
-val eliminateCandidateApply : Candidate -> (Current -> Current)
+val eliminateCandidateHintDescription : PuzzleMap -> Candidate -> HintDescription2
 
-type EliminateCandidateError = 
-    | AlreadySet of Digit
-    | NotACandidate
-
-val eliminateCandidateTry : Cell
-     -> Digit -> Current -> Either<Candidate, EliminateCandidateError>
+val eliminateCandidateStep : PuzzleMap -> Candidate -> Solution -> Solution

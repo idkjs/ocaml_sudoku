@@ -6,12 +6,7 @@ open hints
 
 val setCellDigitApply : CellHouseCells -> Value -> (Current -> Current)
 
-type SetCellDigitError = 
-    { cell : Cell
-      candidate : Digit
-      digit : Digit }
-
-val setCellDigitTry : Cell -> Digit -> Current -> Either<Value, SetCellDigitError>
+val setCellDigitTry : Cell -> Digit -> CellCandidates -> Value option
 
 val setCellHintDescription : PuzzleMap -> Value -> HintDescription2
 

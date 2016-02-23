@@ -4,8 +4,15 @@ open System
 
 open core.sudoku
 open core.puzzlemap
+open core.hints
 open core.setCell
 open core.eliminateCandidate
+
+open hints.fullHouse
+open hints.hidden
+open hints.intersection
+open hints.naked
+open hints.wing
 
 open console.console
 open console.format
@@ -43,48 +50,77 @@ let parseValue (candidates : Digit list) (term : string) =
         Console.WriteLine("Expect a single digit, not {0}", term)
         None
 
-let setCellCommand (item : string) (alphabet : Digit list) (lastGrid : Current) (cells : Set<Cell>) 
-    (cellHouseCells : CellHouseCells) (candidateLookup : CellCandidates) : Value option = 
+let setCellCommandParse (s: PuzzleShape) (item : string) (p : PuzzleMap) : Value option = 
     let terms = item.Split(' ')
     if terms.Length = 4 then 
-        let parsedCell = parseCell alphabet.Length cells terms.[1] terms.[2]
-        let parsedValue = parseValue alphabet terms.[3]
+        let parsedCell = parseCell s.alphabet.Length p.cells terms.[1] terms.[2]
+        let parsedValue = parseValue s.alphabet terms.[3]
 
         match (parsedCell, parsedValue) with
         | (Some cell, Some value) -> 
-            let either = setCellDigitTry cell value lastGrid
-            match either with
-            | Left setCellDigitAction -> Some setCellDigitAction
-            | Right setCellDigitError -> 
-                Console.WriteLine("Cell {0} has been set value {1}", cell, setCellDigitError.digit)
-                None
-        | _ -> 
-            Console.WriteLine "Expect set <col> <row> <val>"
-            None
-    else 
-        Console.WriteLine "Expect set <col> <row> <val>"
-        None
+            makeSetCellDigit cell value
+            |> Some
+        | _ -> None
+    else None
 
-let candidateClearCommand (item : string) (alphabet : Digit list) (lastGrid : Current) 
-    (cells : Set<Cell>) : Candidate option = 
+let setCellCommandCheck (given : Given) (cellCandidates : CellCandidates) (value : Value) : Value option =
+    let givenDigitOpt = given.Item value.cell
+    match givenDigitOpt with
+    | Some givenDigit ->
+        Console.WriteLine("Error: Cell {0} has given {1}", value.cell, givenDigit)
+        None
+    | None ->
+        let digits = cellCandidates.Get value.cell
+        if Set.contains value.digit digits then Some value
+        else
+            Console.WriteLine("Warning: Cell {0} does not have candidate {1}", value.cell, value.digit)
+            value
+            |> Some
+
+
+let candidateClearCommandParse (s: PuzzleShape) (item : string) (p : PuzzleMap) : Candidate option = 
     let terms = item.Split(' ')
     if terms.Length = 4 then 
-        let parsedCell = parseCell alphabet.Length cells terms.[1] terms.[2]
-        let parsedCandidate = parseValue alphabet terms.[3]
+        let parsedCell = parseCell s.alphabet.Length p.cells terms.[1] terms.[2]
+        let parsedDigit = parseValue s.alphabet terms.[3]
 
-        match (parsedCell, parsedCandidate) with
-        | (Some cell, Some candidate) -> 
-            match eliminateCandidateTry cell candidate lastGrid with
-            | Left eliminateCandidateAction -> Some eliminateCandidateAction
-            | Right(AlreadySet digit) -> 
-                Console.WriteLine("Cell {0} has been set value {1}", cell, digit)
-                None
-            | Right NotACandidate -> 
-                Console.WriteLine("Cell {0} does not have candidate {1}", cell, candidate)
-                None
+        match (parsedCell, parsedDigit) with
+        | (Some cell, Some digit) ->
+            makeCandidate cell digit
+            |> Some
         | _ -> 
-            Console.WriteLine "Expect clr <col> <row> <val>"
             None
     else 
-        Console.WriteLine "Expect clr <col> <row> <val>"
         None
+
+let candidateClearCommandCheck (given : Given) (cellCandidates : CellCandidates) (candidate : Candidate) : Candidate option =
+    let givenDigitOpt = given.Item candidate.cell
+    match givenDigitOpt with
+    | Some givenDigit ->
+        Console.WriteLine("Error: Cell {0} has given {1}", candidate.cell, givenDigit)
+        None
+    | None ->
+        let digits = cellCandidates.Get candidate.cell
+        if Set.contains candidate.digit digits then Some candidate
+        else
+            Console.WriteLine("Warning: Cell {0} does not have candidate {1}", candidate.cell, candidate.digit)
+            candidate
+            |> Some
+
+let SupportedHints : Map<string, PuzzleMap -> CellCandidates -> Set<HintDescription2>> =
+    [
+        ("fh", fullHouses)
+        ("hs", hiddenN 1)
+        ("hp", hiddenN 2)
+        ("ht", hiddenN 3)
+        ("hq", hiddenN 4)
+        ("ns", nakedSingle)
+        ("np", nakedN 2)
+        ("nt", nakedN 3)
+        ("nq", nakedN 4)
+        ("pp", pointingPairs)
+        ("bl", boxLineReductions)
+        ("x",  xWings)
+        ("y",  yWings)
+    ]
+    |> Map.ofList

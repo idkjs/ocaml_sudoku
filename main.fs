@@ -12,12 +12,6 @@ open core.setCell
 open core.eliminateCandidate
 open core.force
 
-open hints.fullHouse
-open hints.hidden
-open hints.intersection
-open hints.naked
-open hints.wing
-
 open console.command
 open console.console
 open console.format
@@ -31,43 +25,8 @@ let Maximize() =
     let p = Process.GetCurrentProcess()
     ShowWindow(p.MainWindowHandle, 3) //SW_MAXIMIZE = 3
 
-type HintType = 
-    | FH
-    | HS
-    | HP
-    | HT
-    | HQ
-    | NS
-    | NP
-    | NT
-    | NQ
-    | PP
-    | BL
-    | X
-    | Y
-
-let SupportedHints : Map<string, HintType * (PuzzleMap -> CellCandidates -> Set<HintDescription2>)> =
-    [
-        ("fh", (FH, fullHouses))
-        ("hs", (HS, hiddenN 1))
-        ("hp", (HP, hiddenN 2))
-        ("ht", (HT, hiddenN 3))
-        ("hq", (HQ, hiddenN 4))
-        ("ns", (NS, nakedSingle))
-        ("np", (NP, nakedN 2))
-        ("nt", (NT, nakedN 3))
-        ("nq", (NQ, nakedN 4))
-        ("pp", (PP, pointingPairs))
-        ("bl", (BL, boxLineReductions))
-        ("x",  (X,  xWings))
-        ("y",  (Y,  yWings))
-    ]
-    |> Map.ofList
-
-type Hint = HintType * HintDescription2
-
 let parse (item : string) (solution : Solution) (puzzle : PuzzleShape) 
-    (candidateLookup : CellCandidates) puzzleDrawFull puzzleDrawFull2 print_last : Solution * HintType option * Set<HintDescription2> = 
+    (candidateLookup : CellCandidates) puzzleDrawFull puzzleDrawFull2 print_last : Solution * Set<HintDescription2> = 
 
     let p = TPuzzleMap puzzle :> PuzzleMap
 
@@ -75,7 +34,7 @@ let parse (item : string) (solution : Solution) (puzzle : PuzzleShape)
 
     if item = "print" then 
         puzzleDrawFull None
-        (solution, None, Set.empty)
+        (solution, Set.empty)
     else if item.StartsWith "focus" then
         let terms = item.Split(' ')
         let focusDigit =
@@ -84,58 +43,64 @@ let parse (item : string) (solution : Solution) (puzzle : PuzzleShape)
             else
                 None
         puzzleDrawFull focusDigit
-        (solution, None, Set.empty)
-    else if item.StartsWith "s" then 
-        let setCommand = setCellCommand item puzzle.alphabet solution.current p.cells p.cellHouseCells candidateLookup
+        (solution, Set.empty)
+    else if item.StartsWith "s" then
+        let valueOpt = setCellCommandParse puzzle item p
         
         let newSolution = 
-            match setCommand with
-            | Some setCellValue -> 
-                let hd2 = setCellHintDescription p setCellValue
-                puzzleDrawFull2 hd2.annotations
+            match valueOpt with
+            | Some value ->
+                let setCellValueOpt = setCellCommandCheck solution.given candidateLookup value
+                match setCellValueOpt with
+                | Some setCellValue ->
+                    let hd2 = setCellHintDescription p setCellValue
+                    puzzleDrawFull2 hd2.annotations
 
-                setCellStep p setCellValue solution
-            | None -> 
-                Console.WriteLine("")
-                solution
-        print_last newSolution
-        (newSolution, None, Set.empty)
+                    setCellStep p setCellValue solution
 
-    else if item.StartsWith "c" then 
-        let clearCommand = candidateClearCommand item puzzle.alphabet solution.current p.cells
-        
-        let newSolution = 
-            match clearCommand with
-            | Some candidate -> 
-                let cr = 
-                    { CandidateReduction.cell = candidate.cell
-                      candidates = set [ candidate.digit ] }
-                
-                let hd = 
-                    { HintDescription.primaryHouses = set []
-                      secondaryHouses = set []
-                      candidateReductions = set [ cr ]
-                      setCellValueAction = None
-                      pointers = set [] }
-                
-                let hd2 = mhas p.cells p.cellHouseCells p.houseCells hd
-                puzzleDrawFull2 hd2.annotations
-                { solution with current = eliminateCandidateApply candidate solution.current
-                                steps = (Eliminate candidate) :: solution.steps }
+                | None ->
+                    Console.WriteLine "Expect set <col> <row> <val>"
+                    solution
+
             | None -> 
-                Console.WriteLine("")
+                Console.WriteLine "Expect set <col> <row> <val>"
                 solution
 
         print_last newSolution
-        (newSolution, None, Set.empty)
+        (newSolution, Set.empty)
+
+    else if item.StartsWith "c" then
+        let candidateOpt = candidateClearCommandParse puzzle item p
+
+        let newSolution = 
+            match candidateOpt with
+            | Some candidate ->
+                let clearCommandOpt = candidateClearCommandCheck solution.given candidateLookup candidate
+                match clearCommandOpt with
+                | Some clearCommand ->
+                    let hd2 = eliminateCandidateHintDescription p candidate
+                    puzzleDrawFull2 hd2.annotations
+
+                    eliminateCandidateStep p candidate solution
+
+                | None -> 
+                    Console.WriteLine "Expect clr <col> <row> <val>"
+                    solution
+
+            | None -> 
+                Console.WriteLine "Expect clr <col> <row> <val>"
+                solution
+
+        print_last newSolution
+        (newSolution, Set.empty)
 
     else
         let supportedHintOpt = SupportedHints.TryFind item
         match supportedHintOpt with
         | Some supportedHint ->
-            let hints = (snd supportedHint) p candidateLookup
-            (solution, Some (fst supportedHint), hints)
-        | None -> (solution, None, Set.empty)
+            let hints = supportedHint p candidateLookup
+            (solution, hints)
+        | None -> (solution, Set.empty)
 
 let printHint drawHint (index : int) (hint : HintDescription2) : unit = 
 
@@ -148,19 +113,10 @@ let printHint drawHint (index : int) (hint : HintDescription2) : unit =
 let run (solution : Solution ref) (puzzle : PuzzleShape) 
     puzzleDrawFull puzzleDrawCandidateGridAnnotations print_last puzzlePrintHint item = 
     if item = "quit" then Some "quit"
-    else 
-        let getCandidateEntries (_ : Cell) (annotatedDigit : CellContents) : Set<Digit> = 
-            match annotatedDigit with
-            | BigNumber _ -> Set.empty
-            | PencilMarks s -> s
+    else
+        let mapCandidateCandidates = currentCellCandidates (!solution).current
 
-        let candidateLookup =
-            (!solution).current
-            |> Map.map getCandidateEntries
-
-        let mapCandidateCandidates = MapCellCandidates candidateLookup :> CellCandidates
-
-        let (soln, hintTypeOpt, hints) = 
+        let (soln, hints) = 
             parse item !solution puzzle mapCandidateCandidates puzzleDrawFull 
                 puzzleDrawCandidateGridAnnotations print_last
         solution := soln
@@ -218,7 +174,7 @@ let repl (sudoku : string) (puzzle : PuzzleShape) =
         drawDigitCellContentAnnotations centreDigit focus digit (solution.given.Item cell) 
             (solution.current.Item cell) None
 
-    let puzzleDrawCellDigitAnnotations (solution : Solution) (l : Map<Cell, CellAnnotation>) (cell : Cell) (digit : Digit) : ConsoleChar = 
+    let puzzleDrawCellDigitAnnotations (solution : Solution) (l : CellAnnotations) (cell : Cell) (digit : Digit) : ConsoleChar = 
         drawDigitCellContentAnnotations centreDigit None digit (solution.given.Item cell) 
             (solution.current.Item cell) (Some(l.Item cell))
 
