@@ -57,7 +57,7 @@ let focusCommandParse (s: PuzzleShape) (item : string) : Digit option =
     else
         None
 
-let focusCommandHintDescription (p : PuzzleMap) (digit : Digit) : HintDescription2 =
+let focusCommandHintDescription (p : PuzzleMap) (digit : Digit) : HintDescription =
     let hd = 
         { HintDescription.primaryHouses = set []
           secondaryHouses = set []
@@ -66,7 +66,7 @@ let focusCommandHintDescription (p : PuzzleMap) (digit : Digit) : HintDescriptio
           pointers = set []
           focus = set [digit] }
 
-    mhas p.cells p.cellHouseCells p.houseCells hd
+    hd
 
 let setCellCommandParse (s: PuzzleShape) (item : string) (p : PuzzleMap) : Value option = 
     let terms = item.Split(' ')
@@ -125,7 +125,7 @@ let candidateClearCommandCheck (given : Given) (cellCandidates : CellCandidates)
             candidate
             |> Some
 
-let SupportedHints : Map<string, PuzzleMap -> CellCandidates -> Set<HintDescription2>> =
+let SupportedHints : Map<string, PuzzleMap -> CellCandidates -> Set<HintDescription>> =
     [
         ("fh", fullHouses)
         ("hs", hiddenN 1)

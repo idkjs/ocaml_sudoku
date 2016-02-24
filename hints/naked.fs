@@ -4,8 +4,8 @@ open core.sudoku
 open core.puzzlemap
 open core.hints
 
-let findNaked (cellHouseCells : CellHouseCells) (candidateLookup : CellCandidates) 
-    (primaryHouseCells : Set<Cell>) (cellSubset : Set<Cell>) (count : int) (primaryHouse : House) = 
+let findNaked (count : int) (cellHouseCells : CellHouseCells) (candidateLookup : CellCandidates) 
+    (primaryHouseCells : Set<Cell>) (cellSubset : Set<Cell>) (primaryHouse : House) = 
 
     let subsetDigits =
         cellSubset
@@ -46,11 +46,10 @@ let findNaked (cellHouseCells : CellHouseCells) (candidateLookup : CellCandidate
         else None
     else None
 
-let nakedNPerHouse (allCells : Set<Cell>) (cellHouseCells : CellHouseCells) (puzzleHouseCells : HouseCells) 
-    (candidateLookup : CellCandidates) (count : int) (primaryHouse : House) : Set<HintDescription2> =
+let nakedNPerHouse (count : int) (p : PuzzleMap) (candidateLookup : CellCandidates)  (primaryHouse : House) : Set<HintDescription> =
     let primaryHouseCells =
         primaryHouse
-        |> puzzleHouseCells.Get
+        |> p.houseCells.Get
     
     let hht = 
         primaryHouseCells
@@ -62,15 +61,13 @@ let nakedNPerHouse (allCells : Set<Cell>) (cellHouseCells : CellHouseCells) (puz
     |> Set.ofList
     |> Set.map 
         (fun subset -> 
-        findNaked cellHouseCells candidateLookup primaryHouseCells (Set.ofList subset) count primaryHouse)
+        findNaked count p.cellHouseCells candidateLookup primaryHouseCells (Set.ofList subset) primaryHouse)
     |> Set.filter Option.isSome
     |> Set.map Option.get
-    |> Set.map (mhas allCells cellHouseCells puzzleHouseCells)
 
-let nakedSingleFind (allCells : Set<Cell>) (cellHouseCells : CellHouseCells) (puzzleHouseCells : HouseCells) 
-    (candidateLookup : CellCandidates) (cells : Set<Cell>) : Set<HintDescription2> = 
+let nakedSingle (p : PuzzleMap) (candidateLookup : CellCandidates) : Set<HintDescription> =
 
-    cells
+    p.cells
     |> Set.map (fun cell -> 
         let candidates = candidateLookup.Get cell
 
@@ -88,12 +85,8 @@ let nakedSingleFind (allCells : Set<Cell>) (cellHouseCells : CellHouseCells) (pu
         else None)
     |> Set.filter Option.isSome
     |> Set.map Option.get
-    |> Set.map (mhas allCells cellHouseCells puzzleHouseCells)
 
-let nakedSingle (p : PuzzleMap) (candidateLookup : CellCandidates) : Set<HintDescription2> =
-    nakedSingleFind p.cells p.cellHouseCells p.houseCells candidateLookup p.cells
-
-let nakedN (i : int) (p : PuzzleMap) (candidateLookup : CellCandidates) : Set<HintDescription2> =
+let nakedN (i : int) (p : PuzzleMap) (candidateLookup : CellCandidates) : Set<HintDescription> =
     p.houses
-    |> Set.map (nakedNPerHouse p.cells p.cellHouseCells p.houseCells candidateLookup i)
+    |> Set.map (nakedNPerHouse i p candidateLookup )
     |> Set.unionMany

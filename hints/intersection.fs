@@ -4,12 +4,11 @@ open core.sudoku
 open core.puzzlemap
 open core.hints
 
-let intersectionsPerHouse (allCells : Set<Cell>) (cellHouseCells : CellHouseCells) (cellCandidates : CellCandidates) 
-    (puzzleHouseCells : HouseCells) (primaryHouse : House) (secondaryHouseLookups : Map<Cell, Set<House>>) : Set<HintDescription2> = 
+let intersectionsPerHouse (p : PuzzleMap) (cellCandidates : CellCandidates) (primaryHouse : House) (secondaryHouseLookups : Map<Cell, Set<House>>) : Set<HintDescription> = 
 
     let primaryHouseCells =
         primaryHouse
-        |> puzzleHouseCells.Get
+        |> p.houseCells.Get
     
     let primaryHouseCandidates : Set<Digit> = 
         primaryHouseCells
@@ -32,7 +31,7 @@ let intersectionsPerHouse (allCells : Set<Cell>) (cellHouseCells : CellHouseCell
         let hintsPerSecondaryHouse (secondaryHouses : Set<House>) : HintDescription option = 
             if Set.count pointerCells > 1 && Set.count secondaryHouses = 1 then 
                 let secondaryHouse = first secondaryHouses
-                let secondaryHouseCells = puzzleHouseCells.Get secondaryHouse
+                let secondaryHouseCells = p.houseCells.Get secondaryHouse
                 let otherHouseCells = Set.difference secondaryHouseCells primaryHouseCells
                 
                 let candidateReductionCells =
@@ -67,49 +66,46 @@ let intersectionsPerHouse (allCells : Set<Cell>) (cellHouseCells : CellHouseCell
     primaryHouseCandidates
     |> Set.map uniqueSecondaryForCandidate
     |> Set.unionMany
-    |> Set.map (mhas allCells cellHouseCells puzzleHouseCells)
 
-let pointingPairsPerBox (allCells : Set<Cell>) (cellHouseCells : CellHouseCells) (puzzleHouseCells : HouseCells) 
-    (cellCandidates : CellCandidates) (primaryHouse : House) : Set<HintDescription2> =
+let pointingPairsPerBox (p : PuzzleMap) (cellCandidates : CellCandidates) (primaryHouse : House) : Set<HintDescription> =
     let secondaryHouseLookups : Map<Cell, Set<House>> =
         let ch (cell : Cell) : Set<House> =
             [HRow cell.row; HColumn cell.col ]
             |> Set.ofList
-        allCells
+        p.cells
         |> Set.map (fun cell -> (cell, ch cell))
         |> Map.ofSeq
 
-    intersectionsPerHouse allCells cellHouseCells cellCandidates puzzleHouseCells primaryHouse secondaryHouseLookups
+    intersectionsPerHouse p cellCandidates primaryHouse secondaryHouseLookups
 
-let boxLineReductionsPerHouse (allCells : Set<Cell>) (cellHouseCells : CellHouseCells) (puzzleHouseCells : HouseCells) 
-    (cellCandidates : CellCandidates) (puzzleCellBox : CellBox) (primaryHouse : House) : Set<HintDescription2> = 
+let boxLineReductionsPerHouse (p : PuzzleMap) (cellCandidates : CellCandidates) (primaryHouse : House) : Set<HintDescription> = 
     let secondaryHouseLookups : Map<Cell, Set<House>> =
         let ch (cell : Cell) : Set<House> =
-            [ puzzleCellBox.Get cell |> HBox ]
+            [ p.cellBox.Get cell |> HBox ]
             |> Set.ofList
-        allCells
+        p.cells
         |> Set.map (fun cell -> (cell, ch cell))
         |> Map.ofSeq
 
-    intersectionsPerHouse allCells cellHouseCells cellCandidates puzzleHouseCells primaryHouse secondaryHouseLookups
+    intersectionsPerHouse p cellCandidates primaryHouse secondaryHouseLookups
 
-let pointingPairs (p : PuzzleMap) (candidateLookup : CellCandidates) : Set<HintDescription2> =
+let pointingPairs (p : PuzzleMap) (candidateLookup : CellCandidates) : Set<HintDescription> =
     p.boxes
     |> Set.map HBox
-    |> Set.map (pointingPairsPerBox p.cells p.cellHouseCells p.houseCells candidateLookup) 
+    |> Set.map (pointingPairsPerBox p candidateLookup) 
     |> Set.unionMany
 
-let boxLineReductions (p : PuzzleMap) (candidateLookup : CellCandidates) : Set<HintDescription2> =
+let boxLineReductions (p : PuzzleMap) (candidateLookup : CellCandidates) : Set<HintDescription> =
     let rowHints =
         p.rows
         |> Set.map HRow
-        |> Set.map (boxLineReductionsPerHouse p.cells p.cellHouseCells p.houseCells candidateLookup p.cellBox)
+        |> Set.map (boxLineReductionsPerHouse p candidateLookup)
         |> Set.unionMany
 
     let colHints =
         p.columns
         |> Set.map HColumn
-        |> Set.map (boxLineReductionsPerHouse p.cells p.cellHouseCells p.houseCells candidateLookup p.cellBox)
+        |> Set.map (boxLineReductionsPerHouse p candidateLookup)
         |> Set.unionMany
 
     [rowHints; colHints]

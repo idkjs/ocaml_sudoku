@@ -8,7 +8,7 @@ val parseValue : Digit list -> string -> Digit option
 
 val focusCommandParse : PuzzleShape -> string -> Digit option
 
-val focusCommandHintDescription : PuzzleMap -> Digit -> HintDescription2
+val focusCommandHintDescription : PuzzleMap -> Digit -> HintDescription
 
 val setCellCommandParse : PuzzleShape -> string -> PuzzleMap -> Value option
 
@@ -18,4 +18,4 @@ val candidateClearCommandParse : PuzzleShape -> string -> PuzzleMap -> Candidate
 
 val candidateClearCommandCheck : Given -> CellCandidates -> Candidate -> Candidate option
 
-val SupportedHints : Map<string, PuzzleMap -> CellCandidates -> Set<HintDescription2>>
+val SupportedHints : Map<string, PuzzleMap -> CellCandidates -> Set<HintDescription>>

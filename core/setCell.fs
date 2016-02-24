@@ -32,7 +32,7 @@ let setCellDigitTry (cell : Cell) (candidate : Digit) (cellCandidates : CellCand
         |> Some
     else None
 
-let setCellHintDescription (p : PuzzleMap) (setCellValue : Value) : HintDescription2 =
+let setCellHintDescription (p : PuzzleMap) (setCellValue : Value) : HintDescription =
     let hd = 
         { HintDescription.primaryHouses = set []
           secondaryHouses = set []
@@ -41,7 +41,7 @@ let setCellHintDescription (p : PuzzleMap) (setCellValue : Value) : HintDescript
           pointers = set []
           focus = set [] }
                 
-    mhas p.cells p.cellHouseCells p.houseCells hd
+    hd
 
 let setCellStep (p : PuzzleMap) (setCellValue : Value) (solution : Solution) : Solution =
     { solution with current = setCellDigitApply p.cellHouseCells setCellValue solution.current

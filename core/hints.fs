@@ -84,8 +84,9 @@ type HintDescription =
         sb.ToString()
 
 // To draw a cell we may want to display extra information...
-type CellAnnotation = 
-    { setValue : Digit option
+type Annotation = 
+    { given : Digit option
+      setValue : Digit option
       primaryHintHouse : bool
       secondaryHintHouse : bool
       setValueReduction : Digit option
@@ -93,7 +94,7 @@ type CellAnnotation =
       pointers : Set<Digit>
       focus : Set<Digit> }
 
-type CellAnnotations = Map<Cell, CellAnnotation>
+type CellAnnotations = Map<Cell, Annotation>
 
 type HintDescription2 = 
     { primaryHouses : Set<House>
@@ -115,9 +116,9 @@ type HintDescription2 =
 
         sb.ToString()
 
-let mhas (allCells : Set<Cell>) (cellHouseCells : CellHouseCells) (puzzleHouseCells : HouseCells) (hd : HintDescription) : HintDescription2 = 
+let mhas (solution : Solution) (p : PuzzleMap) (hd : HintDescription) : HintDescription2 = 
 
-    let annotationLookup (cell : Cell) : CellAnnotation = 
+    let annotationLookup (cell : Cell) : Annotation = 
 
         let setValue, setValueReduction = 
             match hd.setCellValueAction with
@@ -128,7 +129,7 @@ let mhas (allCells : Set<Cell>) (cellHouseCells : CellHouseCells) (puzzleHouseCe
                     else None
                 
                 let r3 = 
-                    let cells = cellHouseCells.Get setCellValueAction.cell
+                    let cells = p.cellHouseCells.Get setCellValueAction.cell
 
                     if Set.contains cell cells then Some setCellValueAction.digit
                     else None
@@ -156,15 +157,16 @@ let mhas (allCells : Set<Cell>) (cellHouseCells : CellHouseCells) (puzzleHouseCe
         
         let primaryHouseCells =
             hd.primaryHouses
-            |> Set.map puzzleHouseCells.Get
+            |> Set.map p.houseCells.Get
             |> Set.unionMany
 
         let secondaryHouseCells =
             hd.secondaryHouses
-            |> Set.map puzzleHouseCells.Get
+            |> Set.map p.houseCells.Get
             |> Set.unionMany
 
-        { CellAnnotation.setValue = setValue
+        { Annotation.given = None
+          setValue = setValue
           primaryHintHouse = Set.contains cell primaryHouseCells
           secondaryHintHouse = Set.contains cell secondaryHouseCells
           setValueReduction = setValueReduction
@@ -173,7 +175,7 @@ let mhas (allCells : Set<Cell>) (cellHouseCells : CellHouseCells) (puzzleHouseCe
           focus = hd.focus }
 
     let annotations =
-        allCells
+        p.cells
         |> Set.map (fun cell -> (cell, annotationLookup cell))
         |> Map.ofSeq
 

@@ -6,12 +6,11 @@ open core.sudoku
 open core.puzzlemap
 open core.hints
 
-let fullHousePerHouse (allCells : Set<Cell>) (cellHouseCells : CellHouseCells) (puzzleHouseCells : HouseCells) 
-    (candidateLookup : CellCandidates) (primaryHouse : House) : Set<HintDescription2> =
+let fullHousePerHouse (p : PuzzleMap) (candidateLookup : CellCandidates) (primaryHouse : House) : Set<HintDescription> =
 
     let candidateCells =
         primaryHouse
-        |> puzzleHouseCells.Get
+        |> p.houseCells.Get
         |> Set.map (fun cell -> ((candidateLookup.Get cell), cell))
 
     let hhs =
@@ -36,9 +35,8 @@ let fullHousePerHouse (allCells : Set<Cell>) (cellHouseCells : CellHouseCells) (
         else Set.empty
 
     hhs2
-    |> Set.map (mhas allCells cellHouseCells puzzleHouseCells)
 
-let fullHouses (p : PuzzleMap) (candidateLookup : CellCandidates) : Set<HintDescription2> =
+let fullHouses (p : PuzzleMap) (candidateLookup : CellCandidates) : Set<HintDescription> =
     p.houses
-    |> Set.map (fullHousePerHouse p.cells p.cellHouseCells p.houseCells candidateLookup)
+    |> Set.map (fullHousePerHouse p candidateLookup)
     |> Set.unionMany

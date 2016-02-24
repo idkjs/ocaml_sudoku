@@ -97,45 +97,45 @@ let drawDigitCellContents (firstDigit : Digit option) (currentDigit : CellConten
     | None, PencilMarks _ -> CChar '.'
 
 let drawDigitCellContentAnnotations centreCandidate (candidate : Digit) (firstDigit : Digit option) 
-    (currentDigit : CellContents) (currentHintDigitOpt : CellAnnotation option) = 
+    (currentDigit : CellContents) (annotationOpt : Annotation option) = 
     let isCentre = centreCandidate = candidate
 
     match firstDigit, currentDigit with
     | Some _, _ when not isCentre -> CChar ' '
     | Some s, _ -> 
-        match currentHintDigitOpt with
-        | Some currentHintDigit when currentHintDigit.primaryHintHouse -> 
+        match annotationOpt with
+        | Some annotation when annotation.primaryHintHouse -> 
             ColouredString(s.ToString(), ConsoleColor.Cyan)
-        | Some currentHintDigit when currentHintDigit.secondaryHintHouse -> 
+        | Some annotation when annotation.secondaryHintHouse -> 
             ColouredString(s.ToString(), ConsoleColor.DarkBlue)
         | _ -> ColouredString(s.ToString(), ConsoleColor.Blue)
 
     | None, BigNumber _ when not isCentre -> CChar ' '
     | None, BigNumber s -> 
-        match currentHintDigitOpt with
-        | Some currentHintDigit when currentHintDigit.primaryHintHouse -> 
+        match annotationOpt with
+        | Some annotation when annotation.primaryHintHouse -> 
             ColouredString(s.ToString(), ConsoleColor.Yellow)
-        | Some currentHintDigit when currentHintDigit.secondaryHintHouse -> 
+        | Some annotation when annotation.secondaryHintHouse -> 
             ColouredString(s.ToString(), ConsoleColor.DarkRed)
         | _ -> ColouredString(s.ToString(), ConsoleColor.Red)
     | None, PencilMarks candidates -> 
-        match currentHintDigitOpt with
-        | Some currentHintDigit when currentHintDigit.setValue.IsSome && currentHintDigit.setValue.Value = candidate -> 
+        match annotationOpt with
+        | Some annotation when annotation.setValue.IsSome && annotation.setValue.Value = candidate -> 
                 ColouredString(candidate.ToString(), ConsoleColor.Red)
-        | Some currentHintDigit when currentHintDigit.setValue.IsSome && Set.contains candidate candidates -> 
+        | Some annotation when annotation.setValue.IsSome && Set.contains candidate candidates -> 
             ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
-        | Some currentHintDigit when currentHintDigit.setValueReduction.IsSome && currentHintDigit.setValueReduction.Value = candidate && Set.contains candidate candidates -> 
+        | Some annotation when annotation.setValueReduction.IsSome && annotation.setValueReduction.Value = candidate && Set.contains candidate candidates -> 
                 ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
-        | Some currentHintDigit when Set.contains candidate currentHintDigit.reductions -> 
+        | Some annotation when Set.contains candidate annotation.reductions -> 
             ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
-        | Some currentHintDigit when Set.contains candidate currentHintDigit.pointers -> 
+        | Some annotation when Set.contains candidate annotation.pointers -> 
             ColouredString(candidate.ToString(), ConsoleColor.Magenta)
-        | Some currentHintDigit when Set.contains candidate currentHintDigit.focus && Set.contains candidate candidates -> 
+        | Some annotation when Set.contains candidate annotation.focus && Set.contains candidate candidates -> 
             ColouredString(candidate.ToString(), ConsoleColor.Yellow)
-        | Some currentHintDigit when currentHintDigit.primaryHintHouse -> 
+        | Some annotation when annotation.primaryHintHouse -> 
             if Set.contains candidate candidates then ColouredString(candidate.ToString(), ConsoleColor.DarkGreen)
             else CChar ' '
-        | Some currentHintDigit when currentHintDigit.secondaryHintHouse -> 
+        | Some annotation when annotation.secondaryHintHouse -> 
             if Set.contains candidate candidates then ColouredString(candidate.ToString(), ConsoleColor.Green)
             else CChar ' '
         | _ -> 

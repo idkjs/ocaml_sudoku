@@ -15,7 +15,7 @@ let eliminateCandidateApply (candidate : Candidate) : Current -> Current =
 
     Map.map update
 
-let eliminateCandidateHintDescription (p: PuzzleMap) (candidate : Candidate) : HintDescription2 =
+let eliminateCandidateHintDescription (p: PuzzleMap) (candidate : Candidate) : HintDescription =
     let cr = 
         { CandidateReduction.cell = candidate.cell
           candidates = set [ candidate.digit ] }
@@ -28,7 +28,7 @@ let eliminateCandidateHintDescription (p: PuzzleMap) (candidate : Candidate) : H
           pointers = set []
           focus = set [] }
 
-    mhas p.cells p.cellHouseCells p.houseCells hd
+    hd
 
 let eliminateCandidateStep (p : PuzzleMap) (candidate : Candidate) (solution : Solution) : Solution =
     { solution with current = eliminateCandidateApply candidate solution.current

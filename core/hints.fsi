@@ -20,8 +20,9 @@ val first : Set<'a> -> 'a
 val setSubsets : List<'a> -> int -> List<List<'a>>
 
 // To draw a cell we may want to display extra information...
-type CellAnnotation = 
-    { setValue : Digit option
+type Annotation = 
+    { given : Digit option
+      setValue : Digit option
       primaryHintHouse : bool
       secondaryHintHouse : bool
       setValueReduction : Digit option
@@ -29,7 +30,7 @@ type CellAnnotation =
       pointers : Set<Digit>
       focus : Set<Digit> }
 
-type CellAnnotations = Map<Cell, CellAnnotation>
+type CellAnnotations = Map<Cell, Annotation>
 
 type HintDescription2 = 
     { primaryHouses : Set<House>
@@ -38,4 +39,4 @@ type HintDescription2 =
       setCellValueAction : Value option
       annotations : CellAnnotations }
 
-val mhas : Set<Cell> -> CellHouseCells -> HouseCells -> HintDescription -> HintDescription2
+val mhas : Solution -> PuzzleMap -> HintDescription -> HintDescription2

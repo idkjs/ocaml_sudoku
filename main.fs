@@ -26,7 +26,7 @@ let Maximize() =
     ShowWindow(p.MainWindowHandle, 3) //SW_MAXIMIZE = 3
 
 let parse (item : string) (solution : Solution) (puzzle : PuzzleShape) 
-    (candidateLookup : CellCandidates) puzzleDrawFull2 print_last : Solution * Set<HintDescription2> = 
+    (candidateLookup : CellCandidates) puzzleDrawFull2 print_last : Solution * Set<HintDescription> = 
 
     let p = TPuzzleMap puzzle :> PuzzleMap
 
@@ -40,7 +40,8 @@ let parse (item : string) (solution : Solution) (puzzle : PuzzleShape)
         match focusDigitOpt with
         | Some focusDigit ->
             let hd2 = focusCommandHintDescription p focusDigit
-            puzzleDrawFull2 (Some hd2.annotations)
+            let hd3 = mhas solution p hd2
+            puzzleDrawFull2 (Some hd3.annotations)
 
             (solution, Set.empty)
         | None ->
@@ -56,7 +57,8 @@ let parse (item : string) (solution : Solution) (puzzle : PuzzleShape)
                 match setCellValueOpt with
                 | Some setCellValue ->
                     let hd2 = setCellHintDescription p setCellValue
-                    puzzleDrawFull2 (Some hd2.annotations)
+                    let hd3 = mhas solution p hd2
+                    puzzleDrawFull2 (Some hd3.annotations)
 
                     setCellStep p setCellValue solution
 
@@ -81,7 +83,8 @@ let parse (item : string) (solution : Solution) (puzzle : PuzzleShape)
                 match clearCommandOpt with
                 | Some clearCommand ->
                     let hd2 = eliminateCandidateHintDescription p candidate
-                    puzzleDrawFull2 (Some hd2.annotations)
+                    let hd3 = mhas solution p hd2
+                    puzzleDrawFull2 (Some hd3.annotations)
 
                     eliminateCandidateStep p candidate solution
 
@@ -104,11 +107,12 @@ let parse (item : string) (solution : Solution) (puzzle : PuzzleShape)
             (solution, hints)
         | None -> (solution, Set.empty)
 
-let printHint drawHint (index : int) (hint : HintDescription2) : unit = 
+let printHint (solution : Solution) (p : PuzzleMap) drawHint (index : int) (hint : HintDescription) : unit = 
 
     Console.WriteLine("{0}: {1}", index, hint)
 
-    drawHint (Some hint.annotations)
+    let hd3 = mhas solution p hint
+    drawHint (Some hd3.annotations)
 
     Console.Read() |> ignore
 
@@ -224,7 +228,7 @@ let repl (sudoku : string) (puzzle : PuzzleShape) =
     //        forcedSolutions
     //else Console.WriteLine("No solutions")
 
-    let puzzlePrintHint = printHint puzzleDrawCandidateGridAnnotations
+    let puzzlePrintHint = printHint (!solution) p puzzleDrawCandidateGridAnnotations
 
     Seq.tryPick (run solution puzzle puzzleDrawCandidateGridAnnotations print_last puzzlePrintHint) 
         readlines |> ignore

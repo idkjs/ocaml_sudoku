@@ -4,12 +4,13 @@ open core.sudoku
 open core.puzzlemap
 open core.hints
 
-let findHidden (cellHouseCells : CellHouseCells) (candidateLookup : CellCandidates) 
-    (primaryHouseCells : Set<Cell>) (candidateSubset : Set<Digit>) (count : int) (primaryHouse : House) = 
+let findHidden (count : int) (p : PuzzleMap) (candidateLookup : CellCandidates) (candidateSubset : Set<Digit>) (primaryHouse : House) = 
+
+    let primaryHouseCells = p.houseCells.Get primaryHouse
+
     let pairs = 
         primaryHouseCells
-        |> Set.toList
-        |> List.map (fun cell -> 
+        |> Set.map (fun cell -> 
             let candidates = candidateLookup.Get cell
             
             let pointer = 
@@ -25,7 +26,8 @@ let findHidden (cellHouseCells : CellHouseCells) (candidateLookup : CellCandidat
                   candidates = crs }
             
             (pointer, candidateReduction))
-    
+        |> Set.toList
+
     let pointers, candidateReductions = List.unzip pairs
 
     let nonEmptyPointers =
@@ -57,9 +59,8 @@ let findHidden (cellHouseCells : CellHouseCells) (candidateLookup : CellCandidat
                focus = set [] }
     else None
 
-let hiddenNPerHouse (allCells : Set<Cell>) (cellHouseCells : CellHouseCells) (puzzleHouseCells : HouseCells) 
-    (candidateLookup : CellCandidates) (count : int) (house : House) : Set<HintDescription2> = 
-    let cells = puzzleHouseCells.Get house
+let hiddenNPerHouse (count : int) (p : PuzzleMap) (candidateLookup : CellCandidates) (house : House) : Set<HintDescription> = 
+    let cells = p.houseCells.Get house
 
     let houseCandidates =
         cells
@@ -70,13 +71,11 @@ let hiddenNPerHouse (allCells : Set<Cell>) (cellHouseCells : CellHouseCells) (pu
     |> Set.ofList
     |> Set.map
         (fun candidateSubset -> 
-        findHidden cellHouseCells candidateLookup cells (Set.ofList candidateSubset) count house)
+            findHidden count p candidateLookup (Set.ofList candidateSubset) house)
     |> Set.filter Option.isSome
     |> Set.map Option.get
-    |> Set.map (mhas allCells cellHouseCells puzzleHouseCells)
 
-let hiddenN (i : int) (p : PuzzleMap) (candidateLookup : CellCandidates) : Set<HintDescription2> =
+let hiddenN (i : int) (p : PuzzleMap) (candidateLookup : CellCandidates) : Set<HintDescription> =
     p.houses
-    |> Set.map (hiddenNPerHouse p.cells p.cellHouseCells p.houseCells candidateLookup i)
+    |> Set.map (hiddenNPerHouse i p candidateLookup)
     |> Set.unionMany
-
