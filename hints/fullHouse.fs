@@ -6,7 +6,7 @@ open core.sudoku
 open core.puzzlemap
 open core.hints
 
-let fullHousePerHouse (p : PuzzleMap) (candidateLookup : CellCandidates) (primaryHouse : House) : Set<HintDescription> =
+let fullHousePerHouse (p : puzzleMap) (candidateLookup : cellCandidates) (primaryHouse : house) : Set<hintDescription> =
 
     let candidateCells =
         primaryHouse
@@ -25,7 +25,7 @@ let fullHousePerHouse (p : PuzzleMap) (candidateLookup : CellCandidates) (primar
 
             let setCellValue = makeSetCellDigit cell candidate
 
-            [ { HintDescription.primaryHouses = set [ primaryHouse ]
+            [ { hintDescription.primaryHouses = set [ primaryHouse ]
                 secondaryHouses = set []
                 candidateReductions = set []
                 setCellValueAction = Some setCellValue
@@ -36,7 +36,7 @@ let fullHousePerHouse (p : PuzzleMap) (candidateLookup : CellCandidates) (primar
 
     hhs2
 
-let fullHouses (p : PuzzleMap) (candidateLookup : CellCandidates) : Set<HintDescription> =
+let fullHouses (p : puzzleMap) (candidateLookup : cellCandidates) : Set<hintDescription> =
     p.houses
     |> Set.map (fullHousePerHouse p candidateLookup)
     |> Set.unionMany

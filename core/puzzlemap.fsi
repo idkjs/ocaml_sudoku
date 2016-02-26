@@ -2,95 +2,95 @@
 
 open sudoku
 
-val makeColumn : int -> Column
-val makeRow : int -> Row
-val makeStack : int -> Stack
-val makeBand : int -> Band
+val makeColumn : int -> column
+val makeRow : int -> row
+val makeStack : int -> stack
+val makeBand : int -> band
 
-val makeSetCellDigit : Cell -> Digit -> Value
+val makeSetCellDigit : cell -> digit -> value
 
-val makeCandidate : Cell -> Digit -> Candidate
+val makeCandidate : cell -> digit -> candidate
 
-type ColumnCells = Lookup<Column, Set<Cell>>
+type columnCells = lookup<column, Set<cell>>
 
-type RowCells = Lookup<Row, Set<Cell>>
+type rowCells = lookup<row, Set<cell>>
 
-type ColumnStack = Lookup<Column, Stack>
+type columnStack = lookup<column, stack>
 
-type StackColumns = Lookup<Stack, Set<Column>>
+type stackColumns = lookup<stack, Set<column>>
 
-type RowBand = Lookup<Row, Band>
+type rowBand = lookup<row, band>
 
-type BandRows = Lookup<Band, Set<Row>>
+type bandRows = lookup<band, Set<row>>
 
-type CellBox = Lookup<Cell, Box>
+type cellBox = lookup<cell, box>
 
-type BoxCells = Lookup<Box, Set<Cell>>
+type boxCells = lookup<box, Set<cell>>
 
 // for a house, return the cells in it
-type HouseCells = Lookup<House, Set<Cell>>
+type houseCells = lookup<house, Set<cell>>
 
 // for a cell, return the cells in the column, row and box it belongs to
-type CellHouseCells =Lookup<Cell, Set<Cell>>
+type cellHouseCells =lookup<cell, Set<cell>>
 
-type PuzzleMap =
+type puzzleMap =
     // The order they are normally written in
-    abstract member orderedColumns : Column list
-    abstract member orderedRows : Row list
-    abstract member orderedCells : Cell list
-    abstract member orderedStacks : Stack list
-    abstract member orderedBands : Band list
+    abstract member orderedColumns : column list
+    abstract member orderedRows : row list
+    abstract member orderedCells : cell list
+    abstract member orderedStacks : stack list
+    abstract member orderedBands : band list
 
     // for a stack, return the columns in it
-    abstract member orderedStackColumns : Stack -> Column list
+    abstract member orderedStackColumns : stack -> column list
 
     // for a band, return the rows in it
-    abstract member orderedBandRows : Band -> Row list
+    abstract member orderedBandRows : band -> row list
 
-    abstract member columns : Set<Column>
+    abstract member columns : Set<column>
 
-    abstract member rows : Set<Row>
+    abstract member rows : Set<row>
 
-    abstract member cells : Set<Cell>
+    abstract member cells : Set<cell>
 
-    abstract member stacks : Set<Stack>
+    abstract member stacks : Set<stack>
 
-    abstract member bands : Set<Band>
+    abstract member bands : Set<band>
 
-    abstract member boxes : Set<Box>
+    abstract member boxes : Set<box>
 
-    abstract member houses : Set<House>
+    abstract member houses : Set<house>
 
     // for a column, return the cells in it
-    abstract member columnCells : ColumnCells
+    abstract member columnCells : columnCells
 
     // for a row, return the cells in it
-    abstract member rowCells : RowCells
+    abstract member rowCells : rowCells
 
     // for a column, which stack is it in?
-    abstract member columnStack : ColumnStack
+    abstract member columnStack : columnStack
 
     // for a stack, return the columns in it
-    abstract member stackColumns : StackColumns
+    abstract member stackColumns : stackColumns
 
     // for a row, which band is it in?
-    abstract member rowBand : RowBand
+    abstract member rowBand : rowBand
 
     // for a band, return the rows in it
-    abstract member bandRows : BandRows
+    abstract member bandRows : bandRows
 
     // for a cell, which box is it in?
-    abstract member cellBox : CellBox
+    abstract member cellBox : cellBox
 
     // for a box, return the cells in it
-    abstract member boxCells : BoxCells
+    abstract member boxCells : boxCells
 
     // for a house, return the cells in it
-    abstract member houseCells : HouseCells
+    abstract member houseCells : houseCells
 
-    abstract member cellHouseCells : CellHouseCells
+    abstract member cellHouseCells : cellHouseCells
 
-type TPuzzleMap =
-    interface PuzzleMap
+type tPuzzleMap =
+    interface puzzleMap
 
-    new : PuzzleShape -> TPuzzleMap
+    new : puzzleShape -> tPuzzleMap

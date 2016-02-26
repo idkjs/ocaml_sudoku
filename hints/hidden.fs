@@ -4,7 +4,7 @@ open core.sudoku
 open core.puzzlemap
 open core.hints
 
-let findHidden (count : int) (p : PuzzleMap) (candidateLookup : CellCandidates) (candidateSubset : Set<Digit>) (primaryHouse : House) = 
+let findHidden (count : int) (p : puzzleMap) (candidateLookup : cellCandidates) (candidateSubset : Set<digit>) (primaryHouse : house) = 
 
     let primaryHouseCells = p.houseCells.Get primaryHouse
 
@@ -14,7 +14,7 @@ let findHidden (count : int) (p : PuzzleMap) (candidateLookup : CellCandidates) 
             let candidates = candidateLookup.Get cell
             
             let pointer = 
-                { CandidateReduction.cell = cell
+                { candidateReduction.cell = cell
                   candidates = Set.intersect candidates candidateSubset }
             
             let crs = 
@@ -22,7 +22,7 @@ let findHidden (count : int) (p : PuzzleMap) (candidateLookup : CellCandidates) 
                 else set []
             
             let candidateReduction = 
-                { CandidateReduction.cell = cell
+                { candidateReduction.cell = cell
                   candidates = crs }
             
             (pointer, candidateReduction))
@@ -51,7 +51,7 @@ let findHidden (count : int) (p : PuzzleMap) (candidateLookup : CellCandidates) 
                 Some setCellValue
             else None
 
-        Some { HintDescription.primaryHouses = set [ primaryHouse ]
+        Some { hintDescription.primaryHouses = set [ primaryHouse ]
                secondaryHouses = set []
                candidateReductions = Set.ofList nonEmptyCandidateReductions
                setCellValueAction = setCellValue
@@ -59,7 +59,7 @@ let findHidden (count : int) (p : PuzzleMap) (candidateLookup : CellCandidates) 
                focus = set [] }
     else None
 
-let hiddenNPerHouse (count : int) (p : PuzzleMap) (candidateLookup : CellCandidates) (house : House) : Set<HintDescription> = 
+let hiddenNPerHouse (count : int) (p : puzzleMap) (candidateLookup : cellCandidates) (house : house) : Set<hintDescription> = 
     let cells = p.houseCells.Get house
 
     let houseCandidates =
@@ -75,7 +75,7 @@ let hiddenNPerHouse (count : int) (p : PuzzleMap) (candidateLookup : CellCandida
     |> Set.filter Option.isSome
     |> Set.map Option.get
 
-let hiddenN (i : int) (p : PuzzleMap) (candidateLookup : CellCandidates) : Set<HintDescription> =
+let hiddenN (i : int) (p : puzzleMap) (candidateLookup : cellCandidates) : Set<hintDescription> =
     p.houses
     |> Set.map (hiddenNPerHouse i p candidateLookup)
     |> Set.unionMany

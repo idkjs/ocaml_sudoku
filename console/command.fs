@@ -26,7 +26,7 @@ let parseColumnRow what gridSize term =
         None
 
 // find a cell from a pair of strings
-let parseCell (gridSize : int) (cells : Set<Cell>) (termColumn : string) (termRow : string) : Cell option =
+let parseCell (gridSize : int) (cells : Set<cell>) (termColumn : string) (termRow : string) : cell option =
     let parsedCol = parseColumnRow "Column" gridSize termColumn
     let parsedRow = parseColumnRow "Row" gridSize termRow
 
@@ -39,27 +39,27 @@ let parseCell (gridSize : int) (cells : Set<Cell>) (termColumn : string) (termRo
         Console.WriteLine("({0},{1} is not a cell", termColumn, termRow)
         None
 
-let charToCandidate (candidates : Digit list) (trialDigit : char) = 
+let charToCandidate (candidates : digit list) (trialDigit : char) = 
     let compareAlpha (Digit charDigit) = trialDigit = charDigit
     List.tryFind compareAlpha candidates
 
 // find an element of the alphabet
-let parseValue (candidates : Digit list) (term : string) = 
+let parseValue (candidates : digit list) (term : string) = 
     if term.Length = 1 then charToCandidate candidates (term.Chars 0)
     else 
         Console.WriteLine("Expect a single digit, not {0}", term)
         None
 
-let focusCommandParse (s: PuzzleShape) (item : string) : Digit option =
+let focusCommandParse (s: puzzleShape) (item : string) : digit option =
     let terms = item.Split(' ')
     if terms.Length = 2 then 
         parseValue s.alphabet terms.[1]
     else
         None
 
-let focusCommandHintDescription (p : PuzzleMap) (digit : Digit) : HintDescription =
+let focusCommandHintDescription (p : puzzleMap) (digit : digit) : hintDescription =
     let hd = 
-        { HintDescription.primaryHouses = set []
+        { hintDescription.primaryHouses = set []
           secondaryHouses = set []
           candidateReductions = set []
           setCellValueAction = None
@@ -68,7 +68,7 @@ let focusCommandHintDescription (p : PuzzleMap) (digit : Digit) : HintDescriptio
 
     hd
 
-let setCellCommandParse (s: PuzzleShape) (item : string) (p : PuzzleMap) : Value option = 
+let setCellCommandParse (s: puzzleShape) (item : string) (p : puzzleMap) : value option = 
     let terms = item.Split(' ')
     if terms.Length = 4 then 
         let parsedCell = parseCell s.alphabet.Length p.cells terms.[1] terms.[2]
@@ -81,7 +81,7 @@ let setCellCommandParse (s: PuzzleShape) (item : string) (p : PuzzleMap) : Value
         | _ -> None
     else None
 
-let setCellCommandCheck (given : Given) (cellCandidates : CellCandidates) (value : Value) : Value option =
+let setCellCommandCheck (given : given) (cellCandidates : cellCandidates) (value : value) : value option =
     let givenDigitOpt = given.Item value.cell
     match givenDigitOpt with
     | Some givenDigit ->
@@ -96,7 +96,7 @@ let setCellCommandCheck (given : Given) (cellCandidates : CellCandidates) (value
             |> Some
 
 
-let candidateClearCommandParse (s: PuzzleShape) (item : string) (p : PuzzleMap) : Candidate option = 
+let candidateClearCommandParse (s: puzzleShape) (item : string) (p : puzzleMap) : candidate option = 
     let terms = item.Split(' ')
     if terms.Length = 4 then 
         let parsedCell = parseCell s.alphabet.Length p.cells terms.[1] terms.[2]
@@ -111,7 +111,7 @@ let candidateClearCommandParse (s: PuzzleShape) (item : string) (p : PuzzleMap) 
     else 
         None
 
-let candidateClearCommandCheck (given : Given) (cellCandidates : CellCandidates) (candidate : Candidate) : Candidate option =
+let candidateClearCommandCheck (given : given) (cellCandidates : cellCandidates) (candidate : candidate) : candidate option =
     let givenDigitOpt = given.Item candidate.cell
     match givenDigitOpt with
     | Some givenDigit ->
@@ -125,7 +125,7 @@ let candidateClearCommandCheck (given : Given) (cellCandidates : CellCandidates)
             candidate
             |> Some
 
-let SupportedHints : Map<string, PuzzleMap -> CellCandidates -> Set<HintDescription>> =
+let SupportedHints : Map<string, puzzleMap -> cellCandidates -> Set<hintDescription>> =
     [
         ("fh", fullHouses)
         ("hs", hiddenN 1)

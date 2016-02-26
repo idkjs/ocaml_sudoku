@@ -35,7 +35,7 @@ type candidateGridChars<'a> =
       b : candidateGridCharsRow<'a>
       n : 'a }
 
-let printLine (cells : Cell list) (digitTo : Cell -> 'c) : List<'c> = 
+let printLine (cells : cell list) (digitTo : cell -> 'c) : List<'c> = 
     let cons x y = x :: y
     List.foldBack (digitTo >> cons) cells []
 
@@ -67,21 +67,21 @@ let sinterleave (fenceToSeq : 'a -> seq<'c>) (firstPost : seq<'c>) (midPost : se
     }
 
 // Print a column
-let printCell (digitTo : Cell -> 'c) cell = digitTo cell |> Seq.singleton
+let printCell (digitTo : cell -> 'c) cell = digitTo cell |> Seq.singleton
 
-let printColumn (printCell : Cell -> seq<'c>) row column : seq<'c> = 
+let printColumn (printCell : cell -> seq<'c>) row column : seq<'c> = 
     let cell = 
-        { Cell.col = column
+        { cell.col = column
           row = row }
     printCell cell
 
 // Print a stack
-let printStack (columnPrinter : Row -> Column -> seq<'c>) (columnSeparator : seq<'c>) 
-    (puzzleStackColumns : Stack -> Column list) (row : Row) (stack : Stack) = 
+let printStack (columnPrinter : row -> column -> seq<'c>) (columnSeparator : seq<'c>) 
+    (puzzleStackColumns : stack -> column list) (row : row) (stack : stack) = 
     simpleInterleave (columnPrinter row) columnSeparator (puzzleStackColumns stack)
 
 // Print a row
-let printRow (stackPrinter : Stack -> seq<'c>) (gridCharsRow : gridCharsRow<seq<'c>>) eol (stacks : Stack list) = 
+let printRow (stackPrinter : stack -> seq<'c>) (gridCharsRow : gridCharsRow<seq<'c>>) eol (stacks : stack list) = 
     seq { 
         yield! gridCharsRow.l
         yield! simpleInterleave stackPrinter gridCharsRow.m stacks
@@ -90,11 +90,11 @@ let printRow (stackPrinter : Stack -> seq<'c>) (gridCharsRow : gridCharsRow<seq<
     }
 
 // Print a band
-let printBand (rowToSeq : Row -> seq<'c>) (rowSeparator : seq<'c>) (puzzleBandRows : Band -> Row list) (band : Band) = 
+let printBand (rowToSeq : row -> seq<'c>) (rowSeparator : seq<'c>) (puzzleBandRows : band -> row list) (band : band) = 
     simpleInterleave rowToSeq rowSeparator (puzzleBandRows band)
 
 // Print a puzzle grid, supply callback to draw each cell
-let printGrid (puzzleStacks : Stack list) (puzzleStackColumns : Stack -> Column list) (puzzleBands : Band list) (puzzleBandRows : Band -> Row list) (gridChars : gridChars<seq<'c>>) (digitTo : Cell -> 'c) = 
+let printGrid (puzzleStacks : stack list) (puzzleStackColumns : stack -> column list) (puzzleBands : band list) (puzzleBandRows : band -> row list) (gridChars : gridChars<seq<'c>>) (digitTo : cell -> 'c) = 
 
     let doPrintColumn = printColumn (printCell digitTo)
 
@@ -112,9 +112,9 @@ let printGrid (puzzleStacks : Stack list) (puzzleStackColumns : Stack -> Column 
 
     sinterleave doPrintBand t m b Seq.empty puzzleBands
 
-let printCandidateGrid (puzzleStacks : Stack list) (puzzleStackColumns : Stack -> Column list) (puzzleBands : Band list) (puzzleBandRows : Band -> Row list) 
-    (candidateGridChars : candidateGridChars<seq<'c>>) (alphabet : Digit list) 
-    (draw_cell : Cell -> Digit -> 'c) = 
+let printCandidateGrid (puzzleStacks : stack list) (puzzleStackColumns : stack -> column list) (puzzleBands : band list) (puzzleBandRows : band -> row list) 
+    (candidateGridChars : candidateGridChars<seq<'c>>) (alphabet : digit list) 
+    (draw_cell : cell -> digit -> 'c) = 
 
     let d = Seq.collect (konst candidateGridChars.h) (puzzleStackColumns puzzleStacks.Head)
     let i = Seq.collect (konst candidateGridChars.hi) (puzzleStackColumns puzzleStacks.Head)
@@ -136,13 +136,13 @@ let printCandidateGrid (puzzleStacks : Stack list) (puzzleStackColumns : Stack -
     let sss = List.ofSeq ss
     let ssss = List.map List.ofSeq sss
     
-    let doPrintColumn (digits : seq<Digit>) = 
+    let doPrintColumn (digits : seq<digit>) = 
         let doPrintCell cell = Seq.map (fun digit -> draw_cell cell digit) digits
         printColumn doPrintCell
     
-    let doPrintStack (digits : seq<Digit>) = printStack (doPrintColumn digits) candidateGridChars.vi puzzleStackColumns
+    let doPrintStack (digits : seq<digit>) = printStack (doPrintColumn digits) candidateGridChars.vi puzzleStackColumns
 
-    let doPrintRow (row : Row) = 
+    let doPrintRow (row : row) = 
         Seq.collect (fun digits -> printRow (doPrintStack digits row) candidateGridChars.v candidateGridChars.n puzzleStacks) 
             ssss
     let t = printFullHorizontal candidateGridChars.t d

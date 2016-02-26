@@ -4,13 +4,13 @@ open core.sudoku
 open core.puzzlemap
 
 // Load a sudoku given as a single line of gridSize*gridSize characters
-let loadPuzzle (cells : Cell list) (alphabetisedLine : Digit option list) : Map<Cell, Digit option> = 
+let loadPuzzle (cells : cell list) (alphabetisedLine : digit option list) : Map<cell, digit option> = 
     List.zip cells alphabetisedLine
     |> Map.ofList
 
-let load (orderedCells : Cell list) (alphabet : Digit list) (sudoku : char list) 
-    (contentsTransformer : Given -> Current) : Solution = 
-    let charToAlphabet (trialDigit : char) : Digit option = 
+let load (orderedCells : cell list) (alphabet : digit list) (sudoku : char list) 
+    (contentsTransformer : given -> current) : solution = 
+    let charToAlphabet (trialDigit : char) : digit option = 
         let compareAlpha (Digit charDigit) = trialDigit = charDigit
         List.tryFind compareAlpha alphabet
     

@@ -23,11 +23,11 @@ let twoByFourPuzzleSpec =
 
 [<Test>]
 let ``Can make columns``() =
-    let p = TPuzzleMap defaultPuzzleSpec :> PuzzleMap
+    let p = tPuzzleMap defaultPuzzleSpec :> puzzleMap
 
-    let actual : Set<Column> = p.columns
+    let actual : Set<column> = p.columns
 
-    let expected : Set<Column> =
+    let expected : Set<column> =
         [1..9]
         |> Set.ofList
         |> Set.map
@@ -38,11 +38,11 @@ let ``Can make columns``() =
 
 [<Test>]
 let ``Can make rows``() = 
-    let p = TPuzzleMap defaultPuzzleSpec :> PuzzleMap
+    let p = tPuzzleMap defaultPuzzleSpec :> puzzleMap
 
-    let actual : Set<Row> = p.rows
+    let actual : Set<row> = p.rows
 
-    let expected : Set<Row> =
+    let expected : Set<row> =
         [1..9]
         |> Set.ofList
         |> Set.map
@@ -53,11 +53,11 @@ let ``Can make rows``() =
 
 [<Test>]
 let ``Can make cells``() = 
-    let p = TPuzzleMap defaultPuzzleSpec :> PuzzleMap
+    let p = tPuzzleMap defaultPuzzleSpec :> puzzleMap
 
-    let actual : Set<Cell> = p.cells
+    let actual : Set<cell> = p.cells
 
-    let expected : Set<Cell> =
+    let expected : Set<cell> =
         [1..9]
         |> Set.ofList
         |> Set.map
@@ -66,7 +66,7 @@ let ``Can make cells``() =
                 |> Set.ofList
                 |> Set.map
                     (fun c ->
-                        { Cell.col = c |> CColumn
+                        { cell.col = c |> CColumn
                           row = r |> RRow }))
         |> Set.unionMany
 
@@ -74,11 +74,11 @@ let ``Can make cells``() =
 
 [<Test>]
 let ``Can make stacks``() = 
-    let p = TPuzzleMap twoByFourPuzzleSpec :> PuzzleMap
+    let p = tPuzzleMap twoByFourPuzzleSpec :> puzzleMap
 
-    let actual : Set<Stack> = p.stacks
+    let actual : Set<stack> = p.stacks
 
-    let expected : Set<Stack> =
+    let expected : Set<stack> =
         [1..4]
         |> Set.ofList
         |> Set.map
@@ -89,11 +89,11 @@ let ``Can make stacks``() =
 
 [<Test>]
 let ``Can make bands``() = 
-    let p = TPuzzleMap twoByFourPuzzleSpec :> PuzzleMap
+    let p = tPuzzleMap twoByFourPuzzleSpec :> puzzleMap
 
-    let actual : Set<Band> = p.bands
+    let actual : Set<band> = p.bands
 
-    let expected : Set<Band> =
+    let expected : Set<band> =
         [1..2]
         |> Set.ofList
         |> Set.map
@@ -104,11 +104,11 @@ let ``Can make bands``() =
 
 [<Test>]
 let ``Can make boxes``() = 
-    let p = TPuzzleMap twoByFourPuzzleSpec :> PuzzleMap
+    let p = tPuzzleMap twoByFourPuzzleSpec :> puzzleMap
 
-    let actual : Set<Box> = p.boxes
+    let actual : Set<box> = p.boxes
 
-    let expected : Set<Box> =
+    let expected : Set<box> =
         [1..2]
         |> Set.ofList
         |> Set.map
@@ -117,7 +117,7 @@ let ``Can make boxes``() =
                 |> Set.ofList
                 |> Set.map
                     (fun s ->
-                        { Box.stack = s |> SStack
+                        { box.stack = s |> SStack
                           band = b |> BBand }))
         |> Set.unionMany
 
@@ -125,11 +125,11 @@ let ``Can make boxes``() =
 
 [<Test>]
 let ``Can make houses``() = 
-    let p = TPuzzleMap twoByFourPuzzleSpec :> PuzzleMap
+    let p = tPuzzleMap twoByFourPuzzleSpec :> puzzleMap
 
-    let actual : Set<House> = p.houses
+    let actual : Set<house> = p.houses
 
-    let expectedColumns : Set<House> =
+    let expectedColumns : Set<house> =
         [1..9]
         |> Set.ofList
         |> Set.map
@@ -137,7 +137,7 @@ let ``Can make houses``() =
                 c |> CColumn)
         |> Set.map HColumn
 
-    let expectedRows : Set<House> =
+    let expectedRows : Set<house> =
         [1..9]
         |> Set.ofList
         |> Set.map
@@ -145,7 +145,7 @@ let ``Can make houses``() =
                 r |> RRow)
         |> Set.map HRow
 
-    let expectedBoxes : Set<House> =
+    let expectedBoxes : Set<house> =
         [1..2]
         |> Set.ofList
         |> Set.map
@@ -154,7 +154,7 @@ let ``Can make houses``() =
                 |> Set.ofList
                 |> Set.map
                     (fun s ->
-                        { Box.stack = s |> SStack
+                        { box.stack = s |> SStack
                           band = b |> BBand }))
         |> Set.unionMany
         |> Set.map HBox
@@ -168,47 +168,47 @@ let ``Can make houses``() =
 
 [<Test>]
 let ``Get column cells``() = 
-    let p = TPuzzleMap defaultPuzzleSpec :> PuzzleMap
+    let p = tPuzzleMap defaultPuzzleSpec :> puzzleMap
 
-    let actual : Set<Cell> = p.columnCells.Get (2 |> CColumn)
+    let actual : Set<cell> = p.columnCells.Get (2 |> CColumn)
 
-    let expected : Set<Cell> =
+    let expected : Set<cell> =
         [1..9]
         |> Set.ofList
         |> Set.map
             (fun r ->
-                { Cell.col = 2 |> CColumn
+                { cell.col = 2 |> CColumn
                   row = r |> RRow })
 
     Assert.AreEqual(expected, actual)
 
 [<Test>]
 let ``Get row cells``() = 
-    let p = TPuzzleMap defaultPuzzleSpec :> PuzzleMap
+    let p = tPuzzleMap defaultPuzzleSpec :> puzzleMap
 
-    let actual : Set<Cell> = p.rowCells.Get (7 |> RRow)
+    let actual : Set<cell> = p.rowCells.Get (7 |> RRow)
 
-    let expected : Set<Cell> =
+    let expected : Set<cell> =
         [1..9]
         |> Set.ofList
         |> Set.map
             (fun c ->
-                { Cell.col = c |> CColumn
+                { cell.col = c |> CColumn
                   row = 7 |> RRow })
 
     Assert.AreEqual(expected, actual)
 
 [<Test>]
 let ``Get stack for a column``() =
-    let p = TPuzzleMap defaultPuzzleSpec :> PuzzleMap
+    let p = tPuzzleMap defaultPuzzleSpec :> puzzleMap
 
-    let columns : Set<Column> = p.columns
+    let columns : Set<column> = p.columns
 
-    let actual : Set<Stack> =
+    let actual : Set<stack> =
         columns
         |> Set.map p.columnStack.Get
 
-    let expected : Set<Stack> =
+    let expected : Set<stack> =
         [1..3]
         |> Set.ofList
         |> Set.map
@@ -224,11 +224,11 @@ let ``Get stack for a column``() =
 
 [<Test>]
 let ``Get stack columns``() = 
-    let p = TPuzzleMap defaultPuzzleSpec :> PuzzleMap
+    let p = tPuzzleMap defaultPuzzleSpec :> puzzleMap
 
-    let actual : Set<Column> = p.stackColumns.Get (2 |> SStack)
+    let actual : Set<column> = p.stackColumns.Get (2 |> SStack)
 
-    let expected : Set<Column> =
+    let expected : Set<column> =
         [4..6]
         |> Set.ofList
         |> Set.map
@@ -239,15 +239,15 @@ let ``Get stack columns``() =
 
 [<Test>]
 let ``Get band for a row``() =
-    let p = TPuzzleMap defaultPuzzleSpec :> PuzzleMap
+    let p = tPuzzleMap defaultPuzzleSpec :> puzzleMap
 
-    let rows : Set<Row> = p.rows
+    let rows : Set<row> = p.rows
 
-    let actual : Set<Band> =
+    let actual : Set<band> =
         rows
         |> Set.map p.rowBand.Get
 
-    let expected : Set<Band> =
+    let expected : Set<band> =
         [1..3]
         |> Set.ofList
         |> Set.map
@@ -263,11 +263,11 @@ let ``Get band for a row``() =
 
 [<Test>]
 let ``Get band rows``() = 
-    let p = TPuzzleMap defaultPuzzleSpec :> PuzzleMap
+    let p = tPuzzleMap defaultPuzzleSpec :> puzzleMap
 
-    let actual : Set<Row> = p.bandRows.Get (2 |> BBand)
+    let actual : Set<row> = p.bandRows.Get (2 |> BBand)
 
-    let expected : Set<Row> =
+    let expected : Set<row> =
         [4..6]
         |> Set.ofList
         |> Set.map
@@ -278,21 +278,21 @@ let ``Get band rows``() =
 
 [<Test>]
 let ``Get box for a cell``() =
-    let p = TPuzzleMap defaultPuzzleSpec :> PuzzleMap
+    let p = tPuzzleMap defaultPuzzleSpec :> puzzleMap
 
-    let cells : Set<Cell> =
+    let cells : Set<cell> =
         [1..9]
         |> Set.ofList
         |> Set.map
             (fun r ->
-                { Cell.col = 5 |> CColumn
+                { cell.col = 5 |> CColumn
                   row = r |> RRow })
 
-    let actual : Set<Box> =
+    let actual : Set<box> =
         cells
         |> Set.map p.cellBox.Get
 
-    let expected : Set<Box> =
+    let expected : Set<box> =
         [1..3]
         |> Set.ofList
         |> Set.map
@@ -301,7 +301,7 @@ let ``Get box for a cell``() =
                 |> Set.ofList
                 |> Set.map
                     (fun _ ->
-                        { Box.stack = 2 |> SStack
+                        { box.stack = 2 |> SStack
                           band = b |> BBand }))
         |> Set.unionMany
 

@@ -7,26 +7,26 @@ open setCell
 open sudoku
 open puzzlemap
 
-let isPencilMarksCellContents (cellContents : CellContents) : bool =
+let isPencilMarksCellContents (cellContents : cellContents) : bool =
     match cellContents with
     | BigNumber _ -> false
     | PencilMarks _ -> true
 
-let isValidCellContents (cellContents : CellContents) : bool =
+let isValidCellContents (cellContents : cellContents) : bool =
     match cellContents with
     | BigNumber _ -> true
     | PencilMarks candidates -> Set.count candidates > 0
 
-let cellCellContents (solution : Solution) (cell : Cell) : CellContents =
+let cellCellContents (solution : solution) (cell : cell) : cellContents =
     solution.current.Item cell
 
-let isValid (solution : Solution) (cells : Set<Cell>) : bool =
+let isValid (solution : solution) (cells : Set<cell>) : bool =
     cells
     |> Set.map (cellCellContents solution)
     |> Set.forall isValidCellContents
 
-let rec searchr (solution : Solution) (cells : Set<Cell>) (puzzleHouseCellCells : CellHouseCells) (existing : Set<Solution>) : Set<Solution> = 
-    let emptyCell : Cell option =
+let rec searchr (solution : solution) (cells : Set<cell>) (puzzleHouseCellCells : cellHouseCells) (existing : Set<solution>) : Set<solution> = 
+    let emptyCell : cell option =
         cells
         |> Set.toList
         |> List.tryFind ((cellCellContents solution) >> isPencilMarksCellContents)
@@ -76,7 +76,7 @@ let rec searchr (solution : Solution) (cells : Set<Cell>) (puzzleHouseCellCells 
 
     | None -> Set.add solution existing
 
-let solve (solution : Solution) (cells : Set<Cell>) (puzzleHouseCellCells : CellHouseCells) : Set<Solution> =
+let solve (solution : solution) (cells : Set<cell>) (puzzleHouseCellCells : cellHouseCells) : Set<solution> =
     let stopwatch = new Stopwatch()
     stopwatch.Start()
 

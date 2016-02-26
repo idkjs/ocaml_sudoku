@@ -4,9 +4,9 @@ open sudoku
 open puzzlemap
 open hints
 
-let eliminateCandidateApply (candidate : Candidate) : Current -> Current = 
+let eliminateCandidateApply (candidate : candidate) : current -> current = 
 
-    let update (cell : Cell) (cellContents : CellContents) : CellContents = 
+    let update (cell : cell) (cellContents : cellContents) : cellContents = 
         match cellContents with
         | BigNumber _ -> cellContents
         | PencilMarks candidates -> 
@@ -15,13 +15,13 @@ let eliminateCandidateApply (candidate : Candidate) : Current -> Current =
 
     Map.map update
 
-let eliminateCandidateHintDescription (p: PuzzleMap) (candidate : Candidate) : HintDescription =
+let eliminateCandidateHintDescription (p: puzzleMap) (candidate : candidate) : hintDescription =
     let cr = 
-        { CandidateReduction.cell = candidate.cell
+        { candidateReduction.cell = candidate.cell
           candidates = set [ candidate.digit ] }
 
     let hd = 
-        { HintDescription.primaryHouses = set []
+        { hintDescription.primaryHouses = set []
           secondaryHouses = set []
           candidateReductions = set [ cr ]
           setCellValueAction = None
@@ -30,6 +30,6 @@ let eliminateCandidateHintDescription (p: PuzzleMap) (candidate : Candidate) : H
 
     hd
 
-let eliminateCandidateStep (p : PuzzleMap) (candidate : Candidate) (solution : Solution) : Solution =
+let eliminateCandidateStep (p : puzzleMap) (candidate : candidate) (solution : solution) : solution =
     { solution with current = eliminateCandidateApply candidate solution.current
                     steps = (Eliminate candidate) :: solution.steps }

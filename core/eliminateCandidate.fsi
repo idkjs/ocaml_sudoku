@@ -4,6 +4,6 @@ open sudoku
 open puzzlemap
 open hints
 
-val eliminateCandidateHintDescription : PuzzleMap -> Candidate -> HintDescription
+val eliminateCandidateHintDescription : puzzleMap -> candidate -> hintDescription
 
-val eliminateCandidateStep : PuzzleMap -> Candidate -> Solution -> Solution
+val eliminateCandidateStep : puzzleMap -> candidate -> solution -> solution

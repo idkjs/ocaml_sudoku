@@ -4,6 +4,6 @@ open core.sudoku
 open core.puzzlemap
 open core.hints
 
-val xWings : PuzzleMap -> CellCandidates -> Set<HintDescription>
+val xWings : puzzleMap -> cellCandidates -> Set<hintDescription>
 
-val yWings : PuzzleMap -> CellCandidates -> Set<HintDescription>
+val yWings : puzzleMap -> cellCandidates -> Set<hintDescription>

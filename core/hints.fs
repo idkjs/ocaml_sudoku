@@ -57,19 +57,19 @@ let firstOpt (set : Set<'a>) =
     | s :: _ -> Some s
     | _ -> None
 
-type CandidateReduction = 
-    { cell : Cell
-      candidates : Set<Digit> }
+type candidateReduction = 
+    { cell : cell
+      candidates : Set<digit> }
     override this.ToString() = 
         String.Format("Cell {0}, Candidates {1}", this.cell, String.Join(",", Set.toArray this.candidates))
 
-type HintDescription = 
-    { primaryHouses : Set<House>
-      secondaryHouses : Set<House>
-      candidateReductions : Set<CandidateReduction>
-      setCellValueAction : Value option
-      pointers : Set<CandidateReduction>
-      focus : Set<Digit> }
+type hintDescription = 
+    { primaryHouses : Set<house>
+      secondaryHouses : Set<house>
+      candidateReductions : Set<candidateReduction>
+      setCellValueAction : value option
+      pointers : Set<candidateReduction>
+      focus : Set<digit> }
     override this.ToString() = 
         let sb = StringBuilder()
 
@@ -78,30 +78,30 @@ type HintDescription =
         |> ignore
         sb.AppendLine(String.Format("Pointers {0}", String.Join(",", Set.toArray this.pointers))) |> ignore
 
-        Set.iter (fun (cr : CandidateReduction) -> sb.AppendLine(String.Format("  {0}", cr)) |> ignore) 
+        Set.iter (fun (cr : candidateReduction) -> sb.AppendLine(String.Format("  {0}", cr)) |> ignore) 
             this.candidateReductions
 
         sb.ToString()
 
 // To draw a cell we may want to display extra information...
-type Annotation = 
-    { given : Digit option
-      setValue : Digit option
+type annotation = 
+    { given : digit option
+      setValue : digit option
       primaryHintHouse : bool
       secondaryHintHouse : bool
-      setValueReduction : Digit option
-      reductions : Set<Digit>
-      pointers : Set<Digit>
-      focus : Set<Digit> }
+      setValueReduction : digit option
+      reductions : Set<digit>
+      pointers : Set<digit>
+      focus : Set<digit> }
 
-type CellAnnotations = Map<Cell, Annotation>
+type cellAnnotations = Map<cell, annotation>
 
-type HintDescription2 = 
-    { primaryHouses : Set<House>
-      secondaryHouses : Set<House>
-      candidateReductions : Set<CandidateReduction>
-      setCellValueAction : Value option
-      annotations : CellAnnotations }
+type hintDescription2 = 
+    { primaryHouses : Set<house>
+      secondaryHouses : Set<house>
+      candidateReductions : Set<candidateReduction>
+      setCellValueAction : value option
+      annotations : cellAnnotations }
     override this.ToString() = 
         let sb = StringBuilder()
 
@@ -109,16 +109,16 @@ type HintDescription2 =
         sb.AppendLine(String.Format("Secondary Houses {0}", String.Join(",", Set.toArray this.secondaryHouses))) 
         |> ignore
 
-        Set.iter (fun (cr : CandidateReduction) -> sb.AppendLine(String.Format("  {0}", cr)) |> ignore) 
+        Set.iter (fun (cr : candidateReduction) -> sb.AppendLine(String.Format("  {0}", cr)) |> ignore) 
             this.candidateReductions
 
         sb.AppendLine(String.Format("Set Cell {0}", this.setCellValueAction)) |> ignore
 
         sb.ToString()
 
-let mhas (solution : Solution) (p : PuzzleMap) (hd : HintDescription) : HintDescription2 = 
+let mhas (solution : solution) (p : puzzleMap) (hd : hintDescription) : hintDescription2 = 
 
-    let annotationLookup (cell : Cell) : Annotation = 
+    let annotationLookup (cell : cell) : annotation = 
 
         let setValue, setValueReduction = 
             match hd.setCellValueAction with
@@ -165,7 +165,7 @@ let mhas (solution : Solution) (p : PuzzleMap) (hd : HintDescription) : HintDesc
             |> Set.map p.houseCells.Get
             |> Set.unionMany
 
-        { Annotation.given = None
+        { annotation.given = None
           setValue = setValue
           primaryHintHouse = Set.contains cell primaryHouseCells
           secondaryHintHouse = Set.contains cell secondaryHouseCells
@@ -179,7 +179,7 @@ let mhas (solution : Solution) (p : PuzzleMap) (hd : HintDescription) : HintDesc
         |> Set.map (fun cell -> (cell, annotationLookup cell))
         |> Map.ofSeq
 
-    { HintDescription2.primaryHouses = hd.primaryHouses
+    { hintDescription2.primaryHouses = hd.primaryHouses
       secondaryHouses = hd.secondaryHouses
       candidateReductions = hd.candidateReductions
       setCellValueAction = hd.setCellValueAction

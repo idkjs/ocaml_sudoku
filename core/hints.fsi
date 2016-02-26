@@ -3,40 +3,40 @@
 open sudoku
 open puzzlemap
 
-type CandidateReduction = 
-    { cell : Cell
-      candidates : Set<Digit> }
+type candidateReduction = 
+    { cell : cell
+      candidates : Set<digit> }
 
-type HintDescription = 
-    { primaryHouses : Set<House>
-      secondaryHouses : Set<House>
-      candidateReductions : Set<CandidateReduction>
-      setCellValueAction : Value option
-      pointers : Set<CandidateReduction>
-      focus : Set<Digit> }
+type hintDescription = 
+    { primaryHouses : Set<house>
+      secondaryHouses : Set<house>
+      candidateReductions : Set<candidateReduction>
+      setCellValueAction : value option
+      pointers : Set<candidateReduction>
+      focus : Set<digit> }
 
 val first : Set<'a> -> 'a
 
 val setSubsets : List<'a> -> int -> List<List<'a>>
 
 // To draw a cell we may want to display extra information...
-type Annotation = 
-    { given : Digit option
-      setValue : Digit option
+type annotation = 
+    { given : digit option
+      setValue : digit option
       primaryHintHouse : bool
       secondaryHintHouse : bool
-      setValueReduction : Digit option
-      reductions : Set<Digit>
-      pointers : Set<Digit>
-      focus : Set<Digit> }
+      setValueReduction : digit option
+      reductions : Set<digit>
+      pointers : Set<digit>
+      focus : Set<digit> }
 
-type CellAnnotations = Map<Cell, Annotation>
+type cellAnnotations = Map<cell, annotation>
 
-type HintDescription2 = 
-    { primaryHouses : Set<House>
-      secondaryHouses : Set<House>
-      candidateReductions : Set<CandidateReduction>
-      setCellValueAction : Value option
-      annotations : CellAnnotations }
+type hintDescription2 = 
+    { primaryHouses : Set<house>
+      secondaryHouses : Set<house>
+      candidateReductions : Set<candidateReduction>
+      setCellValueAction : value option
+      annotations : cellAnnotations }
 
-val mhas : Solution -> PuzzleMap -> HintDescription -> HintDescription2
+val mhas : solution -> puzzleMap -> hintDescription -> hintDescription2

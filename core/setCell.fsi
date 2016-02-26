@@ -4,10 +4,10 @@ open sudoku
 open puzzlemap
 open hints
 
-val setCellDigitApply : CellHouseCells -> Value -> (Current -> Current)
+val setCellDigitApply : cellHouseCells -> value -> (current -> current)
 
-val setCellDigitTry : Cell -> Digit -> CellCandidates -> Value option
+val setCellDigitTry : cell -> digit -> cellCandidates -> value option
 
-val setCellHintDescription : PuzzleMap -> Value -> HintDescription
+val setCellHintDescription : puzzleMap -> value -> hintDescription
 
-val setCellStep : PuzzleMap -> Value -> Solution -> Solution
+val setCellStep : puzzleMap -> value -> solution -> solution

@@ -4,9 +4,9 @@ open sudoku
 open puzzlemap
 open hints
 
-let setCellDigitApply (cellHouseCells : CellHouseCells) (setCellValue : Value) : Current -> Current = 
+let setCellDigitApply (cellHouseCells : cellHouseCells) (setCellValue : value) : current -> current = 
 
-    let update (cell : Cell) (cellContents : CellContents) : CellContents =
+    let update (cell : cell) (cellContents : cellContents) : cellContents =
         match cellContents with
         | BigNumber _ -> cellContents
         | PencilMarks candidates -> 
@@ -19,12 +19,12 @@ let setCellDigitApply (cellHouseCells : CellHouseCells) (setCellValue : Value) :
 
     Map.map update
 
-type SetCellDigitError = 
-    { cell : Cell
-      candidate : Digit
-      digit : Digit }
+type setCellDigitError = 
+    { cell : cell
+      candidate : digit
+      digit : digit }
 
-let setCellDigitTry (cell : Cell) (candidate : Digit) (cellCandidates : CellCandidates) : Value option = 
+let setCellDigitTry (cell : cell) (candidate : digit) (cellCandidates : cellCandidates) : value option = 
     let candidates = cellCandidates.Get cell
 
     if Set.contains candidate candidates then
@@ -32,9 +32,9 @@ let setCellDigitTry (cell : Cell) (candidate : Digit) (cellCandidates : CellCand
         |> Some
     else None
 
-let setCellHintDescription (p : PuzzleMap) (setCellValue : Value) : HintDescription =
+let setCellHintDescription (p : puzzleMap) (setCellValue : value) : hintDescription =
     let hd = 
-        { HintDescription.primaryHouses = set []
+        { hintDescription.primaryHouses = set []
           secondaryHouses = set []
           candidateReductions = set []
           setCellValueAction = Some setCellValue
@@ -43,6 +43,6 @@ let setCellHintDescription (p : PuzzleMap) (setCellValue : Value) : HintDescript
                 
     hd
 
-let setCellStep (p : PuzzleMap) (setCellValue : Value) (solution : Solution) : Solution =
+let setCellStep (p : puzzleMap) (setCellValue : value) (solution : solution) : solution =
     { solution with current = setCellDigitApply p.cellHouseCells setCellValue solution.current
                     steps = (Placement setCellValue) :: solution.steps }

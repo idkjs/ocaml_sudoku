@@ -4,8 +4,8 @@ open core.sudoku
 open core.puzzlemap
 open core.hints
 
-let findNaked (count : int) (cellHouseCells : CellHouseCells) (candidateLookup : CellCandidates) 
-    (primaryHouseCells : Set<Cell>) (cellSubset : Set<Cell>) (primaryHouse : House) = 
+let findNaked (count : int) (cellHouseCells : cellHouseCells) (candidateLookup : cellCandidates) 
+    (primaryHouseCells : Set<cell>) (cellSubset : Set<cell>) (primaryHouse : house) = 
 
     let subsetDigits =
         cellSubset
@@ -21,7 +21,7 @@ let findNaked (count : int) (cellHouseCells : CellHouseCells) (candidateLookup :
             otherCells
             |> Set.map (fun cell -> 
                 let candidates = candidateLookup.Get cell
-                { CandidateReduction.candidates = Set.intersect subsetDigits candidates
+                { candidateReduction.candidates = Set.intersect subsetDigits candidates
                   cell = cell }) 
         
         let nonEmptyCandidateReductions =
@@ -32,11 +32,11 @@ let findNaked (count : int) (cellHouseCells : CellHouseCells) (candidateLookup :
             cellSubset
             |> Set.map (fun cell -> 
                 let candidates = candidateLookup.Get cell
-                { CandidateReduction.cell = cell
+                { candidateReduction.cell = cell
                   candidates = candidates })
 
         if Set.count nonEmptyCandidateReductions > 0 then 
-            Some { HintDescription.primaryHouses = set [ primaryHouse ]
+            Some { hintDescription.primaryHouses = set [ primaryHouse ]
                    secondaryHouses = set []
                    candidateReductions = nonEmptyCandidateReductions
                    setCellValueAction = None
@@ -46,7 +46,7 @@ let findNaked (count : int) (cellHouseCells : CellHouseCells) (candidateLookup :
         else None
     else None
 
-let nakedNPerHouse (count : int) (p : PuzzleMap) (candidateLookup : CellCandidates)  (primaryHouse : House) : Set<HintDescription> =
+let nakedNPerHouse (count : int) (p : puzzleMap) (candidateLookup : cellCandidates)  (primaryHouse : house) : Set<hintDescription> =
     let primaryHouseCells =
         primaryHouse
         |> p.houseCells.Get
@@ -65,7 +65,7 @@ let nakedNPerHouse (count : int) (p : PuzzleMap) (candidateLookup : CellCandidat
     |> Set.filter Option.isSome
     |> Set.map Option.get
 
-let nakedSingle (p : PuzzleMap) (candidateLookup : CellCandidates) : Set<HintDescription> =
+let nakedSingle (p : puzzleMap) (candidateLookup : cellCandidates) : Set<hintDescription> =
 
     p.cells
     |> Set.map (fun cell -> 
@@ -76,7 +76,7 @@ let nakedSingle (p : PuzzleMap) (candidateLookup : CellCandidates) : Set<HintDes
 
             let setCellValue = makeSetCellDigit cell candidate
 
-            Some { HintDescription.primaryHouses = set []
+            Some { hintDescription.primaryHouses = set []
                    secondaryHouses = set []
                    candidateReductions = set []
                    setCellValueAction = Some setCellValue
@@ -86,7 +86,7 @@ let nakedSingle (p : PuzzleMap) (candidateLookup : CellCandidates) : Set<HintDes
     |> Set.filter Option.isSome
     |> Set.map Option.get
 
-let nakedN (i : int) (p : PuzzleMap) (candidateLookup : CellCandidates) : Set<HintDescription> =
+let nakedN (i : int) (p : puzzleMap) (candidateLookup : cellCandidates) : Set<hintDescription> =
     p.houses
     |> Set.map (nakedNPerHouse i p candidateLookup )
     |> Set.unionMany

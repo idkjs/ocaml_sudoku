@@ -4,18 +4,18 @@ open core.sudoku
 open core.puzzlemap
 open core.hints
 
-val parseValue : Digit list -> string -> Digit option
+val parseValue : digit list -> string -> digit option
 
-val focusCommandParse : PuzzleShape -> string -> Digit option
+val focusCommandParse : puzzleShape -> string -> digit option
 
-val focusCommandHintDescription : PuzzleMap -> Digit -> HintDescription
+val focusCommandHintDescription : puzzleMap -> digit -> hintDescription
 
-val setCellCommandParse : PuzzleShape -> string -> PuzzleMap -> Value option
+val setCellCommandParse : puzzleShape -> string -> puzzleMap -> value option
 
-val setCellCommandCheck : Given -> CellCandidates -> Value -> Value option
+val setCellCommandCheck : given -> cellCandidates -> value -> value option
 
-val candidateClearCommandParse : PuzzleShape -> string -> PuzzleMap -> Candidate option
+val candidateClearCommandParse : puzzleShape -> string -> puzzleMap -> candidate option
 
-val candidateClearCommandCheck : Given -> CellCandidates -> Candidate -> Candidate option
+val candidateClearCommandCheck : given -> cellCandidates -> candidate -> candidate option
 
-val SupportedHints : Map<string, PuzzleMap -> CellCandidates -> Set<HintDescription>>
+val SupportedHints : Map<string, puzzleMap -> cellCandidates -> Set<hintDescription>>

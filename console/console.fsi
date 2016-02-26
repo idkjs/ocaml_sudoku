@@ -8,20 +8,20 @@ open core.hints
 open format
 
 // Things we may want to write
-type ConsoleChar = 
+type consoleChar = 
     | CChar of char
     | CStr of string
     | ColouredChar of char * ConsoleColor
     | ColouredString of string * ConsoleColor
     | NL
 
-val defaultGridChars : gridChars<seq<ConsoleChar>>
+val defaultGridChars : gridChars<seq<consoleChar>>
 
-val defaultCandidateGridChars : candidateGridChars<seq<ConsoleChar>>
+val defaultCandidateGridChars : candidateGridChars<seq<consoleChar>>
 
-val drawConsoleChar : ConsoleChar -> Unit
+val drawConsoleChar : consoleChar -> Unit
 
-val drawDigitCellContents : Digit option -> CellContents -> ConsoleChar
+val drawDigitCellContents : digit option -> cellContents -> consoleChar
 
-val drawDigitCellContentAnnotations : Digit
-     -> Digit -> Digit option -> CellContents -> Annotation option -> ConsoleChar
+val drawDigitCellContentAnnotations : digit
+     -> digit -> digit option -> cellContents -> annotation option -> consoleChar

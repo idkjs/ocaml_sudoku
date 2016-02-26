@@ -8,7 +8,7 @@ open core.hints
 open format
 
 // Things we may want to write
-type ConsoleChar = 
+type consoleChar = 
     | CChar of char
     | CStr of string
     | ColouredChar of char * ConsoleColor
@@ -18,7 +18,7 @@ type ConsoleChar =
 let cs = CChar >> Seq.singleton
 
 // Some predefined characters - for smaller grid
-let defaultGridChars : gridChars<seq<ConsoleChar>> = 
+let defaultGridChars : gridChars<seq<consoleChar>> = 
     { h = cs '─'
       v = 
           { l = cs '│'
@@ -39,7 +39,7 @@ let defaultGridChars : gridChars<seq<ConsoleChar>> =
       n = Seq.singleton NL }
 
 // Some predefined characters - for smaller grid
-let defaultCandidateGridChars : candidateGridChars<seq<ConsoleChar>> = 
+let defaultCandidateGridChars : candidateGridChars<seq<consoleChar>> = 
     { h = cs '═'
       hi = cs '─'
       v = 
@@ -82,7 +82,7 @@ let consoleWriteColor (value : 'a) consoleColour =
     finally
         System.Console.ForegroundColor <- foregroundColour
 
-let drawConsoleChar (consoleChar : ConsoleChar) = 
+let drawConsoleChar (consoleChar : consoleChar) = 
     match consoleChar with
     | CChar c -> Console.Write c
     | CStr c -> Console.Write c
@@ -90,14 +90,14 @@ let drawConsoleChar (consoleChar : ConsoleChar) =
     | ColouredString(c, consoleColour) -> consoleWriteColor c consoleColour
     | NL -> Console.WriteLine ""
 
-let drawDigitCellContents (firstDigit : Digit option) (currentDigit : CellContents) = 
+let drawDigitCellContents (firstDigit : digit option) (currentDigit : cellContents) = 
     match firstDigit, currentDigit with
     | Some s, _ -> ColouredString(s.ToString(), ConsoleColor.Blue)
     | None, BigNumber s -> ColouredString(s.ToString(), ConsoleColor.Red)
     | None, PencilMarks _ -> CChar '.'
 
-let drawDigitCellContentAnnotations centreCandidate (candidate : Digit) (firstDigit : Digit option) 
-    (currentDigit : CellContents) (annotationOpt : Annotation option) = 
+let drawDigitCellContentAnnotations centreCandidate (candidate : digit) (firstDigit : digit option) 
+    (currentDigit : cellContents) (annotationOpt : annotation option) = 
     let isCentre = centreCandidate = candidate
 
     match firstDigit, currentDigit with

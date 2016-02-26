@@ -30,12 +30,12 @@ type candidateGridChars<'a> =
       b : candidateGridCharsRow<'a>
       n : 'a }
 
-val printLine : Cell list -> (Cell -> 'c) -> List<'c>
+val printLine : cell list -> (cell -> 'c) -> List<'c>
 
-val printGrid : Stack list
-     -> (Stack -> Column list) -> Band list -> (Band -> Row list) -> gridChars<seq<'c>> -> (Cell -> 'c) -> seq<'c>
+val printGrid : stack list
+     -> (stack -> column list) -> band list -> (band -> row list) -> gridChars<seq<'c>> -> (cell -> 'c) -> seq<'c>
 
-val printCandidateGrid : Stack list
-     -> (Stack -> Column list)
-     -> Band list
-     -> (Band -> Row list) -> candidateGridChars<seq<'c>> -> Digit list -> (Cell -> Digit -> 'c) -> seq<'c>
+val printCandidateGrid : stack list
+     -> (stack -> column list)
+     -> band list
+     -> (band -> row list) -> candidateGridChars<seq<'c>> -> digit list -> (cell -> digit -> 'c) -> seq<'c>

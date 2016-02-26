@@ -4,11 +4,11 @@ open core.sudoku
 open core.puzzlemap
 open core.hints
 
-let makeHints (candidateLookup : CellCandidates) (puzzleHouseCells : HouseCells) pointerCells primaryHouses secondaryHouses candidate = 
+let makeHints (candidateLookup : cellCandidates) (puzzleHouseCells : houseCells) pointerCells primaryHouses secondaryHouses candidate = 
     let pointers =
         pointerCells
         |> Set.map (fun cell -> 
-            { CandidateReduction.cell = cell
+            { candidateReduction.cell = cell
               candidates = set [ candidate ] }) 
     
     let colCells =
@@ -21,11 +21,11 @@ let makeHints (candidateLookup : CellCandidates) (puzzleHouseCells : HouseCells)
         |> Set.map (fun cell -> (candidateLookup.Get cell, cell))
         |> Set.filter (fun (candidates, _) -> Set.contains candidate candidates)
         |> Set.map (fun (_, cell) -> 
-            { CandidateReduction.cell = cell
+            { candidateReduction.cell = cell
               candidates = set [ candidate ] }) 
 
     if Set.count candidatesReductions > 0 then 
-        Some { HintDescription.candidateReductions = candidatesReductions
+        Some { hintDescription.candidateReductions = candidatesReductions
                primaryHouses = primaryHouses
                secondaryHouses = secondaryHouses
                pointers = pointers
@@ -33,8 +33,8 @@ let makeHints (candidateLookup : CellCandidates) (puzzleHouseCells : HouseCells)
                focus = set [] }
     else None
 
-let xWingsPerHouseCandidate (candidateLookup : CellCandidates) (puzzleHouseCells : HouseCells) 
-    (house1 : House) (house2 : House) houseCandidateCells1 houseCandidateCells2 (candidate : Digit) = 
+let xWingsPerHouseCandidate (candidateLookup : cellCandidates) (puzzleHouseCells : houseCells) 
+    (house1 : house) (house2 : house) houseCandidateCells1 houseCandidateCells2 (candidate : digit) = 
     let hht1 = Set.filter (fun (candidates, _) -> Set.contains candidate candidates) houseCandidateCells1
     let hht2 = Set.filter (fun (candidates, _) -> Set.contains candidate candidates) houseCandidateCells2
 
@@ -48,12 +48,12 @@ let xWingsPerHouseCandidate (candidateLookup : CellCandidates) (puzzleHouseCells
         if Set.count cols1 = 2 && Set.count cols2 = 2 && Set.count cols = 2 then 
             let row1Cells = 
                 Set.map (fun col -> 
-                    { Cell.col = col
+                    { cell.col = col
                       row = row1 }) cols
             
             let row2Cells = 
                 Set.map (fun col -> 
-                    { Cell.col = col
+                    { cell.col = col
                       row = row2 }) cols
             
             let pointerCells = Set.union row1Cells row2Cells
@@ -74,12 +74,12 @@ let xWingsPerHouseCandidate (candidateLookup : CellCandidates) (puzzleHouseCells
         if Set.count rows1 = 2 && Set.count rows2 = 2 && Set.count rows = 2 then 
             let col1Cells = 
                 Set.map (fun row -> 
-                    { Cell.col = col1
+                    { cell.col = col1
                       row = row }) rows
             
             let col2Cells = 
                 Set.map (fun row -> 
-                    { Cell.col = col2
+                    { cell.col = col2
                       row = row }) rows
             
             let pointerCells = Set.union col1Cells col2Cells
@@ -92,8 +92,8 @@ let xWingsPerHouseCandidate (candidateLookup : CellCandidates) (puzzleHouseCells
         else None
     | _ -> None
 
-let xWingsPerHouse (candidateLookup : CellCandidates) (puzzleHouseCells : HouseCells) (house1 : House) 
-    (house2 : House) = 
+let xWingsPerHouse (candidateLookup : cellCandidates) (puzzleHouseCells : houseCells) (house1 : house) 
+    (house2 : house) = 
 
     let candidateCells1 =
         house1
@@ -120,12 +120,12 @@ let xWingsPerHouse (candidateLookup : CellCandidates) (puzzleHouseCells : HouseC
     commonHouseCandidates
     |> Seq.map (xWingsPerHouseCandidate candidateLookup puzzleHouseCells house1 house2 candidateCells1 candidateCells2) 
 
-let xWings (p : PuzzleMap) (candidateLookup : CellCandidates) : Set<HintDescription> =
-    let rows : Set<House> =
+let xWings (p : puzzleMap) (candidateLookup : cellCandidates) : Set<hintDescription> =
+    let rows : Set<house> =
         p.rows
         |> Set.map HRow
 
-    let cols : Set<House> =
+    let cols : Set<house> =
         p.columns
         |> Set.map HColumn
 
@@ -159,8 +159,8 @@ let xWings (p : PuzzleMap) (candidateLookup : CellCandidates) : Set<HintDescript
     [ rowHints; colHints ]
     |> Set.unionMany
 
-let yWingsPerHouseCandidate (candidateLookup : CellCandidates) (puzzleHouseCells : HouseCells) 
-    (house1 : House) (house2 : House) houseCandidateCells1 houseCandidateCells2 (candidate : Digit) = 
+let yWingsPerHouseCandidate (candidateLookup : cellCandidates) (puzzleHouseCells : houseCells) 
+    (house1 : house) (house2 : house) houseCandidateCells1 houseCandidateCells2 (candidate : digit) = 
     let hht1 = Set.filter (fun (candidates, _) -> Set.contains candidate candidates) houseCandidateCells1
     let hht2 = Set.filter (fun (candidates, _) -> Set.contains candidate candidates) houseCandidateCells2
 
@@ -174,12 +174,12 @@ let yWingsPerHouseCandidate (candidateLookup : CellCandidates) (puzzleHouseCells
         if Set.count cols1 = 2 && Set.count cols2 = 2 && Set.count cols = 2 then 
             let row1Cells = 
                 Set.map (fun col -> 
-                    { Cell.col = col
+                    { cell.col = col
                       row = row1 }) cols
             
             let row2Cells = 
                 Set.map (fun col -> 
-                    { Cell.col = col
+                    { cell.col = col
                       row = row2 }) cols
             
             let pointerCells = Set.union row1Cells row2Cells
@@ -199,12 +199,12 @@ let yWingsPerHouseCandidate (candidateLookup : CellCandidates) (puzzleHouseCells
         if Set.count rows1 = 2 && Set.count rows2 = 2 && Set.count rows = 2 then 
             let col1Cells = 
                 Set.map (fun row -> 
-                    { Cell.col = col1
+                    { cell.col = col1
                       row = row }) rows
             
             let col2Cells = 
                 Set.map (fun row -> 
-                    { Cell.col = col2
+                    { cell.col = col2
                       row = row }) rows
             
             let pointerCells = Set.union col1Cells col2Cells
@@ -217,22 +217,22 @@ let yWingsPerHouseCandidate (candidateLookup : CellCandidates) (puzzleHouseCells
         else None
     | _ -> None
 
-let yWingsPerHouse (candidateLookup : CellCandidates) (puzzleHouseCells : HouseCells) (row1 : Row) 
-    (row2 : Row) (col1 : Column) (col2 : Column) = 
+let yWingsPerHouse (candidateLookup : cellCandidates) (puzzleHouseCells : houseCells) (row1 : row) 
+    (row2 : row) (col1 : column) (col2 : column) = 
     let cell11 = 
-        { Cell.col = col1
+        { cell.col = col1
           row = row1 }
     
     let cell12 = 
-        { Cell.col = col2
+        { cell.col = col2
           row = row1 }
     
     let cell21 = 
-        { Cell.col = col1
+        { cell.col = col1
           row = row2 }
     
     let cell22 = 
-        { Cell.col = col2
+        { cell.col = col2
           row = row2 }
     
     let cells = [ cell11; cell12; cell21; cell22 ]
@@ -269,9 +269,9 @@ let yWingsPerHouse (candidateLookup : CellCandidates) (puzzleHouseCells : HouseC
                         if Set.count removee = 1 && ((fst left) <> (fst right)) && 
                             Set.isSubset removee (candidateLookup.Get other) then
 
-                            let candidateReductions = { CandidateReduction.cell = other; candidates = removee }
+                            let candidateReductions = { candidateReduction.cell = other; candidates = removee }
 
-                            let pointers = List.map (fun (cr, cell) -> { CandidateReduction.cell = cell; candidates = cr } ) triple
+                            let pointers = List.map (fun (cr, cell) -> { candidateReduction.cell = cell; candidates = cr } ) triple
                                            |> Set.ofList
 
                             let primaryHouses = 
@@ -285,7 +285,7 @@ let yWingsPerHouse (candidateLookup : CellCandidates) (puzzleHouseCells : HouseC
                                 |> Set.map puzzleHouseCells.Get
                                 |> Set.unionMany
 
-                            Some { HintDescription.candidateReductions = set [ candidateReductions ]
+                            Some { hintDescription.candidateReductions = set [ candidateReductions ]
                                    primaryHouses = primaryHouses
                                    secondaryHouses = set []
                                    pointers = pointers
@@ -297,7 +297,7 @@ let yWingsPerHouse (candidateLookup : CellCandidates) (puzzleHouseCells : HouseC
             else None) triples
     else []
 
-let yWings (p : PuzzleMap) (candidateLookup : CellCandidates) : Set<HintDescription> =
+let yWings (p : puzzleMap) (candidateLookup : cellCandidates) : Set<hintDescription> =
     let hints = 
         Seq.mapi 
             (fun i row1 -> 
