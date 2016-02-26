@@ -3,24 +3,17 @@
 open System
 
 // A sudoku is a square grid of size...
-[<Measure>]
-type size
+type size = int
 
 // containing columns...
-[<Measure>]
-type column
-
 type Column = 
-    | CColumn of int<column>
+    | CColumn of int
     override this.ToString() =
         match this with CColumn c -> String.Format("c{0}", c)
 
 // ... by rows
-[<Measure>]
-type row
-
 type Row = 
-    | RRow of int<row>
+    | RRow of int
     override this.ToString() =
         match this with RRow r -> String.Format("r{0}", r)
 
@@ -34,29 +27,21 @@ type Cell =
 // The grid is divided into boxes,
 // these do not have to be square, but they are
 // all the same size and cover the grid
-[<Measure>]
-type stack
-
 // A column of vertical boxes is a stack
 type Stack = 
-    | SStack of int<stack>
+    | SStack of int
     override this.ToString() =
         match this with SStack s -> String.Format("stk{0}", s)
 
-[<Measure>]
-type boxWidth
-
-[<Measure>]
-type band
+type boxWidth = int
 
 // A row of horizontal boxes is a band
 type Band = 
-    | BBand of int<band>
+    | BBand of int
     override this.ToString() =
         match this with BBand b -> String.Format("bnd{0}", b)
 
-[<Measure>]
-type boxHeight
+type boxHeight = int
 
 // A box is the intersection of a stack and a band
 type Box = 
@@ -91,9 +76,9 @@ type Digit =
 // which is the same as the Digits in the alphabet
 // and also by the width and height of the boxes
 type PuzzleShape = 
-    { size : int<size>
-      boxWidth : int<boxWidth>
-      boxHeight : int<boxHeight>
+    { size : size
+      boxWidth : boxWidth
+      boxHeight : boxHeight
       alphabet : Digit list }
 
 // Whilst working to a solution each cell in the grid

@@ -3,16 +3,16 @@
 open sudoku
 
 let makeColumn (i : int) : Column =
-    i * 1<column> |> CColumn
+    i |> CColumn
 
 let makeRow (i : int) : Row =
-    i * 1<row> |> RRow
+    i |> RRow
 
 let makeStack (i : int) : Stack =
-    i * 1<stack> |> SStack
+    i |> SStack
 
 let makeBand (i : int) : Band =
-    i * 1<band> |> BBand
+    i |> BBand
 
 let makeSetCellDigit (cell : Cell) (digit : Digit) : Value = 
     { Value.cell = cell
@@ -50,73 +50,73 @@ let makeMapLookup<'a, 'b when 'a : comparison and 'b : comparison> (as' : Set<'a
     |> Map.ofSeq
     |> MapLookup<'a, 'b>
 
-let orderedColumns (length : int<size>) : Column list =
+let orderedColumns (length : size) : Column list =
     [ 1..(int) length ]
     |> List.map makeColumn
 
-let orderedRows (length : int<size>) : Row list =
+let orderedRows (length : size) : Row list =
     [ 1..(int) length ]
     |> List.map makeRow
 
-let orderedCells (length : int<size>) : Cell list =
+let orderedCells (length : size) : Cell list =
     [ for row in (orderedRows length) do
           for column in (orderedColumns length) do
               yield { Cell.col = column
                       row = row } ]
 
-let orderedStacks (length : int<size>) (boxWidth : int<boxWidth>) : Stack list =
+let orderedStacks (length : size) (boxWidth : boxWidth) : Stack list =
     [ 1..((int) length / (int) boxWidth) ]
     |> List.map makeStack
 
-let orderedBands (length : int<size>) (boxHeight : int<boxHeight>) : Band list =
+let orderedBands (length : size) (boxHeight : boxHeight) : Band list =
     [ 1..((int) length / (int) boxHeight) ]
     |> List.map makeBand
 
-let orderedStackColumns (boxWidth : int<boxWidth>) (stack : Stack) : Column list =
+let orderedStackColumns (boxWidth : boxWidth) (stack : Stack) : Column list =
     match stack with
     | SStack s ->
         let t = ((int) s - 1) * (int) boxWidth
         [ (t + 1)..(t + (int) boxWidth) ]
         |> List.map makeColumn
 
-let orderedBandRows (boxHeight : int<boxHeight>) (band : Band) : Row list =
+let orderedBandRows (boxHeight : boxHeight) (band : Band) : Row list =
     let c = match band with BBand b -> ((int) b - 1) * (int) boxHeight
 
     [ (c + 1)..(c + (int) boxHeight) ]
     |> List.map makeRow
 
-let columns (length : int<size>) : Set<Column> =
+let columns (length : size) : Set<Column> =
     [ 1..(int) length ]
     |> List.map makeColumn
     |> Set.ofList
 
-let rows (length : int<size>) : Set<Row> =
+let rows (length : size) : Set<Row> =
     [ 1..(int) length ]
     |> List.map makeRow
     |> Set.ofList
 
-let cells (length : int<size>) : Set<Cell> =
+let cells (length : size) : Set<Cell> =
     orderedCells length
     |> Set.ofList
 
-let stacks (length : int<size>) (boxWidth : int<boxWidth>) : Set<Stack> =
+let stacks (length : size) (boxWidth : boxWidth) : Set<Stack> =
     [ 1..((int) length / (int) boxWidth) ]
     |> List.map makeStack
     |> Set.ofList
 
-let bands (length : int<size>) (boxHeight : int<boxHeight>) : Set<Band> =
+let bands (length : size) (boxHeight : boxHeight) : Set<Band> =
     [ 1..((int) length / (int) boxHeight) ]
     |> List.map makeBand
     |> Set.ofList
 
-let boxes (length : int<size>) (boxWidth : int<boxWidth>) (boxHeight : int<boxHeight>) : Set<Box> =
+let boxes (length : size) (boxWidth : boxWidth) (boxHeight : boxHeight) : Set<Box> =
     [ for band in bands length boxHeight do
           for stack in stacks length boxWidth do
               yield { Box.stack = stack
                       band = band } ]
     |> Set.ofList
 
-let houses (length : int<size>) (boxWidth : int<boxWidth>) (boxHeight : int<boxHeight>) : Set<House> =
+let houses (length : size) (boxWidth : boxWidth) (boxHeight : boxHeight) : Set<House> =
     let chs =
         columns length
         |> Set.map HColumn
@@ -132,25 +132,25 @@ let houses (length : int<size>) (boxWidth : int<boxWidth>) (boxHeight : int<boxH
     [ chs; rhs; bhs ]
     |> Set.unionMany
 
-let columnCells (length : int<size>) (column : Column) : Set<Cell> =
+let columnCells (length : size) (column : Column) : Set<Cell> =
     rows length
     |> Set.map (fun row -> 
         { col = column
           row = row })
 
-let rowCells (length : int<size>) (row : Row) : Set<Cell> =
+let rowCells (length : size) (row : Row) : Set<Cell> =
     columns length
     |> Set.map (fun column -> 
         { col = column
           row = row })
 
-let columnStack (boxWidth : int<boxWidth>) (column : Column) : Stack =
+let columnStack (boxWidth : boxWidth) (column : Column) : Stack =
     match column with
     | CColumn c ->
         1 + ((int) c- 1) / (int) boxWidth
         |> makeStack
 
-let stackColumns (boxWidth : int<boxWidth>) (stack : Stack) : Set<Column> =
+let stackColumns (boxWidth : boxWidth) (stack : Stack) : Set<Column> =
     match stack with
     | SStack s ->
         let t = ((int) s - 1) * (int) boxWidth
@@ -158,25 +158,25 @@ let stackColumns (boxWidth : int<boxWidth>) (stack : Stack) : Set<Column> =
         |> List.map makeColumn
         |> Set.ofList
 
-let rowBand (boxHeight : int<boxHeight>) (row : Row) : Band =
+let rowBand (boxHeight : boxHeight) (row : Row) : Band =
     match row with
     | RRow r ->
         1 + ((int) r - 1) / (int) boxHeight
         |> makeBand
 
-let bandRows (boxHeight : int<boxHeight>) (band : Band) : Set<Row> =
+let bandRows (boxHeight : boxHeight) (band : Band) : Set<Row> =
     let c = match band with BBand b -> ((int) b - 1) * (int) boxHeight
     [ (c + 1)..(c + (int) boxHeight) ]
     |> List.map makeRow
     |> Set.ofList
 
-let cellBox (boxWidth : int<boxWidth>) (boxHeight : int<boxHeight>) (cell : Cell) : Box =
+let cellBox (boxWidth : boxWidth) (boxHeight : boxHeight) (cell : Cell) : Box =
     let stack = columnStack boxWidth cell.col
     let band = rowBand boxHeight cell.row
     { Box.band = band
       stack = stack }
 
-let boxCells (boxWidth : int<boxWidth>) (boxHeight : int<boxHeight>) (box : Box) : Set<Cell> =
+let boxCells (boxWidth : boxWidth) (boxHeight : boxHeight) (box : Box) : Set<Cell> =
     let stackColumns = stackColumns boxWidth box.stack
     let bandRows = bandRows boxHeight box.band
 
@@ -186,13 +186,13 @@ let boxCells (boxWidth : int<boxWidth>) (boxHeight : int<boxHeight>) (box : Box)
                       row = row } ]
     |> Set.ofList
 
-let houseCells (length : int<size>) (boxWidth : int<boxWidth>) (boxHeight : int<boxHeight>) (house : House) : Set<Cell> =
+let houseCells (length : size) (boxWidth : boxWidth) (boxHeight : boxHeight) (house : House) : Set<Cell> =
     match house with
     | HColumn c -> columnCells length c
     | HRow r -> rowCells length r
     | HBox b -> boxCells boxWidth boxHeight b
 
-let cellHouseCells (length : int<size>) (boxWidth : int<boxWidth>) (boxHeight : int<boxHeight>) (cell : Cell) : Set<Cell> =
+let cellHouseCells (length : size) (boxWidth : boxWidth) (boxHeight : boxHeight) (cell : Cell) : Set<Cell> =
     let r : Set<Cell> =
         rowCells length cell.row
 

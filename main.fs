@@ -234,9 +234,9 @@ let repl (sudoku : string) (puzzle : PuzzleShape) =
         readlines |> ignore
 
 let defaultPuzzleSpec = 
-    { size = 9 * 1<size>
-      boxWidth = 3 * 1<boxWidth>
-      boxHeight = 3 * 1<boxHeight>
+    { size = 9
+      boxWidth = 3
+      boxHeight = 3
       alphabet = 
           [ for i in 1..9 -> (char) i + '0'
                              |> Digit ] }

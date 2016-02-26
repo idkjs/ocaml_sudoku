@@ -6,17 +6,17 @@ open core.puzzlemap
 open NUnit.Framework
 
 let defaultPuzzleSpec = 
-    { size = 9 * 1<size>
-      boxWidth = 3 * 1<boxWidth>
-      boxHeight = 3 * 1<boxHeight>
+    { size = 9
+      boxWidth = 3
+      boxHeight = 3
       alphabet = 
           [ for i in 1..9 -> (char) i + '0'
                              |> Digit ] }
 
 let twoByFourPuzzleSpec =
-    { size = 8 * 1<size>
-      boxWidth = 2 * 1<boxWidth>
-      boxHeight = 4 * 1<boxHeight>
+    { size = 8
+      boxWidth = 2
+      boxHeight = 4
       alphabet = 
           [ for i in 1..8 -> (char) i + '0'
                              |> Digit ] }
@@ -32,7 +32,7 @@ let ``Can make columns``() =
         |> Set.ofList
         |> Set.map
             (fun c ->
-                c * 1<column> |> CColumn)
+                c |> CColumn)
 
     Assert.AreEqual(expected, actual)
 
@@ -47,7 +47,7 @@ let ``Can make rows``() =
         |> Set.ofList
         |> Set.map
             (fun r ->
-                r * 1<row> |> RRow)
+                r |> RRow)
 
     Assert.AreEqual(expected, actual)
 
@@ -66,8 +66,8 @@ let ``Can make cells``() =
                 |> Set.ofList
                 |> Set.map
                     (fun c ->
-                        { Cell.col = (c * 1<column> |> CColumn)
-                          row = (r * 1<row> |> RRow) }))
+                        { Cell.col = c |> CColumn
+                          row = r |> RRow }))
         |> Set.unionMany
 
     Assert.AreEqual(expected, actual)
@@ -83,7 +83,7 @@ let ``Can make stacks``() =
         |> Set.ofList
         |> Set.map
             (fun s ->
-                s * 1<stack> |> SStack)
+                s |> SStack)
 
     Assert.AreEqual(expected, actual)
 
@@ -98,7 +98,7 @@ let ``Can make bands``() =
         |> Set.ofList
         |> Set.map
             (fun b ->
-                b * 1<band> |> BBand )
+                b |> BBand )
 
     Assert.AreEqual(expected, actual)
 
@@ -117,8 +117,8 @@ let ``Can make boxes``() =
                 |> Set.ofList
                 |> Set.map
                     (fun s ->
-                        { Box.stack = s * 1<stack> |> SStack
-                          band = b * 1<band> |> BBand }))
+                        { Box.stack = s |> SStack
+                          band = b |> BBand }))
         |> Set.unionMany
 
     Assert.AreEqual(expected, actual)
@@ -134,7 +134,7 @@ let ``Can make houses``() =
         |> Set.ofList
         |> Set.map
             (fun c ->
-                c * 1<column> |> CColumn)
+                c |> CColumn)
         |> Set.map HColumn
 
     let expectedRows : Set<House> =
@@ -142,7 +142,7 @@ let ``Can make houses``() =
         |> Set.ofList
         |> Set.map
             (fun r ->
-                r * 1<row> |> RRow)
+                r |> RRow)
         |> Set.map HRow
 
     let expectedBoxes : Set<House> =
@@ -154,8 +154,8 @@ let ``Can make houses``() =
                 |> Set.ofList
                 |> Set.map
                     (fun s ->
-                        { Box.stack = s * 1<stack> |> SStack
-                          band = b * 1<band> |> BBand }))
+                        { Box.stack = s |> SStack
+                          band = b |> BBand }))
         |> Set.unionMany
         |> Set.map HBox
 
@@ -170,15 +170,15 @@ let ``Can make houses``() =
 let ``Get column cells``() = 
     let p = TPuzzleMap defaultPuzzleSpec :> PuzzleMap
 
-    let actual : Set<Cell> = p.columnCells.Get (2 * 1<column> |> CColumn)
+    let actual : Set<Cell> = p.columnCells.Get (2 |> CColumn)
 
     let expected : Set<Cell> =
         [1..9]
         |> Set.ofList
         |> Set.map
             (fun r ->
-                { Cell.col = (2 * 1<column> |> CColumn)
-                  row = (r * 1<row> |> RRow) })
+                { Cell.col = 2 |> CColumn
+                  row = r |> RRow })
 
     Assert.AreEqual(expected, actual)
 
@@ -186,15 +186,15 @@ let ``Get column cells``() =
 let ``Get row cells``() = 
     let p = TPuzzleMap defaultPuzzleSpec :> PuzzleMap
 
-    let actual : Set<Cell> = p.rowCells.Get (7 * 1<row> |> RRow)
+    let actual : Set<Cell> = p.rowCells.Get (7 |> RRow)
 
     let expected : Set<Cell> =
         [1..9]
         |> Set.ofList
         |> Set.map
             (fun c ->
-                { Cell.col = (c * 1<column> |> CColumn)
-                  row = (7 * 1<row> |> RRow) })
+                { Cell.col = c |> CColumn
+                  row = 7 |> RRow })
 
     Assert.AreEqual(expected, actual)
 
@@ -217,7 +217,7 @@ let ``Get stack for a column``() =
                 |> Set.ofList
                 |> Set.map
                     (fun _ ->
-                        s * 1<stack> |> SStack))
+                        s |> SStack))
         |> Set.unionMany
 
     Assert.AreEqual(expected, actual)
@@ -226,14 +226,14 @@ let ``Get stack for a column``() =
 let ``Get stack columns``() = 
     let p = TPuzzleMap defaultPuzzleSpec :> PuzzleMap
 
-    let actual : Set<Column> = p.stackColumns.Get (2 * 1<stack> |> SStack)
+    let actual : Set<Column> = p.stackColumns.Get (2 |> SStack)
 
     let expected : Set<Column> =
         [4..6]
         |> Set.ofList
         |> Set.map
             (fun c ->
-                c * 1<column> |> CColumn)
+                c |> CColumn)
 
     Assert.AreEqual(expected, actual)
 
@@ -256,7 +256,7 @@ let ``Get band for a row``() =
                 |> Set.ofList
                 |> Set.map
                     (fun _ ->
-                        b * 1<band> |> BBand))
+                        b |> BBand))
         |> Set.unionMany
 
     Assert.AreEqual(expected, actual)
@@ -265,14 +265,14 @@ let ``Get band for a row``() =
 let ``Get band rows``() = 
     let p = TPuzzleMap defaultPuzzleSpec :> PuzzleMap
 
-    let actual : Set<Row> = p.bandRows.Get (2 * 1<band> |> BBand)
+    let actual : Set<Row> = p.bandRows.Get (2 |> BBand)
 
     let expected : Set<Row> =
         [4..6]
         |> Set.ofList
         |> Set.map
             (fun r ->
-                r * 1<row> |> RRow)
+                r |> RRow)
 
     Assert.AreEqual(expected, actual)
 
@@ -285,8 +285,8 @@ let ``Get box for a cell``() =
         |> Set.ofList
         |> Set.map
             (fun r ->
-                { Cell.col = (5 * 1<column> |> CColumn)
-                  row = (r * 1<row> |> RRow) })
+                { Cell.col = 5 |> CColumn
+                  row = r |> RRow })
 
     let actual : Set<Box> =
         cells
@@ -301,8 +301,8 @@ let ``Get box for a cell``() =
                 |> Set.ofList
                 |> Set.map
                     (fun _ ->
-                        { Box.stack = 2 * 1<stack> |> SStack
-                          band = (b * 1<band>) |> BBand }))
+                        { Box.stack = 2 |> SStack
+                          band = b |> BBand }))
         |> Set.unionMany
 
     Assert.AreEqual(expected, actual)
