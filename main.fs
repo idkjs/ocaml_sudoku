@@ -1,4 +1,4 @@
-﻿module main
+module main
 
 open System
 open System.Diagnostics
@@ -23,7 +23,7 @@ extern bool ShowWindow(System.IntPtr hWnd, int cmdShow)
 
 let Maximize() = 
     let p = Process.GetCurrentProcess()
-    ShowWindow(p.MainWindowHandle, 3) //SW_MAXIMIZE = 3
+    ShowWindow(p.MainWindowHandle, 3) (* SW_MAXIMIZE = 3 *)
 
 let parse (item : string) (solution : solution) (puzzle : puzzleShape) 
     (candidateLookup : cellCandidates) puzzleDrawFull2 print_last : solution * Set<hintDescription> = 
@@ -171,7 +171,7 @@ let repl (sudoku : string) (puzzle : puzzleShape) =
         printCandidateGrid p.orderedStacks p.orderedStackColumns p.orderedBands p.orderedBandRows defaultCandidateGridChars 
             puzzle.alphabet
 
-    // Print a Digit option, with colours
+    (* Print a Digit option, with colours *)
     let puzzleDrawCell (solution : solution) (cell : cell) : consoleChar = 
         drawDigitCellContents (solution.given.Item cell) (solution.current.Item cell)
 
@@ -220,13 +220,13 @@ let repl (sudoku : string) (puzzle : puzzleShape) =
 
     puzzleDrawGrid()
 
-    //let forcedSolutions = solve (!solution) p.cells p.cellHouseCells
-    //puzzleDrawGrid()
-    //if List.length forcedSolutions > 0 then
-    //    List.iter
-    //        (fun solve -> Seq.iter drawConsoleChar (puzzlePrintGrid (puzzleDrawCell solve)))
-    //        forcedSolutions
-    //else Console.WriteLine("No solutions")
+    (* let forcedSolutions = solve (!solution) p.cells p.cellHouseCells
+    puzzleDrawGrid()
+    if List.length forcedSolutions > 0 then
+        List.iter
+            (fun solve -> Seq.iter drawConsoleChar (puzzlePrintGrid (puzzleDrawCell solve)))
+            forcedSolutions
+    else Console.WriteLine("No solutions") *)
 
     let puzzlePrintHint = printHint (!solution) p puzzleDrawCandidateGridAnnotations
 
@@ -252,31 +252,31 @@ let defaultPuzzleSpec = {
 
 Maximize() |> ignore
 
-// Input puzzle
+(* Input puzzle *)
 Console.WriteLine "1........2........3........4........5........6........7........8........9........"
 Console.WriteLine "123456789123456789123456789123456789123456789123456789123456789123456789123456789"
 
-//let example = "410230000700580040000000020190000700380000016000008400000806005031050000000090800"
+(*let example = "410230000700580040000000020190000700380000016000008400000806005031050000000090800" *)
 let example = "000105000140000670080002400063070010900000003010090520007200080026000035000409000"
 
-// FullHouse
-//let example = "800739006370465000040182009000600040054300610060500000400853070000271064100940002"
-//let example = "801006094300009080970080500547062030632000050198375246083620915065198000219500008"
-//let example = "2...3..7.9...1..8.5...6.9.4653871492489325761721496.....5.8.....6..4.....9..5...3"
+(* FullHouse *)
+(*let example = "800739006370465000040182009000600040054300610060500000400853070000271064100940002" *)
+(*let example = "801006094300009080970080500547062030632000050198375246083620915065198000219500008" *)
+(*let example = "2...3..7.9...1..8.5...6.9.4653871492489325761721496.....5.8.....6..4.....9..5...3" *)
 
-// ht
-//let example = "528600049136490025794205630000100200007826300002509060240300976809702413070904582"
-// hq
-//let example = "...3742......82.4..............3.8266...9...48.5.4697.547.2...9......4.5.1.45.7.2"
-// http://www.sudokuwiki.org/Hidden_Candidates hq
-//let example = "65..87.24...649.5..4..25...57.438.61...5.1...31.9.2.85...89..1....213...13.75..98"
-//let example = "000500000425090001800010020500000000019000460000000002090040003200060807000001600"
+(* ht *)
+(*let example = "528600049136490025794205630000100200007826300002509060240300976809702413070904582" *)
+(* hq *)
+(*let example = "...3742......82.4..............3.8266...9...48.5.4697.547.2...9......4.5.1.45.7.2" *)
+(* http://www.sudokuwiki.org/Hidden_Candidates hq *)
+(*let example = "65..87.24...649.5..4..25...57.438.61...5.1...31.9.2.85...89..1....213...13.75..98" *)
+(*let example = "000500000425090001800010020500000000019000460000000002090040003200060807000001600" *)
 
-// http://www.sudokuwiki.org/X_Wing_Strategy
-//let example = "100000569492056108056109240009640801064010000218035604040500016905061402621000005"
-// http://www.sudokuwiki.org/Y_Wing_Strategy
-//let example = "900240000050690231020050090090700320002935607070002900069020073510079062207086009"
-//let example = "273005081810302004009010200100953728792186345538724196021060500300201869080530412"
+(* http://www.sudokuwiki.org/X_Wing_Strategy *)
+(*let example = "100000569492056108056109240009640801064010000218035604040500016905061402621000005" *)
+(* http://www.sudokuwiki.org/Y_Wing_Strategy *)
+(*let example = "900240000050690231020050090090700320002935607070002900069020073510079062207086009" *)
+(*let example = "273005081810302004009010200100953728792186345538724196021060500300201869080530412" *)
 
 
 repl example defaultPuzzleSpec

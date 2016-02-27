@@ -1,4 +1,4 @@
-﻿module hints.naked
+module hints.naked
 
 open core.sudoku
 open core.puzzlemap

@@ -1,4 +1,4 @@
-﻿module console.console
+module console.console
 
 open System
 
@@ -7,7 +7,7 @@ open core.hints
 
 open format
 
-// Things we may want to write
+(* Things we may want to write *)
 type consoleChar = 
     | CChar of char
     | CStr of string
@@ -17,7 +17,7 @@ type consoleChar =
 
 let cs = CChar >> Seq.singleton
 
-// Some predefined characters - for smaller grid
+(* Some predefined characters - for smaller grid *)
 let defaultGridChars : gridChars<seq<consoleChar>> = 
     { h = cs '─'
       v = 
@@ -38,7 +38,7 @@ let defaultGridChars : gridChars<seq<consoleChar>> =
             r = cs '┘' }
       n = Seq.singleton NL }
 
-// Some predefined characters - for smaller grid
+(* Some predefined characters - for smaller grid *)
 let defaultCandidateGridChars : candidateGridChars<seq<consoleChar>> = 
     { h = cs '═'
       hi = cs '─'
@@ -73,7 +73,7 @@ let defaultCandidateGridChars : candidateGridChars<seq<consoleChar>> =
                   r = cs '╝' } }
       n = Seq.singleton NL }
 
-// Change the console colour to write a string
+(* Change the console colour to write a string *)
 let consoleWriteColor (value : 'a) consoleColour = 
     let foregroundColour = System.Console.ForegroundColor
     try 

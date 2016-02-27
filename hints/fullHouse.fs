@@ -1,7 +1,7 @@
-﻿module hints.fullHouse
+module hints.fullHouse
 
-// Full House means:
-// For a house there is only one cell that is neither given nor set i.e. has candidates
+(* Full House means:
+ For a house there is only one cell that is neither given nor set i.e. has candidates *)
 open core.sudoku
 open core.puzzlemap
 open core.hints

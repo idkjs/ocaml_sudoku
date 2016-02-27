@@ -1,4 +1,4 @@
-﻿module core.force
+module core.force
 
 open System
 open System.Diagnostics
@@ -52,10 +52,10 @@ let rec searchr (solution : solution) (cells : Set<cell>) (puzzleHouseCellCells 
                         current = current
                         steps = (Placement setCellValue) :: solution.steps }
 
-                //Console.WriteLine ("Trying {0}", setCellValue)
+                (*Console.WriteLine ("Trying {0}", setCellValue) *)
 
                 if isValid newSolution cells then
-                    //Console.WriteLine(">")
+                    (*Console.WriteLine(">")*)
                     searchr newSolution cells puzzleHouseCellCells existing
                 else
                     (*

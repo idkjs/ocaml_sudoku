@@ -1,4 +1,4 @@
-﻿module console.command
+module console.command
 
 open System
 
@@ -17,7 +17,7 @@ open hints.wing
 open console.console
 open console.format
 
-// find a column or row
+(* find a column or row *)
 let parseColumnRow what gridSize term = 
     match Int32.TryParse term with
     | (true, col) when col >= 1 && col <= gridSize -> Some col
@@ -25,7 +25,7 @@ let parseColumnRow what gridSize term =
         Console.WriteLine("{0} must be a number between 1 and {1}", what, gridSize)
         None
 
-// find a cell from a pair of strings
+(* find a cell from a pair of strings *)
 let parseCell (gridSize : int) (cells : Set<cell>) (termColumn : string) (termRow : string) : cell option =
     let parsedCol = parseColumnRow "Column" gridSize termColumn
     let parsedRow = parseColumnRow "Row" gridSize termRow
@@ -43,7 +43,7 @@ let charToCandidate (candidates : digit list) (trialDigit : char) =
     let compareAlpha (Digit charDigit) = trialDigit = charDigit
     List.tryFind compareAlpha candidates
 
-// find an element of the alphabet
+(* find an element of the alphabet *)
 let parseValue (candidates : digit list) (term : string) = 
     if term.Length = 1 then charToCandidate candidates (term.Chars 0)
     else 

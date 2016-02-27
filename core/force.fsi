@@ -1,4 +1,4 @@
-﻿module core.force
+module core.force
 
 open sudoku
 open puzzlemap

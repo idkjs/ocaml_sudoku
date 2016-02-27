@@ -1,4 +1,4 @@
-﻿module hints.intersection
+module hints.intersection
 
 open core.sudoku
 open core.puzzlemap

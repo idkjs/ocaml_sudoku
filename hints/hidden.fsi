@@ -1,4 +1,4 @@
-﻿module hints.hidden
+module hints.hidden
 
 open core.sudoku
 open core.puzzlemap

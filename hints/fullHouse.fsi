@@ -1,4 +1,4 @@
-﻿module hints.fullHouse
+module hints.fullHouse
 
 open core.sudoku
 open core.puzzlemap

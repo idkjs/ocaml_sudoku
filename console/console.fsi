@@ -1,4 +1,4 @@
-﻿module console.console
+module console.console
 
 open System
 
@@ -7,7 +7,7 @@ open core.hints
 
 open format
 
-// Things we may want to write
+(* Things we may want to write *)
 type consoleChar = 
     | CChar of char
     | CStr of string

@@ -1,4 +1,4 @@
-﻿module console.format
+module console.format
 
 open core.sudoku
 

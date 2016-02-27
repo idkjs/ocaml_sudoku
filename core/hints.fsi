@@ -19,7 +19,7 @@ val first : Set<'a> -> 'a
 
 val setSubsets : List<'a> -> int -> List<List<'a>>
 
-// To draw a cell we may want to display extra information...
+(* To draw a cell we may want to display extra information... *)
 type annotation = 
     { given : digit option
       setValue : digit option

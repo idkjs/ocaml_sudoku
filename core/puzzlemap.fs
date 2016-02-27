@@ -38,10 +38,10 @@ type cellBox = lookup<cell, box>
 
 type boxCells = lookup<box, Set<cell>>
 
-// for a house, return the cells in it
+(* for a house, return the cells in it *)
 type houseCells = lookup<house, Set<cell>>
 
-// for a cell, return the cells in the column, row and box it belongs to
+(* for a cell, return the cells in the column, row and box it belongs to *)
 type cellHouseCells =lookup<cell, Set<cell>>
 
 let makeMapLookup<'a, 'b when 'a : comparison and 'b : comparison> (as' : Set<'a>) (fn : 'a -> 'b) : mapLookup<'a, 'b> =
@@ -207,17 +207,17 @@ let cellHouseCells (length : size) (boxWidth : boxWidth) (boxHeight : boxHeight)
 
 
 type puzzleMap =
-    // The order they are normally written in
+    (* The order they are normally written in *)
     abstract member orderedColumns : column list
     abstract member orderedRows : row list
     abstract member orderedCells : cell list
     abstract member orderedStacks : stack list
     abstract member orderedBands : band list
 
-    // for a stack, return the columns in it
+    (* for a stack, return the columns in it *)
     abstract member orderedStackColumns : stack -> column list
 
-    // for a band, return the rows in it
+    (* for a band, return the rows in it *)
     abstract member orderedBandRows : band -> row list
 
     abstract member columns : Set<column>
@@ -234,31 +234,31 @@ type puzzleMap =
 
     abstract member houses : Set<house>
 
-    // for a column, return the cells in it
+    (* for a column, return the cells in it *)
     abstract member columnCells : columnCells
 
-    // for a row, return the cells in it
+    (* for a row, return the cells in it *)
     abstract member rowCells : rowCells
 
-    // for a column, which stack is it in?
+    (* for a column, which stack is it in? *)
     abstract member columnStack : columnStack
 
-    // for a stack, return the columns in it
+    (* for a stack, return the columns in it *)
     abstract member stackColumns : stackColumns
 
-    // for a row, which band is it in?
+    (* for a row, which band is it in? *)
     abstract member rowBand : rowBand
 
-    // for a band, return the rows in it
+    (* for a band, return the rows in it *)
     abstract member bandRows : bandRows
 
-    // for a cell, which box is it in?
+    (* for a cell, which box is it in? *)
     abstract member cellBox : cellBox
 
-    // for a box, return the cells in it
+    (* for a box, return the cells in it *)
     abstract member boxCells : boxCells
 
-    // for a house, return the cells in it
+    (* for a house, return the cells in it *)
     abstract member houseCells : houseCells
 
     abstract member cellHouseCells : cellHouseCells
@@ -321,17 +321,17 @@ type tPuzzleMap(puzzleShape : puzzleShape) =
 
     interface puzzleMap with
 
-        // The order they are normally written in
+        (* The order they are normally written in *)
         member this.orderedColumns : column list = _orderedColumns
         member this.orderedRows : row list = _orderedRows
         member this.orderedCells : cell list = _orderedCells
         member this.orderedStacks : stack list = _orderedStacks
         member this.orderedBands : band list = _orderedBands
 
-        // for a stack, return the columns in it
+        (* for a stack, return the columns in it *)
         member this.orderedStackColumns (stack : stack) : column list = orderedStackColumns puzzleShape.boxWidth stack
 
-        // for a band, return the rows in it
+        (* for a band, return the rows in it *)
         member this.orderedBandRows (band : band) : row list = orderedBandRows puzzleShape.boxHeight band
 
         member this.columns : Set<column> = _columns
@@ -348,31 +348,31 @@ type tPuzzleMap(puzzleShape : puzzleShape) =
 
         member this.houses : Set<house> = _houses
 
-        // for a column, return the cells in it
+        (* for a column, return the cells in it *)
         member this.columnCells : columnCells = _columnCells
 
-        // for a row, return the cells in it
+        (* for a row, return the cells in it *)
         member this.rowCells : rowCells = _rowCells
 
-        // for a column, which stack is it in?
+        (* for a column, which stack is it in? *)
         member this.columnStack : columnStack = _columnStack
 
-        // for a stack, return the columns in it
+        (* for a stack, return the columns in it *)
         member this.stackColumns : stackColumns = _stackColumns
 
-        // for a row, which band is it in?
+        (* for a row, which band is it in? *)
         member this.rowBand : rowBand = _rowBand
 
-        // for a band, return the rows in it
+        (* for a band, return the rows in it *)
         member this.bandRows : bandRows = _bandRows
 
-        // for a cell, which box is it in?
+        (* for a cell, which box is it in? *)
         member this.cellBox : cellBox = _cellBox
 
-        // for a box, return the cells in it
+        (* for a box, return the cells in it *)
         member this.boxCells : boxCells = _boxCells
 
-        // for a house, return the cells in it
+        (* for a house, return the cells in it *)
         member this.houseCells : houseCells = _houseCells
 
         member this.cellHouseCells : cellHouseCells = _cellHouseCells

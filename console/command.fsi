@@ -1,4 +1,4 @@
-﻿module console.command
+module console.command
 
 open core.sudoku
 open core.puzzlemap

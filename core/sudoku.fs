@@ -1,4 +1,4 @@
-﻿(*F#
+(*F#
 module core.sudoku
 F#*)
 open System

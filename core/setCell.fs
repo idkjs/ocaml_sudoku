@@ -1,4 +1,4 @@
-﻿module core.setCell
+module core.setCell
 
 open sudoku
 open puzzlemap

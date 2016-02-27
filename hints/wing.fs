@@ -1,4 +1,4 @@
-﻿module hints.wing
+module hints.wing
 
 open core.sudoku
 open core.puzzlemap

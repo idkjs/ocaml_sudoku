@@ -83,7 +83,7 @@ type hintDescription =
 
         sb.ToString()
 
-// To draw a cell we may want to display extra information...
+(* To draw a cell we may want to display extra information... *)
 type annotation = 
     { given : digit option
       setValue : digit option

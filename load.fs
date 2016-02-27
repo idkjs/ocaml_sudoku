@@ -3,7 +3,7 @@ module load
 open core.sudoku
 open core.puzzlemap
 
-// Load a sudoku given as a single line of gridSize*gridSize characters
+(* Load a sudoku given as a single line of gridSize*gridSize characters *)
 let loadPuzzle (cells : cell list) (alphabetisedLine : digit option list) : Map<cell, digit option> = 
     List.zip cells alphabetisedLine
     |> Map.ofList

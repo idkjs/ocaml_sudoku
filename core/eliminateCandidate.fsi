@@ -1,4 +1,4 @@
-﻿module core.eliminateCandidate
+module core.eliminateCandidate
 
 open sudoku
 open puzzlemap

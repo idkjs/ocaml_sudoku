@@ -1,17 +1,17 @@
-﻿module console.format
+module console.format
 
 open core.sudoku
 
 let konst x _ = x
 
-// Printing a row, we need special characters at left, in the middle and on the right
+(* Printing a row, we need special characters at left, in the middle and on the right *)
 type gridCharsRow<'a> = 
     { l : 'a
       m : 'a
       r : 'a }
 
-// Printing a grid, we need special rows at top, in the middle and on the bottom
-// Also, horizontal and vertical spacers
+(* Printing a grid, we need special rows at top, in the middle and on the bottom
+ Also, horizontal and vertical spacers *)
 type gridChars<'a> = 
     { h : 'a
       v : gridCharsRow<'a>
@@ -39,7 +39,7 @@ let printLine (cells : cell list) (digitTo : cell -> 'c) : List<'c> =
     let cons x y = x :: y
     List.foldBack (digitTo >> cons) cells []
 
-// Combine fences with posts (there's one more fence than posts: f p f p ... p f)
+(* Combine fences with posts (there's one more fence than posts: f p f p ... p f) *)
 let simpleInterleave (fenceToSeq : 'a -> seq<'c>) (post : seq<'c>) (fences : 'a list) = 
     seq { 
         match fences with
@@ -53,8 +53,8 @@ let simpleInterleave (fenceToSeq : 'a -> seq<'c>) (post : seq<'c>) (fences : 'a 
         | [] -> ()
     }
 
-// Create a sequence of fences interleaved with posts (first and last posts may be different)
-// l f p f p f ... p f r
+(* Create a sequence of fences interleaved with posts (first and last posts may be different)
+ l f p f p f ... p f r *)
 let sinterleave (fenceToSeq : 'a -> seq<'c>) (firstPost : seq<'c>) (midPost : seq<'c>) (lastPost : seq<'c>) 
     (eol : seq<'c>) (fences : 'a list) = 
     seq { 
@@ -66,7 +66,7 @@ let sinterleave (fenceToSeq : 'a -> seq<'c>) (firstPost : seq<'c>) (midPost : se
         yield! eol
     }
 
-// Print a column
+(* Print a column *)
 let printCell (digitTo : cell -> 'c) cell = digitTo cell |> Seq.singleton
 
 let printColumn (printCell : cell -> seq<'c>) row column : seq<'c> = 
@@ -75,12 +75,12 @@ let printColumn (printCell : cell -> seq<'c>) row column : seq<'c> =
           row = row }
     printCell cell
 
-// Print a stack
+(* Print a stack *)
 let printStack (columnPrinter : row -> column -> seq<'c>) (columnSeparator : seq<'c>) 
     (puzzleStackColumns : stack -> column list) (row : row) (stack : stack) = 
     simpleInterleave (columnPrinter row) columnSeparator (puzzleStackColumns stack)
 
-// Print a row
+(* Print a row *)
 let printRow (stackPrinter : stack -> seq<'c>) (gridCharsRow : gridCharsRow<seq<'c>>) eol (stacks : stack list) = 
     seq { 
         yield! gridCharsRow.l
@@ -89,11 +89,11 @@ let printRow (stackPrinter : stack -> seq<'c>) (gridCharsRow : gridCharsRow<seq<
         yield! eol
     }
 
-// Print a band
+(* Print a band *)
 let printBand (rowToSeq : row -> seq<'c>) (rowSeparator : seq<'c>) (puzzleBandRows : band -> row list) (band : band) = 
     simpleInterleave rowToSeq rowSeparator (puzzleBandRows band)
 
-// Print a puzzle grid, supply callback to draw each cell
+(* Print a puzzle grid, supply callback to draw each cell *)
 let printGrid (puzzleStacks : stack list) (puzzleStackColumns : stack -> column list) (puzzleBands : band list) (puzzleBandRows : band -> row list) (gridChars : gridChars<seq<'c>>) (digitTo : cell -> 'c) = 
 
     let doPrintColumn = printColumn (printCell digitTo)
