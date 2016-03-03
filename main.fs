@@ -5,7 +5,8 @@ open System.Diagnostics
 open System.Runtime.InteropServices
 open System.Text
 
-open core.sudoku
+
+open core.sset;open core.sudoku
 open core.puzzlemap
 open core.hints
 open core.setCell
@@ -25,16 +26,14 @@ let Maximize() =
     let p = Process.GetCurrentProcess()
     ShowWindow(p.MainWindowHandle, 3) (* SW_MAXIMIZE = 3 *)
 
-let parse (item : string) (solution : solution) (puzzle : puzzleShape) 
-    (candidateLookup : cellCandidates) puzzleDrawFull2 print_last : solution * Set<hintDescription> = 
-
-    let p = tPuzzleMap puzzle :> puzzleMap
+let parse (p : puzzleMap) (item : string) (solution : solution) (puzzle : puzzleShape) 
+    (cellCandidates : cellCandidates) puzzleDrawFull2 print_last : solution * hintDescription array = 
 
     Console.WriteLine item
 
     if item = "print" then 
         puzzleDrawFull2 None
-        (solution, Set.empty)
+        (solution, Array.empty)
     else if item.StartsWith "focus" then
         let focusDigitOpt = focusCommandParse puzzle item
         match focusDigitOpt with
@@ -43,9 +42,9 @@ let parse (item : string) (solution : solution) (puzzle : puzzleShape)
             let hd3 = mhas solution p hd2
             puzzleDrawFull2 (Some hd3.annotations)
 
-            (solution, Set.empty)
+            (solution, Array.empty)
         | None ->
-            (solution, Set.empty)
+            (solution, Array.empty)
 
     else if item.StartsWith "s" then
         let valueOpt = setCellCommandParse puzzle item p
@@ -53,7 +52,7 @@ let parse (item : string) (solution : solution) (puzzle : puzzleShape)
         let newSolution = 
             match valueOpt with
             | Some value ->
-                let setCellValueOpt = setCellCommandCheck solution.given candidateLookup value
+                let setCellValueOpt = setCellCommandCheck solution.given cellCandidates value
                 match setCellValueOpt with
                 | Some setCellValue ->
                     let hd2 = setCellHintDescription p setCellValue
@@ -71,7 +70,7 @@ let parse (item : string) (solution : solution) (puzzle : puzzleShape)
                 solution
 
         print_last newSolution
-        (newSolution, Set.empty)
+        (newSolution, Array.empty)
 
     else if item.StartsWith "c" then
         let candidateOpt = candidateClearCommandParse puzzle item p
@@ -79,7 +78,7 @@ let parse (item : string) (solution : solution) (puzzle : puzzleShape)
         let newSolution = 
             match candidateOpt with
             | Some candidate ->
-                let clearCommandOpt = candidateClearCommandCheck solution.given candidateLookup candidate
+                let clearCommandOpt = candidateClearCommandCheck solution.given cellCandidates candidate
                 match clearCommandOpt with
                 | Some clearCommand ->
                     let hd2 = eliminateCandidateHintDescription p candidate
@@ -97,15 +96,15 @@ let parse (item : string) (solution : solution) (puzzle : puzzleShape)
                 solution
 
         print_last newSolution
-        (newSolution, Set.empty)
+        (newSolution, Array.empty)
 
     else
-        let supportedHintOpt = SupportedHints.TryFind item
+        let supportedHintOpt = SupportedHints.Get item
         match supportedHintOpt with
         | Some supportedHint ->
-            let hints = supportedHint p candidateLookup
+            let hints = supportedHint p cellCandidates
             (solution, hints)
-        | None -> (solution, Set.empty)
+        | None -> (solution, Array.empty)
 
 let printHint (solution : solution) (p : puzzleMap) drawHint (index : int) (hint : hintDescription) : unit = 
 
@@ -120,35 +119,36 @@ let run (solution : solution ref) (puzzle : puzzleShape)
     puzzleDrawCandidateGridAnnotations print_last puzzlePrintHint item = 
     if item = "quit" then Some "quit"
     else
-        let mapCandidateCandidates = currentCellCandidates (!solution).current
+        let p = tPuzzleMap puzzle :> puzzleMap
+
+        let mapCandidateCandidates = currentCellCandidates p.cells (!solution).current
 
         let (soln, hints) = 
-            parse item !solution puzzle mapCandidateCandidates puzzleDrawCandidateGridAnnotations print_last
+            parse p item !solution puzzle mapCandidateCandidates puzzleDrawCandidateGridAnnotations print_last
         solution := soln
 
         Seq.iteri puzzlePrintHint hints
 
         None
 
-let digitToEntry (cellDigitLookup : given) (alphabet : Set<digit>) 
-    (cellHouseCells : cellHouseCells) : current = 
-    let m (cell : cell) (dop : digit option) : cellContents =
+let digitToEntry (p : puzzleMap) (given : given) (alphabet : digits) : current =
+
+    let m (cell : cell) : cellContents =
+        let dop = given.Get cell
         match dop with
         | Some(e) -> BigNumber(e)
         | None -> 
-            let cells =
-                cell
-                |> cellHouseCells.Get
-                |> Set.toList
             let digits =
-                cells
-                |> List.choose (fun cell -> cellDigitLookup.Item cell)
-                |> Set.ofList
+                cell
+                |> p.cellHouseCells.Get
+                |> Cells.choose given.Get
+                |> Digits.ofSet
 
-            Set.difference alphabet digits
+            Digits.difference alphabet digits
             |> PencilMarks
-    cellDigitLookup
-    |> Map.map m
+
+    makeMapLookup p.cells m
+    :> current
 
 let repl (sudoku : string) (puzzle : puzzleShape) = 
 
@@ -156,36 +156,35 @@ let repl (sudoku : string) (puzzle : puzzleShape) =
     
     let p = tPuzzleMap puzzle :> puzzleMap
 
-    let transformer (puzzleGrid : given) : current = 
-        digitToEntry puzzleGrid (Set.ofList puzzle.alphabet) p.cellHouseCells
+    let alphabetSet =
+        Digits.ofArray puzzle.alphabet
+
+    let transformer (given : given) : current = 
+        digitToEntry p given alphabetSet
     
-    let solution = ref (load p.orderedCells puzzle.alphabet (List.ofSeq sudoku) transformer)
+    let solution = ref (load p.cells puzzle.alphabet (Array.ofSeq sudoku) transformer)
 
-    let centreDigit : digit = List.nth puzzle.alphabet ((List.length puzzle.alphabet) / 2)
+    let centreDigit : digit = puzzle.alphabet.[((Array.length puzzle.alphabet) / 2)]
 
-    let puzzlePrintLine = printLine p.orderedCells
+    let puzzlePrintLine = printLine p.cells
 
-    let puzzlePrintGrid = printGrid p.orderedStacks p.orderedStackColumns p.orderedBands p.orderedBandRows defaultGridChars
+    let puzzlePrintGrid = printGrid p defaultGridChars
 
-    let puzzlePrintCandidateGrid = 
-        printCandidateGrid p.orderedStacks p.orderedStackColumns p.orderedBands p.orderedBandRows defaultCandidateGridChars 
-            puzzle.alphabet
+    let puzzlePrintCandidateGrid = printCandidateGrid p defaultCandidateGridChars puzzle.alphabet
 
     (* Print a Digit option, with colours *)
     let puzzleDrawCell (solution : solution) (cell : cell) : consoleChar = 
-        drawDigitCellContents (solution.given.Item cell) (solution.current.Item cell)
+        drawDigitCellContents (solution.given.Get cell) (solution.current.Get cell)
 
     let puzzleDrawCellDigit (solution : solution) (cell : cell) (digit : digit) : consoleChar = 
-        drawDigitCellContentAnnotations centreDigit digit (solution.given.Item cell) 
-            (solution.current.Item cell) None
+        drawDigitCellContentAnnotations centreDigit digit (solution.given.Get cell) (solution.current.Get cell) None
 
-    let puzzleDrawCellDigitAnnotations (solution : solution) (l : cellAnnotations option) (cell : cell) (digit : digit) : consoleChar = 
+    let puzzleDrawCellDigitAnnotations (solution : solution) (l : lookup<cell, annotation> option) (cell : cell) (digit : digit) : consoleChar = 
         let cellAnnotationOpt =
             l
-            |> Option.map (fun ll -> ll.Item cell)
+            |> Option.map (fun ll -> ll.Get cell)
 
-        drawDigitCellContentAnnotations centreDigit digit (solution.given.Item cell) 
-            (solution.current.Item cell) cellAnnotationOpt
+        drawDigitCellContentAnnotations centreDigit digit (solution.given.Get cell) (solution.current.Get cell) cellAnnotationOpt
 
     let puzzleDrawLine () =
         Seq.iter drawConsoleChar (puzzlePrintLine (puzzleDrawCell !solution))
@@ -197,7 +196,7 @@ let repl (sudoku : string) (puzzle : puzzleShape) =
         Seq.iter drawConsoleChar (puzzlePrintCandidateGrid (puzzleDrawCellDigitAnnotations !solution annotations))
 
     let print_last (solution : solution) = 
-        let puzzleDrawCell' (cell : cell) = drawDigitCellContents (solution.given.Item cell) (solution.current.Item cell)
+        let puzzleDrawCell' (cell : cell) = drawDigitCellContents (solution.given.Get cell) (solution.current.Get cell)
         Seq.iter drawConsoleChar (puzzlePrintGrid puzzleDrawCell')
 
         match solution.steps with
@@ -220,13 +219,15 @@ let repl (sudoku : string) (puzzle : puzzleShape) =
 
     puzzleDrawGrid()
 
-    (* let forcedSolutions = solve (!solution) p.cells p.cellHouseCells
+    let forcedSolutions = solve p (!solution)
     puzzleDrawGrid()
-    if List.length forcedSolutions > 0 then
-        List.iter
-            (fun solve -> Seq.iter drawConsoleChar (puzzlePrintGrid (puzzleDrawCell solve)))
-            forcedSolutions
-    else Console.WriteLine("No solutions") *)
+    if Array.length forcedSolutions > 0 then
+        forcedSolutions
+        |> Array.iter
+            (fun solve ->
+                Seq.iter drawConsoleChar (puzzlePrintGrid (puzzleDrawCell solve)))
+
+    else Console.WriteLine("No solutions")
 
     let puzzlePrintHint = printHint (!solution) p puzzleDrawCandidateGridAnnotations
 
@@ -238,8 +239,7 @@ let defaultPuzzleSpec =
       boxWidth = 3
       boxHeight = 3
       alphabet = 
-          [ for i in 1..9 -> (char) i + '0'
-                             |> Digit ] }
+          [| for i in 1..9 -> (char) i + '0' |> Digit |] }
 
 (*
 let defaultPuzzleSpec = {

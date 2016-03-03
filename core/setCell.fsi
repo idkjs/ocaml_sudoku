@@ -1,10 +1,10 @@
-﻿module core.setCell
+module core.setCell
 
 open sudoku
 open puzzlemap
 open hints
 
-val setCellDigitApply : cellHouseCells -> value -> (current -> current)
+val setCellDigitApply : puzzleMap -> value -> current -> current
 
 val setCellDigitTry : cell -> digit -> cellCandidates -> value option
 

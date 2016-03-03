@@ -4,89 +4,78 @@ open core.sudoku
 open core.puzzlemap
 open core.hints
 
-let findNaked (count : int) (cellHouseCells : cellHouseCells) (candidateLookup : cellCandidates) 
-    (primaryHouseCells : Set<cell>) (cellSubset : Set<cell>) (primaryHouse : house) = 
+let findNaked (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (primaryHouse : house) (cellSubset : cells) = 
 
     let subsetDigits =
         cellSubset
-        |> Set.map candidateLookup.Get
-        |> Set.unionMany
+        |> Cells.map cellCandidates.Get
+        |> Digits.unionMany
 
-    if Set.count subsetDigits <= count then 
-        let otherCells =
-            primaryHouseCells
-            |> Set.filter (fun cell -> Set.contains cell cellSubset = false) 
-
+    if Digits.count subsetDigits <= count then
         let candidateReductions =
-            otherCells
-            |> Set.map (fun cell -> 
-                let candidates = candidateLookup.Get cell
-                { candidateReduction.candidates = Set.intersect subsetDigits candidates
-                  cell = cell }) 
-        
-        let nonEmptyCandidateReductions =
-            candidateReductions
-            |> Set.filter (fun cr -> Set.count cr.candidates > 0)
-        
+            primaryHouse
+            |> p.houseCells.Get
+            |> Cells.filter (fun cell -> Cells.contains cell cellSubset = false) 
+            |> Cells.map (fun cell -> 
+                let candidates = cellCandidates.Get cell
+                { candidateReduction.candidates = Digits.intersect subsetDigits candidates
+                  cell = cell })
+            |> CandidateReductions.ofSet
+            |> CandidateReductions.filter (fun cr -> Digits.count cr.candidates > 0)
+
         let pointers =
             cellSubset
-            |> Set.map (fun cell -> 
-                let candidates = candidateLookup.Get cell
+            |> Cells.map (fun cell -> 
+                let candidates = cellCandidates.Get cell
                 { candidateReduction.cell = cell
                   candidates = candidates })
+            |> CandidateReductions.ofSet
 
-        if Set.count nonEmptyCandidateReductions > 0 then 
-            Some { hintDescription.primaryHouses = set [ primaryHouse ]
-                   secondaryHouses = set []
-                   candidateReductions = nonEmptyCandidateReductions
+        if CandidateReductions.count candidateReductions > 0 then 
+            Some { hintDescription.primaryHouses = Houses.singleton primaryHouse
+                   secondaryHouses = Houses.empty
+                   candidateReductions = candidateReductions
                    setCellValueAction = None
                    pointers = pointers
-                   focus = set [] }
+                   focus = Digits.empty }
 
         else None
     else None
 
-let nakedNPerHouse (count : int) (p : puzzleMap) (candidateLookup : cellCandidates)  (primaryHouse : house) : Set<hintDescription> =
-    let primaryHouseCells =
-        primaryHouse
-        |> p.houseCells.Get
+let nakedNPerHouse (count : int) (p : puzzleMap) (cellCandidates : cellCandidates)  (primaryHouse : house) : hintDescription array =
     
     let hht = 
-        primaryHouseCells
-        |> Set.filter (fun cell -> 
-            let candidates = candidateLookup.Get cell
-            Set.count candidates > 1 && Set.count candidates <= count) 
-    
-    setSubsets (Set.toList hht) count
-    |> Set.ofList
-    |> Set.map 
-        (fun subset -> 
-        findNaked count p.cellHouseCells candidateLookup primaryHouseCells (Set.ofList subset) primaryHouse)
-    |> Set.filter Option.isSome
-    |> Set.map Option.get
+        primaryHouse
+        |> p.houseCells.Get
+        |> Cells.filter (fun cell -> 
+            let candidates = cellCandidates.Get cell
+            Digits.count candidates > 1 && Digits.count candidates <= count) 
 
-let nakedSingle (p : puzzleMap) (candidateLookup : cellCandidates) : Set<hintDescription> =
+    setSubsets (Cells.toArray hht) count
+    |> Array.map (fun ss -> findNaked count p cellCandidates primaryHouse (Cells.ofArray ss))
+    |> Array.choose id
+
+let nakedSingle (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescription array =
 
     p.cells
-    |> Set.map (fun cell -> 
-        let candidates = candidateLookup.Get cell
+    |> Array.map (fun cell -> 
+        let candidates = cellCandidates.Get cell
 
-        if Set.count candidates = 1 then 
+        if Digits.count candidates = 1 then 
             let candidate = first candidates
 
             let setCellValue = makeSetCellDigit cell candidate
 
-            Some { hintDescription.primaryHouses = set []
-                   secondaryHouses = set []
-                   candidateReductions = set []
+            Some { hintDescription.primaryHouses = Houses.empty
+                   secondaryHouses = Houses.empty
+                   candidateReductions = CandidateReductions.empty
                    setCellValueAction = Some setCellValue
-                   pointers = set []
-                   focus = set [] }
+                   pointers = CandidateReductions.empty
+                   focus = Digits.empty }
         else None)
-    |> Set.filter Option.isSome
-    |> Set.map Option.get
+    |> Array.choose id
 
-let nakedN (i : int) (p : puzzleMap) (candidateLookup : cellCandidates) : Set<hintDescription> =
+let nakedN (i : int) (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescription array =
     p.houses
-    |> Set.map (nakedNPerHouse i p candidateLookup )
-    |> Set.unionMany
+    |> Array.map (nakedNPerHouse i p cellCandidates )
+    |> Array.concat

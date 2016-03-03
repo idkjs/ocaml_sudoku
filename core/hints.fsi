@@ -1,23 +1,20 @@
-﻿module core.hints
+module core.hints
 
+open sset
 open sudoku
 open puzzlemap
 
-type candidateReduction = 
-    { cell : cell
-      candidates : Set<digit> }
-
 type hintDescription = 
-    { primaryHouses : Set<house>
-      secondaryHouses : Set<house>
-      candidateReductions : Set<candidateReduction>
+    { primaryHouses : houses
+      secondaryHouses : houses
+      candidateReductions : candidateReductions
       setCellValueAction : value option
-      pointers : Set<candidateReduction>
-      focus : Set<digit> }
+      pointers : candidateReductions
+      focus : digits }
 
-val first : Set<'a> -> 'a
+val first : digits -> digit
 
-val setSubsets : List<'a> -> int -> List<List<'a>>
+val setSubsets : 'a array -> int -> 'a array array
 
 (* To draw a cell we may want to display extra information... *)
 type annotation = 
@@ -26,17 +23,16 @@ type annotation =
       primaryHintHouse : bool
       secondaryHintHouse : bool
       setValueReduction : digit option
-      reductions : Set<digit>
-      pointers : Set<digit>
-      focus : Set<digit> }
+      reductions : digits
+      pointers : digits
+      focus : digits }
 
-type cellAnnotations = Map<cell, annotation>
-
+[<NoComparisonAttribute>]
 type hintDescription2 = 
-    { primaryHouses : Set<house>
-      secondaryHouses : Set<house>
-      candidateReductions : Set<candidateReduction>
+    { primaryHouses : houses
+      secondaryHouses : houses
+      candidateReductions : candidateReductions
       setCellValueAction : value option
-      annotations : cellAnnotations }
+      annotations : lookup<cell, annotation> }
 
 val mhas : solution -> puzzleMap -> hintDescription -> hintDescription2

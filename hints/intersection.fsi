@@ -4,6 +4,6 @@ open core.sudoku
 open core.puzzlemap
 open core.hints
 
-val pointingPairs : puzzleMap -> cellCandidates -> Set<hintDescription>
+val pointingPairs : puzzleMap -> cellCandidates -> hintDescription array
 
-val boxLineReductions : puzzleMap -> cellCandidates -> Set<hintDescription>
+val boxLineReductions : puzzleMap -> cellCandidates -> hintDescription array

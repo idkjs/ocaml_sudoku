@@ -2,41 +2,32 @@ module hints.fullHouse
 
 (* Full House means:
  For a house there is only one cell that is neither given nor set i.e. has candidates *)
+
 open core.sudoku
 open core.puzzlemap
 open core.hints
 
-let fullHousePerHouse (p : puzzleMap) (candidateLookup : cellCandidates) (primaryHouse : house) : Set<hintDescription> =
-
-    let candidateCells =
-        primaryHouse
-        |> p.houseCells.Get
-        |> Set.map (fun cell -> ((candidateLookup.Get cell), cell))
+let fullHousePerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primaryHouse : house) : hintDescription option =
 
     let hhs =
-        candidateCells
-        |> Set.filter (fun (candidates, _) -> Set.isEmpty candidates = false) 
-    
-    let hhs2 = 
-        if hhs.Count = 1 then 
-            let h = first hhs
-            let cell = snd h
-            let candidate = first (fst h)
+        p.houseCellCandidateReductions primaryHouse cellCandidates
+        |> CandidateReductions.filter (fun cr -> Digits.count cr.candidates > 0) 
 
-            let setCellValue = makeSetCellDigit cell candidate
+    if CandidateReductions.count hhs = 1 then 
+        let h = hhs.data.data.Head
+        let cell = h.cell
+        let candidate = first h.candidates
 
-            [ { hintDescription.primaryHouses = set [ primaryHouse ]
-                secondaryHouses = set []
-                candidateReductions = set []
-                setCellValueAction = Some setCellValue
-                pointers = set []
-                focus = set [] } ]
-            |> Set.ofList
-        else Set.empty
+        let setCellValue = makeSetCellDigit cell candidate
 
-    hhs2
+        Some { hintDescription.primaryHouses = Houses.singleton primaryHouse
+               secondaryHouses = Houses.empty
+               candidateReductions = CandidateReductions.empty
+               setCellValueAction = Some setCellValue
+               pointers = CandidateReductions.empty
+               focus = Digits.empty }
+    else None
 
-let fullHouses (p : puzzleMap) (candidateLookup : cellCandidates) : Set<hintDescription> =
+let fullHouses (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescription array =
     p.houses
-    |> Set.map (fullHousePerHouse p candidateLookup)
-    |> Set.unionMany
+    |> Array.choose (fullHousePerHouse p cellCandidates)

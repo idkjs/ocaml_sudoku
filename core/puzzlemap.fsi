@@ -3,92 +3,67 @@ module core.puzzlemap
 open sudoku
 
 val makeColumn : int -> column
+
 val makeRow : int -> row
+
 val makeStack : int -> stack
+
 val makeBand : int -> band
 
 val makeSetCellDigit : cell -> digit -> value
 
 val makeCandidate : cell -> digit -> candidate
 
-type columnCells = lookup<column, Set<cell>>
-
-type rowCells = lookup<row, Set<cell>>
-
-type columnStack = lookup<column, stack>
-
-type stackColumns = lookup<stack, Set<column>>
-
-type rowBand = lookup<row, band>
-
-type bandRows = lookup<band, Set<row>>
-
-type cellBox = lookup<cell, box>
-
-type boxCells = lookup<box, Set<cell>>
-
-(* for a house, return the cells in it *)
-type houseCells = lookup<house, Set<cell>>
-
-(* for a cell, return the cells in the column, row and box it belongs to *)
-type cellHouseCells =lookup<cell, Set<cell>>
-
 type puzzleMap =
-    (* The order they are normally written in *)
-    abstract member orderedColumns : column list
-    abstract member orderedRows : row list
-    abstract member orderedCells : cell list
-    abstract member orderedStacks : stack list
-    abstract member orderedBands : band list
 
-    (* for a stack, return the columns in it *)
-    abstract member orderedStackColumns : stack -> column list
+    abstract member columns : column array
 
-    (* for a band, return the rows in it *)
-    abstract member orderedBandRows : band -> row list
+    abstract member rows : row array
 
-    abstract member columns : Set<column>
+    abstract member cells : cell array
 
-    abstract member rows : Set<row>
+    abstract member stacks : stack array
 
-    abstract member cells : Set<cell>
+    abstract member bands : band array
 
-    abstract member stacks : Set<stack>
+    abstract member boxes : box array
 
-    abstract member bands : Set<band>
-
-    abstract member boxes : Set<box>
-
-    abstract member houses : Set<house>
+    abstract member houses : house array
 
     (* for a column, return the cells in it *)
-    abstract member columnCells : columnCells
+    abstract member columnCells : lookup<column, cell array>
 
     (* for a row, return the cells in it *)
-    abstract member rowCells : rowCells
+    abstract member rowCells : lookup<row, cell array>
 
     (* for a column, which stack is it in? *)
-    abstract member columnStack : columnStack
+    abstract member columnStack : lookup<column, stack>
 
     (* for a stack, return the columns in it *)
-    abstract member stackColumns : stackColumns
+    abstract member stackColumns : lookup<stack, column array>
 
     (* for a row, which band is it in? *)
-    abstract member rowBand : rowBand
+    abstract member rowBand : lookup<row, band>
 
     (* for a band, return the rows in it *)
-    abstract member bandRows : bandRows
+    abstract member bandRows : lookup<band, row array>
 
     (* for a cell, which box is it in? *)
-    abstract member cellBox : cellBox
+    abstract member cellBox : lookup<cell, box>
 
     (* for a box, return the cells in it *)
-    abstract member boxCells : boxCells
+    abstract member boxCells : lookup<box, cell array>
 
     (* for a house, return the cells in it *)
-    abstract member houseCells : houseCells
+    abstract member houseCells : lookup<house, cells>
 
-    abstract member cellHouseCells : cellHouseCells
+    abstract member cellHouseCells : lookup<cell, cells>
+
+    abstract member housesCells : houses -> cells
+
+    abstract member houseCellCandidateReductions : house -> cellCandidates -> candidateReductions
+
+    //abstract member houseCellCandidates : lookup<house, cellCandidates>
 
 type tPuzzleMap =
     interface puzzleMap

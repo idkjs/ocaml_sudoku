@@ -4,78 +4,77 @@ open core.sudoku
 open core.puzzlemap
 open core.hints
 
-let findHidden (count : int) (p : puzzleMap) (candidateLookup : cellCandidates) (candidateSubset : Set<digit>) (primaryHouse : house) = 
-
-    let primaryHouseCells = p.houseCells.Get primaryHouse
+let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (candidateSubset : digits) (primaryHouse : house) = 
 
     let pairs = 
-        primaryHouseCells
-        |> Set.map (fun cell -> 
-            let candidates = candidateLookup.Get cell
-            
+        primaryHouse
+        |> p.houseCells.Get
+        |> Cells.toArray
+        |> Array.map (fun cell -> 
+            let candidates = cellCandidates.Get cell
+
             let pointer = 
                 { candidateReduction.cell = cell
-                  candidates = Set.intersect candidates candidateSubset }
+                  candidates = Digits.intersect candidates candidateSubset }
             
             let crs = 
-                if Set.count pointer.candidates > 0 then Set.difference candidates candidateSubset
-                else set []
+                if Digits.count pointer.candidates > 0 then Digits.difference candidates candidateSubset
+                else Digits.empty
             
             let candidateReduction = 
                 { candidateReduction.cell = cell
                   candidates = crs }
             
             (pointer, candidateReduction))
-        |> Set.toList
 
-    let pointers, candidateReductions = List.unzip pairs
+    let pointers, candidateReductions = Array.unzip pairs
 
     let nonEmptyPointers =
         pointers
-        |> List.filter (fun cr -> Set.count cr.candidates > 0) 
+        |> Array.filter (fun cr -> Digits.count cr.candidates > 0) 
+        |> CandidateReductions.ofArray
 
     let nonEmptyCandidateReductions =
         candidateReductions
-        |> List.filter (fun cr -> Set.count cr.candidates > 0) 
+        |> Array.filter (fun cr -> Digits.count cr.candidates > 0) 
+        |> CandidateReductions.ofArray
 
-    if List.length nonEmptyPointers = count && List.length nonEmptyCandidateReductions > 0 then 
+    if CandidateReductions.count nonEmptyPointers = count && CandidateReductions.count nonEmptyCandidateReductions > 0 then 
 
         let setCellValue = 
             if count = 1 then 
-                let h = List.head nonEmptyPointers
+                let h = nonEmptyPointers.data.data.Head
                 let cell = h.cell
-                let candidate = first candidateSubset
+                let candidate = candidateSubset.data.data.Head
 
                 let setCellValue = makeSetCellDigit cell candidate
 
                 Some setCellValue
             else None
 
-        Some { hintDescription.primaryHouses = set [ primaryHouse ]
-               secondaryHouses = set []
-               candidateReductions = Set.ofList nonEmptyCandidateReductions
+        Some { hintDescription.primaryHouses = Houses.singleton primaryHouse
+               secondaryHouses = Houses.empty
+               candidateReductions = nonEmptyCandidateReductions
                setCellValueAction = setCellValue
-               pointers = Set.ofList nonEmptyPointers
-               focus = set [] }
+               pointers = nonEmptyPointers
+               focus = Digits.empty }
     else None
 
-let hiddenNPerHouse (count : int) (p : puzzleMap) (candidateLookup : cellCandidates) (house : house) : Set<hintDescription> = 
-    let cells = p.houseCells.Get house
+let hiddenNPerHouse (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (house : house) : hintDescription array = 
 
     let houseCandidates =
-        cells
-        |> Set.map candidateLookup.Get
-        |> Set.unionMany
+        house
+        |> p.houseCells.Get
+        |> Cells.map cellCandidates.Get
+        |> Digits.unionMany
+        |> Digits.toArray
 
-    setSubsets (Set.toList houseCandidates) count
-    |> Set.ofList
-    |> Set.map
+    setSubsets houseCandidates count
+    |> Array.choose
         (fun candidateSubset -> 
-            findHidden count p candidateLookup (Set.ofList candidateSubset) house)
-    |> Set.filter Option.isSome
-    |> Set.map Option.get
+            findHidden count p cellCandidates (Digits.ofArray candidateSubset) house)
 
-let hiddenN (i : int) (p : puzzleMap) (candidateLookup : cellCandidates) : Set<hintDescription> =
+let hiddenN (i : int) (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescription array =
     p.houses
-    |> Set.map (hiddenNPerHouse i p candidateLookup)
-    |> Set.unionMany
+    |> Array.map (hiddenNPerHouse i p cellCandidates)
+    |> Array.concat

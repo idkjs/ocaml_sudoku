@@ -4,27 +4,25 @@ open core.sudoku
 open core.puzzlemap
 
 (* Load a sudoku given as a single line of gridSize*gridSize characters *)
-let loadPuzzle (cells : cell list) (alphabetisedLine : digit option list) : Map<cell, digit option> = 
-    List.zip cells alphabetisedLine
-    |> Map.ofList
+let loadPuzzle (cells : cell array) (alphabetisedLine : digit option array) : lookup<cell, digit option> = 
+    Array.zip cells alphabetisedLine
+    |> Map.ofArray
+    |> mapLookup<cell, digit option>
+    :> lookup<cell, digit option>
 
-let load (orderedCells : cell list) (alphabet : digit list) (sudoku : char list) 
+let load (orderedCells : cell array) (alphabet : digit array) (sudoku : char array) 
     (contentsTransformer : given -> current) : solution = 
-    let charToAlphabet (trialDigit : char) : digit option = 
+
+    let charToDigit (trialDigit : char) : digit option = 
         let compareAlpha (Digit charDigit) = trialDigit = charDigit
-        List.tryFind compareAlpha alphabet
-    
-    let alphabetisedLine = List.map charToAlphabet sudoku
+        Array.tryFind compareAlpha alphabet
 
-    let puzzleGrid = loadPuzzle orderedCells alphabetisedLine
+    let alphabetisedLine = Array.map charToDigit sudoku
 
-    let given = puzzleGrid
+    let given = loadPuzzle orderedCells alphabetisedLine
 
-    let solutionGrid = contentsTransformer puzzleGrid
-    
-    let solution = 
-        { given = given
-          current = solutionGrid
-          steps = [] }
+    let current = contentsTransformer given
 
-    solution
+    { solution.given = given
+      current = current
+      steps = [] }

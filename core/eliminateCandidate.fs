@@ -4,32 +4,31 @@ open sudoku
 open puzzlemap
 open hints
 
-let eliminateCandidateApply (candidate : candidate) : current -> current = 
+let eliminateCandidateApply (p : puzzleMap) (candidate : candidate) (current : current) : current = 
 
-    let update (cell : cell) (cellContents : cellContents) : cellContents = 
+    let update (cell : cell) : cellContents = 
+        let cellContents = current.Get cell
         match cellContents with
         | BigNumber _ -> cellContents
         | PencilMarks candidates -> 
-            if candidate.cell = cell then PencilMarks(Set.remove candidate.digit candidates)
+            if candidate.cell = cell then PencilMarks(Digits.remove candidate.digit candidates)
             else cellContents
 
-    Map.map update
+    makeMapLookup<cell, cellContents> p.cells update
+    :> current
 
 let eliminateCandidateHintDescription (p: puzzleMap) (candidate : candidate) : hintDescription =
     let cr = 
         { candidateReduction.cell = candidate.cell
-          candidates = set [ candidate.digit ] }
+          candidates = Digits.singleton candidate.digit }
 
-    let hd = 
-        { hintDescription.primaryHouses = set []
-          secondaryHouses = set []
-          candidateReductions = set [ cr ]
-          setCellValueAction = None
-          pointers = set []
-          focus = set [] }
-
-    hd
+    { hintDescription.primaryHouses = Houses.empty
+      secondaryHouses = Houses.empty
+      candidateReductions = CandidateReductions.singleton cr
+      setCellValueAction = None
+      pointers = CandidateReductions.empty
+      focus = Digits.empty }
 
 let eliminateCandidateStep (p : puzzleMap) (candidate : candidate) (solution : solution) : solution =
-    { solution with current = eliminateCandidateApply candidate solution.current
+    { solution with current = eliminateCandidateApply p candidate solution.current
                     steps = (Eliminate candidate) :: solution.steps }

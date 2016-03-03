@@ -1,6 +1,7 @@
 module console.format
 
 open core.sudoku
+open core.puzzlemap
 
 type gridCharsRow<'a> = 
     { l : 'a
@@ -30,12 +31,8 @@ type candidateGridChars<'a> =
       b : candidateGridCharsRow<'a>
       n : 'a }
 
-val printLine : cell list -> (cell -> 'c) -> List<'c>
+val printLine : cell array -> (cell -> 'c) -> List<'c>
 
-val printGrid : stack list
-     -> (stack -> column list) -> band list -> (band -> row list) -> gridChars<seq<'c>> -> (cell -> 'c) -> seq<'c>
+val printGrid : puzzleMap -> gridChars<seq<'c>> -> (cell -> 'c) -> seq<'c>
 
-val printCandidateGrid : stack list
-     -> (stack -> column list)
-     -> band list
-     -> (band -> row list) -> candidateGridChars<seq<'c>> -> digit list -> (cell -> digit -> 'c) -> seq<'c>
+val printCandidateGrid : puzzleMap -> candidateGridChars<seq<'c>> -> digit array -> (cell -> digit -> 'c) -> seq<'c>

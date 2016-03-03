@@ -122,22 +122,22 @@ let drawDigitCellContentAnnotations centreCandidate (candidate : digit) (firstDi
         match annotationOpt with
         | Some annotation when annotation.setValue.IsSome && annotation.setValue.Value = candidate -> 
                 ColouredString(candidate.ToString(), ConsoleColor.Red)
-        | Some annotation when annotation.setValue.IsSome && Set.contains candidate candidates -> 
+        | Some annotation when annotation.setValue.IsSome && Digits.contains candidate candidates -> 
             ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
-        | Some annotation when annotation.setValueReduction.IsSome && annotation.setValueReduction.Value = candidate && Set.contains candidate candidates -> 
+        | Some annotation when annotation.setValueReduction.IsSome && annotation.setValueReduction.Value = candidate && Digits.contains candidate candidates -> 
                 ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
-        | Some annotation when Set.contains candidate annotation.reductions -> 
+        | Some annotation when Digits.contains candidate annotation.reductions -> 
             ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
-        | Some annotation when Set.contains candidate annotation.pointers -> 
+        | Some annotation when Digits.contains candidate annotation.pointers -> 
             ColouredString(candidate.ToString(), ConsoleColor.Magenta)
-        | Some annotation when Set.contains candidate annotation.focus && Set.contains candidate candidates -> 
+        | Some annotation when Digits.contains candidate annotation.focus && Digits.contains candidate candidates -> 
             ColouredString(candidate.ToString(), ConsoleColor.Yellow)
         | Some annotation when annotation.primaryHintHouse -> 
-            if Set.contains candidate candidates then ColouredString(candidate.ToString(), ConsoleColor.DarkGreen)
+            if Digits.contains candidate candidates then ColouredString(candidate.ToString(), ConsoleColor.DarkGreen)
             else CChar ' '
         | Some annotation when annotation.secondaryHintHouse -> 
-            if Set.contains candidate candidates then ColouredString(candidate.ToString(), ConsoleColor.Green)
+            if Digits.contains candidate candidates then ColouredString(candidate.ToString(), ConsoleColor.Green)
             else CChar ' '
         | _ -> 
-            if Set.contains candidate candidates then CStr(candidate.ToString())
+            if Digits.contains candidate candidates then CStr(candidate.ToString())
             else CChar ' '

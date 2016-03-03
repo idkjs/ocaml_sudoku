@@ -3,9 +3,9 @@ module core.force
 open System
 open System.Diagnostics
 
-open setCell
 open sudoku
 open puzzlemap
+open setCell
 
 let isPencilMarksCellContents (cellContents : cellContents) : bool =
     match cellContents with
@@ -15,37 +15,32 @@ let isPencilMarksCellContents (cellContents : cellContents) : bool =
 let isValidCellContents (cellContents : cellContents) : bool =
     match cellContents with
     | BigNumber _ -> true
-    | PencilMarks candidates -> Set.count candidates > 0
+    | PencilMarks candidates -> Digits.count candidates > 0
 
-let cellCellContents (solution : solution) (cell : cell) : cellContents =
-    solution.current.Item cell
-
-let isValid (solution : solution) (cells : Set<cell>) : bool =
+let isValid (solution : solution) (cells : cell array) : bool =
     cells
-    |> Set.map (cellCellContents solution)
-    |> Set.forall isValidCellContents
+    |> Array.map solution.current.Get
+    |> Array.forall isValidCellContents
 
-let rec searchr (solution : solution) (cells : Set<cell>) (puzzleHouseCellCells : cellHouseCells) (existing : Set<solution>) : Set<solution> = 
+let rec searchr (p : puzzleMap) (solution : solution) (existing : solution array) : solution array = 
     let emptyCell : cell option =
-        cells
-        |> Set.toList
-        |> List.tryFind ((cellCellContents solution) >> isPencilMarksCellContents)
+        p.cells
+        |> Array.tryFind (solution.current.Get >> isPencilMarksCellContents)
 
     match emptyCell with
     | Some cell ->
         let candidates =
-            let cellContents = solution.current.Item cell
+            let cellContents = solution.current.Get cell
             match cellContents with
-            | BigNumber _ -> []
-            | PencilMarks candidates -> candidates |> Set.toList
+            | BigNumber _ -> Array.empty
+            | PencilMarks candidates -> candidates |> Digits.toArray
         
         candidates
-        |> Set.ofList
-        |> Set.map
+        |> Array.map
             (fun digit ->
                 let setCellValue = makeSetCellDigit cell digit
                 
-                let current = setCellDigitApply puzzleHouseCellCells setCellValue solution.current
+                let current = setCellDigitApply p setCellValue solution.current
 
                 let newSolution =
                     { solution with
@@ -54,9 +49,9 @@ let rec searchr (solution : solution) (cells : Set<cell>) (puzzleHouseCellCells 
 
                 (*Console.WriteLine ("Trying {0}", setCellValue) *)
 
-                if isValid newSolution cells then
+                if isValid newSolution p.cells then
                     (*Console.WriteLine(">")*)
-                    searchr newSolution cells puzzleHouseCellCells existing
+                    searchr p newSolution existing
                 else
                     (*
                     let cell =
@@ -65,22 +60,20 @@ let rec searchr (solution : solution) (cells : Set<cell>) (puzzleHouseCellCells 
                                 let cellContents = newSolution.current cell
                                 match cellContents with
                                 | BigNumber _ -> false
-                                | PencilMarks candidates -> Set.count candidates = 0)
+                                | PencilMarks candidates -> Digits.count candidates = 0)
                             cells
 
                     Console.WriteLine(String.Format("< {0}", cell))
                     *)
-                    Set.empty)
-            |> Set.unionMany
+                    Array.empty)
+            |> Array.concat
+    | None -> Array.append existing [|solution|]
 
-
-    | None -> Set.add solution existing
-
-let solve (solution : solution) (cells : Set<cell>) (puzzleHouseCellCells : cellHouseCells) : Set<solution> =
+let solve (p : puzzleMap) (solution : solution) : solution array =
     let stopwatch = new Stopwatch()
     stopwatch.Start()
 
-    let results = searchr solution cells puzzleHouseCellCells Set.empty
+    let results = searchr p solution Array.empty
 
     stopwatch.Stop()
     Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed)

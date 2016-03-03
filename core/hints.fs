@@ -1,14 +1,15 @@
-﻿module core.hints
+module core.hints
 
 open System
 open System.Text
 
+open sset
 open sudoku
 open puzzlemap
 
 exception CellStateInvalid
 
-let first (set : Set<'a>) = Set.toList set |> List.head
+let first (set : digits) = (Digits.toArray set).[0]
 
 let rec doSetSubsets (list : List<'a>) (size : int) (prefix : List<'a>) : List<List<'a>> = 
     match list with
@@ -21,7 +22,11 @@ let rec doSetSubsets (list : List<'a>) (size : int) (prefix : List<'a>) : List<L
             List.append inc dec
     | _ -> []
 
-let rec setSubsets (list : List<'a>) (size : int) : List<List<'a>> = doSetSubsets list size []
+let rec setSubsets (as' : 'a array) (size : int) : 'a array array =
+    let list = Array.toList as'
+    doSetSubsets list size []
+    |> List.map List.toArray
+    |> List.toArray
 
 (*
     let s0 = []
@@ -51,35 +56,26 @@ let rec setSubsets (list : List<'a>) (size : int) : List<List<'a>> = doSetSubset
     let p35 = setSubsets s3 5
 *)
 
-let firstOpt (set : Set<'a>) = 
-    let l = Set.toList set
-    match l with
-    | s :: _ -> Some s
-    | _ -> None
-
-type candidateReduction = 
-    { cell : cell
-      candidates : Set<digit> }
-    override this.ToString() = 
-        String.Format("Cell {0}, Candidates {1}", this.cell, String.Join(",", Set.toArray this.candidates))
 
 type hintDescription = 
-    { primaryHouses : Set<house>
-      secondaryHouses : Set<house>
-      candidateReductions : Set<candidateReduction>
+    { primaryHouses : houses
+      secondaryHouses : houses
+      candidateReductions : candidateReductions
       setCellValueAction : value option
-      pointers : Set<candidateReduction>
-      focus : Set<digit> }
+      pointers : candidateReductions
+      focus : digits }
     override this.ToString() = 
         let sb = StringBuilder()
 
-        sb.AppendLine(String.Format("Primary Houses {0}", String.Join(",", Set.toArray this.primaryHouses))) |> ignore
-        sb.AppendLine(String.Format("Secondary Houses {0}", String.Join(",", Set.toArray this.secondaryHouses))) 
-        |> ignore
-        sb.AppendLine(String.Format("Pointers {0}", String.Join(",", Set.toArray this.pointers))) |> ignore
+        sb.AppendLine(String.Format("Primary Houses {0}", String.Join(",", this.primaryHouses))) |> ignore
+        sb.AppendLine(String.Format("Secondary Houses {0}", String.Join(",", this.secondaryHouses))) |> ignore
+        sb.AppendLine(String.Format("Pointers {0}", String.Join(",", this.pointers))) |> ignore
 
-        Set.iter (fun (cr : candidateReduction) -> sb.AppendLine(String.Format("  {0}", cr)) |> ignore) 
-            this.candidateReductions
+        this.candidateReductions
+        |> CandidateReductions.toArray
+        |> Array.iter
+            (fun candidateReduction ->
+                sb.AppendLine(String.Format("  {0}", candidateReduction)) |> ignore) 
 
         sb.ToString()
 
@@ -90,27 +86,29 @@ type annotation =
       primaryHintHouse : bool
       secondaryHintHouse : bool
       setValueReduction : digit option
-      reductions : Set<digit>
-      pointers : Set<digit>
-      focus : Set<digit> }
+      reductions : digits
+      pointers : digits
+      focus : digits }
 
-type cellAnnotations = Map<cell, annotation>
-
+[<NoComparisonAttribute>]
 type hintDescription2 = 
-    { primaryHouses : Set<house>
-      secondaryHouses : Set<house>
-      candidateReductions : Set<candidateReduction>
+    { primaryHouses : houses
+      secondaryHouses : houses
+      candidateReductions : candidateReductions
       setCellValueAction : value option
-      annotations : cellAnnotations }
+      annotations : lookup<cell, annotation> }
     override this.ToString() = 
         let sb = StringBuilder()
 
-        sb.AppendLine(String.Format("Primary Houses {0}", String.Join(",", Set.toArray this.primaryHouses))) |> ignore
-        sb.AppendLine(String.Format("Secondary Houses {0}", String.Join(",", Set.toArray this.secondaryHouses))) 
+        sb.AppendLine(String.Format("Primary Houses {0}", String.Join(",", this.primaryHouses))) |> ignore
+        sb.AppendLine(String.Format("Secondary Houses {0}", String.Join(",", this.secondaryHouses))) 
         |> ignore
 
-        Set.iter (fun (cr : candidateReduction) -> sb.AppendLine(String.Format("  {0}", cr)) |> ignore) 
-            this.candidateReductions
+        this.candidateReductions
+        |> CandidateReductions.toArray
+        |> Array.iter
+            (fun candidateReduction ->
+                sb.AppendLine(String.Format("  {0}", candidateReduction)) |> ignore) 
 
         sb.AppendLine(String.Format("Set Cell {0}", this.setCellValueAction)) |> ignore
 
@@ -129,9 +127,10 @@ let mhas (solution : solution) (p : puzzleMap) (hd : hintDescription) : hintDesc
                     else None
                 
                 let r3 = 
-                    let cells = p.cellHouseCells.Get setCellValueAction.cell
+                    let cells =
+                        p.cellHouseCells.Get setCellValueAction.cell
 
-                    if Set.contains cell cells then Some setCellValueAction.digit
+                    if Cells.contains cell cells then Some setCellValueAction.digit
                     else None
                 
                 r1, r3
@@ -139,45 +138,38 @@ let mhas (solution : solution) (p : puzzleMap) (hd : hintDescription) : hintDesc
         
         let cellCandidateReductions =
             hd.candidateReductions
-            |> Set.filter (fun pointer -> cell = pointer.cell) 
-        
+            |> CandidateReductions.filter (fun pointer -> cell = pointer.cell) 
+
         let reductions = 
-            match firstOpt cellCandidateReductions with
+            match CandidateReductions.firstOpt cellCandidateReductions with
             | Some cr -> cr.candidates
-            | _ -> set []
-        
+            | _ -> Digits.empty
+
         let cellPointers =
             hd.pointers
-            |> Set.filter (fun pointer -> cell = pointer.cell)
-        
+            |> CandidateReductions.filter (fun pointer -> cell = pointer.cell)
+
         let pointers = 
-            match firstOpt cellPointers with
+            match CandidateReductions.firstOpt cellPointers with
             | Some cr -> cr.candidates
-            | _ -> set []
+            | _ -> Digits.empty
         
         let primaryHouseCells =
-            hd.primaryHouses
-            |> Set.map p.houseCells.Get
-            |> Set.unionMany
+            p.housesCells hd.primaryHouses
 
         let secondaryHouseCells =
-            hd.secondaryHouses
-            |> Set.map p.houseCells.Get
-            |> Set.unionMany
+            p.housesCells hd.secondaryHouses
 
         { annotation.given = None
           setValue = setValue
-          primaryHintHouse = Set.contains cell primaryHouseCells
-          secondaryHintHouse = Set.contains cell secondaryHouseCells
+          primaryHintHouse = Cells.contains cell primaryHouseCells
+          secondaryHintHouse = Cells.contains cell secondaryHouseCells
           setValueReduction = setValueReduction
           reductions = reductions
           pointers = pointers
           focus = hd.focus }
 
-    let annotations =
-        p.cells
-        |> Set.map (fun cell -> (cell, annotationLookup cell))
-        |> Map.ofSeq
+    let annotations = makeMapLookup p.cells annotationLookup
 
     { hintDescription2.primaryHouses = hd.primaryHouses
       secondaryHouses = hd.secondaryHouses
