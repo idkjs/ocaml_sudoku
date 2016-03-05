@@ -8,6 +8,7 @@ open System.Text
 
 open core.sset;open core.sudoku
 open core.puzzlemap
+open core.loadEliminate
 open core.hints
 open core.setCell
 open core.eliminateCandidate
@@ -17,7 +18,7 @@ open console.command
 open console.console
 open console.format
 
-open load
+open input.load
 
 [<DllImport("user32.dll")>]
 extern bool ShowWindow(System.IntPtr hWnd, int cmdShow)
@@ -46,6 +47,16 @@ let parse (p : puzzleMap) (item : string) (solution : solution) (puzzle : puzzle
         | None ->
             (solution, Array.empty)
 
+    else if item = "load" then
+        let candidateReductions = loadEliminateFind p solution.current
+
+        let hd2 = loadEliminateDescription p candidateReductions
+        let hd3 = mhas solution p hd2
+        puzzleDrawFull2 (Some hd3.annotations)
+
+        let newSolution = loadEliminateStep p solution candidateReductions
+        //print_last newSolution
+        (newSolution, Array.empty)
     else if item.StartsWith "s" then
         let valueOpt = setCellCommandParse puzzle item p
         
@@ -121,56 +132,35 @@ let run (solution : solution ref) (puzzle : puzzleShape)
     else
         let p = tPuzzleMap puzzle :> puzzleMap
 
-        let mapCandidateCandidates = currentCellCandidates p.cells (!solution).current
+        let cellCandidates = currentCellCandidates p.cells (!solution).current
 
         let (soln, hints) = 
-            parse p item !solution puzzle mapCandidateCandidates puzzleDrawCandidateGridAnnotations print_last
+            parse p item !solution puzzle cellCandidates puzzleDrawCandidateGridAnnotations print_last
         solution := soln
 
         Seq.iteri puzzlePrintHint hints
 
         None
 
-let digitToEntry (p : puzzleMap) (given : given) (alphabet : digits) : current =
 
-    let m (cell : cell) : cellContents =
-        let dop = given.Get cell
-        match dop with
-        | Some(e) -> BigNumber(e)
-        | None -> 
-            let digits =
-                cell
-                |> p.cellHouseCells.Get
-                |> Cells.choose given.Get
-                |> Digits.ofSet
-
-            Digits.difference alphabet digits
-            |> PencilMarks
-
-    makeMapLookup p.cells m
-    :> current
-
-let repl (sudoku : string) (puzzle : puzzleShape) = 
+let repl (sudoku : string) (puzzleShape : puzzleShape) = 
 
     Console.WriteLine sudoku
-    
-    let p = tPuzzleMap puzzle :> puzzleMap
 
-    let alphabetSet =
-        Digits.ofArray puzzle.alphabet
+    let p = tPuzzleMap puzzleShape :> puzzleMap
 
     let transformer (given : given) : current = 
-        digitToEntry p given alphabetSet
+        givenToCurrent p.cells given (Digits.ofArray puzzleShape.alphabet)
     
-    let solution = ref (load p.cells puzzle.alphabet (Array.ofSeq sudoku) transformer)
+    let solution = ref (load puzzleShape sudoku)
 
-    let centreDigit : digit = puzzle.alphabet.[((Array.length puzzle.alphabet) / 2)]
+    let centreDigit : digit = puzzleShape.alphabet.[((Array.length puzzleShape.alphabet) / 2)]
 
     let puzzlePrintLine = printLine p.cells
 
     let puzzlePrintGrid = printGrid p defaultGridChars
 
-    let puzzlePrintCandidateGrid = printCandidateGrid p defaultCandidateGridChars puzzle.alphabet
+    let puzzlePrintCandidateGrid = printCandidateGrid p defaultCandidateGridChars puzzleShape.alphabet
 
     (* Print a Digit option, with colours *)
     let puzzleDrawCell (solution : solution) (cell : cell) : consoleChar = 
@@ -202,6 +192,7 @@ let repl (sudoku : string) (puzzle : puzzleShape) =
         match solution.steps with
         | action :: _ -> 
             match action with
+            | LoadEliminate _ -> drawConsoleChar (CStr "")
             | Placement sv -> drawConsoleChar (CStr(sv.ToString()))
             | Eliminate candidate -> drawConsoleChar (CStr(candidate.ToString()))
         | [] -> ()
@@ -219,6 +210,7 @@ let repl (sudoku : string) (puzzle : puzzleShape) =
 
     puzzleDrawGrid()
 
+(*
     let forcedSolutions = solve p (!solution)
     puzzleDrawGrid()
     if Array.length forcedSolutions > 0 then
@@ -228,27 +220,12 @@ let repl (sudoku : string) (puzzle : puzzleShape) =
                 Seq.iter drawConsoleChar (puzzlePrintGrid (puzzleDrawCell solve)))
 
     else Console.WriteLine("No solutions")
+*)
 
     let puzzlePrintHint = printHint (!solution) p puzzleDrawCandidateGridAnnotations
 
-    Seq.tryPick (run solution puzzle puzzleDrawCandidateGridAnnotations print_last puzzlePrintHint) 
+    Seq.tryPick (run solution puzzleShape puzzleDrawCandidateGridAnnotations print_last puzzlePrintHint) 
         readlines |> ignore
-
-let defaultPuzzleSpec = 
-    { size = 9
-      boxWidth = 3
-      boxHeight = 3
-      alphabet = 
-          [| for i in 1..9 -> (char) i + '0' |> Digit |] }
-
-(*
-let defaultPuzzleSpec = {
-    boxWidth = 4 * 1<width>
-    boxHeight = 2 * 1<height>
-    alphabet = [ for i in 1 .. 8 -> (char) i + '0' |> Digit ]
-    digits = fun _ -> None
-}
-*)
 
 Maximize() |> ignore
 

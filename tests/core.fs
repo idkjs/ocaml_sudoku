@@ -5,13 +5,6 @@ open core.puzzlemap
 
 open NUnit.Framework
 
-let defaultPuzzleSpec = 
-    { size = 9
-      boxWidth = 3
-      boxHeight = 3
-      alphabet = 
-          [| for i in 1..9 -> (char) i + '0' |> Digit |] }
-
 let twoByFourPuzzleSpec =
     { size = 8
       boxWidth = 2
@@ -98,12 +91,12 @@ let ``Can make houses``() =
     let p = tPuzzleMap twoByFourPuzzleSpec :> puzzleMap
 
     let expectedColumns =
-        [|1..9|]
+        [|1..8|]
         |> Array.map CColumn
         |> Array.map HColumn
 
     let expectedRows =
-        [|1..9|]
+        [|1..8|]
         |> Array.map RRow
         |> Array.map HRow
 

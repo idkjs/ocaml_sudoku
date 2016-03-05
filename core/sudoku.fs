@@ -233,6 +233,14 @@ type puzzleShape =
       boxHeight : boxHeight;
       alphabet : digit array }
 
+let makeDigit i = (char) i + '0' |> Digit
+
+let defaultPuzzleSpec : puzzleShape = 
+    { puzzleShape.size = 9
+      boxWidth = 3
+      boxHeight = 3
+      alphabet = 
+          [| for i in 1..9 -> makeDigit i |] }
 
 (* Whilst working to a solution each cell in the grid
  that doesn't have a Digit is filled with candidates
@@ -260,31 +268,8 @@ type candidate =
         String.Format("({0}){1}", this.digit, this.cell)
 F#*)
 
-(* Working towards a solution we take one of the following actions:
- SSet the cell to have a Digit
- or remove a candidate *)
-type action = 
-    | Placement of value
-    | Eliminate of candidate
-(*F#
-    override this.ToString() =
-        match this with
-        | Placement a -> String.Format("{0}={1}", a.cell, a.digit)
-        | Eliminate candidate -> String.Format("{0}<>{1}", candidate.cell, candidate.digit)
-F#*)
-
 type lookup<'a, 'b> = 
     abstract member Get: 'a -> 'b
-
-type given = lookup<cell, digit option>
-
-type current = lookup<cell, cellContents>
-
-[<NoComparisonAttribute>]
-type solution = 
-    { given : given;
-      current : current;
-      steps : action list }
 
 (* From http://www.fssnip.net/ji *)
 type either<'a, 'b> = 
@@ -303,17 +288,16 @@ let makeMapLookup<'a, 'b when 'a : comparison> (as' : 'a array) (fn : 'a -> 'b) 
     |> Map.ofSeq
     |> mapLookup<'a, 'b>
 
-(* for a cell, return a set of candidates *)
-type cellCandidates = lookup<cell, digits>
+type tryMapLookup<'a, 'b when 'a : comparison>(data : Map<'a, 'b>) =
+    interface lookup<'a, 'b option> with
+        member this.Get (a : 'a) : 'b option =
+            data.TryFind a
 
-let currentCellCandidates (cells : cell array) (current : current) : cellCandidates =
-    let getCandidateEntries (cell : cell) : digits =
-        let cellContents = current.Get cell
-        match cellContents with
-        | BigNumber _ -> Digits.empty
-        | PencilMarks s -> s
-
-    makeMapLookup<cell, digits> cells getCandidateEntries :> cellCandidates
+let makeTryMapLookup<'a, 'b when 'a : comparison> (as' : 'a array) (fn : 'a -> 'b) : tryMapLookup<'a, 'b> =
+    as'
+    |> Array.map (fun a -> (a, fn a))
+    |> Map.ofSeq
+    |> tryMapLookup<'a, 'b>
 
 type candidateReduction = 
     { cell : cell
@@ -346,3 +330,52 @@ module CandidateReductions =
     let singleton (d : candidateReduction) : candidateReductions = { data = SSet.ofArray<candidateReduction> [| d |] }
 
     let toArray (s : candidateReductions) : candidateReduction array = SSet.toArray<candidateReduction> s.data
+
+(* Working towards a solution we take one of the following actions:
+ SSet the cell to have a Digit
+ or remove a candidate *)
+ [<NoComparisonAttribute>]
+type action =
+    | LoadEliminate of candidateReductions
+    | Placement of value
+    | Eliminate of candidate
+(*F#
+    override this.ToString() =
+        match this with
+        | LoadEliminate _ -> "Load"
+        | Placement a -> String.Format("{0}={1}", a.cell, a.digit)
+        | Eliminate candidate -> String.Format("{0}<>{1}", candidate.cell, candidate.digit)
+F#*)
+
+type given = lookup<cell, digit option>
+
+type current = lookup<cell, cellContents>
+
+[<NoComparisonAttribute>]
+type solution = 
+    { given : given;
+      current : current;
+      steps : action list }
+
+let givenToCurrent (cells : cell array) (given : given) (alphabet : digits) : current =
+    let makeCellContents (cell : cell) : cellContents =
+        let dop = given.Get cell
+        match dop with
+        | Some digit -> BigNumber digit
+        | None -> PencilMarks alphabet
+
+    makeMapLookup cells makeCellContents
+    :> current
+
+(* for a cell, return a set of candidates *)
+type cellCandidates = lookup<cell, digits>
+
+let currentCellCandidates (cells : cell array) (current : current) : cellCandidates =
+    let getCandidateEntries (cell : cell) : digits =
+        let cellContents = current.Get cell
+        match cellContents with
+        | BigNumber _ -> Digits.empty
+        | PencilMarks s -> s
+
+    makeMapLookup<cell, digits> cells getCandidateEntries
+    :> cellCandidates

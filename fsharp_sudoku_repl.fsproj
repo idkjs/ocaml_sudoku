@@ -75,6 +75,7 @@
     <Compile Include="core\puzzlemap.fs" />
     <Compile Include="core\hints.fsi" />
     <Compile Include="core\hints.fs" />
+    <Compile Include="core\loadEliminate.fs" />
     <Compile Include="core\setCell.fsi" />
     <Compile Include="core\setCell.fs" />
     <Compile Include="core\eliminateCandidate.fsi" />
@@ -97,9 +98,10 @@
     <Compile Include="console\console.fs" />
     <Compile Include="console\command.fsi" />
     <Compile Include="console\command.fs" />
+    <Compile Include="input\load.fsi" />
+    <Compile Include="input\load.fs" />
     <Compile Include="tests\core.fs" />
-    <Compile Include="load.fsi" />
-    <Compile Include="load.fs" />
+    <Compile Include="tests\naked.fs" />
     <Compile Include="main.fs" />
     <None Include="App.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

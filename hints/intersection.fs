@@ -9,20 +9,16 @@ type cellHouses = lookup<cell, house array>
 
 let intersectionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primaryHouse : house) (secondaryHouseLookups : cellHouses) : hintDescription array = 
 
-    let primaryHouseCells =
+    let primaryHouseCandidates = 
         primaryHouse
         |> p.houseCells.Get
-    
-    let primaryHouseCandidates = 
-        primaryHouseCells
-        |> Cells.toArray
-        |> Array.map cellCandidates.Get
+        |> Cells.map cellCandidates.Get
         |> Digits.unionMany
-        |> Digits.toArray
 
     let uniqueSecondaryForCandidate (candidate : digit) : hintDescription array = 
         let pointerCells = 
-            primaryHouseCells
+            primaryHouse
+            |> p.houseCells.Get
             |> Cells.filter (fun cell -> 
                 let candidates = cellCandidates.Get cell
                 Digits.contains candidate candidates) 
@@ -36,8 +32,13 @@ let intersectionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (pri
 
         let hintsPerSecondaryHouse (secondaryHouses : house array) : hintDescription option = 
             if Cells.count pointerCells > 1 && Array.length secondaryHouses = 1 then 
+                let primaryHouseCells =
+                    primaryHouse
+                    |> p.houseCells.Get
+
                 let secondaryHouse = secondaryHouses.[0]
                 let secondaryHouseCells = p.houseCells.Get secondaryHouse
+
                 let otherHouseCells = Cells.difference secondaryHouseCells primaryHouseCells
                 
                 let candidateReductions = 
@@ -67,6 +68,7 @@ let intersectionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (pri
         |> SSet.toArray
     
     primaryHouseCandidates
+    |> Digits.toArray
     |> Array.map uniqueSecondaryForCandidate
     |> Array.concat
 

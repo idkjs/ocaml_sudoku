@@ -144,20 +144,19 @@ let SupportedHints : lookup<string, (puzzleMap -> cellCandidates -> hintDescript
 
     let command key =
         match key with
-        | "fh" -> fullHouses |> Some
-        | "hs" -> hiddenN 1 |> Some
-        | "hp" -> hiddenN 2 |> Some
-        | "ht" -> hiddenN 3 |> Some
-        | "hq" -> hiddenN 4 |> Some
-        | "ns" -> nakedSingle |> Some
-        | "np" -> nakedN 2 |> Some
-        | "nt" -> nakedN 3 |> Some
-        | "nq" -> nakedN 4 |> Some
-        | "pp" -> pointingPairs |> Some
-        | "bl" -> boxLineReductions |> Some
-        | "x" -> xWings |> Some
-        | "y" -> yWings |> Some
-        | _ -> None
+        | "fh" -> fullHouses
+        | "hs" -> hiddenN 1
+        | "hp" -> hiddenN 2
+        | "ht" -> hiddenN 3
+        | "hq" -> hiddenN 4
+        | "ns" -> nakedSingle
+        | "np" -> nakedN 2
+        | "nt" -> nakedN 3
+        | "nq" -> nakedN 4
+        | "pp" -> pointingPairs
+        | "bl" -> boxLineReductions
+        | "x" -> xWings
+        | "y" -> yWings
 
-    makeMapLookup keys command
+    makeTryMapLookup keys command
     :> lookup<string, (puzzleMap -> cellCandidates -> hintDescription array) option>

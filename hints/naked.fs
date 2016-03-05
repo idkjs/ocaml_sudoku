@@ -25,10 +25,7 @@ let findNaked (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (p
 
         let pointers =
             cellSubset
-            |> Cells.map (fun cell -> 
-                let candidates = cellCandidates.Get cell
-                { candidateReduction.cell = cell
-                  candidates = candidates })
+            |> Cells.map (fun cell -> { candidateReduction.cell = cell; candidates = cellCandidates.Get cell })
             |> CandidateReductions.ofSet
 
         if CandidateReductions.count candidateReductions > 0 then 
@@ -52,7 +49,7 @@ let nakedNPerHouse (count : int) (p : puzzleMap) (cellCandidates : cellCandidate
             Digits.count candidates > 1 && Digits.count candidates <= count) 
 
     setSubsets (Cells.toArray hht) count
-    |> Array.map (fun ss -> findNaked count p cellCandidates primaryHouse (Cells.ofArray ss))
+    |> Array.map (fun ss -> findNaked count p cellCandidates primaryHouse (Cells.ofSet ss))
     |> Array.choose id
 
 let nakedSingle (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescription array =

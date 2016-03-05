@@ -6,44 +6,42 @@ open core.hints
 
 let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (candidateSubset : digits) (primaryHouse : house) = 
 
-    let pairs = 
+    let pointers = 
         primaryHouse
         |> p.houseCells.Get
-        |> Cells.toArray
-        |> Array.map (fun cell -> 
-            let candidates = cellCandidates.Get cell
+        |> Cells.map (fun cell -> { candidateReduction.cell = cell; candidates = cellCandidates.Get cell })
+        |> CandidateReductions.ofSet
+        |> CandidateReductions.map (fun cr -> 
+            { candidateReduction.cell = cr.cell
+              candidates = Digits.intersect cr.candidates candidateSubset })
+        |> CandidateReductions.ofSet
+        |> CandidateReductions.filter (fun cr -> Digits.count cr.candidates > 0) 
 
-            let pointer = 
-                { candidateReduction.cell = cell
-                  candidates = Digits.intersect candidates candidateSubset }
+    let candidateReductions = 
+        primaryHouse
+        |> p.houseCells.Get
+        |> Cells.map (fun cell -> { candidateReduction.cell = cell; candidates = cellCandidates.Get cell })
+        |> CandidateReductions.ofSet
+        |> CandidateReductions.map (fun cr -> 
+            let pointerCandidates = Digits.intersect cr.candidates candidateSubset
             
             let crs = 
-                if Digits.count pointer.candidates > 0 then Digits.difference candidates candidateSubset
+                if Digits.count pointerCandidates > 0 then Digits.difference cr.candidates candidateSubset
                 else Digits.empty
             
             let candidateReduction = 
-                { candidateReduction.cell = cell
+                { candidateReduction.cell = cr.cell
                   candidates = crs }
             
-            (pointer, candidateReduction))
+            candidateReduction)
+        |> CandidateReductions.ofSet
+        |> CandidateReductions.filter (fun cr -> Digits.count cr.candidates > 0) 
 
-    let pointers, candidateReductions = Array.unzip pairs
-
-    let nonEmptyPointers =
-        pointers
-        |> Array.filter (fun cr -> Digits.count cr.candidates > 0) 
-        |> CandidateReductions.ofArray
-
-    let nonEmptyCandidateReductions =
-        candidateReductions
-        |> Array.filter (fun cr -> Digits.count cr.candidates > 0) 
-        |> CandidateReductions.ofArray
-
-    if CandidateReductions.count nonEmptyPointers = count && CandidateReductions.count nonEmptyCandidateReductions > 0 then 
+    if CandidateReductions.count pointers = count && CandidateReductions.count candidateReductions > 0 then 
 
         let setCellValue = 
             if count = 1 then 
-                let h = nonEmptyPointers.data.data.Head
+                let h = pointers.data.data.Head
                 let cell = h.cell
                 let candidate = candidateSubset.data.data.Head
 
@@ -54,9 +52,9 @@ let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (
 
         Some { hintDescription.primaryHouses = Houses.singleton primaryHouse
                secondaryHouses = Houses.empty
-               candidateReductions = nonEmptyCandidateReductions
+               candidateReductions = candidateReductions
                setCellValueAction = setCellValue
-               pointers = nonEmptyPointers
+               pointers = pointers
                focus = Digits.empty }
     else None
 
@@ -67,12 +65,11 @@ let hiddenNPerHouse (count : int) (p : puzzleMap) (cellCandidates : cellCandidat
         |> p.houseCells.Get
         |> Cells.map cellCandidates.Get
         |> Digits.unionMany
-        |> Digits.toArray
 
-    setSubsets houseCandidates count
+    setSubsets (Digits.toArray houseCandidates) count
     |> Array.choose
         (fun candidateSubset -> 
-            findHidden count p cellCandidates (Digits.ofArray candidateSubset) house)
+            findHidden count p cellCandidates (Digits.ofSet candidateSubset) house)
 
 let hiddenN (i : int) (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescription array =
     p.houses

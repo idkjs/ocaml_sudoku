@@ -22,10 +22,11 @@ let rec doSetSubsets (list : List<'a>) (size : int) (prefix : List<'a>) : List<L
             List.append inc dec
     | _ -> []
 
-let rec setSubsets (as' : 'a array) (size : int) : 'a array array =
+let rec setSubsets (as' : 'a array) (size : int) : SSet<'a> array =
     let list = Array.toList as'
     doSetSubsets list size []
     |> List.map List.toArray
+    |> List.map SSet.ofArray
     |> List.toArray
 
 (*

@@ -1,4 +1,4 @@
-module load
+module input.load
 
 open core.sudoku
 open core.puzzlemap
@@ -10,18 +10,21 @@ let loadPuzzle (cells : cell array) (alphabetisedLine : digit option array) : lo
     |> mapLookup<cell, digit option>
     :> lookup<cell, digit option>
 
-let load (orderedCells : cell array) (alphabet : digit array) (sudoku : char array) 
-    (contentsTransformer : given -> current) : solution = 
+let load (puzzleShape : puzzleShape) (sudoku : string) : solution = 
 
     let charToDigit (trialDigit : char) : digit option = 
         let compareAlpha (Digit charDigit) = trialDigit = charDigit
-        Array.tryFind compareAlpha alphabet
+        Array.tryFind compareAlpha puzzleShape.alphabet
 
-    let alphabetisedLine = Array.map charToDigit sudoku
+    let alphabetisedLine =
+        Array.ofSeq sudoku
+        |> Array.map charToDigit
 
-    let given = loadPuzzle orderedCells alphabetisedLine
+    let p = tPuzzleMap puzzleShape :> puzzleMap
 
-    let current = contentsTransformer given
+    let given = loadPuzzle p.cells alphabetisedLine
+
+    let current = givenToCurrent p.cells given (Digits.ofArray puzzleShape.alphabet)
 
     { solution.given = given
       current = current

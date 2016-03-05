@@ -123,7 +123,6 @@ let xWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates) (h
 let xWingsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (house1 : house) 
     (house2 : house) : hintDescription array = 
 
-
     let houseCandidates1 =
         house1
         |> p.houseCells.Get
@@ -289,12 +288,11 @@ let yWingsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (row1 : row
                 let allCandidates =
                     ccs
                     |> Digits.unionMany
-                    |> Digits.toArray
 
-                if Array.length allCandidates = 3 then 
+                if Digits.count allCandidates = 3 then 
                     match triple with
                     | [| left; pivot; right; _ |] -> 
-                        let removee = Digits.difference (Digits.ofArray allCandidates) pivot.candidates
+                        let removee = Digits.difference allCandidates pivot.candidates
 
                         if Digits.count removee = 1 && (left.candidates <> right.candidates) && 
                             Digits.isSubset removee (cellCandidates.Get other) then
