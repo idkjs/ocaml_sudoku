@@ -271,11 +271,6 @@ F#*)
 type lookup<'a, 'b> = 
     abstract member Get: 'a -> 'b
 
-(* From http://www.fssnip.net/ji *)
-type either<'a, 'b> = 
-    | Left of 'a
-    | Right of 'b
-
 
 type mapLookup<'a, 'b when 'a : comparison>(data : Map<'a, 'b>) =
     interface lookup<'a, 'b> with
@@ -336,13 +331,15 @@ module CandidateReductions =
  or remove a candidate *)
  [<NoComparisonAttribute>]
 type action =
-    | LoadEliminate of candidateReductions
+    | Load of string
+    | LoadEliminate
     | Placement of value
     | Eliminate of candidate
 (*F#
     override this.ToString() =
         match this with
-        | LoadEliminate _ -> "Load"
+        | Load sudoku -> String.Format("Load:{0}", sudoku)
+        | LoadEliminate  -> "Load"
         | Placement a -> String.Format("{0}={1}", a.cell, a.digit)
         | Eliminate candidate -> String.Format("{0}<>{1}", candidate.cell, candidate.digit)
 F#*)

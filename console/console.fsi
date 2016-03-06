@@ -23,5 +23,4 @@ val drawConsoleChar : consoleChar -> Unit
 
 val drawDigitCellContents : digit option -> cellContents -> consoleChar
 
-val drawDigitCellContentAnnotations : digit
-     -> digit -> digit option -> cellContents -> annotation option -> consoleChar
+val drawDigitCellContentAnnotations : digit -> lookup<cell, annotation> -> cell -> digit -> consoleChar

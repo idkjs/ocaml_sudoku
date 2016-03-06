@@ -83,6 +83,7 @@ type hintDescription =
 (* To draw a cell we may want to display extra information... *)
 type annotation = 
     { given : digit option
+      current: cellContents
       setValue : digit option
       primaryHintHouse : bool
       secondaryHintHouse : bool
@@ -93,27 +94,7 @@ type annotation =
 
 [<NoComparisonAttribute>]
 type hintDescription2 = 
-    { primaryHouses : houses
-      secondaryHouses : houses
-      candidateReductions : candidateReductions
-      setCellValueAction : value option
-      annotations : lookup<cell, annotation> }
-    override this.ToString() = 
-        let sb = StringBuilder()
-
-        sb.AppendLine(String.Format("Primary Houses {0}", String.Join(",", this.primaryHouses))) |> ignore
-        sb.AppendLine(String.Format("Secondary Houses {0}", String.Join(",", this.secondaryHouses))) 
-        |> ignore
-
-        this.candidateReductions
-        |> CandidateReductions.toArray
-        |> Array.iter
-            (fun candidateReduction ->
-                sb.AppendLine(String.Format("  {0}", candidateReduction)) |> ignore) 
-
-        sb.AppendLine(String.Format("Set Cell {0}", this.setCellValueAction)) |> ignore
-
-        sb.ToString()
+    { annotations : lookup<cell, annotation> }
 
 let mhas (solution : solution) (p : puzzleMap) (hd : hintDescription) : hintDescription2 = 
 
@@ -161,7 +142,8 @@ let mhas (solution : solution) (p : puzzleMap) (hd : hintDescription) : hintDesc
         let secondaryHouseCells =
             p.housesCells hd.secondaryHouses
 
-        { annotation.given = None
+        { annotation.given = solution.given.Get cell
+          current = solution.current.Get cell
           setValue = setValue
           primaryHintHouse = Cells.contains cell primaryHouseCells
           secondaryHintHouse = Cells.contains cell secondaryHouseCells
@@ -172,8 +154,22 @@ let mhas (solution : solution) (p : puzzleMap) (hd : hintDescription) : hintDesc
 
     let annotations = makeMapLookup p.cells annotationLookup
 
-    { hintDescription2.primaryHouses = hd.primaryHouses
-      secondaryHouses = hd.secondaryHouses
-      candidateReductions = hd.candidateReductions
-      setCellValueAction = hd.setCellValueAction
-      annotations = annotations }
+    { hintDescription2.annotations = annotations }
+
+let mhas2 (solution : solution) (p : puzzleMap) : hintDescription2 = 
+
+    let annotationLookup (cell : cell) : annotation = 
+
+        { annotation.given = solution.given.Get cell
+          current = solution.current.Get cell
+          setValue = None
+          primaryHintHouse = false
+          secondaryHintHouse = false
+          setValueReduction = None
+          reductions = Digits.empty
+          pointers = Digits.empty
+          focus = Digits.empty }
+
+    let annotations = makeMapLookup p.cells annotationLookup
+
+    { hintDescription2.annotations = annotations }

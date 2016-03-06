@@ -33,7 +33,8 @@ let parse (p : puzzleMap) (item : string) (solution : solution) (puzzle : puzzle
     Console.WriteLine item
 
     if item = "print" then 
-        puzzleDrawFull2 None
+        let hd3 = mhas2 solution p
+        puzzleDrawFull2 hd3.annotations
         (solution, Array.empty)
     else if item.StartsWith "focus" then
         let focusDigitOpt = focusCommandParse puzzle item
@@ -41,7 +42,7 @@ let parse (p : puzzleMap) (item : string) (solution : solution) (puzzle : puzzle
         | Some focusDigit ->
             let hd2 = focusCommandHintDescription p focusDigit
             let hd3 = mhas solution p hd2
-            puzzleDrawFull2 (Some hd3.annotations)
+            puzzleDrawFull2 hd3.annotations
 
             (solution, Array.empty)
         | None ->
@@ -52,7 +53,7 @@ let parse (p : puzzleMap) (item : string) (solution : solution) (puzzle : puzzle
 
         let hd2 = loadEliminateDescription p candidateReductions
         let hd3 = mhas solution p hd2
-        puzzleDrawFull2 (Some hd3.annotations)
+        puzzleDrawFull2 hd3.annotations
 
         let newSolution = loadEliminateStep p solution candidateReductions
         //print_last newSolution
@@ -68,7 +69,7 @@ let parse (p : puzzleMap) (item : string) (solution : solution) (puzzle : puzzle
                 | Some setCellValue ->
                     let hd2 = setCellHintDescription p setCellValue
                     let hd3 = mhas solution p hd2
-                    puzzleDrawFull2 (Some hd3.annotations)
+                    puzzleDrawFull2 hd3.annotations
 
                     setCellStep p setCellValue solution
 
@@ -94,7 +95,7 @@ let parse (p : puzzleMap) (item : string) (solution : solution) (puzzle : puzzle
                 | Some clearCommand ->
                     let hd2 = eliminateCandidateHintDescription p candidate
                     let hd3 = mhas solution p hd2
-                    puzzleDrawFull2 (Some hd3.annotations)
+                    puzzleDrawFull2 hd3.annotations
 
                     eliminateCandidateStep p candidate solution
 
@@ -122,7 +123,7 @@ let printHint (solution : solution) (p : puzzleMap) drawHint (index : int) (hint
     Console.WriteLine("{0}: {1}", index, hint)
 
     let hd3 = mhas solution p hint
-    drawHint (Some hd3.annotations)
+    drawHint hd3.annotations
 
     Console.Read() |> ignore
 
@@ -149,50 +150,31 @@ let repl (sudoku : string) (puzzleShape : puzzleShape) =
 
     let p = tPuzzleMap puzzleShape :> puzzleMap
 
-    let transformer (given : given) : current = 
-        givenToCurrent p.cells given (Digits.ofArray puzzleShape.alphabet)
-    
     let solution = ref (load puzzleShape sudoku)
 
     let centreDigit : digit = puzzleShape.alphabet.[((Array.length puzzleShape.alphabet) / 2)]
-
-    let puzzlePrintLine = printLine p.cells
-
-    let puzzlePrintGrid = printGrid p defaultGridChars
-
-    let puzzlePrintCandidateGrid = printCandidateGrid p defaultCandidateGridChars puzzleShape.alphabet
 
     (* Print a Digit option, with colours *)
     let puzzleDrawCell (solution : solution) (cell : cell) : consoleChar = 
         drawDigitCellContents (solution.given.Get cell) (solution.current.Get cell)
 
-    let puzzleDrawCellDigit (solution : solution) (cell : cell) (digit : digit) : consoleChar = 
-        drawDigitCellContentAnnotations centreDigit digit (solution.given.Get cell) (solution.current.Get cell) None
+    let puzzleDrawLine (solution : solution) =
+        Seq.iter drawConsoleChar (printLine p.cells (puzzleDrawCell solution))
 
-    let puzzleDrawCellDigitAnnotations (solution : solution) (l : lookup<cell, annotation> option) (cell : cell) (digit : digit) : consoleChar = 
-        let cellAnnotationOpt =
-            l
-            |> Option.map (fun ll -> ll.Get cell)
-
-        drawDigitCellContentAnnotations centreDigit digit (solution.given.Get cell) (solution.current.Get cell) cellAnnotationOpt
-
-    let puzzleDrawLine () =
-        Seq.iter drawConsoleChar (puzzlePrintLine (puzzleDrawCell !solution))
-
-    let puzzleDrawGrid () =
-        Seq.iter drawConsoleChar (puzzlePrintGrid (puzzleDrawCell !solution))
+    let puzzleDrawGrid (solution : solution) =
+        Seq.iter drawConsoleChar (printGrid p defaultGridChars (puzzleDrawCell solution))
     
     let puzzleDrawCandidateGridAnnotations annotations = 
-        Seq.iter drawConsoleChar (puzzlePrintCandidateGrid (puzzleDrawCellDigitAnnotations !solution annotations))
+        Seq.iter drawConsoleChar (printCandidateGrid p defaultCandidateGridChars puzzleShape.alphabet (drawDigitCellContentAnnotations centreDigit annotations))
 
     let print_last (solution : solution) = 
-        let puzzleDrawCell' (cell : cell) = drawDigitCellContents (solution.given.Get cell) (solution.current.Get cell)
-        Seq.iter drawConsoleChar (puzzlePrintGrid puzzleDrawCell')
+        puzzleDrawGrid solution
 
         match solution.steps with
         | action :: _ -> 
             match action with
-            | LoadEliminate _ -> drawConsoleChar (CStr "")
+            | Load _ -> drawConsoleChar (CStr "")
+            | LoadEliminate  -> drawConsoleChar (CStr "")
             | Placement sv -> drawConsoleChar (CStr(sv.ToString()))
             | Eliminate candidate -> drawConsoleChar (CStr(candidate.ToString()))
         | [] -> ()
@@ -205,10 +187,10 @@ let repl (sudoku : string) (puzzleShape : puzzleShape) =
     
     let readlines = Seq.initInfinite (fun _ -> getInput (">"))
 
-    puzzleDrawLine()
+    puzzleDrawLine !solution
     drawConsoleChar NL
 
-    puzzleDrawGrid()
+    puzzleDrawGrid !solution
 
 (*
     let forcedSolutions = solve p (!solution)
@@ -217,7 +199,7 @@ let repl (sudoku : string) (puzzleShape : puzzleShape) =
         forcedSolutions
         |> Array.iter
             (fun solve ->
-                Seq.iter drawConsoleChar (puzzlePrintGrid (puzzleDrawCell solve)))
+                Seq.iter drawConsoleChar (printGrid p defaultGridChars (puzzleDrawCell solve)))
 
     else Console.WriteLine("No solutions")
 *)

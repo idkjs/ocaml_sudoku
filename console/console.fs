@@ -96,46 +96,44 @@ let drawDigitCellContents (firstDigit : digit option) (currentDigit : cellConten
     | None, BigNumber s -> ColouredString(s.ToString(), ConsoleColor.Red)
     | None, PencilMarks _ -> CChar '.'
 
-let drawDigitCellContentAnnotations centreCandidate (candidate : digit) (firstDigit : digit option) 
-    (currentDigit : cellContents) (annotationOpt : annotation option) = 
+let drawDigitCellContentAnnotations centreCandidate (annotations : lookup<cell, annotation>) (cell : cell) (candidate : digit) = 
+
+    let annotation' = annotations.Get cell
     let isCentre = centreCandidate = candidate
 
-    match firstDigit, currentDigit with
-    | Some _, _ when not isCentre -> CChar ' '
-    | Some s, _ -> 
-        match annotationOpt with
-        | Some annotation when annotation.primaryHintHouse -> 
+    match annotation'.current with
+    | BigNumber _ when not isCentre -> CChar ' '
+    | BigNumber s -> 
+        match annotation' with
+        | annotation when annotation.primaryHintHouse && annotation.given.IsSome -> 
             ColouredString(s.ToString(), ConsoleColor.Cyan)
-        | Some annotation when annotation.secondaryHintHouse -> 
-            ColouredString(s.ToString(), ConsoleColor.DarkBlue)
-        | _ -> ColouredString(s.ToString(), ConsoleColor.Blue)
-
-    | None, BigNumber _ when not isCentre -> CChar ' '
-    | None, BigNumber s -> 
-        match annotationOpt with
-        | Some annotation when annotation.primaryHintHouse -> 
+        | annotation when annotation.primaryHintHouse -> 
             ColouredString(s.ToString(), ConsoleColor.Yellow)
-        | Some annotation when annotation.secondaryHintHouse -> 
+        | annotation when annotation.secondaryHintHouse && annotation.given.IsSome -> 
+            ColouredString(s.ToString(), ConsoleColor.DarkBlue)
+        | annotation when annotation.secondaryHintHouse -> 
             ColouredString(s.ToString(), ConsoleColor.DarkRed)
+        | annotation when annotation.given.IsSome -> 
+            ColouredString(s.ToString(), ConsoleColor.Blue)
         | _ -> ColouredString(s.ToString(), ConsoleColor.Red)
-    | None, PencilMarks candidates -> 
-        match annotationOpt with
-        | Some annotation when annotation.setValue.IsSome && annotation.setValue.Value = candidate -> 
+    | PencilMarks candidates -> 
+        match annotation' with
+        | annotation when annotation.setValue.IsSome && annotation.setValue.Value = candidate -> 
                 ColouredString(candidate.ToString(), ConsoleColor.Red)
-        | Some annotation when annotation.setValue.IsSome && Digits.contains candidate candidates -> 
+        | annotation when annotation.setValue.IsSome && Digits.contains candidate candidates -> 
             ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
-        | Some annotation when annotation.setValueReduction.IsSome && annotation.setValueReduction.Value = candidate && Digits.contains candidate candidates -> 
+        | annotation when annotation.setValueReduction.IsSome && annotation.setValueReduction.Value = candidate && Digits.contains candidate candidates -> 
                 ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
-        | Some annotation when Digits.contains candidate annotation.reductions -> 
+        | annotation when Digits.contains candidate annotation.reductions -> 
             ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
-        | Some annotation when Digits.contains candidate annotation.pointers -> 
+        | annotation when Digits.contains candidate annotation.pointers -> 
             ColouredString(candidate.ToString(), ConsoleColor.Magenta)
-        | Some annotation when Digits.contains candidate annotation.focus && Digits.contains candidate candidates -> 
+        | annotation when Digits.contains candidate annotation.focus && Digits.contains candidate candidates -> 
             ColouredString(candidate.ToString(), ConsoleColor.Yellow)
-        | Some annotation when annotation.primaryHintHouse -> 
+        | annotation when annotation.primaryHintHouse -> 
             if Digits.contains candidate candidates then ColouredString(candidate.ToString(), ConsoleColor.DarkGreen)
             else CChar ' '
-        | Some annotation when annotation.secondaryHintHouse -> 
+        | annotation when annotation.secondaryHintHouse -> 
             if Digits.contains candidate candidates then ColouredString(candidate.ToString(), ConsoleColor.Green)
             else CChar ' '
         | _ -> 

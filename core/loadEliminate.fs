@@ -66,7 +66,7 @@ let loadEliminateDescription (p : puzzleMap) (candidateReductions : candidateRed
 let loadEliminateStep (p : puzzleMap) (solution : solution) (candidateReductions : candidateReductions) : solution =
 
     { solution with current = loadEliminateApply p candidateReductions solution.current
-                    steps = LoadEliminate candidateReductions :: solution.steps }
+                    steps = LoadEliminate :: solution.steps }
 
 let loadEliminateFindAndApply (p : puzzleMap) (solution : solution) : solution =
     let candidateReductions = loadEliminateFind p solution.current

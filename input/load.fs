@@ -28,4 +28,4 @@ let load (puzzleShape : puzzleShape) (sudoku : string) : solution =
 
     { solution.given = given
       current = current
-      steps = [] }
+      steps = [ Load sudoku ] }
