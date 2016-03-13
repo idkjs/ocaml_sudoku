@@ -20,7 +20,7 @@ let load (puzzleShape : puzzleShape) (sudoku : string) : solution =
         Array.ofSeq sudoku
         |> Array.map charToDigit
 
-    let p = tPuzzleMap puzzleShape :> puzzleMap
+    let p = tPuzzleMap puzzleShape
 
     let given = loadPuzzle p.cells alphabetisedLine
 

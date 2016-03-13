@@ -72,9 +72,7 @@ let sinterleave (fenceToSeq : 'a -> seq<'c>) (firstPost : seq<'c>) (midPost : se
 let printCell (digitTo : cell -> 'c) cell = digitTo cell |> Seq.singleton
 
 let printColumn (printCell : cell -> seq<'c>) row column : seq<'c> = 
-    let cell = 
-        { cell.col = column
-          row = row }
+    let cell = makeCell column row
     printCell cell
 
 (* Print a stack *)

@@ -18,9 +18,7 @@ let eliminateCandidateApply (p : puzzleMap) (candidate : candidate) (current : c
     :> current
 
 let eliminateCandidateHintDescription (p: puzzleMap) (candidate : candidate) : hintDescription =
-    let cr = 
-        { candidateReduction.cell = candidate.cell
-          candidates = Digits.singleton candidate.digit }
+    let cr = makeCandidateReduction (candidate.cell) (Digits.singleton candidate.digit)
 
     { hintDescription.primaryHouses = Houses.empty
       secondaryHouses = Houses.empty

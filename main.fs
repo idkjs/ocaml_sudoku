@@ -131,7 +131,7 @@ let run (solution : solution ref) (puzzle : puzzleShape)
     puzzleDrawCandidateGridAnnotations print_last puzzlePrintHint item = 
     if item = "quit" then Some "quit"
     else
-        let p = tPuzzleMap puzzle :> puzzleMap
+        let p = tPuzzleMap puzzle
 
         let cellCandidates = currentCellCandidates p.cells (!solution).current
 
@@ -148,7 +148,7 @@ let repl (sudoku : string) (puzzleShape : puzzleShape) =
 
     Console.WriteLine sudoku
 
-    let p = tPuzzleMap puzzleShape :> puzzleMap
+    let p = tPuzzleMap puzzleShape
 
     let solution = ref (load puzzleShape sudoku)
 

@@ -38,7 +38,7 @@ let rec searchr (p : puzzleMap) (solution : solution) (existing : solution array
         candidates
         |> Array.map
             (fun digit ->
-                let setCellValue = makeSetCellDigit cell digit
+                let setCellValue = makeValue cell digit
                 
                 let current = setCellDigitApply p setCellValue solution.current
 

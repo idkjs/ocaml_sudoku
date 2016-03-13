@@ -14,7 +14,7 @@ let twoByFourPuzzleSpec =
 
 [<Test>]
 let ``Can make columns``() =
-    let p = tPuzzleMap defaultPuzzleSpec :> puzzleMap
+    let p = tPuzzleMap defaultPuzzleSpec
 
     let expected =
         [|1..9|]
@@ -24,7 +24,7 @@ let ``Can make columns``() =
 
 [<Test>]
 let ``Can make rows``() = 
-    let p = tPuzzleMap defaultPuzzleSpec :> puzzleMap
+    let p = tPuzzleMap defaultPuzzleSpec
 
     let expected =
         [|1..9|]
@@ -34,7 +34,7 @@ let ``Can make rows``() =
 
 [<Test>]
 let ``Can make cells``() = 
-    let p = tPuzzleMap defaultPuzzleSpec :> puzzleMap
+    let p = tPuzzleMap defaultPuzzleSpec
 
     let expected =
         [|1..9|]
@@ -42,16 +42,14 @@ let ``Can make cells``() =
             (fun r ->
                 [|1..9|]
                 |> Array.map
-                    (fun c ->
-                        { cell.col = c |> CColumn
-                          row = r |> RRow }))
+                    (fun c -> makeCell (c |> CColumn) (r |> RRow)))
         |> Array.concat
 
     Assert.AreEqual(expected, p.cells)
 
 [<Test>]
 let ``Can make stacks``() = 
-    let p = tPuzzleMap twoByFourPuzzleSpec :> puzzleMap
+    let p = tPuzzleMap twoByFourPuzzleSpec
 
     let expected =
         [|1..4|]
@@ -61,7 +59,7 @@ let ``Can make stacks``() =
 
 [<Test>]
 let ``Can make bands``() = 
-    let p = tPuzzleMap twoByFourPuzzleSpec :> puzzleMap
+    let p = tPuzzleMap twoByFourPuzzleSpec
 
     let expected =
         [|1..2|]
@@ -71,7 +69,7 @@ let ``Can make bands``() =
 
 [<Test>]
 let ``Can make boxes``() = 
-    let p = tPuzzleMap twoByFourPuzzleSpec :> puzzleMap
+    let p = tPuzzleMap twoByFourPuzzleSpec
 
     let expected =
         [|1..2|]
@@ -79,16 +77,14 @@ let ``Can make boxes``() =
             (fun b ->
                 [|1..4|]
                 |> Array.map
-                    (fun s ->
-                        { box.stack = s |> SStack
-                          band = b |> BBand }))
+                    (fun s -> makeBox (s |> SStack) (b |> BBand)))
         |> Array.concat
 
     Assert.AreEqual(expected, p.boxes)
 
 [<Test>]
 let ``Can make houses``() = 
-    let p = tPuzzleMap twoByFourPuzzleSpec :> puzzleMap
+    let p = tPuzzleMap twoByFourPuzzleSpec
 
     let expectedColumns =
         [|1..8|]
@@ -106,9 +102,7 @@ let ``Can make houses``() =
             (fun b ->
                 [|1..4|]
                 |> Array.map
-                    (fun s ->
-                        { box.stack = s |> SStack
-                          band = b |> BBand }))
+                    (fun s -> makeBox (s |> SStack) (b |> BBand)))
         |> Array.concat
         |> Array.map HBox
 
@@ -120,37 +114,33 @@ let ``Can make houses``() =
 
 [<Test>]
 let ``Get column cells``() = 
-    let p = tPuzzleMap defaultPuzzleSpec :> puzzleMap
+    let p = tPuzzleMap defaultPuzzleSpec
 
     let actual = p.columnCells.Get (2 |> CColumn)
 
     let expected =
         [|1..9|]
         |> Array.map
-            (fun r ->
-                { cell.col = 2 |> CColumn
-                  row = r |> RRow })
+            (fun r -> makeCell (2 |> CColumn) (r |> RRow))
 
     Assert.AreEqual(expected, actual)
 
 [<Test>]
 let ``Get row cells``() = 
-    let p = tPuzzleMap defaultPuzzleSpec :> puzzleMap
+    let p = tPuzzleMap defaultPuzzleSpec
 
     let actual = p.rowCells.Get (7 |> RRow)
 
     let expected =
         [|1..9|]
         |> Array.map
-            (fun c ->
-                { cell.col = c |> CColumn
-                  row = 7 |> RRow })
+            (fun c -> makeCell (c |> CColumn) (7 |> RRow))
 
     Assert.AreEqual(expected, actual)
 
 [<Test>]
 let ``Get stack for a column``() =
-    let p = tPuzzleMap defaultPuzzleSpec :> puzzleMap
+    let p = tPuzzleMap defaultPuzzleSpec
 
     let actual =
         p.columns
@@ -168,7 +158,7 @@ let ``Get stack for a column``() =
 
 [<Test>]
 let ``Get stack columns``() = 
-    let p = tPuzzleMap defaultPuzzleSpec :> puzzleMap
+    let p = tPuzzleMap defaultPuzzleSpec
 
     let actual = p.stackColumns.Get (2 |> SStack)
 
@@ -180,7 +170,7 @@ let ``Get stack columns``() =
 
 [<Test>]
 let ``Get band for a row``() =
-    let p = tPuzzleMap defaultPuzzleSpec :> puzzleMap
+    let p = tPuzzleMap defaultPuzzleSpec
 
     let actual =
         p.rows
@@ -198,7 +188,7 @@ let ``Get band for a row``() =
 
 [<Test>]
 let ``Get band rows``() = 
-    let p = tPuzzleMap defaultPuzzleSpec :> puzzleMap
+    let p = tPuzzleMap defaultPuzzleSpec
 
     let actual = p.bandRows.Get (2 |> BBand)
 
@@ -210,14 +200,12 @@ let ``Get band rows``() =
 
 [<Test>]
 let ``Get box for a cell``() =
-    let p = tPuzzleMap defaultPuzzleSpec :> puzzleMap
+    let p = tPuzzleMap defaultPuzzleSpec
 
     let cells =
         [|1..9|]
         |> Array.map
-            (fun r ->
-                { cell.col = 5 |> CColumn
-                  row = r |> RRow })
+            (fun r -> makeCell (5 |> CColumn) (r |> RRow))
 
     let actual =
         cells
@@ -229,10 +217,7 @@ let ``Get box for a cell``() =
             (fun b ->
                 [|1..3|]
                 |> Array.map
-                    (fun _ ->
-                        { box.stack = 2 |> SStack
-                          band = b |> BBand }))
+                    (fun _ -> makeBox (2 |> SStack) (b |> BBand)))
         |> Array.concat
 
     Assert.AreEqual(expected, actual)
-

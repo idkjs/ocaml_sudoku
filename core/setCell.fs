@@ -31,7 +31,7 @@ let setCellDigitTry (cell : cell) (candidate : digit) (cellCandidates : cellCand
     let candidates = cellCandidates.Get cell
 
     if Digits.contains candidate candidates then
-        makeSetCellDigit cell candidate
+        makeValue cell candidate
         |> Some
     else None
 

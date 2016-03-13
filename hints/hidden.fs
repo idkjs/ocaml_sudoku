@@ -9,18 +9,16 @@ let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (
     let pointers = 
         primaryHouse
         |> p.houseCells.Get
-        |> Cells.map (fun cell -> { candidateReduction.cell = cell; candidates = cellCandidates.Get cell })
+        |> Cells.map (fun cell -> makeCandidateReduction cell (cellCandidates.Get cell))
         |> CandidateReductions.ofSet
-        |> CandidateReductions.map (fun cr -> 
-            { candidateReduction.cell = cr.cell
-              candidates = Digits.intersect cr.candidates candidateSubset })
+        |> CandidateReductions.map (fun cr -> makeCandidateReduction cr.cell (Digits.intersect cr.candidates candidateSubset))
         |> CandidateReductions.ofSet
         |> CandidateReductions.filter (fun cr -> Digits.count cr.candidates > 0) 
 
     let candidateReductions = 
         primaryHouse
         |> p.houseCells.Get
-        |> Cells.map (fun cell -> { candidateReduction.cell = cell; candidates = cellCandidates.Get cell })
+        |> Cells.map (fun cell -> makeCandidateReduction cell (cellCandidates.Get cell))
         |> CandidateReductions.ofSet
         |> CandidateReductions.map (fun cr -> 
             let pointerCandidates = Digits.intersect cr.candidates candidateSubset
@@ -29,9 +27,7 @@ let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (
                 if Digits.count pointerCandidates > 0 then Digits.difference cr.candidates candidateSubset
                 else Digits.empty
             
-            let candidateReduction = 
-                { candidateReduction.cell = cr.cell
-                  candidates = crs }
+            let candidateReduction = makeCandidateReduction cr.cell crs
             
             candidateReduction)
         |> CandidateReductions.ofSet
@@ -45,7 +41,7 @@ let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (
                 let cell = h.cell
                 let candidate = candidateSubset.data.data.Head
 
-                let setCellValue = makeSetCellDigit cell candidate
+                let setCellValue = makeValue cell candidate
 
                 Some setCellValue
             else None

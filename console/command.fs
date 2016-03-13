@@ -75,7 +75,7 @@ let setCellCommandParse (s: puzzleShape) (item : string) (p : puzzleMap) : value
 
         match (parsedCell, parsedValue) with
         | (Some cell, Some value) -> 
-            makeSetCellDigit cell value
+            makeValue cell value
             |> Some
         | _ -> None
     else None

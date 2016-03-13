@@ -29,7 +29,7 @@ let loadEliminateFind  (p : puzzleMap) (current : current) : candidateReductions
     |> Array.choose
         (fun cell ->
             reductions cell
-            |> Option.map (fun digits -> { candidateReduction.cell = cell; candidates = digits }))
+            |> Option.map (fun digits -> makeCandidateReduction cell digits))
     |> CandidateReductions.ofArray
 
 let loadEliminateApply (p : puzzleMap) (candidateReductions : candidateReductions) (current : current) : current = 
