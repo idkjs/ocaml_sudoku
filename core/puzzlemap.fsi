@@ -1,5 +1,6 @@
 module core.puzzlemap
 
+open smap
 open sudoku
 
 val makeColumn : int -> column
@@ -31,28 +32,28 @@ type puzzleMap =
         boxes : box array
         houses : house array
         (* for a column, return the cells in it *)
-        columnCells : lookup<column, cell array>
+        columnCells : SMap<column, cell array>
         (* for a row, return the cells in it *)
-        rowCells : lookup<row, cell array>
+        rowCells : SMap<row, cell array>
         (* for a column, which stack is it in? *)
-        columnStack : lookup<column, stack>
+        columnStack : SMap<column, stack>
         (* for a stack, return the columns in it *)
-        stackColumns : lookup<stack, column array>
+        stackColumns : SMap<stack, column array>
         (* for a row, which band is it in? *)
-        rowBand : lookup<row, band>
+        rowBand : SMap<row, band>
         (* for a band, return the rows in it *)
-        bandRows : lookup<band, row array>
+        bandRows : SMap<band, row array>
         (* for a cell, which box is it in? *)
-        cellBox : lookup<cell, box>
+        cellBox : SMap<cell, box>
         (* for a box, return the cells in it *)
-        boxCells : lookup<box, cell array>
+        boxCells : SMap<box, cell array>
         (* for a house, return the cells in it *)
-        houseCells : lookup<house, cells>
-        cellHouseCells : lookup<cell, cells>
+        houseCells : SMap<house, cells>
+        cellHouseCells : SMap<cell, cells>
         housesCells : houses -> cells
         houseCellCandidateReductions : house -> cellCandidates -> candidateReductions
 
-        //abstract member houseCellCandidates : lookup<house, cellCandidates>
+        //abstract member houseCellCandidates : SMap<house, cellCandidates>
     }
 
 val tPuzzleMap : puzzleShape -> puzzleMap

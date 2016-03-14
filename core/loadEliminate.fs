@@ -1,5 +1,6 @@
 module core.loadEliminate
 
+open smap
 open sudoku
 open puzzlemap
 open hints
@@ -7,16 +8,16 @@ open hints
 let loadEliminateFind  (p : puzzleMap) (current : current) : candidateReductions = 
 
     let reductions (cell : cell) : digits option =
-        let cellContents = current.Get cell
+        let cellContents = SMap.get current cell
         match cellContents with
         | BigNumber _ -> None
         | PencilMarks candidates -> 
             let digits =
                 cell
-                |> p.cellHouseCells.Get
+                |> SMap.get p.cellHouseCells
                 |> Cells.choose
                     (fun cell ->
-                        let houseCellContents = current.Get cell
+                        let houseCellContents = SMap.get current cell
                         match houseCellContents with
                         | BigNumber digit -> Some digit
                         | PencilMarks _ -> None)
@@ -41,7 +42,7 @@ let loadEliminateApply (p : puzzleMap) (candidateReductions : candidateReduction
         |> Map.ofSeq
 
     let update (cell : cell) : cellContents =
-        let cellContents = current.Get cell
+        let cellContents = SMap.get current cell
         match cellContents with
         | BigNumber _ -> cellContents
         | PencilMarks candidates ->
@@ -52,8 +53,7 @@ let loadEliminateApply (p : puzzleMap) (candidateReductions : candidateReduction
                 |> PencilMarks
             | None -> cellContents
 
-    makeMapLookup<cell, cellContents> p.cells update
-    :> current
+    SMap.ofLookup<cell, cellContents> p.cells update
 
 let loadEliminateDescription (p : puzzleMap) (candidateReductions : candidateReductions) : hintDescription =
     { hintDescription.primaryHouses = Houses.empty

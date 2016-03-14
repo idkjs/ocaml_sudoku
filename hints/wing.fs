@@ -1,5 +1,7 @@
 module hints.wing
 
+open core.sset
+open core.smap
 open core.sudoku
 open core.puzzlemap
 open core.hints
@@ -12,12 +14,12 @@ let makeHints (p : puzzleMap) (cellCandidates : cellCandidates) pointerCells pri
 
     let colCells =
         secondaryHouses
-        |> Houses.map p.houseCells.Get
+        |> Houses.map (SMap.get p.houseCells)
         |> Cells.unionMany
 
     let candidatesReductions = 
         Cells.difference colCells pointerCells
-        |> Cells.map (fun cell -> makeCandidateReduction cell (cellCandidates.Get cell))
+        |> Cells.map (fun cell -> makeCandidateReduction cell (SMap.get cellCandidates cell))
         |> CandidateReductions.ofSet
         |> CandidateReductions.filter (fun cr -> Digits.contains candidate cr.candidates)
         |> CandidateReductions.map (fun cr -> makeCandidateReduction cr.cell (Digits.singleton candidate))
@@ -36,14 +38,14 @@ let xWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates) (h
 
     let houseCandidateCells1 =
         house1
-        |> p.houseCells.Get
-        |> Cells.map (fun cell -> makeCandidateReduction cell (cellCandidates.Get cell))
+        |> SMap.get p.houseCells
+        |> Cells.map (fun cell -> makeCandidateReduction cell (SMap.get cellCandidates cell))
         |> CandidateReductions.ofSet
 
     let houseCandidateCells2 =
         house2
-        |> p.houseCells.Get
-        |> Cells.map (fun cell -> makeCandidateReduction cell (cellCandidates.Get cell))
+        |> SMap.get p.houseCells
+        |> Cells.map (fun cell -> makeCandidateReduction cell (SMap.get cellCandidates cell))
         |> CandidateReductions.ofSet
 
     let hht1 = CandidateReductions.filter (fun cr -> Digits.contains candidate cr.candidates) houseCandidateCells1
@@ -69,6 +71,7 @@ let xWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates) (h
 
             let pointerCells =
                 [| row1Cells; row2Cells |]
+                |> SSet.ofArray
                 |> Cells.unionMany
 
             let primaryHouses = Houses.ofArray [| house1; house2 |]
@@ -101,6 +104,7 @@ let xWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates) (h
 
             let pointerCells =
                 [| col1Cells; col2Cells |]
+                |> SSet.ofArray
                 |> Cells.unionMany
 
             let primaryHouses = Houses.ofArray [| house1; house2 |]
@@ -119,14 +123,14 @@ let xWingsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (house1 : h
 
     let houseCandidates1 =
         house1
-        |> p.houseCells.Get
-        |> Cells.map cellCandidates.Get
+        |> SMap.get p.houseCells
+        |> Cells.map (SMap.get cellCandidates)
         |> Digits.unionMany
 
     let houseCandidates2 =
         house2
-        |> p.houseCells.Get
-        |> Cells.map cellCandidates.Get
+        |> SMap.get p.houseCells
+        |> Cells.map (SMap.get cellCandidates)
         |> Digits.unionMany
 
     Digits.intersect houseCandidates1 houseCandidates2
@@ -251,12 +255,12 @@ let yWingsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (row1 : row
 
     let candidateCells =
         cells
-        |> Array.map (fun cell -> makeCandidateReduction cell (cellCandidates.Get cell))
+        |> Array.map (fun cell -> makeCandidateReduction cell (SMap.get cellCandidates cell))
 
-    let ccell11 = makeCandidateReduction cell11 (cellCandidates.Get cell11)
-    let ccell12 = makeCandidateReduction cell12 (cellCandidates.Get cell12)
-    let ccell21 = makeCandidateReduction cell21 (cellCandidates.Get cell21)
-    let ccell22 = makeCandidateReduction cell22 (cellCandidates.Get cell22)
+    let ccell11 = makeCandidateReduction cell11 (SMap.get cellCandidates cell11)
+    let ccell12 = makeCandidateReduction cell12 (SMap.get cellCandidates cell12)
+    let ccell21 = makeCandidateReduction cell21 (SMap.get cellCandidates cell21)
+    let ccell22 = makeCandidateReduction cell22 (SMap.get cellCandidates cell22)
 
     let allNonEmpty =
         candidateCells
@@ -281,6 +285,7 @@ let yWingsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (row1 : row
             if allPairs then 
                 let allCandidates =
                     ccs
+                    |> SSet.ofArray
                     |> Digits.unionMany
 
                 if Digits.count allCandidates = 3 then 
@@ -289,7 +294,7 @@ let yWingsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (row1 : row
                         let removee = Digits.difference allCandidates pivot.candidates
 
                         if Digits.count removee = 1 && (left.candidates <> right.candidates) && 
-                            Digits.isSubset removee (cellCandidates.Get other) then
+                            Digits.isSubset removee (SMap.get cellCandidates other) then
 
                             let candidateReductions = makeCandidateReduction other removee
 

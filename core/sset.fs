@@ -11,8 +11,6 @@ type SSet<'T when 'T : comparison> =
     interface IEnumerable with
         member x.GetEnumerator(): IEnumerator = 
             failwith "Not implemented yet"
-    interface IEnumerable<'T> with
-        member this.GetEnumerator() = (Seq.cast<'T> this.data).GetEnumerator()
 
 module SSet =
     let empty<'T when 'T : comparison> : SSet<'T> = { data = []} 

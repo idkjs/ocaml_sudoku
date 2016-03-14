@@ -1,5 +1,7 @@
 module hints.hidden
 
+open core.sset
+open core.smap
 open core.sudoku
 open core.puzzlemap
 open core.hints
@@ -8,8 +10,8 @@ let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (
 
     let pointers = 
         primaryHouse
-        |> p.houseCells.Get
-        |> Cells.map (fun cell -> makeCandidateReduction cell (cellCandidates.Get cell))
+        |> SMap.get p.houseCells
+        |> Cells.map (fun cell -> makeCandidateReduction cell (SMap.get cellCandidates cell))
         |> CandidateReductions.ofSet
         |> CandidateReductions.map (fun cr -> makeCandidateReduction cr.cell (Digits.intersect cr.candidates candidateSubset))
         |> CandidateReductions.ofSet
@@ -17,8 +19,8 @@ let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (
 
     let candidateReductions = 
         primaryHouse
-        |> p.houseCells.Get
-        |> Cells.map (fun cell -> makeCandidateReduction cell (cellCandidates.Get cell))
+        |> SMap.get p.houseCells
+        |> Cells.map (fun cell -> makeCandidateReduction cell (SMap.get cellCandidates cell))
         |> CandidateReductions.ofSet
         |> CandidateReductions.map (fun cr -> 
             let pointerCandidates = Digits.intersect cr.candidates candidateSubset
@@ -58,8 +60,8 @@ let hiddenNPerHouse (count : int) (p : puzzleMap) (cellCandidates : cellCandidat
 
     let houseCandidates =
         house
-        |> p.houseCells.Get
-        |> Cells.map cellCandidates.Get
+        |> SMap.get p.houseCells
+        |> Cells.map (SMap.get cellCandidates)
         |> Digits.unionMany
 
     setSubsets (Digits.toArray houseCandidates) count

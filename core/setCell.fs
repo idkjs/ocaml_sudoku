@@ -1,5 +1,6 @@
 module core.setCell
 
+open smap
 open sudoku
 open puzzlemap
 open hints
@@ -7,20 +8,19 @@ open hints
 let setCellDigitApply (p : puzzleMap) (value : value) (current : current) : current = 
 
     let update (cell : cell) : cellContents =
-        let cellContents = current.Get cell
+        let cellContents = SMap.get current cell
         match cellContents with
         | BigNumber _ -> cellContents
         | PencilMarks candidates -> 
             let cells =
-                p.cellHouseCells.Get value.cell
+                SMap.get p.cellHouseCells value.cell
 
             if value.cell = cell then BigNumber value.digit
             else if Cells.contains cell cells then 
                 PencilMarks (Digits.remove value.digit candidates)
             else cellContents
 
-    makeMapLookup<cell, cellContents> p.cells update
-    :> current
+    SMap.ofLookup<cell, cellContents> p.cells update
 
 type setCellDigitError = 
     { cell : cell
@@ -28,7 +28,7 @@ type setCellDigitError =
       digit : digit }
 
 let setCellDigitTry (cell : cell) (candidate : digit) (cellCandidates : cellCandidates) : value option = 
-    let candidates = cellCandidates.Get cell
+    let candidates = SMap.get cellCandidates cell
 
     if Digits.contains candidate candidates then
         makeValue cell candidate

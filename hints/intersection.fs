@@ -1,26 +1,27 @@
 module hints.intersection
 
-
-open core.sset;open core.sudoku
+open core.sset
+open core.smap
+open core.sudoku
 open core.puzzlemap
 open core.hints
 
-type cellHouses = lookup<cell, house array>
+type cellHouses = SMap<cell, house array>
 
 let intersectionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primaryHouse : house) (secondaryHouseLookups : cellHouses) : hintDescription array = 
 
     let primaryHouseCandidates = 
         primaryHouse
-        |> p.houseCells.Get
-        |> Cells.map cellCandidates.Get
+        |> SMap.get p.houseCells
+        |> Cells.map (SMap.get cellCandidates)
         |> Digits.unionMany
 
     let uniqueSecondaryForCandidate (candidate : digit) : hintDescription array = 
         let pointerCells = 
             primaryHouse
-            |> p.houseCells.Get
+            |> SMap.get p.houseCells
             |> Cells.filter (fun cell -> 
-                let candidates = cellCandidates.Get cell
+                let candidates = SMap.get cellCandidates cell
                 Digits.contains candidate candidates) 
         
         let pointers  = 
@@ -32,17 +33,17 @@ let intersectionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (pri
             if Cells.count pointerCells > 1 && Array.length secondaryHouses = 1 then 
                 let primaryHouseCells =
                     primaryHouse
-                    |> p.houseCells.Get
+                    |> SMap.get p.houseCells
 
                 let secondaryHouse = secondaryHouses.[0]
-                let secondaryHouseCells = p.houseCells.Get secondaryHouse
+                let secondaryHouseCells = SMap.get p.houseCells secondaryHouse
 
                 let otherHouseCells = Cells.difference secondaryHouseCells primaryHouseCells
                 
                 let candidateReductions = 
                     otherHouseCells
                     |> Cells.filter (fun cell -> 
-                        let candidates = cellCandidates.Get cell
+                        let candidates = SMap.get cellCandidates cell
                         Digits.contains candidate candidates) 
                     |> Cells.map (fun cell -> makeCandidateReduction cell (Digits.singleton candidate))
                     |> CandidateReductions.ofSet
@@ -59,7 +60,7 @@ let intersectionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (pri
         
         pointerCells
         |> Cells.choose (fun cell -> 
-                            secondaryHouseLookups.Get cell
+                            SMap.get secondaryHouseLookups cell
                             |> hintsPerSecondaryHouse)
         |> SSet.toArray
     
@@ -73,18 +74,16 @@ let pointingPairsPerBox (p : puzzleMap) (cellCandidates : cellCandidates) (prima
         [| HRow cell.row; HColumn cell.col |]
 
     let secondaryHouseLookups =
-        makeMapLookup<cell, house array> p.cells cellLines
-        :> cellHouses
+        SMap.ofLookup<cell, house array> p.cells cellLines
 
     intersectionsPerHouse p cellCandidates primaryHouse secondaryHouseLookups
 
 let boxLineReductionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primaryHouse : house) : hintDescription array = 
     let cellBox (cell : cell) =
-        [| p.cellBox.Get cell |> HBox |]
+        [| SMap.get p.cellBox cell |> HBox |]
 
     let secondaryHouseLookups =
-        makeMapLookup<cell, house array> p.cells cellBox
-        :> cellHouses
+        SMap.ofLookup<cell, house array> p.cells cellBox
 
     intersectionsPerHouse p cellCandidates primaryHouse secondaryHouseLookups
 

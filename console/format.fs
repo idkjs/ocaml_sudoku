@@ -1,5 +1,6 @@
 module console.format
 
+open core.smap
 open core.sudoku
 open core.puzzlemap
 
@@ -77,7 +78,7 @@ let printColumn (printCell : cell -> seq<'c>) row column : seq<'c> =
 
 (* Print a stack *)
 let printStack (p : puzzleMap) (columnPrinter : row -> column -> seq<'c>) (columnSeparator : seq<'c>) (row : row) (stack : stack) = 
-    simpleInterleave (columnPrinter row) columnSeparator (p.stackColumns.Get stack)
+    simpleInterleave (columnPrinter row) columnSeparator (SMap.get p.stackColumns stack)
 
 (* Print a row *)
 let printRow (stackPrinter : stack -> seq<'c>) (gridCharsRow : gridCharsRow<seq<'c>>) eol (stacks : stack array) = 
@@ -90,7 +91,7 @@ let printRow (stackPrinter : stack -> seq<'c>) (gridCharsRow : gridCharsRow<seq<
 
 (* Print a band *)
 let printBand (p : puzzleMap) (rowToSeq : row -> seq<'c>) (rowSeparator : seq<'c>) (band : band) = 
-    simpleInterleave rowToSeq rowSeparator (p.bandRows.Get band)
+    simpleInterleave rowToSeq rowSeparator (SMap.get p.bandRows band)
 
 (* Print a puzzle grid, supply callback to draw each cell *)
 let printGrid (p : puzzleMap) (gridChars : gridChars<seq<'c>>) (digitTo : cell -> 'c) = 
@@ -103,7 +104,7 @@ let printGrid (p : puzzleMap) (gridChars : gridChars<seq<'c>>) (digitTo : cell -
 
     let doPrintBand = printBand p doPrintRow Seq.empty
 
-    let r = Seq.collect (konst gridChars.h) (p.stackColumns.Get p.stacks.[0])
+    let r = Seq.collect (konst gridChars.h) (SMap.get p.stackColumns p.stacks.[0])
     let printHorizontal (g : gridCharsRow<seq<'c>>) = sinterleave (konst r) g.l g.m g.r gridChars.n p.stacks
     let t = printHorizontal gridChars.t
     let m = printHorizontal gridChars.m
@@ -114,15 +115,15 @@ let printGrid (p : puzzleMap) (gridChars : gridChars<seq<'c>>) (digitTo : cell -
 let printCandidateGrid (p : puzzleMap) (candidateGridChars : candidateGridChars<seq<'c>>) (alphabet : digit array) 
     (draw_cell : cell -> digit -> 'c) = 
 
-    let d = Seq.collect (konst candidateGridChars.h) (p.stackColumns.Get p.stacks.[0])
-    let i = Seq.collect (konst candidateGridChars.hi) (p.stackColumns.Get p.stacks.[0])
+    let d = Seq.collect (konst candidateGridChars.h) (SMap.get p.stackColumns p.stacks.[0])
+    let i = Seq.collect (konst candidateGridChars.hi) (SMap.get p.stackColumns p.stacks.[0])
     
     let printFullHorizontal (x : candidateGridCharsRow<seq<'c>>) i = 
-        let s = simpleInterleave (konst i) x.mi (p.stackColumns.Get p.stacks.[0])
+        let s = simpleInterleave (konst i) x.mi (SMap.get p.stackColumns p.stacks.[0])
 
         sinterleave (konst s) x.x.l x.x.m x.x.r candidateGridChars.n p.stacks
     
-    let c = Array.length (p.stackColumns.Get p.stacks.[0])
+    let c = Array.length (SMap.get p.stackColumns p.stacks.[0])
     let s = alphabet
     
     let ss = 

@@ -2,6 +2,7 @@ module console.console
 
 open System
 
+open core.smap
 open core.sudoku
 open core.hints
 
@@ -23,4 +24,4 @@ val drawConsoleChar : consoleChar -> Unit
 
 val drawDigitCellContents : digit option -> cellContents -> consoleChar
 
-val drawDigitCellContentAnnotations : digit -> lookup<cell, annotation> -> cell -> digit -> consoleChar
+val drawDigitCellContentAnnotations : digit -> SMap<cell, annotation> -> cell -> digit -> consoleChar

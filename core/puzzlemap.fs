@@ -1,5 +1,7 @@
 module core.puzzlemap
 
+open sset
+open smap
 open sudoku
 
 let makeColumn (i : int) : column =
@@ -147,6 +149,7 @@ let cellHouseCells (length : size) (boxWidth : boxWidth) (boxHeight : boxHeight)
         |> Cells.remove cell
 
     [| Cells.singleton cell; rowCells; columnCells; boxCells |]
+    |> SSet.ofArray
     |> Cells.unionMany
 
 [<NoComparisonAttribute;NoEqualityAttribute>]
@@ -160,28 +163,28 @@ type puzzleMap =
         boxes : box array
         houses : house array
         (* for a column, return the cells in it *)
-        columnCells : lookup<column, cell array>
+        columnCells : SMap<column, cell array>
         (* for a row, return the cells in it *)
-        rowCells : lookup<row, cell array>
+        rowCells : SMap<row, cell array>
         (* for a column, which stack is it in? *)
-        columnStack : lookup<column, stack>
+        columnStack : SMap<column, stack>
         (* for a stack, return the columns in it *)
-        stackColumns : lookup<stack, column array>
+        stackColumns : SMap<stack, column array>
         (* for a row, which band is it in? *)
-        rowBand : lookup<row, band>
+        rowBand : SMap<row, band>
         (* for a band, return the rows in it *)
-        bandRows : lookup<band, row array>
+        bandRows : SMap<band, row array>
         (* for a cell, which box is it in? *)
-        cellBox : lookup<cell, box>
+        cellBox : SMap<cell, box>
         (* for a box, return the cells in it *)
-        boxCells : lookup<box, cell array>
+        boxCells : SMap<box, cell array>
         (* for a house, return the cells in it *)
-        houseCells : lookup<house, cells>
-        cellHouseCells : lookup<cell, cells>
+        houseCells : SMap<house, cells>
+        cellHouseCells : SMap<cell, cells>
         housesCells : houses -> cells
         houseCellCandidateReductions : house -> cellCandidates -> candidateReductions
 
-        //abstract member houseCellCandidates : lookup<house, cellCandidates>
+        //abstract member houseCellCandidates : SMap<house, cellCandidates>
     }
 
 let tPuzzleMap (puzzleShape : puzzleShape) : puzzleMap =
@@ -205,53 +208,43 @@ let tPuzzleMap (puzzleShape : puzzleShape) : puzzleMap =
     let _cellHouseCells = cellHouseCells puzzleShape.size puzzleShape.boxWidth puzzleShape.boxHeight
 
     let _columnCellsLookup =
-        makeMapLookup<column, cell array> _columns _columnCells
-        :> lookup<column, cell array>
+        SMap.ofLookup<column, cell array> _columns _columnCells
 
     let _rowCellsLookup =
-        makeMapLookup<row, cell array> _rows _rowCells
-        :> lookup<row, cell array>
+        SMap.ofLookup<row, cell array> _rows _rowCells
 
     let _columnStackLookup =
-        makeMapLookup<column, stack> _columns _columnStack
-        :> lookup<column, stack>
+        SMap.ofLookup<column, stack> _columns _columnStack
 
     let _stackColumnsLookup =
-        makeMapLookup<stack, column array> _stacks _stackColumns
-        :> lookup<stack, column array>
+        SMap.ofLookup<stack, column array> _stacks _stackColumns
 
     let _rowBandLookup =
-        makeMapLookup<row, band> _rows _rowBand
-        :> lookup<row, band>
+        SMap.ofLookup<row, band> _rows _rowBand
 
     let _bandRowsLookup =
-        makeMapLookup<band, row array> _bands _bandRows
-        :> lookup<band, row array>
+        SMap.ofLookup<band, row array> _bands _bandRows
 
     let _cellBoxLookup =
-        makeMapLookup<cell, box> _cells _cellBox
-        :> lookup<cell, box>
+        SMap.ofLookup<cell, box> _cells _cellBox
 
     let _boxCellsLookup =
-        makeMapLookup<box, cell array> _boxes _boxCells
-        :> lookup<box, cell array>
+        SMap.ofLookup<box, cell array> _boxes _boxCells
 
     let _houseCellsLookup =
-        makeMapLookup<house, cells> _houses _houseCells
-        :> lookup<house, cells>
+        SMap.ofLookup<house, cells> _houses _houseCells
 
     let _cellHouseCellsLookup =
-        makeMapLookup<cell, cells> _cells _cellHouseCells
-        :> lookup<cell, cells>
+        SMap.ofLookup<cell, cells> _cells _cellHouseCells
 
     let _housesCells (houses : houses) : cells =
         houses
-        |> Houses.map _houseCellsLookup.Get
+        |> Houses.map (SMap.get _houseCellsLookup)
         |> Cells.unionMany
 
     let _houseCellCandidateReductions (house : house) (cellCandidates : cellCandidates) : candidateReductions =
-        _houseCellsLookup.Get house
-        |> Cells.map (fun cell -> makeCandidateReduction cell (cellCandidates.Get cell))
+        SMap.get _houseCellsLookup house
+        |> Cells.map (fun cell -> makeCandidateReduction cell (SMap.get cellCandidates cell))
         |> CandidateReductions.ofSet
 
     {

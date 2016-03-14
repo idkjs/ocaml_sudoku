@@ -3,6 +3,7 @@ module core.sudoku
 
 open System
 open sset
+open smap
 F#*)
 
 (* A sudoku is a square grid of size... *)
@@ -132,10 +133,11 @@ module Digits =
 
     let union (s : digits) (s' : digits) : digits = { data = SSet.union s.data s'.data }
 
-    let unionMany (ss : seq<digits>) : digits =
+    let unionMany (ss : SSet<digits>) : digits =
         let tss =
             ss
-            |> Seq.map (fun s -> s.data)
+            |> SSet.toArray
+            |> Array.map (fun s -> s.data)
         { data = SSet.unionMany tss }
 
 type cells = 
@@ -169,10 +171,11 @@ module Cells =
 
     let union (s : cells) (s' : cells) : cells = { data = SSet.union s.data s'.data }
 
-    let unionMany (ss : seq<cells>) : cells =
+    let unionMany (ss : SSet<cells>) : cells =
         let tss =
             ss
-            |> Seq.map (fun s -> s.data)
+            |> SSet.toArray
+            |> Array.map (fun s -> s.data)
         { data = SSet.unionMany<cell> tss }
 
 type columns = 
@@ -268,32 +271,6 @@ type candidate =
         String.Format("({0}){1}", this.digit, this.cell)
 F#*)
 
-type lookup<'a, 'b> = 
-    abstract member Get: 'a -> 'b
-
-
-type mapLookup<'a, 'b when 'a : comparison>(data : Map<'a, 'b>) =
-    interface lookup<'a, 'b> with
-        member this.Get (a : 'a) =
-            data.Item a
-
-let makeMapLookup<'a, 'b when 'a : comparison> (as' : 'a array) (fn : 'a -> 'b) : mapLookup<'a, 'b> =
-    as'
-    |> Array.map (fun a -> (a, fn a))
-    |> Map.ofSeq
-    |> mapLookup<'a, 'b>
-
-type tryMapLookup<'a, 'b when 'a : comparison>(data : Map<'a, 'b>) =
-    interface lookup<'a, 'b option> with
-        member this.Get (a : 'a) : 'b option =
-            data.TryFind a
-
-let makeTryMapLookup<'a, 'b when 'a : comparison> (as' : 'a array) (fn : 'a -> 'b) : tryMapLookup<'a, 'b> =
-    as'
-    |> Array.map (fun a -> (a, fn a))
-    |> Map.ofSeq
-    |> tryMapLookup<'a, 'b>
-
 type candidateReduction = 
     { cell : cell
       candidates : digits }
@@ -344,9 +321,9 @@ type action =
         | Eliminate candidate -> String.Format("{0}<>{1}", candidate.cell, candidate.digit)
 F#*)
 
-type given = lookup<cell, digit option>
+type given = SMap<cell, digit option>
 
-type current = lookup<cell, cellContents>
+type current = SMap<cell, cellContents>
 
 [<NoComparisonAttribute>]
 type solution = 
@@ -356,23 +333,21 @@ type solution =
 
 let givenToCurrent (cells : cell array) (given : given) (alphabet : digits) : current =
     let makeCellContents (cell : cell) : cellContents =
-        let dop = given.Get cell
+        let dop = SMap.get given cell
         match dop with
         | Some digit -> BigNumber digit
         | None -> PencilMarks alphabet
 
-    makeMapLookup cells makeCellContents
-    :> current
+    SMap.ofLookup cells makeCellContents
 
 (* for a cell, return a set of candidates *)
-type cellCandidates = lookup<cell, digits>
+type cellCandidates = SMap<cell, digits>
 
 let currentCellCandidates (cells : cell array) (current : current) : cellCandidates =
     let getCandidateEntries (cell : cell) : digits =
-        let cellContents = current.Get cell
+        let cellContents = SMap.get current cell
         match cellContents with
         | BigNumber _ -> Digits.empty
         | PencilMarks s -> s
 
-    makeMapLookup<cell, digits> cells getCandidateEntries
-    :> cellCandidates
+    SMap.ofLookup<cell, digits> cells getCandidateEntries

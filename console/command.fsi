@@ -1,5 +1,6 @@
 module console.command
 
+open core.smap
 open core.sudoku
 open core.puzzlemap
 open core.hints
@@ -18,4 +19,4 @@ val candidateClearCommandParse : puzzleShape -> string -> puzzleMap -> candidate
 
 val candidateClearCommandCheck : given -> cellCandidates -> candidate -> candidate option
 
-val SupportedHints : lookup<string, (puzzleMap -> cellCandidates -> hintDescription array) option>
+val supportedHints : SMap<string, (puzzleMap -> cellCandidates -> hintDescription array)>

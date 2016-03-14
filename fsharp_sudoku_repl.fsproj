@@ -70,6 +70,7 @@
   </ProjectExtensions>
   <ItemGroup>
     <Compile Include="core\sset.fs" />
+    <Compile Include="core\smap.fs" />
     <Compile Include="core\sudoku.fs" />
     <Compile Include="core\puzzlemap.fsi" />
     <Compile Include="core\puzzlemap.fs" />

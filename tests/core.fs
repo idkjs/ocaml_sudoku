@@ -1,5 +1,6 @@
 module core.test
 
+open core.smap
 open core.sudoku
 open core.puzzlemap
 
@@ -116,7 +117,7 @@ let ``Can make houses``() =
 let ``Get column cells``() = 
     let p = tPuzzleMap defaultPuzzleSpec
 
-    let actual = p.columnCells.Get (2 |> CColumn)
+    let actual = SMap.get p.columnCells (2 |> CColumn)
 
     let expected =
         [|1..9|]
@@ -129,7 +130,7 @@ let ``Get column cells``() =
 let ``Get row cells``() = 
     let p = tPuzzleMap defaultPuzzleSpec
 
-    let actual = p.rowCells.Get (7 |> RRow)
+    let actual = SMap.get p.rowCells (7 |> RRow)
 
     let expected =
         [|1..9|]
@@ -144,7 +145,7 @@ let ``Get stack for a column``() =
 
     let actual =
         p.columns
-        |> Array.map p.columnStack.Get
+        |> Array.map (SMap.get p.columnStack)
 
     let expected =
         [|1..3|]
@@ -160,7 +161,7 @@ let ``Get stack for a column``() =
 let ``Get stack columns``() = 
     let p = tPuzzleMap defaultPuzzleSpec
 
-    let actual = p.stackColumns.Get (2 |> SStack)
+    let actual = SMap.get p.stackColumns (2 |> SStack)
 
     let expected =
         [|4..6|]
@@ -174,7 +175,7 @@ let ``Get band for a row``() =
 
     let actual =
         p.rows
-        |> Array.map p.rowBand.Get
+        |> Array.map (SMap.get p.rowBand)
 
     let expected =
         [|1..3|]
@@ -190,7 +191,7 @@ let ``Get band for a row``() =
 let ``Get band rows``() = 
     let p = tPuzzleMap defaultPuzzleSpec
 
-    let actual = p.bandRows.Get (2 |> BBand)
+    let actual = SMap.get p.bandRows (2 |> BBand)
 
     let expected =
         [|4..6|]
@@ -209,7 +210,7 @@ let ``Get box for a cell``() =
 
     let actual =
         cells
-        |> Array.map p.cellBox.Get
+        |> Array.map (SMap.get p.cellBox)
 
     let expected =
         [|1..3|]

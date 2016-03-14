@@ -1,14 +1,13 @@
 module input.load
 
+open core.smap
 open core.sudoku
 open core.puzzlemap
 
 (* Load a sudoku given as a single line of gridSize*gridSize characters *)
-let loadPuzzle (cells : cell array) (alphabetisedLine : digit option array) : lookup<cell, digit option> = 
+let loadPuzzle (cells : cell array) (alphabetisedLine : digit option array) : SMap<cell, digit option> = 
     Array.zip cells alphabetisedLine
-    |> Map.ofArray
-    |> mapLookup<cell, digit option>
-    :> lookup<cell, digit option>
+    |> SMap.ofArray
 
 let load (puzzleShape : puzzleShape) (sudoku : string) : solution = 
 

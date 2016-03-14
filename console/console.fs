@@ -2,6 +2,7 @@ module console.console
 
 open System
 
+open core.smap
 open core.sudoku
 open core.hints
 
@@ -96,9 +97,9 @@ let drawDigitCellContents (firstDigit : digit option) (currentDigit : cellConten
     | None, BigNumber s -> ColouredString(s.ToString(), ConsoleColor.Red)
     | None, PencilMarks _ -> CChar '.'
 
-let drawDigitCellContentAnnotations centreCandidate (annotations : lookup<cell, annotation>) (cell : cell) (candidate : digit) = 
+let drawDigitCellContentAnnotations centreCandidate (annotations : SMap<cell, annotation>) (cell : cell) (candidate : digit) = 
 
-    let annotation' = annotations.Get cell
+    let annotation' = SMap.get annotations cell
     let isCentre = centreCandidate = candidate
 
     match annotation'.current with

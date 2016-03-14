@@ -1,6 +1,7 @@
 module core.hints
 
 open sset
+open smap
 open sudoku
 open puzzlemap
 
@@ -30,7 +31,7 @@ type annotation =
 
 [<NoComparisonAttribute>]
 type hintDescription2 = 
-    { annotations : lookup<cell, annotation> }
+    { annotations : SMap<cell, annotation> }
 
 val mhas : solution -> puzzleMap -> hintDescription -> hintDescription2
 

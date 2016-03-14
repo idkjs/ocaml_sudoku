@@ -3,6 +3,7 @@ module core.force
 open System
 open System.Diagnostics
 
+open smap
 open sudoku
 open puzzlemap
 open setCell
@@ -19,18 +20,18 @@ let isValidCellContents (cellContents : cellContents) : bool =
 
 let isValid (solution : solution) (cells : cell array) : bool =
     cells
-    |> Array.map solution.current.Get
+    |> Array.map (SMap.get solution.current)
     |> Array.forall isValidCellContents
 
 let rec searchr (p : puzzleMap) (solution : solution) (existing : solution array) : solution array = 
     let emptyCell : cell option =
         p.cells
-        |> Array.tryFind (solution.current.Get >> isPencilMarksCellContents)
+        |> Array.tryFind (SMap.get solution.current >> isPencilMarksCellContents)
 
     match emptyCell with
     | Some cell ->
         let candidates =
-            let cellContents = solution.current.Get cell
+            let cellContents = SMap.get solution.current cell
             match cellContents with
             | BigNumber _ -> Array.empty
             | PencilMarks candidates -> candidates |> Digits.toArray

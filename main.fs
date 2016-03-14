@@ -5,8 +5,9 @@ open System.Diagnostics
 open System.Runtime.InteropServices
 open System.Text
 
-
-open core.sset;open core.sudoku
+open core.sset
+open core.smap
+open core.sudoku
 open core.puzzlemap
 open core.loadEliminate
 open core.hints
@@ -111,7 +112,7 @@ let parse (p : puzzleMap) (item : string) (solution : solution) (puzzle : puzzle
         (newSolution, Array.empty)
 
     else
-        let supportedHintOpt = SupportedHints.Get item
+        let supportedHintOpt = SMap.tryGet supportedHints item
         match supportedHintOpt with
         | Some supportedHint ->
             let hints = supportedHint p cellCandidates
@@ -156,7 +157,7 @@ let repl (sudoku : string) (puzzleShape : puzzleShape) =
 
     (* Print a Digit option, with colours *)
     let puzzleDrawCell (solution : solution) (cell : cell) : consoleChar = 
-        drawDigitCellContents (solution.given.Get cell) (solution.current.Get cell)
+        drawDigitCellContents (SMap.get solution.given cell) (SMap.get solution.current cell)
 
     let puzzleDrawLine (solution : solution) =
         Seq.iter drawConsoleChar (printLine p.cells (puzzleDrawCell solution))

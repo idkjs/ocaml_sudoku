@@ -2,6 +2,7 @@ module console.command
 
 open System
 
+open core.smap
 open core.sudoku
 open core.puzzlemap
 open core.hints
@@ -81,13 +82,13 @@ let setCellCommandParse (s: puzzleShape) (item : string) (p : puzzleMap) : value
     else None
 
 let setCellCommandCheck (given : given) (cellCandidates : cellCandidates) (value : value) : value option =
-    let givenDigitOpt = given.Get value.cell
+    let givenDigitOpt = SMap.get given value.cell
     match givenDigitOpt with
     | Some givenDigit ->
         Console.WriteLine("Error: Cell {0} has given {1}", value.cell, givenDigit)
         None
     | None ->
-        let digits = cellCandidates.Get value.cell
+        let digits = SMap.get cellCandidates value.cell
         if Digits.contains value.digit digits then Some value
         else
             Console.WriteLine("Warning: Cell {0} does not have candidate {1}", value.cell, value.digit)
@@ -111,20 +112,20 @@ let candidateClearCommandParse (s: puzzleShape) (item : string) (p : puzzleMap) 
         None
 
 let candidateClearCommandCheck (given : given) (cellCandidates : cellCandidates) (candidate : candidate) : candidate option =
-    let givenDigitOpt = given.Get candidate.cell
+    let givenDigitOpt = SMap.get given candidate.cell
     match givenDigitOpt with
     | Some givenDigit ->
         Console.WriteLine("Error: Cell {0} has given {1}", candidate.cell, givenDigit)
         None
     | None ->
-        let digits = cellCandidates.Get candidate.cell
+        let digits = SMap.get cellCandidates candidate.cell
         if Digits.contains candidate.digit digits then Some candidate
         else
             Console.WriteLine("Warning: Cell {0} does not have candidate {1}", candidate.cell, candidate.digit)
             candidate
             |> Some
 
-let SupportedHints : lookup<string, (puzzleMap -> cellCandidates -> hintDescription array) option> =
+let supportedHints : SMap<string, (puzzleMap -> cellCandidates -> hintDescription array)> =
     let keys =
         [|
             "fh"
@@ -158,5 +159,4 @@ let SupportedHints : lookup<string, (puzzleMap -> cellCandidates -> hintDescript
         | "x" -> xWings
         | "y" -> yWings
 
-    makeTryMapLookup keys command
-    :> lookup<string, (puzzleMap -> cellCandidates -> hintDescription array) option>
+    SMap.ofLookup keys command

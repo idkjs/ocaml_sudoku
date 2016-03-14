@@ -4,6 +4,7 @@ open System
 open System.Text
 
 open sset
+open smap
 open sudoku
 open puzzlemap
 
@@ -94,7 +95,7 @@ type annotation =
 
 [<NoComparisonAttribute>]
 type hintDescription2 = 
-    { annotations : lookup<cell, annotation> }
+    { annotations : SMap<cell, annotation> }
 
 let mhas (solution : solution) (p : puzzleMap) (hd : hintDescription) : hintDescription2 = 
 
@@ -110,7 +111,7 @@ let mhas (solution : solution) (p : puzzleMap) (hd : hintDescription) : hintDesc
                 
                 let r3 = 
                     let cells =
-                        p.cellHouseCells.Get setCellValueAction.cell
+                        SMap.get p.cellHouseCells setCellValueAction.cell
 
                     if Cells.contains cell cells then Some setCellValueAction.digit
                     else None
@@ -142,8 +143,8 @@ let mhas (solution : solution) (p : puzzleMap) (hd : hintDescription) : hintDesc
         let secondaryHouseCells =
             p.housesCells hd.secondaryHouses
 
-        { annotation.given = solution.given.Get cell
-          current = solution.current.Get cell
+        { annotation.given = SMap.get solution.given cell
+          current = SMap.get solution.current cell
           setValue = setValue
           primaryHintHouse = Cells.contains cell primaryHouseCells
           secondaryHintHouse = Cells.contains cell secondaryHouseCells
@@ -152,7 +153,7 @@ let mhas (solution : solution) (p : puzzleMap) (hd : hintDescription) : hintDesc
           pointers = pointers
           focus = hd.focus }
 
-    let annotations = makeMapLookup p.cells annotationLookup
+    let annotations = SMap.ofLookup p.cells annotationLookup
 
     { hintDescription2.annotations = annotations }
 
@@ -160,8 +161,8 @@ let mhas2 (solution : solution) (p : puzzleMap) : hintDescription2 =
 
     let annotationLookup (cell : cell) : annotation = 
 
-        { annotation.given = solution.given.Get cell
-          current = solution.current.Get cell
+        { annotation.given = SMap.get solution.given cell
+          current = SMap.get solution.current cell
           setValue = None
           primaryHintHouse = false
           secondaryHintHouse = false
@@ -170,6 +171,6 @@ let mhas2 (solution : solution) (p : puzzleMap) : hintDescription2 =
           pointers = Digits.empty
           focus = Digits.empty }
 
-    let annotations = makeMapLookup p.cells annotationLookup
+    let annotations = SMap.ofLookup p.cells annotationLookup
 
     { hintDescription2.annotations = annotations }
