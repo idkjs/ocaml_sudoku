@@ -5,21 +5,21 @@ open System.Diagnostics
 open System.Runtime.InteropServices
 open System.Text
 
-open core.sset
-open core.smap
-open core.sudoku
-open core.puzzlemap
-open core.loadEliminate
-open core.hints
-open core.setCell
-open core.eliminateCandidate
-open core.force
+open sset
+open smap
+open sudoku
+open puzzlemap
+open loadEliminate
+open hints
+open setCell
+open eliminateCandidate
+open force
 
-open console.command
-open console.console
-open console.format
+open command
+open console
+open format
 
-open input.load
+open load
 
 [<DllImport("user32.dll")>]
 extern bool ShowWindow(System.IntPtr hWnd, int cmdShow)

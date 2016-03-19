@@ -1,0 +1,46 @@
+module test_naked
+
+open sudoku
+open puzzlemap
+open loadEliminate
+
+open naked
+
+open load
+
+open NUnit.Framework
+
+[<Test>]
+let ``Can find naked singles``() =
+    let sudoku = "000105000140000670080002400063070010900000003010090520007200080026000035000409000"
+
+    let p = tPuzzleMap defaultPuzzleSpec
+
+    let solution = load defaultPuzzleSpec sudoku
+
+    let candidateReductions = loadEliminateFind p solution.current
+    let newSolution = loadEliminateStep p solution candidateReductions
+
+    let cellCandidates = currentCellCandidates p.cells newSolution.current
+
+    let hints = nakedSingle p cellCandidates
+
+    Assert.AreEqual(2, hints.Length)
+
+    let expectedHints : hints.hintDescription list =
+        [
+            { hints.hintDescription.primaryHouses = Houses.empty
+              secondaryHouses = Houses.empty
+              candidateReductions = CandidateReductions.empty
+              setCellValueAction = Some (makeValue (makeCell (makeColumn 8) (makeRow 1)) (defaultPuzzleSpec.alphabet.[8]))
+              pointers = CandidateReductions.empty
+              focus = Digits.empty };
+            { hints.hintDescription.primaryHouses = Houses.empty
+              secondaryHouses = Houses.empty
+              candidateReductions = CandidateReductions.empty
+              setCellValueAction = Some (makeValue (makeCell (makeColumn 8) (makeRow 9)) (defaultPuzzleSpec.alphabet.[5]))
+              pointers = CandidateReductions.empty
+              focus = Digits.empty }
+        ]
+
+    Assert.AreEqual(expectedHints, hints)
