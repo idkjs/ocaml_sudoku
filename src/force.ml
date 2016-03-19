@@ -27,26 +27,29 @@ let rec searchr (p : puzzleMap) (solution : solution) (existing : solution list)
     let emptyCell : cell option =
         p.cells
         |> List.tryFind (SMap.get solution.current >> isPencilMarksCellContents)
+        in
 
     match emptyCell with
     | Some cell ->
         let candidates =
-            let cellContents = SMap.get solution.current cell
+            let cellContents = SMap.get solution.current cell in
             match cellContents with
             | BigNumber _ -> []
             | PencilMarks candidates -> candidates |> Digits.toList
-        
+            in
+
         candidates
         |> List.map
             (fun digit ->
-                let setCellValue = makeValue cell digit
+                let setCellValue = makeValue cell digit in
                 
-                let current = setCellDigitApply p setCellValue solution.current
+                let current = setCellDigitApply p setCellValue solution.current in
 
                 let newSolution =
                     { solution with
-                        current = current
+                        current = current;
                         steps = (Placement setCellValue) :: solution.steps }
+                    in
 
                 (*Console.WriteLine ("Trying {0}", setCellValue) *)
 
@@ -71,12 +74,14 @@ let rec searchr (p : puzzleMap) (solution : solution) (existing : solution list)
     | None -> solution :: existing
 
 let solve (p : puzzleMap) (solution : solution) : solution list =
-    let stopwatch = new Stopwatch()
-    stopwatch.Start()
+    let stopwatch = new Stopwatch() in
+    let _ = stopwatch.Start() in
 
-    let results = searchr p solution []
+    let results = searchr p solution [] in
 
-    stopwatch.Stop()
-    Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed)
+    let _ = stopwatch.Stop() in
+
+    let _ = Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed) in
 
     results
+

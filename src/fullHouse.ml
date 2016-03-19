@@ -12,19 +12,20 @@ let fullHousePerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primary
     let hhs =
         p.houseCellCandidateReductions primaryHouse cellCandidates
         |> CandidateReductions.filter (fun cr -> Digits.count cr.candidates > 0) 
+        in
 
     if CandidateReductions.count hhs = 1 then 
-        let h = hhs.data.data.Head
-        let cell = h.cell
-        let candidate = first h.candidates
+        let h = hhs.data.data.Head in
+        let cell = h.cell in
+        let candidate = first h.candidates in
 
-        let setCellValue = makeValue cell candidate
+        let setCellValue = makeValue cell candidate in
 
-        Some { hintDescription.primaryHouses = Houses.singleton primaryHouse
-               secondaryHouses = Houses.empty
-               candidateReductions = CandidateReductions.empty
-               setCellValueAction = Some setCellValue
-               pointers = CandidateReductions.empty
+        Some { hintDescription.primaryHouses = Houses.singleton primaryHouse;
+               secondaryHouses = Houses.empty;
+               candidateReductions = CandidateReductions.empty;
+               setCellValueAction = Some setCellValue;
+               pointers = CandidateReductions.empty;
                focus = Digits.empty }
     else None
 

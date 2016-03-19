@@ -17,8 +17,8 @@ let rec doSetSubsets (list : List<'a>) (size : int) (prefix : List<'a>) : List<L
     | x :: xs when size > 0 -> 
         if size = 1 then (x :: prefix) :: doSetSubsets xs 1 prefix
         else 
-            let inc = doSetSubsets xs (size - 1) (x :: prefix)
-            let dec = doSetSubsets xs size prefix
+            let inc = doSetSubsets xs (size - 1) (x :: prefix) in
+            let dec = doSetSubsets xs size prefix in
 
             List.append inc dec
     | _ -> []
@@ -57,11 +57,11 @@ let rec setSubsets (as' : 'a list) (size : int) : SSet<'a> list =
 
 
 type hintDescription = 
-    { primaryHouses : houses
-      secondaryHouses : houses
-      candidateReductions : candidateReductions
-      setCellValueAction : value option
-      pointers : candidateReductions
+    { primaryHouses : houses;
+      secondaryHouses : houses;
+      candidateReductions : candidateReductions;
+      setCellValueAction : value option;
+      pointers : candidateReductions;
       focus : digits }
     override this.ToString() = 
         let sb = StringBuilder()

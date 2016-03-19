@@ -22,6 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>5</WarningLevel>
     <DocumentationFile>bin\Debug\fsharp_sudoku_repl.XML</DocumentationFile>
+    <OtherFlags>--mlcompatibility</OtherFlags>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -72,35 +73,35 @@
     <Compile Include="src\sset.fs" />
     <Compile Include="src\smap.fs" />
     <Compile Include="src\sudoku.fs" />
-    <Compile Include="src\puzzlemap.fsi" />
-    <Compile Include="src\puzzlemap.fs" />
-    <Compile Include="src\hints.fsi" />
+    <Compile Include="src\puzzlemap.mli" />
+    <Compile Include="src\puzzlemap.ml" />
+    <Compile Include="src\hints.mli" />
     <Compile Include="src\hints.fs" />
-    <Compile Include="src\loadEliminate.fs" />
-    <Compile Include="src\setCell.fsi" />
-    <Compile Include="src\setCell.fs" />
-    <Compile Include="src\eliminateCandidate.fsi" />
-    <Compile Include="src\eliminateCandidate.fs" />
-    <Compile Include="src\force.fsi" />
-    <Compile Include="src\force.fs" />
-    <Compile Include="src\fullHouse.fsi" />
-    <Compile Include="src\fullHouse.fs" />
-    <Compile Include="src\hidden.fsi" />
-    <Compile Include="src\hidden.fs" />
-    <Compile Include="src\naked.fsi" />
-    <Compile Include="src\naked.fs" />
-    <Compile Include="src\intersection.fsi" />
-    <Compile Include="src\intersection.fs" />
-    <Compile Include="src\wing.fsi" />
-    <Compile Include="src\wing.fs" />
-    <Compile Include="src\format.fsi" />
+    <Compile Include="src\loadEliminate.ml" />
+    <Compile Include="src\setCell.mli" />
+    <Compile Include="src\setCell.ml" />
+    <Compile Include="src\eliminateCandidate.mli" />
+    <Compile Include="src\eliminateCandidate.ml" />
+    <Compile Include="src\force.mli" />
+    <Compile Include="src\force.ml" />
+    <Compile Include="src\fullHouse.mli" />
+    <Compile Include="src\fullHouse.ml" />
+    <Compile Include="src\hidden.mli" />
+    <Compile Include="src\hidden.ml" />
+    <Compile Include="src\naked.mli" />
+    <Compile Include="src\naked.ml" />
+    <Compile Include="src\intersection.mli" />
+    <Compile Include="src\intersection.ml" />
+    <Compile Include="src\wing.mli" />
+    <Compile Include="src\wing.ml" />
+    <Compile Include="src\format.mli" />
     <Compile Include="src\format.fs" />
     <Compile Include="src\console.fsi" />
     <Compile Include="src\console.fs" />
-    <Compile Include="src\command.fsi" />
+    <Compile Include="src\command.mli" />
     <Compile Include="src\command.fs" />
-    <Compile Include="src\load.fsi" />
-    <Compile Include="src\load.fs" />
+    <Compile Include="src\load.mli" />
+    <Compile Include="src\load.ml" />
     <Compile Include="tests\test_core.fs" />
     <Compile Include="tests\test_naked.fs" />
     <Compile Include="main.fs" />
@@ -110,6 +111,10 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="FSharp.Compatibility.OCaml">
+      <HintPath>packages\FSharp.Compatibility.OCaml.0.1.12\lib\net40\FSharp.Compatibility.OCaml.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>

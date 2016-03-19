@@ -4,31 +4,31 @@ open sudoku
 open puzzlemap
 
 type gridCharsRow<'a> = 
-    { l : 'a
-      m : 'a
+    { l : 'a;
+      m : 'a;
       r : 'a }
 
 type gridChars<'a> = 
-    { h : 'a
-      v : gridCharsRow<'a>
-      t : gridCharsRow<'a>
-      m : gridCharsRow<'a>
-      b : gridCharsRow<'a>
+    { h : 'a;
+      v : gridCharsRow<'a>;
+      t : gridCharsRow<'a>;
+      m : gridCharsRow<'a>;
+      b : gridCharsRow<'a>;
       n : 'a }
 
 type candidateGridCharsRow<'a> = 
-    { mi : 'a
+    { mi : 'a;
       x : gridCharsRow<'a> }
 
 type candidateGridChars<'a> = 
-    { h : 'a
-      hi : 'a
-      v : gridCharsRow<'a>
-      vi : 'a
-      t : candidateGridCharsRow<'a>
-      m : candidateGridCharsRow<'a>
-      mi : candidateGridCharsRow<'a>
-      b : candidateGridCharsRow<'a>
+    { h : 'a;
+      hi : 'a;
+      v : gridCharsRow<'a>;
+      vi : 'a;
+      t : candidateGridCharsRow<'a>;
+      m : candidateGridCharsRow<'a>;
+      mi : candidateGridCharsRow<'a>;
+      b : candidateGridCharsRow<'a>;
       n : 'a }
 
 val printLine : cell list -> (cell -> 'c) -> List<'c>

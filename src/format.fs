@@ -8,37 +8,37 @@ let konst x _ = x
 
 (* Printing a row, we need special characters at left, in the middle and on the right *)
 type gridCharsRow<'a> = 
-    { l : 'a
-      m : 'a
+    { l : 'a;
+      m : 'a;
       r : 'a }
 
 (* Printing a grid, we need special rows at top, in the middle and on the bottom
  Also, horizontal and vertical spacers *)
 type gridChars<'a> = 
-    { h : 'a
-      v : gridCharsRow<'a>
-      t : gridCharsRow<'a>
-      m : gridCharsRow<'a>
-      b : gridCharsRow<'a>
+    { h : 'a;
+      v : gridCharsRow<'a>;
+      t : gridCharsRow<'a>;
+      m : gridCharsRow<'a>;
+      b : gridCharsRow<'a>;
       n : 'a }
 
 type candidateGridCharsRow<'a> = 
-    { mi : 'a
+    { mi : 'a;
       x : gridCharsRow<'a> }
 
 type candidateGridChars<'a> = 
-    { h : 'a
-      hi : 'a
-      v : gridCharsRow<'a>
-      vi : 'a
-      t : candidateGridCharsRow<'a>
-      m : candidateGridCharsRow<'a>
-      mi : candidateGridCharsRow<'a>
-      b : candidateGridCharsRow<'a>
+    { h : 'a;
+      hi : 'a;
+      v : gridCharsRow<'a>;
+      vi : 'a;
+      t : candidateGridCharsRow<'a>;
+      m : candidateGridCharsRow<'a>;
+      mi : candidateGridCharsRow<'a>;
+      b : candidateGridCharsRow<'a>;
       n : 'a }
 
 let printLine (cells : cell list) (digitTo : cell -> 'c) : List<'c> = 
-    let cons x y = x :: y
+    let cons x y = x :: y in
     List.foldBack (digitTo >> cons) cells []
 
 (* Combine fences with posts (there's one more fence than posts: f p f p ... p f) *)
