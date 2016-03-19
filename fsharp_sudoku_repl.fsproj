@@ -70,9 +70,9 @@
     </MonoDevelop>
   </ProjectExtensions>
   <ItemGroup>
-    <Compile Include="src\sset.fs" />
-    <Compile Include="src\smap.fs" />
-    <Compile Include="src\sudoku.fs" />
+    <Compile Include="src\sset.ml" />
+    <Compile Include="src\smap.ml" />
+    <Compile Include="src\sudoku.ml" />
     <Compile Include="src\puzzlemap.mli" />
     <Compile Include="src\puzzlemap.ml" />
     <Compile Include="src\hints.mli" />

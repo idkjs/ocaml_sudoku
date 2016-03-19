@@ -1,7 +1,5 @@
-module fullHouse
-
-open sudoku
-open puzzlemap
+open Sudoku
+open Puzzlemap
 open hints
 
 val fullHouses : puzzleMap -> cellCandidates -> hintDescription list

@@ -1,10 +1,5 @@
-(*F#
-module sudoku
-
-open System
-open sset
-open smap
-F#*)
+open Sset
+open Smap
 
 (* A sudoku is a square grid of size... *)
 type size = int
@@ -12,27 +7,24 @@ type size = int
 (* containing columns... *)
 type column = 
     | CColumn of int
-(*F#
-    override this.ToString() =
-        match this with CColumn c -> String.Format("c{0}", c)
-F#*)
+
+let column_tostring (CColumn c : column) : string =
+    Printf.sprintf "c%d" c
 
 (* ... by rows *)
 type row = 
     | RRow of int
-(*F#
-    override this.ToString() =
-        match this with RRow r -> String.Format("r{0}", r)
-F#*)
+
+let row_tostring (RRow r : row) : string =
+    Printf.sprintf "r%d" r
 
 (* Each cell is identified by (col, row) *)
 type cell = 
     { col : column;
       row : row }
-(*F#
-    override this.ToString() =
-        String.Format("{0}{1}", this.row, this.col)
-F#*)
+
+let cell_tostring ({col = CColumn c; row = RRow r} : cell) : string =
+    Printf.sprintf "r%dc%d" r c
 
 (* The grid is divided into boxes,
  these do not have to be square, but they are
@@ -40,20 +32,18 @@ F#*)
  A column of vertical boxes is a stack *)
 type stack = 
     | SStack of int
-(*F#
-    override this.ToString() =
-        match this with SStack s -> String.Format("stk{0}", s)
-F#*)
+
+let stack_tostring (SStack s : stack) : string =
+    Printf.sprintf "stk%d" s
 
 type boxWidth = int
 
 (* A row of horizontal boxes is a band *)
 type band = 
     | BBand of int
-(*F#
-    override this.ToString() =
-        match this with BBand b -> String.Format("bnd{0}", b)
-F#*)
+
+let band_tostring (BBand b : band) : string =
+    Printf.sprintf "bnd%d" b
 
 type boxHeight = int
 
@@ -61,10 +51,9 @@ type boxHeight = int
 type box = 
     { stack : stack;
       band : band }
-(*F#
-    override this.ToString() =
-        String.Format("{0}{1}", this.stack, this.band)
-F#*)
+
+let box_tostring ({stack = SStack s; band = BBand b} : box) : string =
+    Printf.sprintf "stk%dbnd%d" s b
 
 (* The columns and rows are collectively called lines *)
 type line = 
@@ -76,21 +65,19 @@ type house =
     | HColumn of column
     | HRow of row
     | HBox of box
-(*F#
-    override this.ToString() = 
-        match this with
-        | HColumn c -> c.ToString()
-        | HRow r -> r.ToString()
-        | HBox b -> b.ToString()
-F#*)
+
+let house_tostring (house : house) : string =
+    match house with
+    | HColumn column -> column_tostring column
+    | HRow row -> row_tostring row
+    | HBox box -> box_tostring box
 
 (* Each cell in the grid contains a Digit, usually numbers 1..9 *)
 type digit = 
     | Digit of char
-(*F#
-    override this.ToString() =
-        match this with Digit s -> (string) s
-F#*)
+
+let digit_tostring (Digit s : digit) : string =
+    (string) s
 
 (*IF-OCAML*)
 module Digit =
@@ -108,7 +95,7 @@ type digits =
 
 F#*)
 
-module Digits =
+module Digits = struct
     let contains (d : digit) (s : digits) : bool = SSet.contains<digit> d s.data
 
     let count (s : digits) : int = SSet.count s.data
@@ -136,9 +123,7 @@ module Digits =
     let union (s : digits) (s' : digits) : digits = { data = SSet.union s.data s'.data }
 
     let unionManyList (ss : digits list) : digits =
-        let tss =
-            ss
-            |> List.map (fun s -> s.data)
+        let tss = List.map (fun s -> s.data) ss in
         { data = SSet.unionMany tss }
 
     let unionMany (ss : SSet<digits>) : digits =
@@ -146,14 +131,22 @@ module Digits =
             ss
             |> SSet.toList
             |> List.map (fun s -> s.data)
+            in
         { data = SSet.unionMany tss }
+
+    let tostring (digits : digits) : string =
+        digits
+        |> toList
+        |> List.map digit_tostring
+        |> String.concat ","
+end
 
 type cells = 
     {
         data : SSet<cell>
     }
 
-module Cells =
+module Cells = struct
 
     let choose (map : cell -> 'U option) (s : cells) : SSet<'U> = { data = List.choose map s.data.data }
 
@@ -180,9 +173,7 @@ module Cells =
     let union (s : cells) (s' : cells) : cells = { data = SSet.union s.data s'.data }
 
     let unionManyList (ss : cells list) : cells =
-        let tss =
-            ss
-            |> List.map (fun s -> s.data)
+        let tss = List.map (fun s -> s.data) ss in
         { data = SSet.unionMany<cell> tss }
 
     let unionMany (ss : SSet<cells>) : cells =
@@ -190,14 +181,16 @@ module Cells =
             ss
             |> SSet.toList
             |> List.map (fun s -> s.data)
+            in
         { data = SSet.unionMany<cell> tss }
+end
 
 type columns = 
     {
         data : SSet<column>
     }
 
-module Columns =
+module Columns = struct
 
     let count (s : columns) : int = SSet.count<column> s.data
 
@@ -206,13 +199,14 @@ module Columns =
     let map (map : column -> 'U) (s : columns) : SSet<'U> = { data = List.map map s.data.data }
 
     let union (s : columns) (s' : columns) : columns = { data = SSet.union s.data s'.data }
+end
 
 type rows = 
     {
         data : SSet<row>
     }
 
-module Rows =
+module Rows = struct
 
     let count (s : rows) : int = SSet.count<row> s.data
 
@@ -221,13 +215,14 @@ module Rows =
     let map (map : row -> 'U) (s : rows) : SSet<'U> = { data = List.map map s.data.data }
 
     let union (s : rows) (s' : rows) : rows = { data = SSet.union s.data s'.data }
+end
 
 type houses = 
     {
         data : SSet<house>
     }
 
-module Houses =
+module Houses = struct
 
     let empty : houses = { data = SSet.empty<house> }
 
@@ -238,6 +233,7 @@ module Houses =
     let ofSet (s : SSet<house>) : houses = { data = s }
 
     let singleton (d : house) : houses = { data = SSet.ofList [ d ] }
+end
 
 (* A sudoku is defined by the overall grid size (it is always square)
  which is the same as the Digits in the alphabet
@@ -250,14 +246,14 @@ type puzzleShape =
 
 let makeDigit i = (char) i + '0' |> Digit
 
-let rec range i j = if i > j then [] else i :: (range (i+1) j)
+(*let rec range i j = if i > j then [] else i :: (range (i+1) j)*)
 
 let defaultPuzzleSpec : puzzleShape = 
-    { size = 9
-      boxWidth = 3
-      boxHeight = 3
+    { size = 9;
+      boxWidth = 3;
+      boxHeight = 3;
       alphabet =
-        range 1 9
+        [1..9]
         |> List.map makeDigit
         }
 
@@ -273,32 +269,29 @@ type cellContents =
 type value = 
     { cell : cell;
       digit : digit }
-(*F#
-    override this.ToString() =
-        String.Format("{0}={1}", this.cell, this.digit)
-F#*)
+
+let value_tostring ({ cell = cell; digit = digit} : value) : string =
+    Printf.sprintf "%s=%s" (cell_tostring cell) (digit_tostring digit)
 
 (* A candidate is a digit in a cell, which is still a pencilmark *)
 type candidate = 
     { cell : cell;
       digit : digit }
-(*F#
-    override this.ToString() =
-        String.Format("({0}){1}", this.digit, this.cell)
-F#*)
+
+let candidate_tostring ({ cell = cell; digit = digit} : candidate) : string =
+    Printf.sprintf "(%s)%s" (cell_tostring cell) (digit_tostring digit)
 
 type candidateReduction = 
     { cell : cell;
       candidates : digits }
-(*F#
-    override this.ToString() = 
-        String.Format("Cell {0}, Candidates {1}", this.cell, String.Join(",", this.candidates))
-F#*)
+
+let candidateReduction_tostring ({ cell = cell; candidates = digits} : candidateReduction) : string =
+    Printf.sprintf "Cell %s, Candidates %s" (cell_tostring cell) (Digits.tostring digits)
 
 type candidateReductions =
     { data : SSet<candidateReduction> }
 
-module CandidateReductions =
+module CandidateReductions = struct
     let count (s : candidateReductions) : int = SSet.count<candidateReduction> s.data
 
     let empty : candidateReductions = { data = SSet.empty<candidateReduction> }
@@ -318,6 +311,7 @@ module CandidateReductions =
     let singleton (d : candidateReduction) : candidateReductions = { data = SSet.ofList<candidateReduction> [ d ] }
 
     let toList (s : candidateReductions) : candidateReduction list = SSet.toList<candidateReduction> s.data
+end
 
 (* Working towards a solution we take one of the following actions:
  SSet the cell to have a Digit
@@ -328,14 +322,13 @@ type action =
     | LoadEliminate
     | Placement of value
     | Eliminate of candidate
-(*F#
-    override this.ToString() =
-        match this with
-        | Load sudoku -> String.Format("Load:{0}", sudoku)
-        | LoadEliminate  -> "Load"
-        | Placement a -> String.Format("{0}={1}", a.cell, a.digit)
-        | Eliminate candidate -> String.Format("{0}<>{1}", candidate.cell, candidate.digit)
-F#*)
+
+let action_tostring (action : action) : string =
+    match action with
+    | Load sudoku -> Printf.sprintf "Load:%s" sudoku
+    | LoadEliminate  -> "Load"
+    | Placement a -> Printf.sprintf "%s=%s" (cell_tostring a.cell) (digit_tostring a.digit)
+    | Eliminate candidate -> Printf.sprintf "%s<>%s" (cell_tostring candidate.cell) (digit_tostring candidate.digit)
 
 type given = SMap<cell, digit option>
 
@@ -349,10 +342,11 @@ type solution =
 
 let givenToCurrent (cells : cell list) (given : given) (alphabet : digits) : current =
     let makeCellContents (cell : cell) : cellContents =
-        let dop = SMap.get given cell
+        let dop = SMap.get given cell in
         match dop with
         | Some digit -> BigNumber digit
         | None -> PencilMarks alphabet
+        in
 
     SMap.ofLookup cells makeCellContents
 
@@ -361,9 +355,10 @@ type cellCandidates = SMap<cell, digits>
 
 let currentCellCandidates (cells : cell list) (current : current) : cellCandidates =
     let getCandidateEntries (cell : cell) : digits =
-        let cellContents = SMap.get current cell
+        let cellContents = SMap.get current cell in
         match cellContents with
         | BigNumber _ -> Digits.empty
         | PencilMarks s -> s
+        in
 
     SMap.ofLookup<cell, digits> cells getCandidateEntries

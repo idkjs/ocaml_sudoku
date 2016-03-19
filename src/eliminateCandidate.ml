@@ -1,8 +1,6 @@
-module eliminateCandidate
-
-open smap
-open sudoku
-open puzzlemap
+open Smap
+open Sudoku
+open Puzzlemap
 open hints
 
 let eliminateCandidateApply (p : puzzleMap) (candidate : candidate) (current : current) : current = 

@@ -1,7 +1,5 @@
-module naked
-
-open sudoku
-open puzzlemap
+open Sudoku
+open Puzzlemap
 open hints
 
 val nakedSingle : puzzleMap -> cellCandidates -> hintDescription list

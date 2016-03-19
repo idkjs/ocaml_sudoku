@@ -1,7 +1,5 @@
-module intersection
-
-open sudoku
-open puzzlemap
+open Sudoku
+open Puzzlemap
 open hints
 
 val pointingPairs : puzzleMap -> cellCandidates -> hintDescription list

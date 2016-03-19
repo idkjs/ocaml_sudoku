@@ -1,8 +1,6 @@
-module loadEliminate
-
-open smap
-open sudoku
-open puzzlemap
+open Smap
+open Sudoku
+open Puzzlemap
 open hints
 
 let loadEliminateFind  (p : puzzleMap) (current : current) : candidateReductions = 

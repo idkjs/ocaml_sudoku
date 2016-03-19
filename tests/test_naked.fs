@@ -1,12 +1,12 @@
 module test_naked
 
-open sudoku
-open puzzlemap
-open loadEliminate
+open Sudoku
+open Puzzlemap
+open LoadEliminate
 
-open naked
+open Naked
 
-open load
+open Load
 
 open NUnit.Framework
 

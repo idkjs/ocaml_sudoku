@@ -1,6 +1,4 @@
-module force
-
-open sudoku
-open puzzlemap
+open Sudoku
+open Puzzlemap
 
 val solve : puzzleMap -> solution -> solution list

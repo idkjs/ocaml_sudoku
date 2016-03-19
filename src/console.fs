@@ -2,8 +2,8 @@ module console
 
 open System
 
-open smap
-open sudoku
+open Smap
+open Sudoku
 open hints
 
 open format

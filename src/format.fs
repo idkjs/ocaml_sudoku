@@ -1,8 +1,8 @@
 module format
 
-open smap
-open sudoku
-open puzzlemap
+open Smap
+open Sudoku
+open Puzzlemap
 
 let konst x _ = x
 

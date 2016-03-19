@@ -1,7 +1,5 @@
-module eliminateCandidate
-
-open sudoku
-open puzzlemap
+open Sudoku
+open Puzzlemap
 open hints
 
 val eliminateCandidateHintDescription : puzzleMap -> candidate -> hintDescription

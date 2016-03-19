@@ -1,7 +1,7 @@
 module format
 
-open sudoku
-open puzzlemap
+open Sudoku
+open Puzzlemap
 
 type gridCharsRow<'a> = 
     { l : 'a;

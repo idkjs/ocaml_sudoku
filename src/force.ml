@@ -1,12 +1,7 @@
-module force
-
-open System
-open System.Diagnostics
-
-open smap
-open sudoku
-open puzzlemap
-open setCell
+open Smap
+open Sudoku
+open Puzzlemap
+open SetCell
 
 let isPencilMarksCellContents (cellContents : cellContents) : bool =
     match cellContents with
@@ -74,14 +69,4 @@ let rec searchr (p : puzzleMap) (solution : solution) (existing : solution list)
     | None -> solution :: existing
 
 let solve (p : puzzleMap) (solution : solution) : solution list =
-    let stopwatch = new Stopwatch() in
-    let _ = stopwatch.Start() in
-
-    let results = searchr p solution [] in
-
-    let _ = stopwatch.Stop() in
-
-    let _ = Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed) in
-
-    results
-
+    searchr p solution []

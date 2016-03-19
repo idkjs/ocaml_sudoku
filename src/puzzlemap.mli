@@ -1,7 +1,5 @@
-module puzzlemap
-
-open smap
-open sudoku
+open Smap
+open Sudoku
 
 val makeColumn : int -> column
 

@@ -1,8 +1,6 @@
-module setCell
-
-open smap
-open sudoku
-open puzzlemap
+open Smap
+open Sudoku
+open Puzzlemap
 open hints
 
 let setCellDigitApply (p : puzzleMap) (value : value) (current : current) : current = 

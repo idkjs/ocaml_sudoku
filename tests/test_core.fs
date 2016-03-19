@@ -1,8 +1,8 @@
 module test_core
 
-open smap
-open sudoku
-open puzzlemap
+open Smap
+open Sudoku
+open Puzzlemap
 
 open NUnit.Framework
 

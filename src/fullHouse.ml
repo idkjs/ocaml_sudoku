@@ -1,10 +1,8 @@
-module fullHouse
-
 (* Full House means:
  For a house there is only one cell that is neither given nor set i.e. has candidates *)
 
-open sudoku
-open puzzlemap
+open Sudoku
+open Puzzlemap
 open hints
 
 let fullHousePerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primaryHouse : house) : hintDescription option =

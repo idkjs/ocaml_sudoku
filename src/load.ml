@@ -1,8 +1,6 @@
-module load
-
-open smap
-open sudoku
-open puzzlemap
+open Smap
+open Sudoku
+open Puzzlemap
 
 (* Load a sudoku given as a single line of gridSize*gridSize characters *)
 let loadPuzzle (cells : cell list) (alphabetisedLine : digit option list) : SMap<cell, digit option> = 

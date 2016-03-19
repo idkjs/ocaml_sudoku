@@ -1,7 +1,5 @@
-module setCell
-
-open sudoku
-open puzzlemap
+open Sudoku
+open Puzzlemap
 open hints
 
 val setCellDigitApply : puzzleMap -> value -> current -> current

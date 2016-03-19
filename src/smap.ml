@@ -1,21 +1,11 @@
-module smap
-
-open System
-open System.Collections
-open System.Collections.Generic
-
 type SMap<'T, 'U when 'T : comparison> =
     {
         data : Map<'T, 'U>
     }
 
-module SMap =
+module SMap = struct
     let ofList<'a, 'b when 'a : comparison> (as' : ('a * 'b) list) : SMap<'a, 'b> =
-        {
-            data = 
-                as'
-                |> Map.ofList
-        }
+        { data = Map.ofList as' }
 
     let ofLookup<'a, 'b when 'a : comparison> (as' : 'a list) (fn : 'a -> 'b) : SMap<'a, 'b> =
         {
@@ -36,3 +26,4 @@ module SMap =
         |> List.find (fst >> ((=) k))
         |> snd
 *)
+end

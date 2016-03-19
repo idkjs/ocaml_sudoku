@@ -1,8 +1,8 @@
 module command
 
-open smap
-open sudoku
-open puzzlemap
+open Smap
+open Sudoku
+open Puzzlemap
 open hints
 
 val parseValue : digit list -> string -> digit option

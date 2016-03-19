@@ -1,5 +1,3 @@
-module load
-
-open sudoku
+open Sudoku
 
 val load : puzzleShape -> string -> solution

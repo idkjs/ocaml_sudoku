@@ -5,21 +5,21 @@ open System.Diagnostics
 open System.Runtime.InteropServices
 open System.Text
 
-open sset
-open smap
-open sudoku
-open puzzlemap
-open loadEliminate
+open Sset
+open Smap
+open Sudoku
+open Puzzlemap
+open LoadEliminate
 open hints
-open setCell
-open eliminateCandidate
-open force
+open SetCell
+open EliminateCandidate
+open Force
 
 open command
 open console
 open format
 
-open load
+open Load
 
 [<DllImport("user32.dll")>]
 extern bool ShowWindow(System.IntPtr hWnd, int cmdShow)
@@ -194,7 +194,15 @@ let repl (sudoku : string) (puzzleShape : puzzleShape) =
     puzzleDrawGrid !solution
 
 (*
+    let stopwatch = new Stopwatch() in
+    let _ = stopwatch.Start() in
+
     let forcedSolutions = solve p (!solution)
+
+    let _ = stopwatch.Stop() in
+
+    let _ = Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed) in
+
     puzzleDrawGrid()
     if List.length forcedSolutions > 0 then
         forcedSolutions

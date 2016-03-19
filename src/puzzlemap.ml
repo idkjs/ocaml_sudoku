@@ -1,8 +1,6 @@
-module puzzlemap
-
-open sset
-open smap
-open sudoku
+open Sset
+open Smap
+open Sudoku
 
 let makeColumn (i : int) : column =
     i |> CColumn

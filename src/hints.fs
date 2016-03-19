@@ -3,10 +3,10 @@ module hints
 open System
 open System.Text
 
-open sset
-open smap
-open sudoku
-open puzzlemap
+open Sset
+open Smap
+open Sudoku
+open Puzzlemap
 
 exception CellStateInvalid
 

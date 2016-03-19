@@ -1,9 +1,7 @@
-module wing
-
-open sset
-open smap
-open sudoku
-open puzzlemap
+open Sset
+open Smap
+open Sudoku
+open Puzzlemap
 open hints
 
 let makeHints (p : puzzleMap) (cellCandidates : cellCandidates) pointerCells primaryHouses secondaryHouses candidate = 

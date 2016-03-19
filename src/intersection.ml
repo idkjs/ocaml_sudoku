@@ -1,9 +1,7 @@
-module intersection
-
-open sset
-open smap
-open sudoku
-open puzzlemap
+open Sset
+open Smap
+open Sudoku
+open Puzzlemap
 open hints
 
 type cellHouses = SMap<cell, house list>

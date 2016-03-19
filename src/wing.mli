@@ -1,7 +1,5 @@
-module wing
-
-open sudoku
-open puzzlemap
+open Sudoku
+open Puzzlemap
 open hints
 
 val xWings : puzzleMap -> cellCandidates -> hintDescription list

@@ -2,18 +2,18 @@ module command
 
 open System
 
-open smap
-open sudoku
-open puzzlemap
+open Smap
+open Sudoku
+open Puzzlemap
 open hints
-open setCell
-open eliminateCandidate
+open SetCell
+open EliminateCandidate
 
-open fullHouse
-open hidden
-open intersection
-open naked
-open wing
+open FullHouse
+open Hidden
+open Intersection
+open Naked
+open Wing
 
 open console
 open format

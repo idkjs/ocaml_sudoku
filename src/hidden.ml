@@ -1,9 +1,7 @@
-module hidden
-
-open sset
-open smap
-open sudoku
-open puzzlemap
+open Sset
+open Smap
+open Sudoku
+open Puzzlemap
 open hints
 
 let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (candidateSubset : digits) (primaryHouse : house) = 

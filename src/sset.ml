@@ -1,16 +1,7 @@
-(*F#
-module sset
-
-open System
-open System.Collections
-open System.Collections.Generic
-F#*)
-
-(*F#
 type SSet<'T when 'T : comparison> =
     { data : 'T list }
 
-module SSet =
+module SSet = struct
     let empty<'T when 'T : comparison> : SSet<'T> = { data = []} 
 
     let count<'T when 'T : comparison> (s : SSet<'T>) : int = s.data.Length
@@ -35,10 +26,10 @@ module SSet =
 
     let toList<'T when 'T : comparison> (ts : SSet<'T>) : 'T list = ts.data
 
-    let unionMany<'T when 'T : comparison> (tss : seq<SSet<'T>>) : SSet<'T> =
-        Seq.collect (fun ts -> ts.data) tss |> Seq.toList |> ofList
-
-    let iter<'T when 'T : comparison> (fn) (ts : SSet<'T>) = ts.data :> IEnumerable<'T> |> Seq.iter fn
+    let unionMany<'T when 'T : comparison> (tss : SSet<'T> list) : SSet<'T> =
+        tss
+        |> List.collect (fun ts -> ts.data)
+        |> ofList
 
     let intersect<'T when 'T : comparison> (ts : SSet<'T>) (ts' : SSet<'T>) =
         Set.intersect (ts.data |> Set.ofList) (ts'.data |> Set.ofList)
@@ -52,4 +43,4 @@ module SSet =
 
     let isSubset<'T when 'T : comparison> (ts : SSet<'T>) (ts' : SSet<'T>) =
         Set.isSubset (ts.data |> Set.ofList) (ts'.data |> Set.ofList)
-F#*)
+end
