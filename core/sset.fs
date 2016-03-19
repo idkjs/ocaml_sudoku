@@ -25,30 +25,30 @@ module SSet =
 
     let filter<'T when 'T : comparison> (predicate : 'T -> bool) (s : SSet<'T>) : SSet<'T> = { data = List.filter predicate s.data }
 
-    let ofArray<'T when 'T : comparison> (ts : 'T array) : SSet<'T> =
-        Array.fold (fun set elem -> add elem set) empty ts
+    let ofList<'T when 'T : comparison> (ts : 'T list) : SSet<'T> =
+        List.fold (fun set elem -> add elem set) empty ts
 
     let remove<'T when 'T : comparison> (t : 'T) (s : SSet<'T>) =
         { data = List.filter (fun t' -> t' <> t) s.data }
 
-    let union<'T when 'T : comparison> (ts : SSet<'T>) (ts' : SSet<'T>) = ofArray ((List.append ts.data ts'.data) |> List.toArray)
+    let union<'T when 'T : comparison> (ts : SSet<'T>) (ts' : SSet<'T>) = ofList ((List.append ts.data ts'.data))
 
-    let toArray<'T when 'T : comparison> (ts : SSet<'T>) : 'T array = ts.data |> Array.ofList
+    let toList<'T when 'T : comparison> (ts : SSet<'T>) : 'T list = ts.data
 
     let unionMany<'T when 'T : comparison> (tss : seq<SSet<'T>>) : SSet<'T> =
-        Seq.collect (fun ts -> ts.data) tss |> Seq.toArray |> ofArray
+        Seq.collect (fun ts -> ts.data) tss |> Seq.toList |> ofList
 
     let iter<'T when 'T : comparison> (fn) (ts : SSet<'T>) = ts.data :> IEnumerable<'T> |> Seq.iter fn
 
     let intersect<'T when 'T : comparison> (ts : SSet<'T>) (ts' : SSet<'T>) =
         Set.intersect (ts.data |> Set.ofList) (ts'.data |> Set.ofList)
-        |> Seq.toArray
-        |> ofArray
+        |> Seq.toList
+        |> ofList
 
     let difference<'T when 'T : comparison> (ts : SSet<'T>) (ts' : SSet<'T>) =
         Set.difference (ts.data |> Set.ofList) (ts'.data |> Set.ofList)
-        |> Seq.toArray
-        |> ofArray
+        |> Seq.toList
+        |> ofList
 
     let isSubset<'T when 'T : comparison> (ts : SSet<'T>) (ts' : SSet<'T>) =
         Set.isSubset (ts.data |> Set.ofList) (ts'.data |> Set.ofList)

@@ -5,25 +5,26 @@ open core.sudoku
 open core.puzzlemap
 
 (* Load a sudoku given as a single line of gridSize*gridSize characters *)
-let loadPuzzle (cells : cell array) (alphabetisedLine : digit option array) : SMap<cell, digit option> = 
-    Array.zip cells alphabetisedLine
-    |> SMap.ofArray
+let loadPuzzle (cells : cell list) (alphabetisedLine : digit option list) : SMap<cell, digit option> = 
+    List.zip cells alphabetisedLine
+    |> SMap.ofList
 
 let load (puzzleShape : puzzleShape) (sudoku : string) : solution = 
 
     let charToDigit (trialDigit : char) : digit option = 
         let compareAlpha (Digit charDigit) = trialDigit = charDigit
-        Array.tryFind compareAlpha puzzleShape.alphabet
+        List.tryFind compareAlpha puzzleShape.alphabet
 
     let alphabetisedLine =
-        Array.ofSeq sudoku
-        |> Array.map charToDigit
+        sudoku
+        |> List.ofSeq
+        |> List.map charToDigit
 
     let p = tPuzzleMap puzzleShape
 
     let given = loadPuzzle p.cells alphabetisedLine
 
-    let current = givenToCurrent p.cells given (Digits.ofArray puzzleShape.alphabet)
+    let current = givenToCurrent p.cells given (Digits.ofList puzzleShape.alphabet)
 
     { solution.given = given
       current = current

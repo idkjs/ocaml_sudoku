@@ -29,14 +29,14 @@ let Maximize() =
     ShowWindow(p.MainWindowHandle, 3) (* SW_MAXIMIZE = 3 *)
 
 let parse (p : puzzleMap) (item : string) (solution : solution) (puzzle : puzzleShape) 
-    (cellCandidates : cellCandidates) puzzleDrawFull2 print_last : solution * hintDescription array = 
+    (cellCandidates : cellCandidates) puzzleDrawFull2 print_last : solution * hintDescription list = 
 
     Console.WriteLine item
 
     if item = "print" then 
         let hd3 = mhas2 solution p
         puzzleDrawFull2 hd3.annotations
-        (solution, Array.empty)
+        (solution, List.empty)
     else if item.StartsWith "focus" then
         let focusDigitOpt = focusCommandParse puzzle item
         match focusDigitOpt with
@@ -45,9 +45,9 @@ let parse (p : puzzleMap) (item : string) (solution : solution) (puzzle : puzzle
             let hd3 = mhas solution p hd2
             puzzleDrawFull2 hd3.annotations
 
-            (solution, Array.empty)
+            (solution, List.empty)
         | None ->
-            (solution, Array.empty)
+            (solution, List.empty)
 
     else if item = "load" then
         let candidateReductions = loadEliminateFind p solution.current
@@ -58,7 +58,7 @@ let parse (p : puzzleMap) (item : string) (solution : solution) (puzzle : puzzle
 
         let newSolution = loadEliminateStep p solution candidateReductions
         //print_last newSolution
-        (newSolution, Array.empty)
+        (newSolution, List.empty)
     else if item.StartsWith "s" then
         let valueOpt = setCellCommandParse puzzle item p
         
@@ -83,7 +83,7 @@ let parse (p : puzzleMap) (item : string) (solution : solution) (puzzle : puzzle
                 solution
 
         print_last newSolution
-        (newSolution, Array.empty)
+        (newSolution, List.empty)
 
     else if item.StartsWith "c" then
         let candidateOpt = candidateClearCommandParse puzzle item p
@@ -109,7 +109,7 @@ let parse (p : puzzleMap) (item : string) (solution : solution) (puzzle : puzzle
                 solution
 
         print_last newSolution
-        (newSolution, Array.empty)
+        (newSolution, List.empty)
 
     else
         let supportedHintOpt = SMap.tryGet supportedHints item
@@ -117,7 +117,7 @@ let parse (p : puzzleMap) (item : string) (solution : solution) (puzzle : puzzle
         | Some supportedHint ->
             let hints = supportedHint p cellCandidates
             (solution, hints)
-        | None -> (solution, Array.empty)
+        | None -> (solution, List.empty)
 
 let printHint (solution : solution) (p : puzzleMap) drawHint (index : int) (hint : hintDescription) : unit = 
 
@@ -153,7 +153,7 @@ let repl (sudoku : string) (puzzleShape : puzzleShape) =
 
     let solution = ref (load puzzleShape sudoku)
 
-    let centreDigit : digit = puzzleShape.alphabet.[((Array.length puzzleShape.alphabet) / 2)]
+    let centreDigit : digit = puzzleShape.alphabet.[((List.length puzzleShape.alphabet) / 2)]
 
     (* Print a Digit option, with colours *)
     let puzzleDrawCell (solution : solution) (cell : cell) : consoleChar = 
@@ -196,9 +196,9 @@ let repl (sudoku : string) (puzzleShape : puzzleShape) =
 (*
     let forcedSolutions = solve p (!solution)
     puzzleDrawGrid()
-    if Array.length forcedSolutions > 0 then
+    if List.length forcedSolutions > 0 then
         forcedSolutions
-        |> Array.iter
+        |> List.iter
             (fun solve ->
                 Seq.iter drawConsoleChar (printGrid p defaultGridChars (puzzleDrawCell solve)))
 

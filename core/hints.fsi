@@ -15,7 +15,7 @@ type hintDescription =
 
 val first : digits -> digit
 
-val setSubsets : 'a array -> int -> SSet<'a> array
+val setSubsets : 'a list -> int -> SSet<'a> list
 
 (* To draw a cell we may want to display extra information... *)
 type annotation = 

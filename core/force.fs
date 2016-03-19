@@ -18,26 +18,26 @@ let isValidCellContents (cellContents : cellContents) : bool =
     | BigNumber _ -> true
     | PencilMarks candidates -> Digits.count candidates > 0
 
-let isValid (solution : solution) (cells : cell array) : bool =
+let isValid (solution : solution) (cells : cell list) : bool =
     cells
-    |> Array.map (SMap.get solution.current)
-    |> Array.forall isValidCellContents
+    |> List.map (SMap.get solution.current)
+    |> List.forall isValidCellContents
 
-let rec searchr (p : puzzleMap) (solution : solution) (existing : solution array) : solution array = 
+let rec searchr (p : puzzleMap) (solution : solution) (existing : solution list) : solution list = 
     let emptyCell : cell option =
         p.cells
-        |> Array.tryFind (SMap.get solution.current >> isPencilMarksCellContents)
+        |> List.tryFind (SMap.get solution.current >> isPencilMarksCellContents)
 
     match emptyCell with
     | Some cell ->
         let candidates =
             let cellContents = SMap.get solution.current cell
             match cellContents with
-            | BigNumber _ -> Array.empty
-            | PencilMarks candidates -> candidates |> Digits.toArray
+            | BigNumber _ -> []
+            | PencilMarks candidates -> candidates |> Digits.toList
         
         candidates
-        |> Array.map
+        |> List.map
             (fun digit ->
                 let setCellValue = makeValue cell digit
                 
@@ -66,15 +66,15 @@ let rec searchr (p : puzzleMap) (solution : solution) (existing : solution array
 
                     Console.WriteLine(String.Format("< {0}", cell))
                     *)
-                    Array.empty)
-            |> Array.concat
-    | None -> Array.append existing [|solution|]
+                    [])
+            |> List.concat
+    | None -> solution :: existing
 
-let solve (p : puzzleMap) (solution : solution) : solution array =
+let solve (p : puzzleMap) (solution : solution) : solution list =
     let stopwatch = new Stopwatch()
     stopwatch.Start()
 
-    let results = searchr p solution Array.empty
+    let results = searchr p solution []
 
     stopwatch.Stop()
     Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed)

@@ -10,7 +10,7 @@ open puzzlemap
 
 exception CellStateInvalid
 
-let first (set : digits) = (Digits.toArray set).[0]
+let first (set : digits) = (Digits.toList set).[0]
 
 let rec doSetSubsets (list : List<'a>) (size : int) (prefix : List<'a>) : List<List<'a>> = 
     match list with
@@ -23,12 +23,9 @@ let rec doSetSubsets (list : List<'a>) (size : int) (prefix : List<'a>) : List<L
             List.append inc dec
     | _ -> []
 
-let rec setSubsets (as' : 'a array) (size : int) : SSet<'a> array =
-    let list = Array.toList as'
-    doSetSubsets list size []
-    |> List.map List.toArray
-    |> List.map SSet.ofArray
-    |> List.toArray
+let rec setSubsets (as' : 'a list) (size : int) : SSet<'a> list =
+    doSetSubsets as' size []
+    |> List.map SSet.ofList
 
 (*
     let s0 = []
@@ -74,8 +71,8 @@ type hintDescription =
         sb.AppendLine(String.Format("Pointers {0}", String.Join(",", this.pointers))) |> ignore
 
         this.candidateReductions
-        |> CandidateReductions.toArray
-        |> Array.iter
+        |> CandidateReductions.toList
+        |> List.iter
             (fun candidateReduction ->
                 sb.AppendLine(String.Format("  {0}", candidateReduction)) |> ignore) 
 

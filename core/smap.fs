@@ -10,18 +10,18 @@ type SMap<'T, 'U when 'T : comparison> =
     }
 
 module SMap =
-    let ofArray<'a, 'b when 'a : comparison> (as' : ('a * 'b) array) : SMap<'a, 'b> =
+    let ofList<'a, 'b when 'a : comparison> (as' : ('a * 'b) list) : SMap<'a, 'b> =
         {
             data = 
                 as'
-                |> Map.ofArray
+                |> Map.ofList
         }
 
-    let ofLookup<'a, 'b when 'a : comparison> (as' : 'a array) (fn : 'a -> 'b) : SMap<'a, 'b> =
+    let ofLookup<'a, 'b when 'a : comparison> (as' : 'a list) (fn : 'a -> 'b) : SMap<'a, 'b> =
         {
             data = 
                 as'
-                |> Array.map (fun a -> (a, fn a))
+                |> List.map (fun a -> (a, fn a))
                 |> Map.ofSeq
         }
 
@@ -30,3 +30,9 @@ module SMap =
 
     let tryGet<'a, 'b when 'a : comparison> (sm : SMap<'a, 'b>) (a : 'a) : 'b option =
         sm.data.TryFind a
+(*
+    let get<'a, 'b when 'a : comparison> (as' : ('a * 'b) list) (k : 'a) : 'b =
+        as'
+        |> List.find (fst >> ((=) k))
+        |> snd
+*)

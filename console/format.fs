@@ -37,15 +37,14 @@ type candidateGridChars<'a> =
       b : candidateGridCharsRow<'a>
       n : 'a }
 
-let printLine (cells : cell array) (digitTo : cell -> 'c) : List<'c> = 
+let printLine (cells : cell list) (digitTo : cell -> 'c) : List<'c> = 
     let cons x y = x :: y
-    Array.foldBack (digitTo >> cons) cells []
+    List.foldBack (digitTo >> cons) cells []
 
 (* Combine fences with posts (there's one more fence than posts: f p f p ... p f) *)
-let simpleInterleave (fenceToSeq : 'a -> seq<'c>) (post : seq<'c>) (fences : 'a array) = 
+let simpleInterleave (fenceToSeq : 'a -> seq<'c>) (post : seq<'c>) (fences : 'a list) = 
     seq {
-        let fencesList = List.ofArray fences
-        match fencesList with
+        match fences with
         | f :: fs -> 
             yield! fenceToSeq f
 
@@ -59,7 +58,7 @@ let simpleInterleave (fenceToSeq : 'a -> seq<'c>) (post : seq<'c>) (fences : 'a 
 (* Create a sequence of fences interleaved with posts (first and last posts may be different)
  l f p f p f ... p f r *)
 let sinterleave (fenceToSeq : 'a -> seq<'c>) (firstPost : seq<'c>) (midPost : seq<'c>) (lastPost : seq<'c>) 
-    (eol : seq<'c>) (fences : 'a array) = 
+    (eol : seq<'c>) (fences : 'a list) = 
     seq { 
         yield! firstPost
 
@@ -81,7 +80,7 @@ let printStack (p : puzzleMap) (columnPrinter : row -> column -> seq<'c>) (colum
     simpleInterleave (columnPrinter row) columnSeparator (SMap.get p.stackColumns stack)
 
 (* Print a row *)
-let printRow (stackPrinter : stack -> seq<'c>) (gridCharsRow : gridCharsRow<seq<'c>>) eol (stacks : stack array) = 
+let printRow (stackPrinter : stack -> seq<'c>) (gridCharsRow : gridCharsRow<seq<'c>>) eol (stacks : stack list) = 
     seq { 
         yield! gridCharsRow.l
         yield! simpleInterleave stackPrinter gridCharsRow.m stacks
@@ -112,7 +111,7 @@ let printGrid (p : puzzleMap) (gridChars : gridChars<seq<'c>>) (digitTo : cell -
 
     sinterleave doPrintBand t m b Seq.empty p.bands
 
-let printCandidateGrid (p : puzzleMap) (candidateGridChars : candidateGridChars<seq<'c>>) (alphabet : digit array) 
+let printCandidateGrid (p : puzzleMap) (candidateGridChars : candidateGridChars<seq<'c>>) (alphabet : digit list) 
     (draw_cell : cell -> digit -> 'c) = 
 
     let d = Seq.collect (konst candidateGridChars.h) (SMap.get p.stackColumns p.stacks.[0])
@@ -123,7 +122,7 @@ let printCandidateGrid (p : puzzleMap) (candidateGridChars : candidateGridChars<
 
         sinterleave (konst s) x.x.l x.x.m x.x.r candidateGridChars.n p.stacks
     
-    let c = Array.length (SMap.get p.stackColumns p.stacks.[0])
+    let c = List.length (SMap.get p.stackColumns p.stacks.[0])
     let s = alphabet
     
     let ss = 

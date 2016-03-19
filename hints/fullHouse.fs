@@ -28,6 +28,6 @@ let fullHousePerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primary
                focus = Digits.empty }
     else None
 
-let fullHouses (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescription array =
+let fullHouses (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescription list =
     p.houses
-    |> Array.choose (fullHousePerHouse p cellCandidates)
+    |> List.choose (fullHousePerHouse p cellCandidates)

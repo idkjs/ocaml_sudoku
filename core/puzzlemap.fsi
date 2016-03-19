@@ -24,29 +24,29 @@ val makeCandidateReduction : cell -> digits -> candidateReduction
 [<NoComparisonAttribute;NoEqualityAttribute>]
 type puzzleMap =
     {
-        columns : column array
-        rows : row array
-        cells : cell array
-        stacks : stack array
-        bands : band array
-        boxes : box array
-        houses : house array
+        columns : column list
+        rows : row list
+        cells : cell list
+        stacks : stack list
+        bands : band list
+        boxes : box list
+        houses : house list
         (* for a column, return the cells in it *)
-        columnCells : SMap<column, cell array>
+        columnCells : SMap<column, cell list>
         (* for a row, return the cells in it *)
-        rowCells : SMap<row, cell array>
+        rowCells : SMap<row, cell list>
         (* for a column, which stack is it in? *)
         columnStack : SMap<column, stack>
         (* for a stack, return the columns in it *)
-        stackColumns : SMap<stack, column array>
+        stackColumns : SMap<stack, column list>
         (* for a row, which band is it in? *)
         rowBand : SMap<row, band>
         (* for a band, return the rows in it *)
-        bandRows : SMap<band, row array>
+        bandRows : SMap<band, row list>
         (* for a cell, which box is it in? *)
         cellBox : SMap<cell, box>
         (* for a box, return the cells in it *)
-        boxCells : SMap<box, cell array>
+        boxCells : SMap<box, cell list>
         (* for a house, return the cells in it *)
         houseCells : SMap<house, cells>
         cellHouseCells : SMap<cell, cells>

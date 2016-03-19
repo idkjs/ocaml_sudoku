@@ -27,18 +27,18 @@ let loadEliminateFind  (p : puzzleMap) (current : current) : candidateReductions
             else None
 
     p.cells
-    |> Array.choose
+    |> List.choose
         (fun cell ->
             reductions cell
             |> Option.map (fun digits -> makeCandidateReduction cell digits))
-    |> CandidateReductions.ofArray
+    |> CandidateReductions.ofList
 
 let loadEliminateApply (p : puzzleMap) (candidateReductions : candidateReductions) (current : current) : current = 
 
     let candidateReductionsLookup =
         candidateReductions
-        |> CandidateReductions.toArray
-        |> Array.map (fun cr -> (cr.cell, cr.candidates))
+        |> CandidateReductions.toList
+        |> List.map (fun cr -> (cr.cell, cr.candidates))
         |> Map.ofSeq
 
     let update (cell : cell) : cellContents =

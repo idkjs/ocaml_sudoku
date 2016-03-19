@@ -6,9 +6,9 @@ open core.sudoku
 open core.puzzlemap
 open core.hints
 
-type cellHouses = SMap<cell, house array>
+type cellHouses = SMap<cell, house list>
 
-let intersectionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primaryHouse : house) (secondaryHouseLookups : cellHouses) : hintDescription array = 
+let intersectionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primaryHouse : house) (secondaryHouseLookups : cellHouses) : hintDescription list = 
 
     let primaryHouseCandidates = 
         primaryHouse
@@ -16,7 +16,7 @@ let intersectionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (pri
         |> Cells.map (SMap.get cellCandidates)
         |> Digits.unionMany
 
-    let uniqueSecondaryForCandidate (candidate : digit) : hintDescription array = 
+    let uniqueSecondaryForCandidate (candidate : digit) : hintDescription list = 
         let pointerCells = 
             primaryHouse
             |> SMap.get p.houseCells
@@ -29,8 +29,8 @@ let intersectionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (pri
             |> Cells.map (fun cell -> makeCandidateReduction cell (Digits.singleton candidate))
             |> CandidateReductions.ofSet
 
-        let hintsPerSecondaryHouse (secondaryHouses : house array) : hintDescription option = 
-            if Cells.count pointerCells > 1 && Array.length secondaryHouses = 1 then 
+        let hintsPerSecondaryHouse (secondaryHouses : house list) : hintDescription option = 
+            if Cells.count pointerCells > 1 && List.length secondaryHouses = 1 then 
                 let primaryHouseCells =
                     primaryHouse
                     |> SMap.get p.houseCells
@@ -62,49 +62,49 @@ let intersectionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (pri
         |> Cells.choose (fun cell -> 
                             SMap.get secondaryHouseLookups cell
                             |> hintsPerSecondaryHouse)
-        |> SSet.toArray
+        |> SSet.toList
     
     primaryHouseCandidates
-    |> Digits.toArray
-    |> Array.map uniqueSecondaryForCandidate
-    |> Array.concat
+    |> Digits.toList
+    |> List.map uniqueSecondaryForCandidate
+    |> List.concat
 
-let pointingPairsPerBox (p : puzzleMap) (cellCandidates : cellCandidates) (primaryHouse : house) : hintDescription array =
+let pointingPairsPerBox (p : puzzleMap) (cellCandidates : cellCandidates) (primaryHouse : house) : hintDescription list =
     let cellLines (cell : cell) =
-        [| HRow cell.row; HColumn cell.col |]
+        [ HRow cell.row; HColumn cell.col ]
 
     let secondaryHouseLookups =
-        SMap.ofLookup<cell, house array> p.cells cellLines
+        SMap.ofLookup<cell, house list> p.cells cellLines
 
     intersectionsPerHouse p cellCandidates primaryHouse secondaryHouseLookups
 
-let boxLineReductionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primaryHouse : house) : hintDescription array = 
+let boxLineReductionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primaryHouse : house) : hintDescription list = 
     let cellBox (cell : cell) =
-        [| SMap.get p.cellBox cell |> HBox |]
+        [ SMap.get p.cellBox cell |> HBox ]
 
     let secondaryHouseLookups =
-        SMap.ofLookup<cell, house array> p.cells cellBox
+        SMap.ofLookup<cell, house list> p.cells cellBox
 
     intersectionsPerHouse p cellCandidates primaryHouse secondaryHouseLookups
 
-let pointingPairs (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescription array =
+let pointingPairs (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescription list =
     p.boxes
-    |> Array.map HBox
-    |> Array.map (pointingPairsPerBox p cellCandidates) 
-    |> Array.concat
+    |> List.map HBox
+    |> List.map (pointingPairsPerBox p cellCandidates) 
+    |> List.concat
 
-let boxLineReductions (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescription array =
+let boxLineReductions (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescription list =
     let rowHints =
         p.rows
-        |> Array.map HRow
-        |> Array.map (boxLineReductionsPerHouse p cellCandidates)
-        |> Array.concat
+        |> List.map HRow
+        |> List.map (boxLineReductionsPerHouse p cellCandidates)
+        |> List.concat
 
     let colHints =
         p.columns
-        |> Array.map HColumn
-        |> Array.map (boxLineReductionsPerHouse p cellCandidates)
-        |> Array.concat
+        |> List.map HColumn
+        |> List.map (boxLineReductionsPerHouse p cellCandidates)
+        |> List.concat
 
     [| rowHints; colHints |]
-    |> Array.concat
+    |> List.concat

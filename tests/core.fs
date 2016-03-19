@@ -11,15 +11,15 @@ let twoByFourPuzzleSpec =
       boxWidth = 2
       boxHeight = 4
       alphabet = 
-          [| for i in 1..8 -> (char) i + '0' |> Digit |] }
+          [ for i in 1..8 -> (char) i + '0' |> Digit ] }
 
 [<Test>]
 let ``Can make columns``() =
     let p = tPuzzleMap defaultPuzzleSpec
 
     let expected =
-        [|1..9|]
-        |> Array.map CColumn
+        [1..9]
+        |> List.map CColumn
 
     Assert.AreEqual(expected, p.columns)
 
@@ -28,8 +28,8 @@ let ``Can make rows``() =
     let p = tPuzzleMap defaultPuzzleSpec
 
     let expected =
-        [|1..9|]
-        |> Array.map RRow
+        [1..9]
+        |> List.map RRow
 
     Assert.AreEqual(expected, p.rows)
 
@@ -38,13 +38,13 @@ let ``Can make cells``() =
     let p = tPuzzleMap defaultPuzzleSpec
 
     let expected =
-        [|1..9|]
-        |> Array.map
+        [1..9]
+        |> List.map
             (fun r ->
-                [|1..9|]
-                |> Array.map
+                [1..9]
+                |> List.map
                     (fun c -> makeCell (c |> CColumn) (r |> RRow)))
-        |> Array.concat
+        |> List.concat
 
     Assert.AreEqual(expected, p.cells)
 
@@ -53,8 +53,8 @@ let ``Can make stacks``() =
     let p = tPuzzleMap twoByFourPuzzleSpec
 
     let expected =
-        [|1..4|]
-        |> Array.map SStack
+        [1..4]
+        |> List.map SStack
 
     Assert.AreEqual(expected, p.stacks)
 
@@ -63,8 +63,8 @@ let ``Can make bands``() =
     let p = tPuzzleMap twoByFourPuzzleSpec
 
     let expected =
-        [|1..2|]
-        |> Array.map BBand
+        [1..2]
+        |> List.map BBand
 
     Assert.AreEqual(expected, p.bands)
 
@@ -73,13 +73,13 @@ let ``Can make boxes``() =
     let p = tPuzzleMap twoByFourPuzzleSpec
 
     let expected =
-        [|1..2|]
-        |> Array.map
+        [1..2]
+        |> List.map
             (fun b ->
-                [|1..4|]
-                |> Array.map
+                [1..4]
+                |> List.map
                     (fun s -> makeBox (s |> SStack) (b |> BBand)))
-        |> Array.concat
+        |> List.concat
 
     Assert.AreEqual(expected, p.boxes)
 
@@ -88,28 +88,28 @@ let ``Can make houses``() =
     let p = tPuzzleMap twoByFourPuzzleSpec
 
     let expectedColumns =
-        [|1..8|]
-        |> Array.map CColumn
-        |> Array.map HColumn
+        [1..8]
+        |> List.map CColumn
+        |> List.map HColumn
 
     let expectedRows =
-        [|1..8|]
-        |> Array.map RRow
-        |> Array.map HRow
+        [1..8]
+        |> List.map RRow
+        |> List.map HRow
 
     let expectedBoxes =
-        [|1..2|]
-        |> Array.map
+        [1..2]
+        |> List.map
             (fun b ->
-                [|1..4|]
-                |> Array.map
+                [1..4]
+                |> List.map
                     (fun s -> makeBox (s |> SStack) (b |> BBand)))
-        |> Array.concat
-        |> Array.map HBox
+        |> List.concat
+        |> List.map HBox
 
     let expected =
-        [| expectedColumns; expectedRows; expectedBoxes|]
-        |> Array.concat
+        [ expectedColumns; expectedRows; expectedBoxes]
+        |> List.concat
 
     Assert.AreEqual(expected, p.houses)
 
@@ -120,8 +120,8 @@ let ``Get column cells``() =
     let actual = SMap.get p.columnCells (2 |> CColumn)
 
     let expected =
-        [|1..9|]
-        |> Array.map
+        [1..9]
+        |> List.map
             (fun r -> makeCell (2 |> CColumn) (r |> RRow))
 
     Assert.AreEqual(expected, actual)
@@ -133,8 +133,8 @@ let ``Get row cells``() =
     let actual = SMap.get p.rowCells (7 |> RRow)
 
     let expected =
-        [|1..9|]
-        |> Array.map
+        [1..9]
+        |> List.map
             (fun c -> makeCell (c |> CColumn) (7 |> RRow))
 
     Assert.AreEqual(expected, actual)
@@ -145,15 +145,15 @@ let ``Get stack for a column``() =
 
     let actual =
         p.columns
-        |> Array.map (SMap.get p.columnStack)
+        |> List.map (SMap.get p.columnStack)
 
     let expected =
-        [|1..3|]
-        |> Array.map
+        [1..3]
+        |> List.map
             (fun s ->
-                [|1..3|]
-                |> Array.map (fun _ -> s |> SStack))
-        |> Array.concat
+                [1..3]
+                |> List.map (fun _ -> s |> SStack))
+        |> List.concat
 
     Assert.AreEqual(expected, actual)
 
@@ -164,8 +164,8 @@ let ``Get stack columns``() =
     let actual = SMap.get p.stackColumns (2 |> SStack)
 
     let expected =
-        [|4..6|]
-        |> Array.map CColumn
+        [4..6]
+        |> List.map CColumn
 
     Assert.AreEqual(expected, actual)
 
@@ -175,15 +175,15 @@ let ``Get band for a row``() =
 
     let actual =
         p.rows
-        |> Array.map (SMap.get p.rowBand)
+        |> List.map (SMap.get p.rowBand)
 
     let expected =
-        [|1..3|]
-        |> Array.map
+        [1..3]
+        |> List.map
             (fun b ->
-                [|1..3|]
-                |> Array.map (fun _ -> b |> BBand))
-        |> Array.concat
+                [1..3]
+                |> List.map (fun _ -> b |> BBand))
+        |> List.concat
 
     Assert.AreEqual(expected, actual)
 
@@ -194,8 +194,8 @@ let ``Get band rows``() =
     let actual = SMap.get p.bandRows (2 |> BBand)
 
     let expected =
-        [|4..6|]
-        |> Array.map RRow
+        [4..6]
+        |> List.map RRow
 
     Assert.AreEqual(expected, actual)
 
@@ -204,21 +204,21 @@ let ``Get box for a cell``() =
     let p = tPuzzleMap defaultPuzzleSpec
 
     let cells =
-        [|1..9|]
-        |> Array.map
+        [1..9]
+        |> List.map
             (fun r -> makeCell (5 |> CColumn) (r |> RRow))
 
     let actual =
         cells
-        |> Array.map (SMap.get p.cellBox)
+        |> List.map (SMap.get p.cellBox)
 
     let expected =
-        [|1..3|]
-        |> Array.map
+        [1..3]
+        |> List.map
             (fun b ->
-                [|1..3|]
-                |> Array.map
+                [1..3]
+                |> List.map
                     (fun _ -> makeBox (2 |> SStack) (b |> BBand)))
-        |> Array.concat
+        |> List.concat
 
     Assert.AreEqual(expected, actual)

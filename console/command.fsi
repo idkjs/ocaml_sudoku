@@ -5,7 +5,7 @@ open core.sudoku
 open core.puzzlemap
 open core.hints
 
-val parseValue : digit array -> string -> digit option
+val parseValue : digit list -> string -> digit option
 
 val focusCommandParse : puzzleShape -> string -> digit option
 
@@ -19,4 +19,4 @@ val candidateClearCommandParse : puzzleShape -> string -> puzzleMap -> candidate
 
 val candidateClearCommandCheck : given -> cellCandidates -> candidate -> candidate option
 
-val supportedHints : SMap<string, (puzzleMap -> cellCandidates -> hintDescription array)>
+val supportedHints : SMap<string, (puzzleMap -> cellCandidates -> hintDescription list)>

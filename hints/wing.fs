@@ -70,10 +70,10 @@ let xWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates) (h
                 |> Cells.ofSet
 
             let pointerCells =
-                [| row1Cells; row2Cells |]
-                |> Cells.unionManyArray
+                [ row1Cells; row2Cells ]
+                |> Cells.unionManyList
 
-            let primaryHouses = Houses.ofArray [| house1; house2 |]
+            let primaryHouses = Houses.ofList [ house1; house2 ]
             let secondaryHouses =
                 cols
                 |> Columns.map HColumn
@@ -102,10 +102,10 @@ let xWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates) (h
                 |> Cells.ofSet
 
             let pointerCells =
-                [| col1Cells; col2Cells |]
-                |> Cells.unionManyArray
+                [ col1Cells; col2Cells ]
+                |> Cells.unionManyList
 
-            let primaryHouses = Houses.ofArray [| house1; house2 |]
+            let primaryHouses = Houses.ofList [ house1; house2 ]
             let secondaryHouses =
                 rows
                 |> Rows.map HRow
@@ -117,7 +117,7 @@ let xWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates) (h
     | _ -> None
 
 let xWingsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (house1 : house) 
-    (house2 : house) : hintDescription array = 
+    (house2 : house) : hintDescription list = 
 
     let houseCandidates1 =
         house1
@@ -132,47 +132,49 @@ let xWingsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (house1 : h
         |> Digits.unionMany
 
     Digits.intersect houseCandidates1 houseCandidates2
-    |> Digits.toArray
-    |> Array.map (xWingsPerHouseCandidate p cellCandidates house1 house2)
-    |> Array.choose id
+    |> Digits.toList
+    |> List.map (xWingsPerHouseCandidate p cellCandidates house1 house2)
+    |> List.choose id
 
-let xWings (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescription array =
+let xWings (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescription list =
     let rows =
         p.rows
-        |> Array.map HRow
+        |> List.map HRow
 
     let cols =
         p.columns
-        |> Array.map HColumn
+        |> List.map HColumn
 
     let rowHints1 = 
         rows
-        |> Array.mapi 
+        |> List.mapi 
             (fun i row1 -> 
-                Array.sub rows (i + 1) (rows.Length - i - 1)
-                |> Array.mapi
+                Array.sub (List.toArray rows) (i + 1) (rows.Length - i - 1)
+                |> Array.toList
+                |> List.mapi
                     (fun j row2 -> xWingsPerHouse p cellCandidates row1 row2)) 
 
     let rowHints = 
         rowHints1
-        |> Array.concat
-        |> Array.concat
+        |> List.concat
+        |> List.concat
 
     let colHints1 = 
         cols
-        |> Array.mapi 
+        |> List.mapi 
             (fun i col1 -> 
-                Array.sub cols (i + 1) (cols.Length - i - 1)
-                |> Array.mapi
+                Array.sub (List.toArray cols) (i + 1) (cols.Length - i - 1)
+                |> Array.toList
+                |> List.mapi
                     (fun j col2 -> xWingsPerHouse p cellCandidates col1 col2)) 
     
     let colHints = 
         colHints1
-        |> Array.concat
-        |> Array.concat
+        |> List.concat
+        |> List.concat
 
     [| rowHints; colHints |]
-    |> Array.concat
+    |> List.concat
 
 let yWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates)
     (house1 : house) (house2 : house) houseCandidateCells1 houseCandidateCells2 (candidate : digit) = 
@@ -200,7 +202,7 @@ let yWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates)
             let pointerCells =
                 Cells.union row1Cells row2Cells
 
-            let primaryHouses = Houses.ofArray [| house1; house2 |]
+            let primaryHouses = Houses.ofList [ house1; house2 ]
             let secondaryHouses =
                 cols
                 |> Columns.map HColumn
@@ -230,7 +232,7 @@ let yWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates)
 
             let pointerCells = Cells.union col1Cells col2Cells
 
-            let primaryHouses = Houses.ofArray [| house1; house2 |]
+            let primaryHouses = Houses.ofList [ house1; house2 ]
             let secondaryHouses =
                 rows
                 |> Rows.map HRow
@@ -242,18 +244,18 @@ let yWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates)
     | _ -> None
 
 let yWingsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (row1 : row) 
-    (row2 : row) (col1 : column) (col2 : column)  : hintDescription array = 
+    (row2 : row) (col1 : column) (col2 : column)  : hintDescription list = 
 
     let cell11 = makeCell col1 row1
     let cell12 = makeCell col2 row1
     let cell21 = makeCell col1 row2
     let cell22 = makeCell col2 row2
     
-    let cells = [| cell11; cell12; cell21; cell22 |]
+    let cells = [ cell11; cell12; cell21; cell22 ]
 
     let candidateCells =
         cells
-        |> Array.map (fun cell -> makeCandidateReduction cell (SMap.get cellCandidates cell))
+        |> List.map (fun cell -> makeCandidateReduction cell (SMap.get cellCandidates cell))
 
     let ccell11 = makeCandidateReduction cell11 (SMap.get cellCandidates cell11)
     let ccell12 = makeCandidateReduction cell12 (SMap.get cellCandidates cell12)
@@ -262,32 +264,32 @@ let yWingsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (row1 : row
 
     let allNonEmpty =
         candidateCells
-        |> Array.forall (fun cr -> Digits.count cr.candidates > 0)
+        |> List.forall (fun cr -> Digits.count cr.candidates > 0)
 
     if allNonEmpty then 
         let triples = 
-            [| (cell12, [| ccell11; ccell12; ccell22 |], cell21)
-               (cell22, [| ccell12; ccell22; ccell21 |], cell11)
-               (cell21, [| ccell22; ccell21; ccell11 |], cell12)
-               (cell11, [| ccell21; ccell11; ccell12 |], cell22) |]
+            [ (cell12, [ ccell11; ccell12; ccell22 ], cell21)
+              (cell22, [ ccell12; ccell22; ccell21 ], cell11)
+              (cell21, [ ccell22; ccell21; ccell11 ], cell12)
+              (cell11, [ ccell21; ccell11; ccell12 ], cell22) ]
 
         triples
-        |> Array.map
+        |> List.map
           (fun (pivot1, triple, other) -> 
-            let ccs = Array.map (fun cr -> cr.candidates) triple
+            let ccs = List.map (fun cr -> cr.candidates) triple
 
             let allPairs =
                 ccs
-                |> Array.forall (fun c -> Digits.count c = 2)
+                |> List.forall (fun c -> Digits.count c = 2)
 
             if allPairs then 
                 let allCandidates =
                     ccs
-                    |> Digits.unionManyArray
+                    |> Digits.unionManyList
 
                 if Digits.count allCandidates = 3 then 
                     match triple with
-                    | [| left; pivot; right; _ |] -> 
+                    | [ left; pivot; right; _ ] -> 
                         let removee = Digits.difference allCandidates pivot.candidates
 
                         if Digits.count removee = 1 && (left.candidates <> right.candidates) && 
@@ -297,14 +299,14 @@ let yWingsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (row1 : row
 
                             let pointers =
                                 triple
-                                |> CandidateReductions.ofArray
+                                |> CandidateReductions.ofList
 
                             let primaryHouses = 
-                                [| HRow row1
-                                   HRow row2
-                                   HColumn col1
-                                   HColumn col2 |]
-                                |> Houses.ofArray
+                                [ HRow row1
+                                  HRow row2
+                                  HColumn col1
+                                  HColumn col2 ]
+                                |> Houses.ofList
 
                             let primaryHouseCells = p.housesCells primaryHouses
 
@@ -318,28 +320,30 @@ let yWingsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (row1 : row
                     | _ -> None
                 else None
             else None)
-        |> Array.choose id
-    else Array.empty
+        |> List.choose id
+    else List.empty
 
-let yWings (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescription array =
+let yWings (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescription list =
     let colsa = p.columns
 
     let hints =
         p.rows
-        |> Array.mapi 
+        |> List.mapi 
             (fun i row1 ->
-                Array.sub p.rows (i + 1) (p.rows.Length - i - 1)
-                |> Array.mapi 
+                Array.sub (List.toArray p.rows) (i + 1) (p.rows.Length - i - 1)
+                |> Array.toList
+                |> List.mapi 
                     (fun j row2 -> 
                         colsa
-                        |> Array.mapi 
+                        |> List.mapi 
                             (fun k col1 -> 
-                                Array.sub colsa (k + 1) (colsa.Length - k - 1)
-                                |> Array.mapi
+                                Array.sub (List.toArray colsa) (k + 1) (colsa.Length - k - 1)
+                                |> Array.toList
+                                |> List.mapi
                                     (fun l col2 -> yWingsPerHouse p cellCandidates row1 row2 col1 col2)))) 
 
     hints
-    |> Array.concat
-    |> Array.concat
-    |> Array.concat
-    |> Array.concat
+    |> List.concat
+    |> List.concat
+    |> List.concat
+    |> List.concat

@@ -31,8 +31,8 @@ type candidateGridChars<'a> =
       b : candidateGridCharsRow<'a>
       n : 'a }
 
-val printLine : cell array -> (cell -> 'c) -> List<'c>
+val printLine : cell list -> (cell -> 'c) -> List<'c>
 
 val printGrid : puzzleMap -> gridChars<seq<'c>> -> (cell -> 'c) -> seq<'c>
 
-val printCandidateGrid : puzzleMap -> candidateGridChars<seq<'c>> -> digit array -> (cell -> digit -> 'c) -> seq<'c>
+val printCandidateGrid : puzzleMap -> candidateGridChars<seq<'c>> -> digit list -> (cell -> digit -> 'c) -> seq<'c>

@@ -27,8 +27,8 @@ let ``Can find naked singles``() =
 
     Assert.AreEqual(2, hints.Length)
 
-    let expectedHints : hints.hintDescription array =
-        [|
+    let expectedHints : hints.hintDescription list =
+        [
             { hints.hintDescription.primaryHouses = Houses.empty
               secondaryHouses = Houses.empty
               candidateReductions = CandidateReductions.empty
@@ -41,6 +41,6 @@ let ``Can find naked singles``() =
               setCellValueAction = Some (makeValue (makeCell (makeColumn 8) (makeRow 9)) (defaultPuzzleSpec.alphabet.[5]))
               pointers = CandidateReductions.empty
               focus = Digits.empty }
-        |]
+        ]
 
     Assert.AreEqual(expectedHints, hints)

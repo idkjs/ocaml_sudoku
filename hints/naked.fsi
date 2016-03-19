@@ -4,6 +4,6 @@ open core.sudoku
 open core.puzzlemap
 open core.hints
 
-val nakedSingle : puzzleMap -> cellCandidates -> hintDescription array
+val nakedSingle : puzzleMap -> cellCandidates -> hintDescription list
 
-val nakedN : int -> puzzleMap -> cellCandidates -> hintDescription array
+val nakedN : int -> puzzleMap -> cellCandidates -> hintDescription list

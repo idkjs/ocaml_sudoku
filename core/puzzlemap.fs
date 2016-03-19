@@ -36,56 +36,56 @@ let makeCandidateReduction (cell : cell) (digits : digits) : candidateReduction 
     { candidateReduction.cell = cell;
       candidates = digits }
 
-let columns (length : size) : column array =
-    [| 1..(int) length |]
-    |> Array.map makeColumn
+let columns (length : size) : column list =
+    [ 1..(int) length ]
+    |> List.map makeColumn
 
-let rows (length : size) : row array =
-    [| 1..(int) length |]
-    |> Array.map makeRow
+let rows (length : size) : row list =
+    [ 1..(int) length ]
+    |> List.map makeRow
 
-let cells (length : size) : cell array =
-    [| for row in (rows length) do
+let cells (length : size) : cell list =
+    [ for row in (rows length) do
           for column in (columns length) do
-              yield makeCell column row |]
+              yield makeCell column row ]
 
-let stacks (length : size) (boxWidth : boxWidth) : stack array =
-    [| 1..((int) length / (int) boxWidth) |]
-    |> Array.map makeStack
+let stacks (length : size) (boxWidth : boxWidth) : stack list =
+    [ 1..((int) length / (int) boxWidth) ]
+    |> List.map makeStack
 
-let bands (length : size) (boxHeight : boxHeight) : band array =
-    [| 1..((int) length / (int) boxHeight) |]
-    |> Array.map makeBand
+let bands (length : size) (boxHeight : boxHeight) : band list =
+    [ 1..((int) length / (int) boxHeight) ]
+    |> List.map makeBand
 
-let boxes (length : size) (boxWidth : boxWidth) (boxHeight : boxHeight) : box array =
-    [| for band in bands length boxHeight do
+let boxes (length : size) (boxWidth : boxWidth) (boxHeight : boxHeight) : box list =
+    [ for band in bands length boxHeight do
           for stack in stacks length boxWidth do
-              yield makeBox stack band |]
+              yield makeBox stack band ]
 
-let houses (length : size) (boxWidth : boxWidth) (boxHeight : boxHeight) : house array =
+let houses (length : size) (boxWidth : boxWidth) (boxHeight : boxHeight) : house list =
     let chs =
         columns length
-        |> Array.map HColumn
+        |> List.map HColumn
 
     let rhs =
         rows length
-        |> Array.map HRow
+        |> List.map HRow
 
     let bhs =
         boxes length boxWidth boxHeight
-        |> Array.map HBox
+        |> List.map HBox
 
     [ chs; rhs; bhs ]
-    |> Array.concat
+    |> List.concat
 
-let columnCells (length : size) (column : column) : cell array =
+let columnCells (length : size) (column : column) : cell list =
     rows length
-    |> Array.map
+    |> List.map
         (fun row -> makeCell column row)
 
-let rowCells (length : size) (row : row) : cell array =
+let rowCells (length : size) (row : row) : cell list =
     columns length
-    |> Array.map
+    |> List.map
         (fun column -> makeCell column row)
 
 let columnStack (boxWidth : boxWidth) (column : column) : stack =
@@ -94,12 +94,12 @@ let columnStack (boxWidth : boxWidth) (column : column) : stack =
         1 + ((int) c- 1) / (int) boxWidth
         |> makeStack
 
-let stackColumns (boxWidth : boxWidth) (stack : stack) : column array =
+let stackColumns (boxWidth : boxWidth) (stack : stack) : column list =
     match stack with
     | SStack s ->
         let t = ((int) s - 1) * (int) boxWidth
-        [| (t + 1)..(t + (int) boxWidth) |]
-        |> Array.map makeColumn
+        [ (t + 1)..(t + (int) boxWidth) ]
+        |> List.map makeColumn
 
 let rowBand (boxHeight : boxHeight) (row : row) : band =
     match row with
@@ -107,76 +107,76 @@ let rowBand (boxHeight : boxHeight) (row : row) : band =
         1 + ((int) r - 1) / (int) boxHeight
         |> makeBand
 
-let bandRows (boxHeight : boxHeight) (band : band) : row array =
+let bandRows (boxHeight : boxHeight) (band : band) : row list =
     let c = match band with BBand b -> ((int) b - 1) * (int) boxHeight
 
-    [| (c + 1)..(c + (int) boxHeight) |]
-    |> Array.map makeRow
+    [ (c + 1)..(c + (int) boxHeight) ]
+    |> List.map makeRow
 
 let cellBox (boxWidth : boxWidth) (boxHeight : boxHeight) (cell : cell) : box =
     let stack = columnStack boxWidth cell.col
     let band = rowBand boxHeight cell.row
     makeBox stack band
 
-let boxCells (boxWidth : boxWidth) (boxHeight : boxHeight) (box : box) : cell array =
+let boxCells (boxWidth : boxWidth) (boxHeight : boxHeight) (box : box) : cell list =
     let stackColumns = stackColumns boxWidth box.stack
     let bandRows = bandRows boxHeight box.band
 
-    [| for row in bandRows do
+    [ for row in bandRows do
           for column in stackColumns do
-              yield makeCell column row |]
+              yield makeCell column row ]
 
 let houseCells (length : size) (boxWidth : boxWidth) (boxHeight : boxHeight) (house : house) : cells =
     match house with
-    | HColumn c -> columnCells length c |> Cells.ofArray
-    | HRow r -> rowCells length r |> Cells.ofArray
-    | HBox b -> boxCells boxWidth boxHeight b |> Cells.ofArray
+    | HColumn c -> columnCells length c |> Cells.ofList
+    | HRow r -> rowCells length r |> Cells.ofList
+    | HBox b -> boxCells boxWidth boxHeight b |> Cells.ofList
 
 let cellHouseCells (length : size) (boxWidth : boxWidth) (boxHeight : boxHeight) (cell : cell) : cells =
     let rowCells =
         rowCells length cell.row
-        |> Cells.ofArray
+        |> Cells.ofList
         |> Cells.remove cell
 
     let columnCells =
         columnCells length cell.col
-        |> Cells.ofArray
+        |> Cells.ofList
         |> Cells.remove cell
 
     let boxCells =
         boxCells boxWidth boxHeight (cellBox boxWidth boxHeight cell)
-        |> Cells.ofArray
+        |> Cells.ofList
         |> Cells.remove cell
 
-    [| Cells.singleton cell; rowCells; columnCells; boxCells |]
-    |> Cells.unionManyArray
+    [ Cells.singleton cell; rowCells; columnCells; boxCells ]
+    |> Cells.unionManyList
 
 [<NoComparisonAttribute;NoEqualityAttribute>]
 type puzzleMap =
     {
-        columns : column array
-        rows : row array
-        cells : cell array
-        stacks : stack array
-        bands : band array
-        boxes : box array
-        houses : house array
+        columns : column list
+        rows : row list
+        cells : cell list
+        stacks : stack list
+        bands : band list
+        boxes : box list
+        houses : house list
         (* for a column, return the cells in it *)
-        columnCells : SMap<column, cell array>
+        columnCells : SMap<column, cell list>
         (* for a row, return the cells in it *)
-        rowCells : SMap<row, cell array>
+        rowCells : SMap<row, cell list>
         (* for a column, which stack is it in? *)
         columnStack : SMap<column, stack>
         (* for a stack, return the columns in it *)
-        stackColumns : SMap<stack, column array>
+        stackColumns : SMap<stack, column list>
         (* for a row, which band is it in? *)
         rowBand : SMap<row, band>
         (* for a band, return the rows in it *)
-        bandRows : SMap<band, row array>
+        bandRows : SMap<band, row list>
         (* for a cell, which box is it in? *)
         cellBox : SMap<cell, box>
         (* for a box, return the cells in it *)
-        boxCells : SMap<box, cell array>
+        boxCells : SMap<box, cell list>
         (* for a house, return the cells in it *)
         houseCells : SMap<house, cells>
         cellHouseCells : SMap<cell, cells>
@@ -207,28 +207,28 @@ let tPuzzleMap (puzzleShape : puzzleShape) : puzzleMap =
     let _cellHouseCells = cellHouseCells puzzleShape.size puzzleShape.boxWidth puzzleShape.boxHeight
 
     let _columnCellsLookup =
-        SMap.ofLookup<column, cell array> _columns _columnCells
+        SMap.ofLookup<column, cell list> _columns _columnCells
 
     let _rowCellsLookup =
-        SMap.ofLookup<row, cell array> _rows _rowCells
+        SMap.ofLookup<row, cell list> _rows _rowCells
 
     let _columnStackLookup =
         SMap.ofLookup<column, stack> _columns _columnStack
 
     let _stackColumnsLookup =
-        SMap.ofLookup<stack, column array> _stacks _stackColumns
+        SMap.ofLookup<stack, column list> _stacks _stackColumns
 
     let _rowBandLookup =
         SMap.ofLookup<row, band> _rows _rowBand
 
     let _bandRowsLookup =
-        SMap.ofLookup<band, row array> _bands _bandRows
+        SMap.ofLookup<band, row list> _bands _bandRows
 
     let _cellBoxLookup =
         SMap.ofLookup<cell, box> _cells _cellBox
 
     let _boxCellsLookup =
-        SMap.ofLookup<box, cell array> _boxes _boxCells
+        SMap.ofLookup<box, cell list> _boxes _boxCells
 
     let _houseCellsLookup =
         SMap.ofLookup<house, cells> _houses _houseCells

@@ -27,24 +27,24 @@ let parseColumnRow what gridSize term =
         None
 
 (* find a cell from a pair of strings *)
-let parseCell (gridSize : int) (cells : cell array) (termColumn : string) (termRow : string) : cell option =
+let parseCell (gridSize : int) (cells : cell list) (termColumn : string) (termRow : string) : cell option =
     let parsedCol = parseColumnRow "Column" gridSize termColumn
     let parsedRow = parseColumnRow "Row" gridSize termRow
 
     match (parsedCol, parsedRow) with
     | (Some col, Some row) ->
         cells
-        |> Array.tryFind (fun cell -> cell.col = (makeColumn col) && cell.row = (makeRow row))
+        |> List.tryFind (fun cell -> cell.col = (makeColumn col) && cell.row = (makeRow row))
     | _ -> 
         Console.WriteLine("({0},{1} is not a cell", termColumn, termRow)
         None
 
-let charToCandidate (digits : digit array) (trialDigit : char) = 
+let charToCandidate (digits : digit list) (trialDigit : char) = 
     let compareAlpha (Digit charDigit) = trialDigit = charDigit
-    Array.tryFind compareAlpha digits
+    List.tryFind compareAlpha digits
 
 (* find an element of the alphabet *)
-let parseValue (digits : digit array) (term : string) = 
+let parseValue (digits : digit list) (term : string) = 
     if term.Length = 1 then charToCandidate digits (term.Chars 0)
     else 
         Console.WriteLine("Expect a single digit, not {0}", term)
@@ -125,9 +125,9 @@ let candidateClearCommandCheck (given : given) (cellCandidates : cellCandidates)
             candidate
             |> Some
 
-let supportedHints : SMap<string, (puzzleMap -> cellCandidates -> hintDescription array)> =
+let supportedHints : SMap<string, (puzzleMap -> cellCandidates -> hintDescription list)> =
     let keys =
-        [|
+        [
             "fh"
             "hs"
             "hp"
@@ -141,7 +141,7 @@ let supportedHints : SMap<string, (puzzleMap -> cellCandidates -> hintDescriptio
             "bl"
             "x"
             "y"
-        |]
+        ]
 
     let command key =
         match key with

@@ -123,29 +123,29 @@ module Digits =
 
     let isSubset (s : digits) (s' : digits) = SSet.isSubset s.data s'.data
 
-    let ofArray (as' : digit array) : digits = { data = SSet.ofArray<digit> as' }
+    let ofList (as' : digit list) : digits = { data = SSet.ofList<digit> as' }
 
     let ofSet (s : SSet<digit>) : digits = { data = s }
 
     let remove (d : digit) (s : digits) : digits = { data = SSet.remove d s.data }
 
-    let singleton (d : digit) : digits = { data = SSet.ofArray [| d |] }
+    let singleton (d : digit) : digits = { data = SSet.ofList [ d ] }
 
-    let toArray (s : digits) : digit array = SSet.toArray s.data
+    let toList (s : digits) : digit list = SSet.toList s.data
 
     let union (s : digits) (s' : digits) : digits = { data = SSet.union s.data s'.data }
 
-    let unionManyArray (ss : digits array) : digits =
+    let unionManyList (ss : digits list) : digits =
         let tss =
             ss
-            |> Array.map (fun s -> s.data)
+            |> List.map (fun s -> s.data)
         { data = SSet.unionMany tss }
 
     let unionMany (ss : SSet<digits>) : digits =
         let tss =
             ss
-            |> SSet.toArray
-            |> Array.map (fun s -> s.data)
+            |> SSet.toList
+            |> List.map (fun s -> s.data)
         { data = SSet.unionMany tss }
 
 type cells = 
@@ -167,29 +167,29 @@ module Cells =
 
     let map (map : cell -> 'U) (s : cells) : SSet<'U> = { data = List.map map s.data.data }
 
-    let ofArray (as' : cell array) : cells = { data = SSet.ofArray<cell> as' }
+    let ofList (as' : cell list) : cells = { data = SSet.ofList<cell> as' }
 
     let ofSet (s : SSet<cell>) : cells = { data = s }
 
     let remove (d : cell) (s : cells) : cells = { data = SSet.remove<cell> d s.data }
 
-    let singleton (d : cell) : cells = { data = SSet.ofArray<cell> [| d |] }
+    let singleton (d : cell) : cells = { data = SSet.ofList<cell> [ d ] }
 
-    let toArray (s : cells) : cell array = SSet.toArray<cell> s.data
+    let toList (s : cells) : cell list = SSet.toList<cell> s.data
 
     let union (s : cells) (s' : cells) : cells = { data = SSet.union s.data s'.data }
 
-    let unionManyArray (ss : cells array) : cells =
+    let unionManyList (ss : cells list) : cells =
         let tss =
             ss
-            |> Array.map (fun s -> s.data)
+            |> List.map (fun s -> s.data)
         { data = SSet.unionMany<cell> tss }
 
     let unionMany (ss : SSet<cells>) : cells =
         let tss =
             ss
-            |> SSet.toArray
-            |> Array.map (fun s -> s.data)
+            |> SSet.toList
+            |> List.map (fun s -> s.data)
         { data = SSet.unionMany<cell> tss }
 
 type columns = 
@@ -233,11 +233,11 @@ module Houses =
 
     let map (map : house -> 'U) (s : houses) : SSet<'U> = { data = List.map map s.data.data }
 
-    let ofArray (as' : house array) : houses = { data = SSet.ofArray<house> as' }
+    let ofList (as' : house list) : houses = { data = SSet.ofList<house> as' }
 
     let ofSet (s : SSet<house>) : houses = { data = s }
 
-    let singleton (d : house) : houses = { data = SSet.ofArray [| d |] }
+    let singleton (d : house) : houses = { data = SSet.ofList [ d ] }
 
 (* A sudoku is defined by the overall grid size (it is always square)
  which is the same as the Digits in the alphabet
@@ -246,7 +246,7 @@ type puzzleShape =
     { size : size;
       boxWidth : boxWidth;
       boxHeight : boxHeight;
-      alphabet : digit array }
+      alphabet : digit list }
 
 let makeDigit i = (char) i + '0' |> Digit
 
@@ -259,7 +259,6 @@ let defaultPuzzleSpec : puzzleShape =
       alphabet =
         range 1 9
         |> List.map makeDigit
-        |> List.toArray
         }
 
 (* Whilst working to a solution each cell in the grid
@@ -314,11 +313,11 @@ module CandidateReductions =
 
     let ofSet (s : SSet<candidateReduction>) : candidateReductions = { data = s }
 
-    let ofArray (as' : candidateReduction array) : candidateReductions = { data = SSet.ofArray<candidateReduction> as' }
+    let ofList(as' : candidateReduction list) : candidateReductions = { data = SSet.ofList<candidateReduction> as' }
 
-    let singleton (d : candidateReduction) : candidateReductions = { data = SSet.ofArray<candidateReduction> [| d |] }
+    let singleton (d : candidateReduction) : candidateReductions = { data = SSet.ofList<candidateReduction> [ d ] }
 
-    let toArray (s : candidateReductions) : candidateReduction array = SSet.toArray<candidateReduction> s.data
+    let toList (s : candidateReductions) : candidateReduction list = SSet.toList<candidateReduction> s.data
 
 (* Working towards a solution we take one of the following actions:
  SSet the cell to have a Digit
@@ -348,7 +347,7 @@ type solution =
       current : current;
       steps : action list }
 
-let givenToCurrent (cells : cell array) (given : given) (alphabet : digits) : current =
+let givenToCurrent (cells : cell list) (given : given) (alphabet : digits) : current =
     let makeCellContents (cell : cell) : cellContents =
         let dop = SMap.get given cell
         match dop with
@@ -360,7 +359,7 @@ let givenToCurrent (cells : cell array) (given : given) (alphabet : digits) : cu
 (* for a cell, return a set of candidates *)
 type cellCandidates = SMap<cell, digits>
 
-let currentCellCandidates (cells : cell array) (current : current) : cellCandidates =
+let currentCellCandidates (cells : cell list) (current : current) : cellCandidates =
     let getCandidateEntries (cell : cell) : digits =
         let cellContents = SMap.get current cell
         match cellContents with

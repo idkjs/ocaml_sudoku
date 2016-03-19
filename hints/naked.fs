@@ -40,7 +40,7 @@ let findNaked (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (p
         else None
     else None
 
-let nakedNPerHouse (count : int) (p : puzzleMap) (cellCandidates : cellCandidates)  (primaryHouse : house) : hintDescription array =
+let nakedNPerHouse (count : int) (p : puzzleMap) (cellCandidates : cellCandidates)  (primaryHouse : house) : hintDescription list =
     
     let hht = 
         primaryHouse
@@ -49,14 +49,14 @@ let nakedNPerHouse (count : int) (p : puzzleMap) (cellCandidates : cellCandidate
             let candidates = SMap.get cellCandidates cell
             Digits.count candidates > 1 && Digits.count candidates <= count) 
 
-    setSubsets (Cells.toArray hht) count
-    |> Array.map (fun ss -> findNaked count p cellCandidates primaryHouse (Cells.ofSet ss))
-    |> Array.choose id
+    setSubsets (Cells.toList hht) count
+    |> List.map (fun ss -> findNaked count p cellCandidates primaryHouse (Cells.ofSet ss))
+    |> List.choose id
 
-let nakedSingle (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescription array =
+let nakedSingle (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescription list =
 
     p.cells
-    |> Array.map (fun cell -> 
+    |> List.map (fun cell -> 
         let candidates = SMap.get cellCandidates cell
 
         if Digits.count candidates = 1 then 
@@ -71,9 +71,9 @@ let nakedSingle (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescript
                    pointers = CandidateReductions.empty
                    focus = Digits.empty }
         else None)
-    |> Array.choose id
+    |> List.choose id
 
-let nakedN (i : int) (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescription array =
+let nakedN (i : int) (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescription list =
     p.houses
-    |> Array.map (nakedNPerHouse i p cellCandidates )
-    |> Array.concat
+    |> List.map (nakedNPerHouse i p cellCandidates )
+    |> List.concat
