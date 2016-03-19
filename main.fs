@@ -10,7 +10,7 @@ open Smap
 open Sudoku
 open Puzzlemap
 open LoadEliminate
-open hints
+open Hints
 open SetCell
 open EliminateCandidate
 open Force

@@ -2,7 +2,7 @@ open Sset
 open Smap
 open Sudoku
 open Puzzlemap
-open hints
+open Hints
 
 let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (candidateSubset : digits) (primaryHouse : house) = 
 

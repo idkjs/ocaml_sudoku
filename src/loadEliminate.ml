@@ -1,7 +1,7 @@
 open Smap
 open Sudoku
 open Puzzlemap
-open hints
+open Hints
 
 let loadEliminateFind  (p : puzzleMap) (current : current) : candidateReductions = 
 

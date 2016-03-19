@@ -1,5 +1,3 @@
-module hints
-
 open Sset
 open Smap
 open Sudoku

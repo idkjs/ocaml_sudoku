@@ -2,7 +2,7 @@ open Sset
 open Smap
 open Sudoku
 open Puzzlemap
-open hints
+open Hints
 
 type cellHouses = SMap<cell, house list>
 

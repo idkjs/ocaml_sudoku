@@ -1,7 +1,7 @@
 open Smap
 open Sudoku
 open Puzzlemap
-open hints
+open Hints
 
 let setCellDigitApply (p : puzzleMap) (value : value) (current : current) : current = 
 

@@ -76,7 +76,7 @@
     <Compile Include="src\puzzlemap.mli" />
     <Compile Include="src\puzzlemap.ml" />
     <Compile Include="src\hints.mli" />
-    <Compile Include="src\hints.fs" />
+    <Compile Include="src\hints.ml" />
     <Compile Include="src\loadEliminate.ml" />
     <Compile Include="src\setCell.mli" />
     <Compile Include="src\setCell.ml" />
@@ -96,14 +96,14 @@
     <Compile Include="src\wing.ml" />
     <Compile Include="src\format.mli" />
     <Compile Include="src\format.fs" />
-    <Compile Include="src\console.fsi" />
-    <Compile Include="src\console.fs" />
+    <Compile Include="src\console.mli" />
+    <Compile Include="src\console.ml" />
     <Compile Include="src\command.mli" />
     <Compile Include="src\command.fs" />
     <Compile Include="src\load.mli" />
     <Compile Include="src\load.ml" />
-    <Compile Include="tests\test_core.fs" />
-    <Compile Include="tests\test_naked.fs" />
+    <Compile Include="tests\test_core.ml" />
+    <Compile Include="tests\test_naked.ml" />
     <Compile Include="main.fs" />
     <None Include="App.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

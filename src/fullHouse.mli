@@ -1,5 +1,5 @@
 open Sudoku
 open Puzzlemap
-open hints
+open Hints
 
 val fullHouses : puzzleMap -> cellCandidates -> hintDescription list

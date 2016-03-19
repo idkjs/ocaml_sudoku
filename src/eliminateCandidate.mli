@@ -1,6 +1,6 @@
 open Sudoku
 open Puzzlemap
-open hints
+open Hints
 
 val eliminateCandidateHintDescription : puzzleMap -> candidate -> hintDescription
 

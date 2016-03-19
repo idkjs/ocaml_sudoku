@@ -4,7 +4,7 @@ open System
 
 open Smap
 open Sudoku
-open hints
+open Hints
 
 open format
 

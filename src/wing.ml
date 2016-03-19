@@ -2,7 +2,7 @@ open Sset
 open Smap
 open Sudoku
 open Puzzlemap
-open hints
+open Hints
 
 let makeHints (p : puzzleMap) (cellCandidates : cellCandidates) pointerCells primaryHouses secondaryHouses candidate = 
     let pointers =

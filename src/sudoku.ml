@@ -233,6 +233,14 @@ module Houses = struct
     let ofSet (s : SSet<house>) : houses = { data = s }
 
     let singleton (d : house) : houses = { data = SSet.ofList [ d ] }
+
+    let toList (houses : houses) : house list = SSet.toList<house> houses.data
+
+    let tostring (houses : houses) : string =
+        houses
+        |> toList
+        |> List.map house_tostring
+        |> String.concat ","
 end
 
 (* A sudoku is defined by the overall grid size (it is always square)
@@ -311,6 +319,12 @@ module CandidateReductions = struct
     let singleton (d : candidateReduction) : candidateReductions = { data = SSet.ofList<candidateReduction> [ d ] }
 
     let toList (s : candidateReductions) : candidateReduction list = SSet.toList<candidateReduction> s.data
+
+    let tostring (s : candidateReductions) : string =
+        s
+        |> toList
+        |> List.map candidateReduction_tostring
+        |> String.concat ","
 end
 
 (* Working towards a solution we take one of the following actions:

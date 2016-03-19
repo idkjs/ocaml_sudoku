@@ -3,7 +3,7 @@ module command
 open Smap
 open Sudoku
 open Puzzlemap
-open hints
+open Hints
 
 val parseValue : digit list -> string -> digit option
 

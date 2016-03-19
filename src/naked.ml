@@ -2,7 +2,7 @@ open Sset
 open Smap
 open Sudoku
 open Puzzlemap
-open hints
+open Hints
 
 let findNaked (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (primaryHouse : house) (cellSubset : cells) = 
 

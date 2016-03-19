@@ -1,7 +1,7 @@
 open Smap
 open Sudoku
 open Puzzlemap
-open hints
+open Hints
 
 let eliminateCandidateApply (p : puzzleMap) (candidate : candidate) (current : current) : current = 
 

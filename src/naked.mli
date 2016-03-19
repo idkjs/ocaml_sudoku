@@ -1,6 +1,6 @@
 open Sudoku
 open Puzzlemap
-open hints
+open Hints
 
 val nakedSingle : puzzleMap -> cellCandidates -> hintDescription list
 

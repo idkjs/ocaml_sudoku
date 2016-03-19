@@ -5,7 +5,7 @@ open System
 open Smap
 open Sudoku
 open Puzzlemap
-open hints
+open Hints
 open SetCell
 open EliminateCandidate
 

@@ -3,7 +3,7 @@
 
 open Sudoku
 open Puzzlemap
-open hints
+open Hints
 
 let fullHousePerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primaryHouse : house) : hintDescription option =
 
