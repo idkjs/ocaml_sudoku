@@ -1,16 +1,14 @@
+(*F#
 module core.sset
 
 open System
 open System.Collections
 open System.Collections.Generic
+F#*)
 
+(*F#
 type SSet<'T when 'T : comparison> =
-    {
-        data : 'T list
-    }
-    interface IEnumerable with
-        member x.GetEnumerator(): IEnumerator = 
-            failwith "Not implemented yet"
+    { data : 'T list }
 
 module SSet =
     let empty<'T when 'T : comparison> : SSet<'T> = { data = []} 
@@ -54,4 +52,4 @@ module SSet =
 
     let isSubset<'T when 'T : comparison> (ts : SSet<'T>) (ts' : SSet<'T>) =
         Set.isSubset (ts.data |> Set.ofList) (ts'.data |> Set.ofList)
-     
+F#*)

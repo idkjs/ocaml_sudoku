@@ -71,8 +71,7 @@ let xWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates) (h
 
             let pointerCells =
                 [| row1Cells; row2Cells |]
-                |> SSet.ofArray
-                |> Cells.unionMany
+                |> Cells.unionManyArray
 
             let primaryHouses = Houses.ofArray [| house1; house2 |]
             let secondaryHouses =
@@ -104,8 +103,7 @@ let xWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates) (h
 
             let pointerCells =
                 [| col1Cells; col2Cells |]
-                |> SSet.ofArray
-                |> Cells.unionMany
+                |> Cells.unionManyArray
 
             let primaryHouses = Houses.ofArray [| house1; house2 |]
             let secondaryHouses =
@@ -285,8 +283,7 @@ let yWingsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (row1 : row
             if allPairs then 
                 let allCandidates =
                     ccs
-                    |> SSet.ofArray
-                    |> Digits.unionMany
+                    |> Digits.unionManyArray
 
                 if Digits.count allCandidates = 3 then 
                     match triple with

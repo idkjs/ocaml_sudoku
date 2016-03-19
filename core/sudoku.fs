@@ -98,13 +98,15 @@ module Digit =
         type t = digit
         let compare = Pervasives.compare
     end
-module ModDigitSet = SSet.Make(Digit)
+module ModDigitSet = Set.Make(Digit)
 (*ENDIF-OCAML*)
 (*F#
 type digits =
     {
         data : SSet<digit>
     }
+
+F#*)
 
 module Digits =
     let contains (d : digit) (s : digits) : bool = SSet.contains<digit> d s.data
@@ -132,6 +134,12 @@ module Digits =
     let toArray (s : digits) : digit array = SSet.toArray s.data
 
     let union (s : digits) (s' : digits) : digits = { data = SSet.union s.data s'.data }
+
+    let unionManyArray (ss : digits array) : digits =
+        let tss =
+            ss
+            |> Array.map (fun s -> s.data)
+        { data = SSet.unionMany tss }
 
     let unionMany (ss : SSet<digits>) : digits =
         let tss =
@@ -170,6 +178,12 @@ module Cells =
     let toArray (s : cells) : cell array = SSet.toArray<cell> s.data
 
     let union (s : cells) (s' : cells) : cells = { data = SSet.union s.data s'.data }
+
+    let unionManyArray (ss : cells array) : cells =
+        let tss =
+            ss
+            |> Array.map (fun s -> s.data)
+        { data = SSet.unionMany<cell> tss }
 
     let unionMany (ss : SSet<cells>) : cells =
         let tss =
@@ -225,8 +239,6 @@ module Houses =
 
     let singleton (d : house) : houses = { data = SSet.ofArray [| d |] }
 
-F#*)
-
 (* A sudoku is defined by the overall grid size (it is always square)
  which is the same as the Digits in the alphabet
  and also by the width and height of the boxes *)
@@ -238,12 +250,17 @@ type puzzleShape =
 
 let makeDigit i = (char) i + '0' |> Digit
 
+let rec range i j = if i > j then [] else i :: (range (i+1) j)
+
 let defaultPuzzleSpec : puzzleShape = 
-    { puzzleShape.size = 9
+    { size = 9
       boxWidth = 3
       boxHeight = 3
-      alphabet = 
-          [| for i in 1..9 -> makeDigit i |] }
+      alphabet =
+        range 1 9
+        |> List.map makeDigit
+        |> List.toArray
+        }
 
 (* Whilst working to a solution each cell in the grid
  that doesn't have a Digit is filled with candidates
@@ -272,15 +289,15 @@ type candidate =
 F#*)
 
 type candidateReduction = 
-    { cell : cell
+    { cell : cell;
       candidates : digits }
+(*F#
     override this.ToString() = 
         String.Format("Cell {0}, Candidates {1}", this.cell, String.Join(",", this.candidates))
+F#*)
 
-type candidateReductions = 
-    {
-        data : SSet<candidateReduction>
-    }
+type candidateReductions =
+    { data : SSet<candidateReduction> }
 
 module CandidateReductions =
     let count (s : candidateReductions) : int = SSet.count<candidateReduction> s.data

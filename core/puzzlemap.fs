@@ -149,8 +149,7 @@ let cellHouseCells (length : size) (boxWidth : boxWidth) (boxHeight : boxHeight)
         |> Cells.remove cell
 
     [| Cells.singleton cell; rowCells; columnCells; boxCells |]
-    |> SSet.ofArray
-    |> Cells.unionMany
+    |> Cells.unionManyArray
 
 [<NoComparisonAttribute;NoEqualityAttribute>]
 type puzzleMap =
