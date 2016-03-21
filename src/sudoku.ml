@@ -110,6 +110,8 @@ module Digits = struct
 
     let isSubset (s : digits) (s' : digits) = SSet.isSubset s.data s'.data
 
+    let nth (s : digits) (i : int) : digit = List.nth s.data.data i
+
     let ofList (as' : digit list) : digits = { data = SSet.ofList<digit> as' }
 
     let ofSet (s : SSet<digit>) : digits = { data = s }
@@ -250,7 +252,7 @@ type puzzleShape =
     { size : size;
       boxWidth : boxWidth;
       boxHeight : boxHeight;
-      alphabet : digit list }
+      alphabet : digits }
 
 let makeDigit i = (char) i + '0' |> Digit
 
@@ -263,6 +265,7 @@ let defaultPuzzleSpec : puzzleShape =
       alphabet =
         [1..9]
         |> List.map makeDigit
+        |> Digits.ofList
         }
 
 (* Whilst working to a solution each cell in the grid

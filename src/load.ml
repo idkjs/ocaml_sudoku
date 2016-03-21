@@ -11,7 +11,7 @@ let load (puzzleShape : puzzleShape) (sudoku : string) : solution =
 
     let charToDigit (trialDigit : char) : digit option = 
         let compareAlpha (Digit charDigit) = trialDigit = charDigit in
-        List.tryFind compareAlpha puzzleShape.alphabet
+        List.tryFind compareAlpha (Digits.toList puzzleShape.alphabet)
         in
 
     let alphabetisedLine =
@@ -24,7 +24,7 @@ let load (puzzleShape : puzzleShape) (sudoku : string) : solution =
 
     let given = loadPuzzle p.cells alphabetisedLine in
 
-    let current = givenToCurrent p.cells given (Digits.ofList puzzleShape.alphabet) in
+    let current = givenToCurrent p.cells given puzzleShape.alphabet in
 
     { solution.given = given;
       current = current;

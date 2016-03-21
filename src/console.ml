@@ -93,46 +93,46 @@ let drawConsoleChar (consoleChar : consoleChar) =
 
 let drawDigitCellContents (firstDigit : digit option) (currentDigit : cellContents) = 
     match firstDigit, currentDigit with
-    | Some s, _ -> ColouredString(s.ToString(), ConsoleColor.Blue)
-    | None, BigNumber s -> ColouredString(s.ToString(), ConsoleColor.Red)
+    | Some s, _ -> ColouredString(digit_tostring s, ConsoleColor.Blue)
+    | None, BigNumber s -> ColouredString(digit_tostring s, ConsoleColor.Red)
     | None, PencilMarks _ -> CChar '.'
 
-let drawBigNumber annotation' s : consoleChar =
+let drawBigNumber (annotation' : annotation) (s : digit) : consoleChar =
     match annotation' with
     | annotation when annotation.primaryHintHouse && annotation.given.IsSome -> 
-        ColouredString(s.ToString(), ConsoleColor.Cyan)
+        ColouredString(digit_tostring s, ConsoleColor.Cyan)
     | annotation when annotation.primaryHintHouse -> 
-        ColouredString(s.ToString(), ConsoleColor.Yellow)
+        ColouredString(digit_tostring s, ConsoleColor.Yellow)
     | annotation when annotation.secondaryHintHouse && annotation.given.IsSome -> 
-        ColouredString(s.ToString(), ConsoleColor.DarkBlue)
+        ColouredString(digit_tostring s, ConsoleColor.DarkBlue)
     | annotation when annotation.secondaryHintHouse -> 
-        ColouredString(s.ToString(), ConsoleColor.DarkRed)
+        ColouredString(digit_tostring s, ConsoleColor.DarkRed)
     | annotation when annotation.given.IsSome -> 
-        ColouredString(s.ToString(), ConsoleColor.Blue)
-    | _ -> ColouredString(s.ToString(), ConsoleColor.Red)
+        ColouredString(digit_tostring s, ConsoleColor.Blue)
+    | _ -> ColouredString(digit_tostring s, ConsoleColor.Red)
 
-let drawPencilMarks annotation' candidate candidates : consoleChar =
+let drawPencilMarks (annotation' : annotation) (candidate : digit) (candidates : digits) : consoleChar =
     match annotation' with
     | annotation when annotation.setValue.IsSome && annotation.setValue.Value = candidate -> 
-        ColouredString(candidate.ToString(), ConsoleColor.Red)
+        ColouredString(digit_tostring candidate, ConsoleColor.Red)
     | annotation when annotation.setValue.IsSome && Digits.contains candidate candidates -> 
-        ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
+        ColouredString(digit_tostring candidate, ConsoleColor.DarkYellow)
     | annotation when annotation.setValueReduction.IsSome && annotation.setValueReduction.Value = candidate && Digits.contains candidate candidates -> 
-        ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
+        ColouredString(digit_tostring candidate, ConsoleColor.DarkYellow)
     | annotation when Digits.contains candidate annotation.reductions -> 
-        ColouredString(candidate.ToString(), ConsoleColor.DarkYellow)
+        ColouredString(digit_tostring candidate, ConsoleColor.DarkYellow)
     | annotation when Digits.contains candidate annotation.pointers -> 
-        ColouredString(candidate.ToString(), ConsoleColor.Magenta)
+        ColouredString(digit_tostring candidate, ConsoleColor.Magenta)
     | annotation when Digits.contains candidate annotation.focus && Digits.contains candidate candidates -> 
-        ColouredString(candidate.ToString(), ConsoleColor.Yellow)
+        ColouredString(digit_tostring candidate, ConsoleColor.Yellow)
     | annotation when annotation.primaryHintHouse -> 
-        if Digits.contains candidate candidates then ColouredString(candidate.ToString(), ConsoleColor.DarkGreen)
+        if Digits.contains candidate candidates then ColouredString(digit_tostring candidate, ConsoleColor.DarkGreen)
         else CChar ' '
     | annotation when annotation.secondaryHintHouse -> 
-        if Digits.contains candidate candidates then ColouredString(candidate.ToString(), ConsoleColor.Green)
+        if Digits.contains candidate candidates then ColouredString(digit_tostring candidate, ConsoleColor.Green)
         else CChar ' '
     | _ -> 
-        if Digits.contains candidate candidates then CStr(candidate.ToString())
+        if Digits.contains candidate candidates then CStr(digit_tostring candidate)
         else CChar ' '
 
 let drawDigitCellContentAnnotations centreCandidate (annotations : SMap<cell, annotation>) (cell : cell) (candidate : digit) : consoleChar = 

@@ -11,7 +11,9 @@ let twoByFourPuzzleSpec =
       boxWidth = 2;
       boxHeight = 4;
       alphabet = 
-          [ for i in 1..8 -> (char) i + '0' |> Digit ] }
+            [1..8]
+            |> List.map (fun i -> (char) i + '0' |> Digit)
+            |> Digits.ofList }
 
 [<Test>]
 let ``Can make columns``() =

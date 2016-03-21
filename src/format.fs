@@ -111,7 +111,7 @@ let printGrid (p : puzzleMap) (gridChars : gridChars<seq<'c>>) (digitTo : cell -
 
     sinterleave doPrintBand t m b Seq.empty p.bands
 
-let printCandidateGrid (p : puzzleMap) (candidateGridChars : candidateGridChars<seq<'c>>) (alphabet : digit list) 
+let printCandidateGrid (p : puzzleMap) (candidateGridChars : candidateGridChars<seq<'c>>) (alphabet : digits) 
     (draw_cell : cell -> digit -> 'c) = 
 
     let d = Seq.collect (konst candidateGridChars.h) (SMap.get p.stackColumns p.stacks.[0])
@@ -123,7 +123,7 @@ let printCandidateGrid (p : puzzleMap) (candidateGridChars : candidateGridChars<
         sinterleave (konst s) x.x.l x.x.m x.x.r candidateGridChars.n p.stacks
     
     let c = List.length (SMap.get p.stackColumns p.stacks.[0])
-    let s = alphabet
+    let s = Digits.toList alphabet
     
     let ss = 
         seq { 

@@ -99,7 +99,7 @@
     <Compile Include="src\console.mli" />
     <Compile Include="src\console.ml" />
     <Compile Include="src\command.mli" />
-    <Compile Include="src\command.fs" />
+    <Compile Include="src\command.ml" />
     <Compile Include="src\load.mli" />
     <Compile Include="src\load.ml" />
     <Compile Include="tests\test_core.ml" />

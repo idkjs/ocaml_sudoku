@@ -38,15 +38,20 @@ let parse (p : puzzleMap) (item : string) (solution : solution) (puzzle : puzzle
         puzzleDrawFull2 hd3.annotations
         (solution, List.empty)
     else if item.StartsWith "focus" then
-        let focusDigitOpt = focusCommandParse puzzle item
-        match focusDigitOpt with
-        | Some focusDigit ->
+        let focusDigitResult = focusCommandParse puzzle item
+        match focusDigitResult with
+        | FCOk (VOk focusDigit) ->
             let hd2 = focusCommandHintDescription p focusDigit
             let hd3 = mhas solution p hd2
             puzzleDrawFull2 hd3.annotations
-
             (solution, List.empty)
-        | None ->
+
+        | FCOk r ->
+            Console.WriteLine(parse_value_result_tostring r)
+            (solution, List.empty)
+
+        | FCWrongTermCount _ ->
+            Console.WriteLine("Expect 'focus <digit>'")
             (solution, List.empty)
 
     else if item = "load" then
@@ -64,23 +69,29 @@ let parse (p : puzzleMap) (item : string) (solution : solution) (puzzle : puzzle
         
         let newSolution = 
             match valueOpt with
-            | Some value ->
+            | SCCOk value ->
                 let setCellValueOpt = setCellCommandCheck solution.given cellCandidates value
                 match setCellValueOpt with
-                | Some setCellValue ->
+                | SSCROk setCellValue ->
                     let hd2 = setCellHintDescription p setCellValue
                     let hd3 = mhas solution p hd2
                     puzzleDrawFull2 hd3.annotations
 
                     setCellStep p setCellValue solution
 
-                | None ->
-                    Console.WriteLine "Expect set <col> <row> <val>"
+                | SCCRGiven _
+                | SCCRNotACandidate _ ->
+                    Console.WriteLine (set_cell_command_check_result_tostring setCellValueOpt)
                     solution
 
-            | None -> 
+            | SCCBadParams (parse_cell, parse_value) ->
+                Console.WriteLine(String.Format("Cell: {0}, Value: {1}", (parse_cell_results_tostring parse_cell), (parse_value_result_tostring parse_value)))
+                solution
+
+            | SCCWrongTermCount _ ->
                 Console.WriteLine "Expect set <col> <row> <val>"
                 solution
+            in
 
         print_last newSolution
         (newSolution, List.empty)
@@ -90,21 +101,26 @@ let parse (p : puzzleMap) (item : string) (solution : solution) (puzzle : puzzle
 
         let newSolution = 
             match candidateOpt with
-            | Some candidate ->
+            | CCCPROk candidate ->
                 let clearCommandOpt = candidateClearCommandCheck solution.given cellCandidates candidate
                 match clearCommandOpt with
-                | Some clearCommand ->
+                | CCCCROk clearCommand ->
                     let hd2 = eliminateCandidateHintDescription p candidate
                     let hd3 = mhas solution p hd2
                     puzzleDrawFull2 hd3.annotations
 
                     eliminateCandidateStep p candidate solution
 
-                | None -> 
-                    Console.WriteLine "Expect clr <col> <row> <val>"
+                | CCCCRGiven _
+                | CCCCRNotACandidate _ -> 
+                    Console.WriteLine(clear_candidate_command_check_result_tostring clearCommandOpt)
                     solution
 
-            | None -> 
+            | CCCPRParseError (parse_cell, parse_value) ->
+                Console.WriteLine(String.Format("Cell: {0}, Value: {1}", (parse_cell_results_tostring parse_cell), (parse_value_result_tostring parse_value)))
+                solution
+
+            | CCCPRWrongItemCount _ ->
                 Console.WriteLine "Expect clr <col> <row> <val>"
                 solution
 
@@ -153,7 +169,7 @@ let repl (sudoku : string) (puzzleShape : puzzleShape) =
 
     let solution = ref (load puzzleShape sudoku)
 
-    let centreDigit : digit = puzzleShape.alphabet.[((List.length puzzleShape.alphabet) / 2)]
+    let centreDigit : digit = Digits.nth puzzleShape.alphabet ((Digits.count puzzleShape.alphabet) / 2)
 
     (* Print a Digit option, with colours *)
     let puzzleDrawCell (solution : solution) (cell : cell) : consoleChar = 
@@ -176,8 +192,8 @@ let repl (sudoku : string) (puzzleShape : puzzleShape) =
             match action with
             | Load _ -> drawConsoleChar (CStr "")
             | LoadEliminate  -> drawConsoleChar (CStr "")
-            | Placement sv -> drawConsoleChar (CStr(sv.ToString()))
-            | Eliminate candidate -> drawConsoleChar (CStr(candidate.ToString()))
+            | Placement sv -> drawConsoleChar (CStr (value_tostring sv))
+            | Eliminate candidate -> drawConsoleChar (CStr(candidate_tostring candidate))
         | [] -> ()
 
         drawConsoleChar NL

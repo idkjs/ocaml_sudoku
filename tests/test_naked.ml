@@ -29,13 +29,13 @@ let ``Can find naked singles``() =
         [   { Hints.hintDescription.primaryHouses = Houses.empty;
               secondaryHouses = Houses.empty;
               candidateReductions = CandidateReductions.empty;
-              setCellValueAction = Some (makeValue (makeCell (makeColumn 8) (makeRow 1)) (defaultPuzzleSpec.alphabet.[8]));
+              setCellValueAction = Some (makeValue (makeCell (makeColumn 8) (makeRow 1)) (Digits.nth defaultPuzzleSpec.alphabet 8));
               pointers = CandidateReductions.empty;
               focus = Digits.empty };
             { Hints.hintDescription.primaryHouses = Houses.empty;
               secondaryHouses = Houses.empty;
               candidateReductions = CandidateReductions.empty;
-              setCellValueAction = Some (makeValue (makeCell (makeColumn 8) (makeRow 9)) (defaultPuzzleSpec.alphabet.[5]));
+              setCellValueAction = Some (makeValue (makeCell (makeColumn 8) (makeRow 9)) (Digits.nth defaultPuzzleSpec.alphabet 5));
               pointers = CandidateReductions.empty;
               focus = Digits.empty } ]
         in

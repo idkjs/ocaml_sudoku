@@ -35,4 +35,4 @@ val printLine : cell list -> (cell -> 'c) -> List<'c>
 
 val printGrid : puzzleMap -> gridChars<seq<'c>> -> (cell -> 'c) -> seq<'c>
 
-val printCandidateGrid : puzzleMap -> candidateGridChars<seq<'c>> -> digit list -> (cell -> digit -> 'c) -> seq<'c>
+val printCandidateGrid : puzzleMap -> candidateGridChars<seq<'c>> -> digits -> (cell -> digit -> 'c) -> seq<'c>
