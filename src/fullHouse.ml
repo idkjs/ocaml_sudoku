@@ -13,9 +13,9 @@ let fullHousePerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primary
         in
 
     if CandidateReductions.count hhs = 1 then 
-        let h = hhs.data.data.Head in
+        let h = CandidateReductions.first hhs in
         let cell = h.cell in
-        let candidate = first h.candidates in
+        let candidate = Digits.first h.candidates in
 
         let setCellValue = makeValue cell candidate in
 

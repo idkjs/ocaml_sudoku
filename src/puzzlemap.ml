@@ -1,4 +1,3 @@
-open Sset
 open Smap
 open Sudoku
 
@@ -157,17 +156,17 @@ let cellHouseCells (length : size) (boxWidth : boxWidth) (boxHeight : boxHeight)
 [<NoComparisonAttribute;NoEqualityAttribute>]
 type puzzleMap =
     {
-        columns : column list;
-        rows : row list;
-        cells : cell list;
+        columns : columns;
+        rows : rows;
+        cells : cells;
         stacks : stack list;
         bands : band list;
         boxes : box list;
         houses : house list;
         (* for a column, return the cells in it *)
-        columnCells : SMap<column, cell list>;
+        columnCells : SMap<column, cells>;
         (* for a row, return the cells in it *)
-        rowCells : SMap<row, cell list>;
+        rowCells : SMap<row, cells>;
         (* for a column, which stack is it in? *)
         columnStack : SMap<column, stack>;
         (* for a stack, return the columns in it *)
@@ -179,7 +178,7 @@ type puzzleMap =
         (* for a cell, which box is it in? *)
         cellBox : SMap<cell, box>;
         (* for a box, return the cells in it *)
-        boxCells : SMap<box, cell list>;
+        boxCells : SMap<box, cells>;
         (* for a house, return the cells in it *)
         houseCells : SMap<house, cells>;
         cellHouseCells : SMap<cell, cells>;
@@ -198,42 +197,42 @@ let tPuzzleMap (puzzleShape : puzzleShape) : puzzleMap =
     let _bands = bands puzzleShape.size puzzleShape.boxHeight in
     let _boxes = boxes puzzleShape.size puzzleShape.boxWidth puzzleShape.boxHeight in
     let _houses = houses puzzleShape.size puzzleShape.boxWidth puzzleShape.boxHeight in
-    let _columnCells = columnCells puzzleShape.size in
-    let _rowCells = rowCells puzzleShape.size in
+    let _columnCells = columnCells puzzleShape.size >> Cells.ofList in
+    let _rowCells = rowCells puzzleShape.size >> Cells.ofList in
     let _columnStack = columnStack puzzleShape.boxWidth in
     let _stackColumns = stackColumns puzzleShape.boxWidth in
     let _rowBand = rowBand puzzleShape.boxHeight in
     let _bandRows = bandRows puzzleShape.boxHeight in
     let _cellBox = cellBox puzzleShape.boxWidth puzzleShape.boxHeight in
-    let _boxCells = boxCells puzzleShape.boxWidth puzzleShape.boxHeight in
+    let _boxCells = boxCells puzzleShape.boxWidth puzzleShape.boxHeight >> Cells.ofList in
     let _houseCells = houseCells puzzleShape.size puzzleShape.boxWidth puzzleShape.boxHeight in
     let _cellHouseCells = cellHouseCells puzzleShape.size puzzleShape.boxWidth puzzleShape.boxHeight in
 
-    let _columnCellsLookup = SMap.ofLookup<column, cell list> _columns _columnCells in
-    let _rowCellsLookup = SMap.ofLookup<row, cell list> _rows _rowCells in
+    let _columnCellsLookup = SMap.ofLookup<column, cells> _columns _columnCells in
+    let _rowCellsLookup = SMap.ofLookup<row, cells> _rows _rowCells in
     let _columnStackLookup = SMap.ofLookup<column, stack> _columns _columnStack in
     let _stackColumnsLookup = SMap.ofLookup<stack, column list> _stacks _stackColumns in
     let _rowBandLookup = SMap.ofLookup<row, band> _rows _rowBand in
     let _bandRowsLookup = SMap.ofLookup<band, row list> _bands _bandRows in
     let _cellBoxLookup = SMap.ofLookup<cell, box> _cells _cellBox in
-    let _boxCellsLookup = SMap.ofLookup<box, cell list> _boxes _boxCells in
+    let _boxCellsLookup = SMap.ofLookup<box, cells> _boxes _boxCells in
     let _houseCellsLookup = SMap.ofLookup<house, cells> _houses _houseCells in
     let _cellHouseCellsLookup = SMap.ofLookup<cell, cells> _cells _cellHouseCells in
 
     let _housesCells (houses : houses) : cells =
         houses
         |> Houses.map (SMap.get _houseCellsLookup)
-        |> Cells.unionMany in
+        |> Cells.unionManyList in
 
     let _houseCellCandidateReductions (house : house) (cellCandidates : cellCandidates) : candidateReductions =
         SMap.get _houseCellsLookup house
         |> Cells.map (fun cell -> makeCandidateReduction cell (SMap.get cellCandidates cell))
-        |> CandidateReductions.ofSet in
+        |> CandidateReductions.ofList in
 
     {
-        puzzleMap.columns = _columns;
-        rows = _rows;
-        cells = _cells;
+        puzzleMap.columns = _columns |> Columns.ofList;
+        rows = _rows |> Rows.ofList ;
+        cells = _cells |> Cells.ofList;
         stacks = _stacks;
         bands = _bands;
         boxes = _boxes;

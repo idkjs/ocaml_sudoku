@@ -1,6 +1,6 @@
-type SMap<'T, 'U when 'T : comparison> =
+type SMap<'a, 'b when 'a : comparison> =
     {
-        data : Map<'T, 'U>
+        data : Map<'a, 'b>
     }
 
 module SMap = struct

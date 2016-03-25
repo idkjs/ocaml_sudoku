@@ -1,4 +1,3 @@
-open Sset
 open Smap
 open Sudoku
 open Puzzlemap
@@ -9,7 +8,7 @@ let findNaked (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (p
     let subsetDigits =
         cellSubset
         |> Cells.map (SMap.get cellCandidates)
-        |> Digits.unionMany
+        |> Digits.unionManyList
         in
 
     if Digits.count subsetDigits <= count then
@@ -20,14 +19,14 @@ let findNaked (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (p
             |> Cells.map (fun cell -> 
                 let candidates = SMap.get cellCandidates cell in
                 makeCandidateReduction cell (Digits.intersect subsetDigits candidates))
-            |> CandidateReductions.ofSet
+            |> CandidateReductions.ofList
             |> CandidateReductions.filter (fun cr -> Digits.count cr.candidates > 0)
             in
 
         let pointers =
             cellSubset
             |> Cells.map (fun cell -> makeCandidateReduction cell (SMap.get cellCandidates cell))
-            |> CandidateReductions.ofSet
+            |> CandidateReductions.ofList
             in
 
         if CandidateReductions.count candidateReductions > 0 then 
@@ -51,18 +50,19 @@ let nakedNPerHouse (count : int) (p : puzzleMap) (cellCandidates : cellCandidate
             Digits.count candidates > 1 && Digits.count candidates <= count) 
         in
 
-    setSubsets (Cells.toList hht) count
-    |> List.map (fun ss -> findNaked count p cellCandidates primaryHouse (Cells.ofSet ss))
+    Sset.setSubsets (Cells.toList hht) count
+    |> List.map (fun ss -> findNaked count p cellCandidates primaryHouse (Cells.ofList ss))
     |> List.choose id
 
 let nakedSingle (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescription list =
 
     p.cells
+    |> Cells.toList
     |> List.map (fun cell -> 
         let candidates = SMap.get cellCandidates cell in
 
         if Digits.count candidates = 1 then 
-            let candidate = first candidates in
+            let candidate = Digits.first candidates in
 
             let setCellValue = makeValue cell candidate in
 

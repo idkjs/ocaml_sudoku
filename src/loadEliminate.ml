@@ -19,13 +19,14 @@ let loadEliminateFind  (p : puzzleMap) (current : current) : candidateReductions
                         match houseCellContents with
                         | BigNumber digit -> Some digit
                         | PencilMarks _ -> None)
-                |> Digits.ofSet in
+                |> Digits.ofList in
 
             if Digits.count digits > 0 then Some digits
             else None
         in
 
     p.cells
+    |> Cells.toList
     |> List.choose
         (fun cell ->
             reductions cell
@@ -54,7 +55,7 @@ let loadEliminateApply (p : puzzleMap) (candidateReductions : candidateReduction
             | None -> cellContents
         in
 
-    SMap.ofLookup<cell, cellContents> p.cells update
+    SMap.ofLookup<cell, cellContents> (Cells.toList p.cells) update
 
 let loadEliminateDescription (p : puzzleMap) (candidateReductions : candidateReductions) : hintDescription =
     { hintDescription.primaryHouses = Houses.empty;

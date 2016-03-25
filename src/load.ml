@@ -3,8 +3,8 @@ open Sudoku
 open Puzzlemap
 
 (* Load a sudoku given as a single line of gridSize*gridSize characters *)
-let loadPuzzle (cells : cell list) (alphabetisedLine : digit option list) : SMap<cell, digit option> = 
-    List.zip cells alphabetisedLine
+let loadPuzzle (cells : cells) (alphabetisedLine : digit option list) : SMap<cell, digit option> =
+    List.zip (Cells.toList cells) alphabetisedLine
     |> SMap.ofList
 
 let load (puzzleShape : puzzleShape) (sudoku : string) : solution = 

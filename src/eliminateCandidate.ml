@@ -14,7 +14,7 @@ let eliminateCandidateApply (p : puzzleMap) (candidate : candidate) (current : c
             else cellContents
         in
 
-    SMap.ofLookup<cell, cellContents> p.cells update
+    SMap.ofLookup<cell, cellContents> (Cells.toList p.cells) update
 
 let eliminateCandidateHintDescription (p: puzzleMap) (candidate : candidate) : hintDescription =
     let cr = makeCandidateReduction (candidate.cell) (Digits.singleton candidate.digit) in

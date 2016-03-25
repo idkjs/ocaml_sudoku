@@ -1,46 +1,88 @@
-type SSet<'T when 'T : comparison> =
-    { data : 'T list }
+(*
+Sset is intended to be an ordered list, without duplicates.
+*)
 
-module SSet = struct
-    let empty<'T when 'T : comparison> : SSet<'T> = { data = []} 
+let rec drop<'a> (n : int) (l : 'a list) : 'a list =
+if n <= 0 then l
+else
+    match l with
+    | [] -> []
+    | _::t  when n = 1 -> t
+    | h::t -> drop (n-1) t
 
-    let count<'T when 'T : comparison> (s : SSet<'T>) : int = s.data.Length
+let add<'a when 'a : comparison> (t : 'a) (s : 'a list) : 'a list=
+    if List.exists (fun t' -> t' = t) s then s
+    else t :: s
 
-    let map<'T, 'U when 'T : comparison and 'U : comparison> (map : 'T -> 'U) (s : SSet<'T>) : SSet<'U> = { data = List.map map s.data }
+let contains<'a when 'a : comparison> (t : 'a) (s : 'a list) : bool =
+    List.exists (fun t' -> t' = t) s
 
-    let add<'T when 'T : comparison> (t : 'T) (s : SSet<'T>) =
-        if List.exists (fun t' -> t' = t) s.data then s
-        else { data = t :: s.data}
+let remove<'a when 'a : comparison> (t : 'a) (s : 'a list) : 'a list =
+    List.filter (fun t' -> t' <> t) s
 
-    let contains<'T when 'T : comparison> (t : 'T) (s : SSet<'T>) : bool = List.exists (fun t' -> t' = t) s.data
+let ofList<'a when 'a : comparison> (xs : 'a list) : 'a list =
+    xs
+    |> Set.ofList
+    |> Set.toList
 
-    let filter<'T when 'T : comparison> (predicate : 'T -> bool) (s : SSet<'T>) : SSet<'T> = { data = List.filter predicate s.data }
+let union<'a when 'a : comparison> (ts : 'a list) (ts' : 'a list) : 'a list =
+    (List.append ts ts')
+    |> ofList
 
-    let ofList<'T when 'T : comparison> (ts : 'T list) : SSet<'T> =
-        List.fold (fun set elem -> add elem set) empty ts
+let unionMany<'a when 'a : comparison> (tss : 'a list list) : 'a list =
+    tss
+    |> List.concat
+    |> ofList
 
-    let remove<'T when 'T : comparison> (t : 'T) (s : SSet<'T>) =
-        { data = List.filter (fun t' -> t' <> t) s.data }
+let intersect<'a when 'a : comparison> (ts : 'a list) (ts' : 'a list) : 'a list =
+    Set.intersect (ts |> Set.ofList) (ts' |> Set.ofList)
+    |> Seq.toList
 
-    let union<'T when 'T : comparison> (ts : SSet<'T>) (ts' : SSet<'T>) = ofList ((List.append ts.data ts'.data))
+let difference<'a when 'a : comparison> (ts : 'a list) (ts' : 'a list) : 'a list =
+    Set.difference (ts |> Set.ofList) (ts' |> Set.ofList)
+    |> Seq.toList
 
-    let toList<'T when 'T : comparison> (ts : SSet<'T>) : 'T list = ts.data
+let isSubset<'a when 'a : comparison> (ts : 'a list) (ts' : 'a list) : bool =
+    Set.isSubset (ts |> Set.ofList) (ts' |> Set.ofList)
 
-    let unionMany<'T when 'T : comparison> (tss : SSet<'T> list) : SSet<'T> =
-        tss
-        |> List.collect (fun ts -> ts.data)
-        |> ofList
+let rec doSetSubsets (list : 'a list) (size : int) (prefix : 'a list) : 'a list list = 
+    match list with
+    | x :: xs when size > 0 -> 
+        if size = 1 then (x :: prefix) :: doSetSubsets xs 1 prefix
+        else 
+            let inc = doSetSubsets xs (size - 1) (x :: prefix) in
+            let dec = doSetSubsets xs size prefix in
 
-    let intersect<'T when 'T : comparison> (ts : SSet<'T>) (ts' : SSet<'T>) =
-        Set.intersect (ts.data |> Set.ofList) (ts'.data |> Set.ofList)
-        |> Seq.toList
-        |> ofList
+            List.append inc dec
+    | _ -> []
 
-    let difference<'T when 'T : comparison> (ts : SSet<'T>) (ts' : SSet<'T>) =
-        Set.difference (ts.data |> Set.ofList) (ts'.data |> Set.ofList)
-        |> Seq.toList
-        |> ofList
+let rec setSubsets (as' : 'a list) (size : int) : 'a list list =
+    doSetSubsets as' size []
 
-    let isSubset<'T when 'T : comparison> (ts : SSet<'T>) (ts' : SSet<'T>) =
-        Set.isSubset (ts.data |> Set.ofList) (ts'.data |> Set.ofList)
-end
+(*
+    let s0 = []
+    let p00 = setSubsets s0 0
+    let p01 = setSubsets s0 1
+    let p02 = setSubsets s0 2
+
+    let s1 = [ 1 ]
+    let p10 = setSubsets s1 0
+    let p11 = setSubsets s1 1
+    let p12 = setSubsets s1 2
+    let p13 = setSubsets s1 3
+
+    let s2 = [ 1; 2 ]
+    let p20 = setSubsets s2 0
+    let p21 = setSubsets s2 1
+    let p22 = setSubsets s2 2
+    let p23 = setSubsets s2 3
+    let p24 = setSubsets s2 4
+
+    let s3 = [ 1; 2; 3 ]
+    let p30 = setSubsets s3 0
+    let p31 = setSubsets s3 1
+    let p32 = setSubsets s3 2
+    let p33 = setSubsets s3 3
+    let p34 = setSubsets s3 4
+    let p35 = setSubsets s3 5
+*)

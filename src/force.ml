@@ -13,14 +13,16 @@ let isValidCellContents (cellContents : cellContents) : bool =
     | BigNumber _ -> true
     | PencilMarks candidates -> Digits.count candidates > 0
 
-let isValid (solution : solution) (cells : cell list) : bool =
+let isValid (solution : solution) (cells : cells) : bool =
     cells
+    |> Cells.toList
     |> List.map (SMap.get solution.current)
     |> List.forall isValidCellContents
 
 let rec searchr (p : puzzleMap) (solution : solution) (existing : solution list) : solution list = 
     let emptyCell : cell option =
         p.cells
+        |> Cells.toList
         |> List.tryFind (SMap.get solution.current >> isPencilMarksCellContents)
         in
 

@@ -50,13 +50,14 @@ let parse_cell_results_tostring (r : parse_cell_results) : string =
     | CColRowError (parsedCol, parsedRow) -> Printf.sprintf "(%s,%s) column and row wrong, is not a cell" (parse_column_or_row_results_tostring parsedCol) (parse_column_or_row_results_tostring parsedRow)
 
 (* find a cell from a pair of strings *)
-let parseCell (gridSize : int) (cells : cell list) (termColumn : string) (termRow : string) : parse_cell_results =
+let parseCell (gridSize : int) (cells : cells) (termColumn : string) (termRow : string) : parse_cell_results =
     let parsedCol = parseColumnRow "Column" gridSize termColumn in
     let parsedRow = parseColumnRow "Row" gridSize termRow in
 
     match (parsedCol, parsedRow) with
     | (CROk col, CROk row) ->
         cells
+        |> Cells.toList
         |> List.find (fun cell -> cell.col = (makeColumn col) && cell.row = (makeRow row))
         |> COk
     | (CRError _, CROk row) -> CColError (parsedCol, row)

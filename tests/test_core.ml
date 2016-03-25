@@ -159,7 +159,7 @@ let ``Get stack for a column``() =
 
     let actual =
         p.columns
-        |> List.map (SMap.get p.columnStack)
+        |> Columns.map (SMap.get p.columnStack)
         in
 
     let expected =
@@ -192,7 +192,7 @@ let ``Get band for a row``() =
 
     let actual =
         p.rows
-        |> List.map (SMap.get p.rowBand)
+        |> Rows.map (SMap.get p.rowBand)
         in
 
     let expected =

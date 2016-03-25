@@ -37,9 +37,9 @@ type candidateGridChars<'a> =
       b : candidateGridCharsRow<'a>;
       n : 'a }
 
-let printLine (cells : cell list) (digitTo : cell -> 'c) : List<'c> = 
+let printLine (cells : cells) (digitTo : cell -> 'c) : 'c list = 
     let cons x y = x :: y in
-    List.foldBack (digitTo >> cons) cells []
+    List.foldBack (digitTo >> cons) (Cells.toList cells) []
 
 (* Combine fences with posts (there's one more fence than posts: f p f p ... p f) *)
 let simpleInterleave (fenceToSeq : 'a -> seq<'c>) (post : seq<'c>) (fences : 'a list) = 

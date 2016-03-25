@@ -1,4 +1,3 @@
-open Sset
 open Smap
 open Sudoku
 open Puzzlemap
@@ -10,9 +9,9 @@ let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (
         primaryHouse
         |> SMap.get p.houseCells
         |> Cells.map (fun cell -> makeCandidateReduction cell (SMap.get cellCandidates cell))
-        |> CandidateReductions.ofSet
+        |> CandidateReductions.ofList
         |> CandidateReductions.map (fun cr -> makeCandidateReduction cr.cell (Digits.intersect cr.candidates candidateSubset))
-        |> CandidateReductions.ofSet
+        |> CandidateReductions.ofList
         |> CandidateReductions.filter (fun cr -> Digits.count cr.candidates > 0) 
         in
 
@@ -20,7 +19,7 @@ let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (
         primaryHouse
         |> SMap.get p.houseCells
         |> Cells.map (fun cell -> makeCandidateReduction cell (SMap.get cellCandidates cell))
-        |> CandidateReductions.ofSet
+        |> CandidateReductions.ofList
         |> CandidateReductions.map
             (fun cr -> 
                 let pointerCandidates = Digits.intersect cr.candidates candidateSubset in
@@ -33,7 +32,7 @@ let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (
                 let candidateReduction = makeCandidateReduction cr.cell crs in
             
                 candidateReduction)
-        |> CandidateReductions.ofSet
+        |> CandidateReductions.ofList
         |> CandidateReductions.filter (fun cr -> Digits.count cr.candidates > 0) 
         in
 
@@ -41,9 +40,9 @@ let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (
 
         let setCellValue = 
             if count = 1 then 
-                let h = pointers.data.data.Head in
+                let h = CandidateReductions.first pointers in
                 let cell = h.cell in
-                let candidate = candidateSubset.data.data.Head in
+                let candidate = Digits.first candidateSubset in
 
                 let setCellValue = makeValue cell candidate in
 
@@ -65,13 +64,13 @@ let hiddenNPerHouse (count : int) (p : puzzleMap) (cellCandidates : cellCandidat
         house
         |> SMap.get p.houseCells
         |> Cells.map (SMap.get cellCandidates)
-        |> Digits.unionMany
+        |> Digits.unionManyList
         in
 
-    setSubsets (Digits.toList houseCandidates) count
+    Sset.setSubsets (Digits.toList houseCandidates) count
     |> List.choose
         (fun candidateSubset -> 
-            findHidden count p cellCandidates (Digits.ofSet candidateSubset) house)
+            findHidden count p cellCandidates (Digits.ofList candidateSubset) house)
 
 let hiddenN (i : int) (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescription list =
     p.houses

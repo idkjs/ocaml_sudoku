@@ -22,17 +22,17 @@ val makeCandidateReduction : cell -> digits -> candidateReduction
 [<NoComparisonAttribute;NoEqualityAttribute>]
 type puzzleMap =
     {
-        columns : column list;
-        rows : row list;
-        cells : cell list;
+        columns : columns;
+        rows : rows;
+        cells : cells;
         stacks : stack list;
         bands : band list;
         boxes : box list;
         houses : house list;
         (* for a column, return the cells in it *)
-        columnCells : SMap<column, cell list>;
+        columnCells : SMap<column, cells>;
         (* for a row, return the cells in it *)
-        rowCells : SMap<row, cell list>;
+        rowCells : SMap<row, cells>;
         (* for a column, which stack is it in? *)
         columnStack : SMap<column, stack>;
         (* for a stack, return the columns in it *)
@@ -44,7 +44,7 @@ type puzzleMap =
         (* for a cell, which box is it in? *)
         cellBox : SMap<cell, box>;
         (* for a box, return the cells in it *)
-        boxCells : SMap<box, cell list>;
+        boxCells : SMap<box, cells>;
         (* for a house, return the cells in it *)
         houseCells : SMap<house, cells>;
         cellHouseCells : SMap<cell, cells>;

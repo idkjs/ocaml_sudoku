@@ -18,7 +18,7 @@ let setCellDigitApply (p : puzzleMap) (value : value) (current : current) : curr
             else cellContents
         in
 
-    SMap.ofLookup<cell, cellContents> p.cells update
+    SMap.ofLookup<cell, cellContents> (Cells.toList p.cells) update
 
 type setCellDigitError = 
     { cell : cell;

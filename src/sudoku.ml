@@ -1,4 +1,3 @@
-open Sset
 open Smap
 
 (* A sudoku is a square grid of size... *)
@@ -88,159 +87,137 @@ module Digit =
 module ModDigitSet = Set.Make(Digit)
 (*ENDIF-OCAML*)
 (*F#
-type digits =
-    {
-        data : SSet<digit>
-    }
+type digits = CDigits of digit list
 
 F#*)
 
 module Digits = struct
-    let contains (d : digit) (s : digits) : bool = SSet.contains<digit> d s.data
+    let contains (d : digit) (CDigits s : digits) : bool = Sset.contains<digit> d s
 
-    let count (s : digits) : int = SSet.count s.data
+    let count (CDigits s : digits) : int = List.length s
 
-    let difference (s : digits) (s' : digits) : digits = { data = SSet.difference s.data s'.data }
+    let difference (CDigits s : digits) (CDigits s' : digits) : digits = Sset.difference s s' |> CDigits
 
-    let empty : digits = { data = SSet.empty<digit> }
+    let empty : digits = [] |> CDigits
 
-    let filter (predicate : digit -> bool) (s : digits) : digits = { data = SSet.filter predicate s.data }
+    let filter (predicate : digit -> bool) (CDigits s : digits) : digits = List.filter predicate s |> CDigits
 
-    let intersect (s : digits) (s' : digits) = { data = SSet.intersect s.data s'.data }
+    let first (CDigits d : digits) : digit = 
+        match d with
+        | h :: _ -> h
+        | [] -> failwith "Not empty"
 
-    let isSubset (s : digits) (s' : digits) = SSet.isSubset s.data s'.data
+    let intersect (CDigits s : digits) (CDigits s' : digits) : digits = Sset.intersect s s' |> CDigits
 
-    let nth (s : digits) (i : int) : digit = List.nth s.data.data i
+    let isSubset (CDigits s : digits) (CDigits s' : digits) : bool = Sset.isSubset s s'
 
-    let ofList (as' : digit list) : digits = { data = SSet.ofList<digit> as' }
+    let nth (CDigits s : digits) (i : int) : digit = List.nth s i
 
-    let ofSet (s : SSet<digit>) : digits = { data = s }
+    let ofList (as' : digit list) : digits = Sset.ofList<digit> as' |> CDigits
 
-    let remove (d : digit) (s : digits) : digits = { data = SSet.remove d s.data }
+    let remove (d : digit) (CDigits s : digits) : digits = Sset.remove d s |> CDigits
 
-    let singleton (d : digit) : digits = { data = SSet.ofList [ d ] }
+    let singleton (d : digit) : digits = [ d ] |> CDigits
 
-    let toList (s : digits) : digit list = SSet.toList s.data
+    let toList (CDigits s : digits) : digit list = s
 
-    let union (s : digits) (s' : digits) : digits = { data = SSet.union s.data s'.data }
+    let union (CDigits s : digits) (CDigits s' : digits) : digits = Sset.union s s' |> CDigits
 
     let unionManyList (ss : digits list) : digits =
-        let tss = List.map (fun s -> s.data) ss in
-        { data = SSet.unionMany tss }
+        let tss = List.map toList ss in
+        Sset.unionMany tss |> CDigits
 
-    let unionMany (ss : SSet<digits>) : digits =
-        let tss =
-            ss
-            |> SSet.toList
-            |> List.map (fun s -> s.data)
-            in
-        { data = SSet.unionMany tss }
-
-    let tostring (digits : digits) : string =
+    let tostring (CDigits digits : digits) : string =
         digits
-        |> toList
         |> List.map digit_tostring
         |> String.concat ","
 end
 
-type cells = 
-    {
-        data : SSet<cell>
-    }
+type cells = CCells of cell list
 
 module Cells = struct
 
-    let choose (map : cell -> 'U option) (s : cells) : SSet<'U> = { data = List.choose map s.data.data }
+    let choose (map : cell -> 'b option) (CCells s : cells) : 'b list = List.choose map s
 
-    let contains (d : cell) (s : cells) : bool = SSet.contains<cell> d s.data
+    let contains (d : cell) (CCells s : cells) : bool = Sset.contains<cell> d s
 
-    let count (s : cells) : int = SSet.count<cell> s.data
+    let count (CCells s : cells) : int = List.length s
 
-    let difference (s : cells) (s' : cells) : cells = { data = SSet.difference s.data s'.data }
+    let difference (CCells s : cells) (CCells s' : cells) : cells = Sset.difference s s' |> CCells
 
-    let filter (predicate : cell -> bool) (s : cells) : cells = { data = SSet.filter predicate s.data }
+    let filter (predicate : cell -> bool) (CCells s : cells) : cells = List.filter predicate s |> CCells
 
-    let map (map : cell -> 'U) (s : cells) : SSet<'U> = { data = List.map map s.data.data }
+    let map (map : cell -> 'b) (CCells s : cells) : 'b list = List.map map s
 
-    let ofList (as' : cell list) : cells = { data = SSet.ofList<cell> as' }
+    let ofList (as' : cell list) : cells = Sset.ofList<cell> as' |> CCells
 
-    let ofSet (s : SSet<cell>) : cells = { data = s }
+    let remove (d : cell) (CCells s : cells) : cells = Sset.remove<cell> d s |> CCells
 
-    let remove (d : cell) (s : cells) : cells = { data = SSet.remove<cell> d s.data }
+    let singleton (d : cell) : cells = [ d ] |> CCells
 
-    let singleton (d : cell) : cells = { data = SSet.ofList<cell> [ d ] }
+    let toList (CCells s : cells) : cell list = s
 
-    let toList (s : cells) : cell list = SSet.toList<cell> s.data
-
-    let union (s : cells) (s' : cells) : cells = { data = SSet.union s.data s'.data }
+    let union (CCells s : cells) (CCells s' : cells) : cells = Sset.union s s' |> CCells
 
     let unionManyList (ss : cells list) : cells =
-        let tss = List.map (fun s -> s.data) ss in
-        { data = SSet.unionMany<cell> tss }
-
-    let unionMany (ss : SSet<cells>) : cells =
-        let tss =
-            ss
-            |> SSet.toList
-            |> List.map (fun s -> s.data)
-            in
-        { data = SSet.unionMany<cell> tss }
+        let tss = List.map toList ss in
+        Sset.unionMany<cell> tss |> CCells
 end
 
-type columns = 
-    {
-        data : SSet<column>
-    }
+type columns = CColumns of column list
 
 module Columns = struct
 
-    let count (s : columns) : int = SSet.count<column> s.data
+    let count (CColumns s : columns) : int = List.length s
 
-    let ofSet (s : SSet<column>) : columns = { data = s }
+    let drop (n : int) (CColumns columns : columns) : columns = Sset.drop n columns |> CColumns
 
-    let map (map : column -> 'U) (s : columns) : SSet<'U> = { data = List.map map s.data.data }
+    let ofList (s : column list) : columns = Sset.ofList<column> s |> CColumns
 
-    let union (s : columns) (s' : columns) : columns = { data = SSet.union s.data s'.data }
+    let map (map : column -> 'b) (CColumns s : columns) : 'b list = List.map map s
+
+    let mapi (map : int -> column -> 'b) (CColumns s : columns) : 'b list = List.mapi map s
+
+    let union (CColumns s : columns) (CColumns s' : columns) : columns = Sset.union s s' |> CColumns
 end
 
-type rows = 
-    {
-        data : SSet<row>
-    }
+type rows = CRows of row list
 
 module Rows = struct
 
-    let count (s : rows) : int = SSet.count<row> s.data
+    let count (CRows s : rows) : int = List.length s
 
-    let ofSet (s : SSet<row>) : rows = { data = s }
+    let drop (n : int) (CRows rows : rows) : rows = Sset.drop n rows |> CRows
 
-    let map (map : row -> 'U) (s : rows) : SSet<'U> = { data = List.map map s.data.data }
+    let ofList (s : row list) : rows = Sset.ofList s |> CRows
 
-    let union (s : rows) (s' : rows) : rows = { data = SSet.union s.data s'.data }
+    let map (map : row -> 'b) (CRows s : rows) : 'b list = List.map map s
+
+    let mapi (map : int -> row -> 'b) (CRows s : rows) : 'b list = List.mapi map s
+
+    let union (CRows s : rows) (CRows s' : rows) : rows = Sset.union s s' |> CRows
 end
 
-type houses = 
-    {
-        data : SSet<house>
-    }
+type houses = CHouses of house list
 
 module Houses = struct
 
-    let empty : houses = { data = SSet.empty<house> }
+    let drop (n : int) (CHouses houses : houses) : houses = Sset.drop n houses |> CHouses
 
-    let map (map : house -> 'U) (s : houses) : SSet<'U> = { data = List.map map s.data.data }
+    let empty : houses = [] |> CHouses
 
-    let ofList (as' : house list) : houses = { data = SSet.ofList<house> as' }
+    let map (map : house -> 'b) (CHouses s : houses) : 'b list = List.map map s
 
-    let ofSet (s : SSet<house>) : houses = { data = s }
+    let mapi (map : int -> house -> 'b) (CHouses s : houses) : 'b list = List.mapi map s
 
-    let singleton (d : house) : houses = { data = SSet.ofList [ d ] }
+    let ofList (as' : house list) : houses = Sset.ofList<house> as' |> CHouses
 
-    let toList (houses : houses) : house list = SSet.toList<house> houses.data
+    let singleton (d : house) : houses = [ d ] |> CHouses
 
-    let tostring (houses : houses) : string =
+    let toList (CHouses houses : houses) : house list = houses
+
+    let tostring (CHouses houses : houses) : string =
         houses
-        |> toList
         |> List.map house_tostring
         |> String.concat ","
 end
@@ -276,7 +253,7 @@ type cellContents =
     | PencilMarks of digits
 
 (* Working towards a solution we take one of the following actions:
- SSet the cell to have a Digit *)
+ Sset the cell to have a Digit *)
 type value = 
     { cell : cell;
       digit : digit }
@@ -299,39 +276,41 @@ type candidateReduction =
 let candidateReduction_tostring ({ cell = cell; candidates = digits} : candidateReduction) : string =
     Printf.sprintf "Cell %s, Candidates %s" (cell_tostring cell) (Digits.tostring digits)
 
-type candidateReductions =
-    { data : SSet<candidateReduction> }
+type candidateReductions = CCandidateReductions of candidateReduction list
 
 module CandidateReductions = struct
-    let count (s : candidateReductions) : int = SSet.count<candidateReduction> s.data
+    let count (CCandidateReductions s : candidateReductions) : int = List.length s
 
-    let empty : candidateReductions = { data = SSet.empty<candidateReduction> }
+    let empty : candidateReductions = [] |> CCandidateReductions
 
-    let filter (predicate : candidateReduction -> bool) (s : candidateReductions) : candidateReductions = { data = SSet.filter predicate s.data }
+    let filter (predicate : candidateReduction -> bool) (CCandidateReductions s : candidateReductions) : candidateReductions = List.filter predicate s |> CCandidateReductions
 
-    let firstOpt (set : candidateReductions) = 
-        if count set > 0 then set.data.data.Head |> Some
-        else None
+    let first (CCandidateReductions set : candidateReductions) : candidateReduction = 
+        match set with
+        | h :: _ -> h
+        | [] -> failwith "Not empty"
 
-    let map (map : candidateReduction -> 'U) (s : candidateReductions) : SSet<'U> = { data = List.map map s.data.data }
+    let firstOpt (CCandidateReductions set : candidateReductions) : candidateReduction option = 
+        match set with
+        | h :: _ -> h |> Some
+        | [] -> None
 
-    let ofSet (s : SSet<candidateReduction>) : candidateReductions = { data = s }
+    let map (map : candidateReduction -> 'b) (CCandidateReductions s : candidateReductions) : 'b list = List.map map s
 
-    let ofList(as' : candidateReduction list) : candidateReductions = { data = SSet.ofList<candidateReduction> as' }
+    let ofList(as' : candidateReduction list) : candidateReductions = Sset.ofList<candidateReduction> as' |> CCandidateReductions
 
-    let singleton (d : candidateReduction) : candidateReductions = { data = SSet.ofList<candidateReduction> [ d ] }
+    let singleton (d : candidateReduction) : candidateReductions = [ d ] |> CCandidateReductions
 
-    let toList (s : candidateReductions) : candidateReduction list = SSet.toList<candidateReduction> s.data
+    let toList (CCandidateReductions s : candidateReductions) : candidateReduction list = s
 
-    let tostring (s : candidateReductions) : string =
+    let tostring (CCandidateReductions s : candidateReductions) : string =
         s
-        |> toList
         |> List.map candidateReduction_tostring
         |> String.concat ","
 end
 
 (* Working towards a solution we take one of the following actions:
- SSet the cell to have a Digit
+ Sset the cell to have a Digit
  or remove a candidate *)
  [<NoComparisonAttribute>]
 type action =
@@ -357,7 +336,7 @@ type solution =
       current : current;
       steps : action list }
 
-let givenToCurrent (cells : cell list) (given : given) (alphabet : digits) : current =
+let givenToCurrent (cells : cells) (given : given) (alphabet : digits) : current =
     let makeCellContents (cell : cell) : cellContents =
         let dop = SMap.get given cell in
         match dop with
@@ -365,12 +344,12 @@ let givenToCurrent (cells : cell list) (given : given) (alphabet : digits) : cur
         | None -> PencilMarks alphabet
         in
 
-    SMap.ofLookup cells makeCellContents
+    SMap.ofLookup (Cells.toList cells) makeCellContents
 
 (* for a cell, return a set of candidates *)
 type cellCandidates = SMap<cell, digits>
 
-let currentCellCandidates (cells : cell list) (current : current) : cellCandidates =
+let currentCellCandidates (cells : cells) (current : current) : cellCandidates =
     let getCandidateEntries (cell : cell) : digits =
         let cellContents = SMap.get current cell in
         match cellContents with
@@ -378,4 +357,4 @@ let currentCellCandidates (cells : cell list) (current : current) : cellCandidat
         | PencilMarks s -> s
         in
 
-    SMap.ofLookup<cell, digits> cells getCandidateEntries
+    SMap.ofLookup<cell, digits> (Cells.toList cells) getCandidateEntries
