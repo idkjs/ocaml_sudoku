@@ -102,9 +102,9 @@ let focusCommandParse (s: puzzleShape) (item : string) : focus_command_result =
 let focusCommandHintDescription (p : puzzleMap) (digit : digit) : hintDescription =
     { hintDescription.primaryHouses = Houses.empty;
       secondaryHouses = Houses.empty;
-      candidateReductions = CandidateReductions.empty;
+      candidateReductions = [];
       setCellValueAction = None;
-      pointers = CandidateReductions.empty;
+      pointers = [];
       focus = Digits.singleton digit }
 
 type set_cell_command_parse_result =

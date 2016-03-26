@@ -19,17 +19,15 @@ let findNaked (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (p
             |> Cells.map (fun cell -> 
                 let candidates = SMap.get cellCandidates cell in
                 makeCandidateReduction cell (Digits.intersect subsetDigits candidates))
-            |> CandidateReductions.ofList
-            |> CandidateReductions.filter (fun cr -> Digits.count cr.candidates > 0)
+            |> List.filter (fun cr -> Digits.count cr.candidates > 0)
             in
 
         let pointers =
             cellSubset
             |> Cells.map (fun cell -> makeCandidateReduction cell (SMap.get cellCandidates cell))
-            |> CandidateReductions.ofList
             in
 
-        if CandidateReductions.count candidateReductions > 0 then 
+        if List.length candidateReductions > 0 then 
             Some { hintDescription.primaryHouses = Houses.singleton primaryHouse;
                    secondaryHouses = Houses.empty;
                    candidateReductions = candidateReductions;
@@ -68,9 +66,9 @@ let nakedSingle (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescript
 
             Some { hintDescription.primaryHouses = Houses.empty;
                    secondaryHouses = Houses.empty;
-                   candidateReductions = CandidateReductions.empty;
+                   candidateReductions = [];
                    setCellValueAction = Some setCellValue;
-                   pointers = CandidateReductions.empty;
+                   pointers = [];
                    focus = Digits.empty }
         else None)
     |> List.choose id

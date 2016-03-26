@@ -9,18 +9,15 @@ let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (
         primaryHouse
         |> SMap.get p.houseCells
         |> Cells.map (fun cell -> makeCandidateReduction cell (SMap.get cellCandidates cell))
-        |> CandidateReductions.ofList
-        |> CandidateReductions.map (fun cr -> makeCandidateReduction cr.cell (Digits.intersect cr.candidates candidateSubset))
-        |> CandidateReductions.ofList
-        |> CandidateReductions.filter (fun cr -> Digits.count cr.candidates > 0) 
+        |> List.map (fun cr -> makeCandidateReduction cr.cell (Digits.intersect cr.candidates candidateSubset))
+        |> List.filter (fun cr -> Digits.count cr.candidates > 0) 
         in
 
     let candidateReductions = 
         primaryHouse
         |> SMap.get p.houseCells
         |> Cells.map (fun cell -> makeCandidateReduction cell (SMap.get cellCandidates cell))
-        |> CandidateReductions.ofList
-        |> CandidateReductions.map
+        |> List.map
             (fun cr -> 
                 let pointerCandidates = Digits.intersect cr.candidates candidateSubset in
             
@@ -32,15 +29,14 @@ let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (
                 let candidateReduction = makeCandidateReduction cr.cell crs in
             
                 candidateReduction)
-        |> CandidateReductions.ofList
-        |> CandidateReductions.filter (fun cr -> Digits.count cr.candidates > 0) 
+        |> List.filter (fun cr -> Digits.count cr.candidates > 0) 
         in
 
-    if CandidateReductions.count pointers = count && CandidateReductions.count candidateReductions > 0 then 
+    if List.length pointers = count && List.length candidateReductions > 0 then 
 
         let setCellValue = 
             if count = 1 then 
-                let h = CandidateReductions.first pointers in
+                let h = List.head pointers in
                 let cell = h.cell in
                 let candidate = Digits.first candidateSubset in
 

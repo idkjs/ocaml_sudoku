@@ -49,7 +49,7 @@ type puzzleMap =
         houseCells : SMap<house, cells>;
         cellHouseCells : SMap<cell, cells>;
         housesCells : houses -> cells;
-        houseCellCandidateReductions : house -> cellCandidates -> candidateReductions;
+        houseCellCandidateReductions : house -> cellCandidates -> candidateReduction list;
 
         //abstract member houseCellCandidates : SMap<house, cellCandidates>
     }

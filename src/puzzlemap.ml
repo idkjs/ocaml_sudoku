@@ -183,7 +183,7 @@ type puzzleMap =
         houseCells : SMap<house, cells>;
         cellHouseCells : SMap<cell, cells>;
         housesCells : houses -> cells;
-        houseCellCandidateReductions : house -> cellCandidates -> candidateReductions;
+        houseCellCandidateReductions : house -> cellCandidates -> candidateReduction list;
 
         //abstract member houseCellCandidates : SMap<house, cellCandidates>
     }
@@ -224,10 +224,9 @@ let tPuzzleMap (puzzleShape : puzzleShape) : puzzleMap =
         |> Houses.map (SMap.get _houseCellsLookup)
         |> Cells.unionManyList in
 
-    let _houseCellCandidateReductions (house : house) (cellCandidates : cellCandidates) : candidateReductions =
+    let _houseCellCandidateReductions (house : house) (cellCandidates : cellCandidates) : candidateReduction list =
         SMap.get _houseCellsLookup house
-        |> Cells.map (fun cell -> makeCandidateReduction cell (SMap.get cellCandidates cell))
-        |> CandidateReductions.ofList in
+        |> Cells.map (fun cell -> makeCandidateReduction cell (SMap.get cellCandidates cell)) in
 
     {
         puzzleMap.columns = _columns |> Columns.ofList;

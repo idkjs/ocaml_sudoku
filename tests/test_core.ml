@@ -15,6 +15,88 @@ let twoByFourPuzzleSpec =
             |> List.map (fun i -> (char) i + '0' |> Digit)
             |> Digits.ofList }
 
+let pick_some<'a> (as' : 'a list) : 'a list * 'a list =
+    let picked =
+        [9; 5; 2; 5; 5; 1; 8; 9; 3; 6]
+        |> List.map (fun i -> List.item (i - 1) as')
+        in
+
+    let expected =
+        [1; 2; 3; 5; 6; 8; 9]
+        |> List.map (fun i -> List.item (i - 1) as')
+        in
+
+    (picked, expected)
+
+let pick_more<'a> (as' : 'a list) : 'a list * 'a list =
+    let picked =
+        [9 * 8 + 1; 9 * 0 + 5; 9 * 2 + 4; 9 * 0 + 5; 9 * 0 + 5; 9 * 5 + 1; 8; 9 * 8 + 1; 9 * 3 + 3; 9 * 0 + 6]
+        |> List.map (fun i -> List.item (i - 1) as')
+        in
+
+    let expected =
+        [9 * 0 + 5; 9 * 0 + 6; 9 * 2 + 4; 9 * 3 + 3; 5; 6; 8; 9 * 8 + 1]
+        |> List.map (fun i -> List.item (i - 1) as')
+        in
+
+    (picked, expected)
+
+[<Test>]
+let ``Can make column sets``() =
+    let p = tPuzzleMap defaultPuzzleSpec in
+
+    let (picked, expected) = pick_some (Columns.toList p.columns) in
+
+    let picked' =
+        picked
+        |> Columns.ofList
+        |> Columns.toList
+        in
+
+    Assert.AreEqual(expected, picked', "{0}!={1}", Columns.list_to_string expected, Columns.list_to_string picked')
+
+[<Test>]
+let ``Can make row sets``() =
+    let p = tPuzzleMap defaultPuzzleSpec in
+
+    let (picked, expected) = pick_some (Rows.toList p.rows) in
+
+    let picked' =
+        picked
+        |> Rows.ofList
+        |> Rows.toList
+        in
+
+    Assert.AreEqual(expected, picked', "{0}!={1}", Rows.list_to_string expected, Rows.list_to_string picked')
+
+[<Test>]
+let ``Can make cell sets``() =
+    let p = tPuzzleMap defaultPuzzleSpec in
+
+    let (picked, expected) = pick_more (Cells.toList p.cells) in
+
+    let picked' =
+        picked
+        |> Cells.ofList
+        |> Cells.toList
+        in
+
+    Assert.AreEqual(expected, picked, "{0}!={1}", Cells.list_to_string expected, Cells.list_to_string picked')
+
+[<Test>]
+let ``Can make digit sets``() =
+    let p = tPuzzleMap defaultPuzzleSpec in
+
+    let (picked, expected) = pick_some (Digits.toList defaultPuzzleSpec.alphabet) in
+
+    let picked' =
+        picked
+        |> Digits.ofList
+        |> Digits.toList
+        in
+
+    Assert.AreEqual(expected, picked')
+
 [<Test>]
 let ``Can make columns``() =
     let p = tPuzzleMap defaultPuzzleSpec in
@@ -24,7 +106,7 @@ let ``Can make columns``() =
         |> List.map CColumn
         in
 
-    Assert.AreEqual(expected, p.columns)
+    Assert.AreEqual(expected, Columns.toList p.columns)
 
 [<Test>]
 let ``Can make rows``() = 
@@ -35,7 +117,7 @@ let ``Can make rows``() =
         |> List.map RRow
         in
 
-    Assert.AreEqual(expected, p.rows)
+    Assert.AreEqual(expected, Rows.toList p.rows)
 
 [<Test>]
 let ``Can make cells``() = 
@@ -49,6 +131,7 @@ let ``Can make cells``() =
                 |> List.map
                     (fun c -> makeCell (c |> CColumn) (r |> RRow)))
         |> List.concat
+        |> Cells.ofList
         in
 
     Assert.AreEqual(expected, p.cells)

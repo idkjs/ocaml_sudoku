@@ -36,9 +36,9 @@ let setCellDigitTry (cell : cell) (candidate : digit) (cellCandidates : cellCand
 let setCellHintDescription (p : puzzleMap) (setCellValue : value) : hintDescription =
     { hintDescription.primaryHouses = Houses.empty;
       secondaryHouses = Houses.empty;
-      candidateReductions = CandidateReductions.empty;
+      candidateReductions = [];
       setCellValueAction = Some setCellValue;
-      pointers = CandidateReductions.empty;
+      pointers = [];
       focus = Digits.empty }
 
 let setCellStep (p : puzzleMap) (setCellValue : value) (solution : solution) : solution =

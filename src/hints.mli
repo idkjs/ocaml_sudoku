@@ -5,9 +5,9 @@ open Puzzlemap
 type hintDescription = 
     { primaryHouses : houses;
       secondaryHouses : houses;
-      candidateReductions : candidateReductions;
+      candidateReductions : candidateReduction list;
       setCellValueAction : value option;
-      pointers : candidateReductions;
+      pointers : candidateReduction list;
       focus : digits }
 
 (* To draw a cell we may want to display extra information... *)

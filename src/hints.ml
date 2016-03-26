@@ -7,9 +7,9 @@ exception CellStateInvalid
 type hintDescription = 
     { primaryHouses : houses;
       secondaryHouses : houses;
-      candidateReductions : candidateReductions;
+      candidateReductions : candidateReduction list;
       setCellValueAction : value option;
-      pointers : candidateReductions;
+      pointers : candidateReduction list;
       focus : digits }
 
 let hintDescription_tostring (h : hintDescription) : string =
@@ -20,7 +20,6 @@ let hintDescription_tostring (h : hintDescription) : string =
 
     let crlines =
         h.candidateReductions
-        |> CandidateReductions.toList
         |> List.map
             (fun candidateReduction ->
                 Printf.sprintf "  %s\r\n" (candidateReduction_tostring candidateReduction))
@@ -71,24 +70,24 @@ let mhas (solution : solution) (p : puzzleMap) (hd : hintDescription) : hintDesc
 
         let cellCandidateReductions =
             hd.candidateReductions
-            |> CandidateReductions.filter (fun pointer -> cell = pointer.cell) 
+            |> List.filter (fun pointer -> cell = pointer.cell) 
             in
 
         let reductions = 
-            match CandidateReductions.firstOpt cellCandidateReductions with
-            | Some cr -> cr.candidates
-            | _ -> Digits.empty
+            match cellCandidateReductions with
+            | cr :: _ -> cr.candidates
+            | [] -> Digits.empty
             in
 
         let cellPointers =
             hd.pointers
-            |> CandidateReductions.filter (fun pointer -> cell = pointer.cell)
+            |> List.filter (fun pointer -> cell = pointer.cell)
             in
 
         let pointers = 
-            match CandidateReductions.firstOpt cellPointers with
-            | Some cr -> cr.candidates
-            | _ -> Digits.empty
+            match cellPointers with
+            | cr :: _ -> cr.candidates
+            | [] -> Digits.empty
             in
 
         let primaryHouseCells =

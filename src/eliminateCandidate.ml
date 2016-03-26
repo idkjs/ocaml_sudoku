@@ -21,9 +21,9 @@ let eliminateCandidateHintDescription (p: puzzleMap) (candidate : candidate) : h
 
     { hintDescription.primaryHouses = Houses.empty;
       secondaryHouses = Houses.empty;
-      candidateReductions = CandidateReductions.singleton cr;
+      candidateReductions = [cr];
       setCellValueAction = None;
-      pointers = CandidateReductions.empty;
+      pointers = [];
       focus = Digits.empty }
 
 let eliminateCandidateStep (p : puzzleMap) (candidate : candidate) (solution : solution) : solution =

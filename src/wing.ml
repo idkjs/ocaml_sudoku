@@ -7,7 +7,6 @@ let makeHints (p : puzzleMap) (cellCandidates : cellCandidates) pointerCells pri
     let pointers =
         pointerCells
         |> Cells.map (fun cell -> makeCandidateReduction cell (Digits.singleton candidate))
-        |> CandidateReductions.ofList
         in
 
     let colCells =
@@ -19,13 +18,11 @@ let makeHints (p : puzzleMap) (cellCandidates : cellCandidates) pointerCells pri
     let candidatesReductions = 
         Cells.difference colCells pointerCells
         |> Cells.map (fun cell -> makeCandidateReduction cell (SMap.get cellCandidates cell))
-        |> CandidateReductions.ofList
-        |> CandidateReductions.filter (fun cr -> Digits.contains candidate cr.candidates)
-        |> CandidateReductions.map (fun cr -> makeCandidateReduction cr.cell (Digits.singleton candidate))
-        |> CandidateReductions.ofList
+        |> List.filter (fun cr -> Digits.contains candidate cr.candidates)
+        |> List.map (fun cr -> makeCandidateReduction cr.cell (Digits.singleton candidate))
         in
 
-    if CandidateReductions.count candidatesReductions > 0 then 
+    if List.length candidatesReductions > 0 then 
         Some { hintDescription.candidateReductions = candidatesReductions;
                primaryHouses = primaryHouses;
                secondaryHouses = secondaryHouses;
@@ -40,30 +37,28 @@ let xWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates) (h
         house1
         |> SMap.get p.houseCells
         |> Cells.map (fun cell -> makeCandidateReduction cell (SMap.get cellCandidates cell))
-        |> CandidateReductions.ofList
         in
 
     let houseCandidateCells2 =
         house2
         |> SMap.get p.houseCells
         |> Cells.map (fun cell -> makeCandidateReduction cell (SMap.get cellCandidates cell))
-        |> CandidateReductions.ofList
         in
 
     let hht1 =
         houseCandidateCells1
-        |> CandidateReductions.filter (fun cr -> Digits.contains candidate cr.candidates)
+        |> List.filter (fun cr -> Digits.contains candidate cr.candidates)
         in
 
     let hht2 =
         houseCandidateCells2
-        |> CandidateReductions.filter (fun cr -> Digits.contains candidate cr.candidates)
+        |> List.filter (fun cr -> Digits.contains candidate cr.candidates)
         in
 
     match house1, house2 with
     | HRow row1, HRow row2 -> 
-        let cols1 = CandidateReductions.map (fun cr -> cr.cell.col) hht1 |> Columns.ofList in
-        let cols2 = CandidateReductions.map (fun cr -> cr.cell.col) hht2 |> Columns.ofList in
+        let cols1 = List.map (fun cr -> cr.cell.col) hht1 |> Columns.ofList in
+        let cols2 = List.map (fun cr -> cr.cell.col) hht2 |> Columns.ofList in
 
         let cols = Columns.union cols1 cols2 in
 
@@ -98,8 +93,8 @@ let xWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates) (h
         else None
 
     | HColumn col1, HColumn col2 -> 
-        let rows1 = CandidateReductions.map (fun cr -> cr.cell.row) hht1 |> Rows.ofList in
-        let rows2 = CandidateReductions.map (fun cr -> cr.cell.row) hht2 |> Rows.ofList in
+        let rows1 = List.map (fun cr -> cr.cell.row) hht1 |> Rows.ofList in
+        let rows2 = List.map (fun cr -> cr.cell.row) hht2 |> Rows.ofList in
 
         let rows = Rows.union rows1 rows2 in
 
@@ -196,18 +191,18 @@ let yWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates)
     (house1 : house) (house2 : house) houseCandidateCells1 houseCandidateCells2 (candidate : digit) = 
     let hht1 =
         houseCandidateCells1
-        |> CandidateReductions.filter (fun cr -> Digits.contains candidate cr.candidates)
+        |> List.filter (fun cr -> Digits.contains candidate cr.candidates)
         in
 
     let hht2 =
         houseCandidateCells2
-        |> CandidateReductions.filter (fun cr -> Digits.contains candidate cr.candidates)
+        |> List.filter (fun cr -> Digits.contains candidate cr.candidates)
         in
 
     match house1, house2 with
     | HRow row1, HRow row2 -> 
-        let cols1 = CandidateReductions.map (fun cr -> cr.cell.col) hht1 |> Columns.ofList in
-        let cols2 = CandidateReductions.map (fun cr -> cr.cell.col) hht2 |> Columns.ofList in
+        let cols1 = List.map (fun cr -> cr.cell.col) hht1 |> Columns.ofList in
+        let cols2 = List.map (fun cr -> cr.cell.col) hht2 |> Columns.ofList in
 
         let cols = Columns.union cols1 cols2 in
 
@@ -238,8 +233,8 @@ let yWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates)
         else None
 
     | HColumn col1, HColumn col2 -> 
-        let rows1 = CandidateReductions.map (fun cr -> cr.cell.row) hht1 |> Rows.ofList in
-        let rows2 = CandidateReductions.map (fun cr -> cr.cell.row) hht2 |> Rows.ofList in
+        let rows1 = List.map (fun cr -> cr.cell.row) hht1 |> Rows.ofList in
+        let rows2 = List.map (fun cr -> cr.cell.row) hht2 |> Rows.ofList in
 
         let rows = Rows.union rows1 rows2 in
 
@@ -329,10 +324,7 @@ let yWingsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (row1 : row
 
                             let candidateReductions = makeCandidateReduction other removee in
 
-                            let pointers =
-                                triple
-                                |> CandidateReductions.ofList
-                                in
+                            let pointers = triple in
 
                             let primaryHouses = 
                                 [ HRow row1;
@@ -344,7 +336,7 @@ let yWingsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (row1 : row
 
                             let primaryHouseCells = p.housesCells primaryHouses in
 
-                            Some { hintDescription.candidateReductions = CandidateReductions.singleton candidateReductions;
+                            Some { hintDescription.candidateReductions = [candidateReductions];
                                    primaryHouses = primaryHouses;
                                    secondaryHouses = Houses.empty;
                                    pointers = pointers;

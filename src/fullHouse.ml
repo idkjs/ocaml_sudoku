@@ -9,11 +9,11 @@ let fullHousePerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primary
 
     let hhs =
         p.houseCellCandidateReductions primaryHouse cellCandidates
-        |> CandidateReductions.filter (fun cr -> Digits.count cr.candidates > 0) 
+        |> List.filter (fun cr -> Digits.count cr.candidates > 0) 
         in
 
-    if CandidateReductions.count hhs = 1 then 
-        let h = CandidateReductions.first hhs in
+    if List.length hhs = 1 then 
+        let h = List.head hhs in
         let cell = h.cell in
         let candidate = Digits.first h.candidates in
 
@@ -21,9 +21,9 @@ let fullHousePerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primary
 
         Some { hintDescription.primaryHouses = Houses.singleton primaryHouse;
                secondaryHouses = Houses.empty;
-               candidateReductions = CandidateReductions.empty;
+               candidateReductions = [];
                setCellValueAction = Some setCellValue;
-               pointers = CandidateReductions.empty;
+               pointers = [];
                focus = Digits.empty }
     else None
 
