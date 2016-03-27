@@ -235,6 +235,12 @@ let repl (sudoku : string) (puzzleShape : puzzleShape) =
 
 Maximize() |> ignore
 
+let all_core_tests = test_core.all_tests in
+
+all_core_tests
+|> List.iter (fun test -> test())
+
+
 (* Input puzzle *)
 Console.WriteLine "1........2........3........4........5........6........7........8........9........"
 Console.WriteLine "123456789123456789123456789123456789123456789123456789123456789123456789123456789"

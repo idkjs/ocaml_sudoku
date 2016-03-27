@@ -23,7 +23,7 @@ module Columns = struct
 
     let drop (n : int) (CColumns columns : columns) : columns = Sset.drop n columns |> CColumns
 
-    let ofList (s : column list) : columns = Sset.ofList<column> column_comparer s |> CColumns
+    let ofList (s : column list) : columns = Sset.setify<column> column_comparer s |> CColumns
 
     let map (map : column -> 'b) (CColumns s : columns) : 'b list = List.map map s
 
@@ -61,7 +61,7 @@ module Rows = struct
 
     let drop (n : int) (CRows rows : rows) : rows = Sset.drop n rows |> CRows
 
-    let ofList (s : row list) : rows = Sset.ofList row_comparer s |> CRows
+    let ofList (s : row list) : rows = Sset.setify row_comparer s |> CRows
 
     let map (map : row -> 'b) (CRows s : rows) : 'b list = List.map map s
 
@@ -111,7 +111,7 @@ module Cells = struct
 
     let map (map : cell -> 'b) (CCells s : cells) : 'b list = List.map map s
 
-    let ofList (as' : cell list) : cells = Sset.ofList<cell> cell_comparer as' |> CCells
+    let ofList (as' : cell list) : cells = Sset.setify<cell> cell_comparer as' |> CCells
 
     let remove (d : cell) (CCells s : cells) : cells = Sset.remove<cell> cell_comparer d s |> CCells
 
@@ -149,6 +149,13 @@ let stack_comparer (SStack s1 : stack) (SStack s2 : stack) : int =
 let stack_tostring (SStack s : stack) : string =
     Printf.sprintf "stk%d" s
 
+module Stacks = struct
+    let list_to_string (s : stack list) : string =
+        s
+        |> List.map stack_tostring
+        |> String.concat ","
+end
+
 type boxWidth = int
 
 (* A row of horizontal boxes is a band *)
@@ -162,6 +169,13 @@ let band_comparer (BBand b1 : band) (BBand b2 : band) : int =
 
 let band_tostring (BBand b : band) : string =
     Printf.sprintf "bnd%d" b
+
+module Bands = struct
+    let list_to_string (s : band list) : string =
+        s
+        |> List.map band_tostring
+        |> String.concat ","
+end
 
 type boxHeight = int
 
@@ -179,7 +193,14 @@ let box_comparer ({ stack = SStack s1; band = BBand b1} : box) ({ stack = SStack
     else 1
 
 let box_tostring ({stack = SStack s; band = BBand b} : box) : string =
-    Printf.sprintf "stk%dbnd%d" s b
+    Printf.sprintf "bnd%dstk%d" b s
+
+module Boxes = struct
+    let list_to_string (s : box list) : string =
+        s
+        |> List.map box_tostring
+        |> String.concat ","
+end
 
 (* The columns and rows are collectively called lines *)
 type line = 
@@ -222,16 +243,19 @@ module Houses = struct
 
     let mapi (map : int -> house -> 'b) (CHouses s : houses) : 'b list = List.mapi map s
 
-    let ofList (as' : house list) : houses = Sset.ofList<house> house_comparer as' |> CHouses
+    let ofList (as' : house list) : houses = Sset.setify<house> house_comparer as' |> CHouses
 
     let singleton (d : house) : houses = [ d ] |> CHouses
 
     let toList (CHouses houses : houses) : house list = houses
 
-    let tostring (CHouses houses : houses) : string =
-        houses
+    let list_to_string (s : house list) : string =
+        s
         |> List.map house_tostring
         |> String.concat ","
+
+    let tostring (CHouses houses : houses) : string =
+        list_to_string houses
 end
 
 (* Each cell in the grid contains a Digit, usually numbers 1..9 *)
@@ -279,9 +303,9 @@ module Digits = struct
 
     let isSubset (CDigits s : digits) (CDigits s' : digits) : bool = Sset.isSubset s s'
 
-    let nth (CDigits s : digits) (i : int) : digit = List.item i s
+    let nth (CDigits s : digits) (i : int) : digit = List.nth s i
 
-    let ofList (as' : digit list) : digits = Sset.ofList<digit> digit_comparer as' |> CDigits
+    let ofList (as' : digit list) : digits = Sset.setify<digit> digit_comparer as' |> CDigits
 
     let remove (d : digit) (CDigits s : digits) : digits = Sset.remove digit_comparer d s |> CDigits
 
@@ -295,10 +319,13 @@ module Digits = struct
         let tss = List.map toList ss in
         Sset.unions digit_comparer tss |> CDigits
 
-    let tostring (CDigits digits : digits) : string =
-        digits
+    let list_to_string (s : digit list) : string =
+        s
         |> List.map digit_tostring
         |> String.concat ","
+
+    let tostring (CDigits digits : digits) : string = list_to_string digits
+
 end
 
 
