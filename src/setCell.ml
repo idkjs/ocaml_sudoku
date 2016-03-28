@@ -6,7 +6,7 @@ open Hints
 let setCellDigitApply (p : puzzleMap) (value : value) (current : current) : current = 
 
     let update (cell : cell) : cellContents =
-        let cellContents = SMap.get current cell in
+        let cellContents = Current.get current cell in
         match cellContents with
         | BigNumber _ -> cellContents
         | PencilMarks candidates -> 
@@ -19,6 +19,7 @@ let setCellDigitApply (p : puzzleMap) (value : value) (current : current) : curr
         in
 
     SMap.ofLookup<cell, cellContents> (Cells.toList p.cells) update
+    |> Current
 
 type setCellDigitError = 
     { cell : cell;
@@ -26,7 +27,7 @@ type setCellDigitError =
       digit : digit }
 
 let setCellDigitTry (cell : cell) (candidate : digit) (cellCandidates : cellCandidates) : value option = 
-    let candidates = SMap.get cellCandidates cell in
+    let candidates = CellCandidates.get cellCandidates cell in
 
     if Digits.contains candidate candidates then
         Value.make cell candidate

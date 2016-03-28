@@ -16,20 +16,20 @@ let isValidCellContents (cellContents : cellContents) : bool =
 let isValid (solution : solution) (cells : cells) : bool =
     cells
     |> Cells.toList
-    |> List.map (SMap.get solution.current)
+    |> List.map (Current.get solution.current)
     |> List.forall isValidCellContents
 
 let rec searchr (p : puzzleMap) (solution : solution) (existing : solution list) : solution list = 
     let emptyCell : cell option =
         p.cells
         |> Cells.toList
-        |> List.tryFind (SMap.get solution.current >> isPencilMarksCellContents)
+        |> List.tryFind (Current.get solution.current >> isPencilMarksCellContents)
         in
 
     match emptyCell with
     | Some cell ->
         let candidates =
-            let cellContents = SMap.get solution.current cell in
+            let cellContents = Current.get solution.current cell in
             match cellContents with
             | BigNumber _ -> []
             | PencilMarks candidates -> candidates |> Digits.toList

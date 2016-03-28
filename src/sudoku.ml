@@ -451,12 +451,24 @@ module Action = struct
         | Eliminate candidate -> Printf.sprintf "%s<>%s" (Cell.to_string candidate.cell) (Digit.to_string candidate.digit)
 end
 
-type given = SMap<cell, digit option>
+type given = Given of (cell * digit option) list
 
-type current = SMap<cell, cellContents>
+module Given = struct
+    let get (Given l:given) (k:cell) : digit option = SMap.get l k
+end
+
+type current = Current of (cell * cellContents) list
+
+module Current = struct
+    let get (Current l:current) (k:cell) : cellContents = SMap.get l k
+end
 
 (* for a cell, return a set of candidates *)
-type cellCandidates = SMap<cell, digits>
+type cellCandidates = CellCandidates of (cell * digits) list
+
+module CellCandidates = struct
+    let get (CellCandidates l:cellCandidates) (k:cell) : digits = SMap.get l k
+end
 
 [<NoComparisonAttribute>]
 type solution = 
@@ -467,21 +479,27 @@ type solution =
 module Solution = struct
     let givenToCurrent (cells : cells) (given : given) (alphabet : digits) : current =
         let makeCellContents (cell : cell) : cellContents =
-            let dop = SMap.get given cell in
+            let dop = Given.get given cell in
             match dop with
             | Some digit -> BigNumber digit
             | None -> PencilMarks alphabet
             in
 
-        SMap.ofLookup (Cells.toList cells) makeCellContents
+        cells
+        |> Cells.toList
+        |> List.map (fun a -> (a, makeCellContents a))
+        |> Current
 
     let currentCellCandidates (cells : cells) (current : current) : cellCandidates =
         let getCandidateEntries (cell : cell) : digits =
-            let cellContents = SMap.get current cell in
+            let cellContents = Current.get current cell in
             match cellContents with
             | BigNumber _ -> Digits.empty
             | PencilMarks s -> s
             in
 
-        SMap.ofLookup<cell, digits> (Cells.toList cells) getCandidateEntries
+        cells
+        |> Cells.toList
+        |> List.map (fun a -> (a, getCandidateEntries a))
+        |> CellCandidates
 end

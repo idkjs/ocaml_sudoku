@@ -6,7 +6,7 @@ open Hints
 let eliminateCandidateApply (p : puzzleMap) (candidate : candidate) (current : current) : current = 
 
     let update (cell : cell) : cellContents = 
-        let cellContents = SMap.get current cell in
+        let cellContents = Current.get current cell in
         match cellContents with
         | BigNumber _ -> cellContents
         | PencilMarks candidates -> 
@@ -15,6 +15,7 @@ let eliminateCandidateApply (p : puzzleMap) (candidate : candidate) (current : c
         in
 
     SMap.ofLookup<cell, cellContents> (Cells.toList p.cells) update
+    |> Current
 
 let eliminateCandidateHintDescription (p: puzzleMap) (candidate : candidate) : hintDescription =
     let cr = CandidateReduction.make (candidate.cell) (Digits.singleton candidate.digit) in

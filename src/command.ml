@@ -135,11 +135,11 @@ let set_cell_command_check_result_to_string (r : set_cell_command_check_result) 
     | SCCRNotACandidate value -> Printf.sprintf "Warning: Cell %s does not have candidate %s" (Cell.to_string value.cell) (Digit.to_string value.digit)
 
 let setCellCommandCheck (given : given) (cellCandidates : cellCandidates) (value : value) : set_cell_command_check_result =
-    let givenDigitOpt = SMap.get given value.cell in
+    let givenDigitOpt = Given.get given value.cell in
     match givenDigitOpt with
     | Some givenDigit -> SCCRGiven (value, givenDigit)
     | None ->
-        let digits = SMap.get cellCandidates value.cell in
+        let digits = CellCandidates.get cellCandidates value.cell in
         if Digits.contains value.digit digits then SSCROk value
         else SCCRNotACandidate value
 
@@ -171,15 +171,15 @@ let clear_candidate_command_check_result_to_string (r : clear_candidate_command_
     | CCCCRNotACandidate candidate -> Printf.sprintf "Warning: Cell %s does not have candidate %s" (Cell.to_string candidate.cell) (Digit.to_string candidate.digit)
 
 let candidateClearCommandCheck (given : given) (cellCandidates : cellCandidates) (candidate : candidate) : clear_candidate_command_check_result =
-    let givenDigitOpt = SMap.get given candidate.cell in
+    let givenDigitOpt = Given.get given candidate.cell in
     match givenDigitOpt with
     | Some givenDigit -> CCCCRGiven (candidate, givenDigit)
     | None ->
-        let digits = SMap.get cellCandidates candidate.cell in
+        let digits = CellCandidates.get cellCandidates candidate.cell in
         if Digits.contains candidate.digit digits then CCCCROk candidate
         else CCCCRNotACandidate candidate
 
-let supportedHints : SMap<string, (puzzleMap -> cellCandidates -> hintDescription list)> =
+let supportedHints : (string * (puzzleMap -> cellCandidates -> hintDescription list)) list =
     let keys =
         [
             "fh";

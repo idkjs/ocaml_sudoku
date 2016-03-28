@@ -172,7 +172,7 @@ let repl (sudoku : string) (puzzleShape : puzzleShape) =
 
     (* Print a Digit option, with colours *)
     let puzzleDrawCell (solution : solution) (cell : cell) : consoleChar = 
-        drawDigitCellContents (SMap.get solution.given cell) (SMap.get solution.current cell)
+        drawDigitCellContents (Given.get solution.given cell) (Current.get solution.current cell)
 
     let puzzleDrawLine (solution : solution) =
         Seq.iter drawConsoleChar (printLine p.cells (puzzleDrawCell solution))

@@ -24,7 +24,7 @@ type annotation =
 
 [<NoComparisonAttribute>]
 type hintDescription2 = 
-    { annotations : SMap<cell, annotation> }
+    { annotations : (cell * annotation) list }
 
 val mhas : solution -> puzzleMap -> hintDescription -> hintDescription2
 

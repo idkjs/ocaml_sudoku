@@ -7,7 +7,7 @@ let findNaked (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (p
 
     let subsetDigits =
         cellSubset
-        |> Cells.map (SMap.get cellCandidates)
+        |> Cells.map (CellCandidates.get cellCandidates)
         |> Digits.unionManyList
         in
 
@@ -17,14 +17,14 @@ let findNaked (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (p
             |> SMap.get p.houseCells
             |> Cells.filter (fun cell -> Cells.contains cell cellSubset = false) 
             |> Cells.map (fun cell -> 
-                let candidates = SMap.get cellCandidates cell in
+                let candidates = CellCandidates.get cellCandidates cell in
                 CandidateReduction.make cell (Digits.intersect subsetDigits candidates))
             |> List.filter (fun cr -> Digits.count cr.candidates > 0)
             in
 
         let pointers =
             cellSubset
-            |> Cells.map (fun cell -> CandidateReduction.make cell (SMap.get cellCandidates cell))
+            |> Cells.map (fun cell -> CandidateReduction.make cell (CellCandidates.get cellCandidates cell))
             in
 
         if List.length candidateReductions > 0 then 
@@ -44,7 +44,7 @@ let nakedNPerHouse (count : int) (p : puzzleMap) (cellCandidates : cellCandidate
         primaryHouse
         |> SMap.get p.houseCells
         |> Cells.filter (fun cell -> 
-            let candidates = SMap.get cellCandidates cell in
+            let candidates = CellCandidates.get cellCandidates cell in
             Digits.count candidates > 1 && Digits.count candidates <= count) 
         in
 
@@ -57,7 +57,7 @@ let nakedSingle (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescript
     p.cells
     |> Cells.toList
     |> List.map (fun cell -> 
-        let candidates = SMap.get cellCandidates cell in
+        let candidates = CellCandidates.get cellCandidates cell in
 
         if Digits.count candidates = 1 then 
             let candidate = Digits.first candidates in

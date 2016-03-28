@@ -135,7 +135,7 @@ let drawPencilMarks (annotation' : annotation) (candidate : digit) (candidates :
         if Digits.contains candidate candidates then CStr(Digit.to_string candidate)
         else CChar ' '
 
-let drawDigitCellContentAnnotations centreCandidate (annotations : SMap<cell, annotation>) (cell : cell) (candidate : digit) : consoleChar = 
+let drawDigitCellContentAnnotations centreCandidate (annotations : (cell * annotation) list) (cell : cell) (candidate : digit) : consoleChar = 
 
     let annotation' = SMap.get annotations cell in
     let isCentre = centreCandidate = candidate in

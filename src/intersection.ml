@@ -3,14 +3,14 @@ open Sudoku
 open Puzzlemap
 open Hints
 
-type cellHouses = SMap<cell, house list>
+type cellHouses = (cell * house list) list
 
 let intersectionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primaryHouse : house) (secondaryHouseLookups : cellHouses) : hintDescription list = 
 
     let primaryHouseCandidates = 
         primaryHouse
         |> SMap.get p.houseCells
-        |> Cells.map (SMap.get cellCandidates)
+        |> Cells.map (CellCandidates.get cellCandidates)
         |> Digits.unionManyList
         in
 
@@ -19,7 +19,7 @@ let intersectionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (pri
             primaryHouse
             |> SMap.get p.houseCells
             |> Cells.filter (fun cell -> 
-                let candidates = SMap.get cellCandidates cell in
+                let candidates = CellCandidates.get cellCandidates cell in
                 Digits.contains candidate candidates) 
             in
 
@@ -43,7 +43,7 @@ let intersectionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (pri
                 let candidateReductions = 
                     otherHouseCells
                     |> Cells.filter (fun cell -> 
-                        let candidates = SMap.get cellCandidates cell in
+                        let candidates = CellCandidates.get cellCandidates cell in
                         Digits.contains candidate candidates)
                     |> Cells.map (fun cell -> CandidateReduction.make cell (Digits.singleton candidate))
                     in

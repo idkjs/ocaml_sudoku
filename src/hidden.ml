@@ -8,7 +8,7 @@ let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (
     let pointers = 
         primaryHouse
         |> SMap.get p.houseCells
-        |> Cells.map (fun cell -> CandidateReduction.make cell (SMap.get cellCandidates cell))
+        |> Cells.map (fun cell -> CandidateReduction.make cell (CellCandidates.get cellCandidates cell))
         |> List.map (fun cr -> CandidateReduction.make cr.cell (Digits.intersect cr.candidates candidateSubset))
         |> List.filter (fun cr -> Digits.count cr.candidates > 0) 
         in
@@ -16,7 +16,7 @@ let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (
     let candidateReductions = 
         primaryHouse
         |> SMap.get p.houseCells
-        |> Cells.map (fun cell -> CandidateReduction.make cell (SMap.get cellCandidates cell))
+        |> Cells.map (fun cell -> CandidateReduction.make cell (CellCandidates.get cellCandidates cell))
         |> List.map
             (fun cr -> 
                 let pointerCandidates = Digits.intersect cr.candidates candidateSubset in
@@ -59,7 +59,7 @@ let hiddenNPerHouse (count : int) (p : puzzleMap) (cellCandidates : cellCandidat
     let houseCandidates =
         house
         |> SMap.get p.houseCells
-        |> Cells.map (SMap.get cellCandidates)
+        |> Cells.map (CellCandidates.get cellCandidates)
         |> Digits.unionManyList
         in
 

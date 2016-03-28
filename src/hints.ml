@@ -44,7 +44,7 @@ type annotation =
 
 [<NoComparisonAttribute>]
 type hintDescription2 = 
-    { annotations : SMap<cell, annotation> }
+    { annotations : (cell * annotation) list }
 
 let mhas (solution : solution) (p : puzzleMap) (hd : hintDescription) : hintDescription2 = 
 
@@ -100,8 +100,8 @@ let mhas (solution : solution) (p : puzzleMap) (hd : hintDescription) : hintDesc
             p.housesCells hd.secondaryHouses
             in
 
-        { annotation.given = SMap.get solution.given cell;
-          current = SMap.get solution.current cell;
+        { annotation.given = Given.get solution.given cell;
+          current = Current.get solution.current cell;
           setValue = setValue;
           primaryHintHouse = Cells.contains cell primaryHouseCells;
           secondaryHintHouse = Cells.contains cell secondaryHouseCells;
@@ -118,8 +118,8 @@ let mhas (solution : solution) (p : puzzleMap) (hd : hintDescription) : hintDesc
 let mhas2 (solution : solution) (p : puzzleMap) : hintDescription2 = 
 
     let annotationLookup (cell : cell) : annotation = 
-        { annotation.given = SMap.get solution.given cell;
-          current = SMap.get solution.current cell;
+        { annotation.given = Given.get solution.given cell;
+          current = Current.get solution.current cell;
           setValue = None;
           primaryHintHouse = false;
           secondaryHintHouse = false;

@@ -3,9 +3,9 @@ open Sudoku
 open Puzzlemap
 
 (* Load a sudoku given as a single line of gridSize*gridSize characters *)
-let loadPuzzle (cells : cells) (alphabetisedLine : digit option list) : SMap<cell, digit option> =
+let loadPuzzle (cells : cells) (alphabetisedLine : digit option list) : given =
     List.zip (Cells.toList cells) alphabetisedLine
-    |> SMap.ofList
+    |> Given
 
 let load (puzzleShape : puzzleShape) (sudoku : string) : solution = 
 

@@ -185,9 +185,18 @@ type action =
 module Action = begin
   val to_string : action:action -> string
 end
-type given = Smap.SMap<cell,digit option>
-type current = Smap.SMap<cell,cellContents>
-type cellCandidates = Smap.SMap<cell,digits>
+type given = Given of (cell * digit option) list
+module Given = begin
+    val get : given:given -> key:cell -> digit option
+end
+type current = Current of (cell * cellContents) list
+module Current = begin
+    val get : current:current -> key:cell -> cellContents
+end
+type cellCandidates = CellCandidates of (cell * digits) list
+module CellCandidates = begin
+    val get : cellCandidates:cellCandidates -> key:cell -> digits
+end
 [<NoComparisonAttribute ()>]
 type solution =
   {given: given;

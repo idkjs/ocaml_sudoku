@@ -6,7 +6,7 @@ open Hints
 let loadEliminateFind  (p : puzzleMap) (current : current) : candidateReduction list = 
 
     let reductions (cell : cell) : digits option =
-        let cellContents = SMap.get current cell in
+        let cellContents = Current.get current cell in
         match cellContents with
         | BigNumber _ -> None
         | PencilMarks candidates -> 
@@ -15,7 +15,7 @@ let loadEliminateFind  (p : puzzleMap) (current : current) : candidateReduction 
                 |> SMap.get p.cellHouseCells
                 |> Cells.choose
                     (fun cell ->
-                        let houseCellContents = SMap.get current cell in
+                        let houseCellContents = Current.get current cell in
                         match houseCellContents with
                         | BigNumber digit -> Some digit
                         | PencilMarks _ -> None)
@@ -41,7 +41,7 @@ let loadEliminateApply (p : puzzleMap) (candidateReductions : candidateReduction
         in
 
     let update (cell : cell) : cellContents =
-        let cellContents = SMap.get current cell in
+        let cellContents = Current.get current cell in
         match cellContents with
         | BigNumber _ -> cellContents
         | PencilMarks candidates ->
@@ -54,6 +54,7 @@ let loadEliminateApply (p : puzzleMap) (candidateReductions : candidateReduction
         in
 
     SMap.ofLookup<cell, cellContents> (Cells.toList p.cells) update
+    |> Current
 
 let loadEliminateDescription (p : puzzleMap) (candidateReductions : candidateReduction list) : hintDescription =
     { hintDescription.primaryHouses = Houses.empty;
