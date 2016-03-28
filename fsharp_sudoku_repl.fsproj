@@ -22,7 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>5</WarningLevel>
     <DocumentationFile>bin\Debug\fsharp_sudoku_repl.XML</DocumentationFile>
-    <OtherFlags>--mlcompatibility</OtherFlags>
+    <OtherFlags>--mlcompatibility --sig:$(OutputPath)\mysig.fsi</OtherFlags>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -72,6 +72,7 @@
   <ItemGroup>
     <Compile Include="src\sset.ml" />
     <Compile Include="src\smap.ml" />
+    <Compile Include="src\sudoku.mli" />
     <Compile Include="src\sudoku.ml" />
     <Compile Include="src\puzzlemap.mli" />
     <Compile Include="src\puzzlemap.ml" />

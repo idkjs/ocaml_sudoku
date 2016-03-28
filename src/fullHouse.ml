@@ -17,7 +17,7 @@ let fullHousePerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primary
         let cell = h.cell in
         let candidate = Digits.first h.candidates in
 
-        let setCellValue = makeValue cell candidate in
+        let setCellValue = Value.make cell candidate in
 
         Some { hintDescription.primaryHouses = Houses.singleton primaryHouse;
                secondaryHouses = Houses.empty;

@@ -24,7 +24,7 @@ let load (puzzleShape : puzzleShape) (sudoku : string) : solution =
 
     let given = loadPuzzle p.cells alphabetisedLine in
 
-    let current = givenToCurrent p.cells given puzzleShape.alphabet in
+    let current = Solution.givenToCurrent p.cells given puzzleShape.alphabet in
 
     { solution.given = given;
       current = current;

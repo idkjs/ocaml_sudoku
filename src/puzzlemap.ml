@@ -1,45 +1,13 @@
 open Smap
 open Sudoku
 
-let makeColumn (i : int) : column =
-    i |> CColumn
-
-let makeRow (i : int) : row =
-    i |> RRow
-
-let makeCell (c : column) (r : row) : cell =
-    { cell.col = c;
-      row = r }
-
-let makeStack (i : int) : stack =
-    i |> SStack
-
-let makeBand (i : int) : band =
-    i |> BBand
-
-let makeBox (s : stack) (b : band) : box =
-    { box.stack = s;
-      band = b }
-
-let makeValue (cell : cell) (digit : digit) : value = 
-    { value.cell = cell;
-      digit = digit }
-
-let makeCandidate (cell : cell) (digit : digit) : candidate =
-    { candidate.cell = cell;
-      digit = digit }
-
-let makeCandidateReduction (cell : cell) (digits : digits) : candidateReduction =
-    { candidateReduction.cell = cell;
-      candidates = digits }
-
 let columns (length : size) : column list =
     [ 1..(int) length ]
-    |> List.map makeColumn
+    |> List.map Column.make
 
 let rows (length : size) : row list =
     [ 1..(int) length ]
-    |> List.map makeRow
+    |> List.map Row.make
 
 let cells (length : size) : cell list =
     let columns' = columns length in
@@ -49,16 +17,16 @@ let cells (length : size) : cell list =
         (fun row ->
             columns'
             |> List.map
-                (fun column -> makeCell column row))
+                (fun column -> Cell.make column row))
     |> List.concat
 
 let stacks (length : size) (boxWidth : boxWidth) : stack list =
     [ 1..((int) length / (int) boxWidth) ]
-    |> List.map makeStack
+    |> List.map Stack.make
 
 let bands (length : size) (boxHeight : boxHeight) : band list =
     [ 1..((int) length / (int) boxHeight) ]
-    |> List.map makeBand
+    |> List.map Band.make
 
 let boxes (length : size) (boxWidth : boxWidth) (boxHeight : boxHeight) : box list =
     let stacks' = stacks length boxWidth in
@@ -67,7 +35,7 @@ let boxes (length : size) (boxWidth : boxWidth) (boxHeight : boxHeight) : box li
     |> List.map
         (fun band ->
           stacks'
-          |> List.map (fun stack -> makeBox stack band))
+          |> List.map (fun stack -> Box.make stack band))
     |> List.concat
 
 let houses (length : size) (boxWidth : boxWidth) (boxHeight : boxHeight) : house list =
@@ -80,42 +48,42 @@ let houses (length : size) (boxWidth : boxWidth) (boxHeight : boxHeight) : house
 let columnCells (length : size) (column : column) : cell list =
     rows length
     |> List.map
-        (fun row -> makeCell column row)
+        (fun row -> Cell.make column row)
 
 let rowCells (length : size) (row : row) : cell list =
     columns length
     |> List.map
-        (fun column -> makeCell column row)
+        (fun column -> Cell.make column row)
 
 let columnStack (boxWidth : boxWidth) (column : column) : stack =
     match column with
     | CColumn c ->
         1 + ((int) c- 1) / (int) boxWidth
-        |> makeStack
+        |> Stack.make
 
 let stackColumns (boxWidth : boxWidth) (stack : stack) : column list =
     match stack with
     | SStack s ->
         let t = ((int) s - 1) * (int) boxWidth in
         [ (t + 1)..(t + (int) boxWidth) ]
-        |> List.map makeColumn
+        |> List.map Column.make
 
 let rowBand (boxHeight : boxHeight) (row : row) : band =
     match row with
     | RRow r ->
         1 + ((int) r - 1) / (int) boxHeight
-        |> makeBand
+        |> Band.make
 
 let bandRows (boxHeight : boxHeight) (band : band) : row list =
     let c = match band with BBand b -> ((int) b - 1) * (int) boxHeight in
 
     [ (c + 1)..(c + (int) boxHeight) ]
-    |> List.map makeRow
+    |> List.map Row.make
 
 let cellBox (boxWidth : boxWidth) (boxHeight : boxHeight) (cell : cell) : box =
     let stack = columnStack boxWidth cell.col in
     let band = rowBand boxHeight cell.row in
-    makeBox stack band
+    Box.make stack band
 
 let boxCells (boxWidth : boxWidth) (boxHeight : boxHeight) (box : box) : cell list =
     let stackColumns = stackColumns boxWidth box.stack in
@@ -125,7 +93,7 @@ let boxCells (boxWidth : boxWidth) (boxHeight : boxHeight) (box : box) : cell li
     |> List.map
         (fun row ->
             stackColumns
-            |> List.map (fun column -> makeCell column row))
+            |> List.map (fun column -> Cell.make column row))
     |> List.concat
 
 let houseCells (length : size) (boxWidth : boxWidth) (boxHeight : boxHeight) (house : house) : cells =
@@ -226,7 +194,7 @@ let tPuzzleMap (puzzleShape : puzzleShape) : puzzleMap =
 
     let _houseCellCandidateReductions (house : house) (cellCandidates : cellCandidates) : candidateReduction list =
         SMap.get _houseCellsLookup house
-        |> Cells.map (fun cell -> makeCandidateReduction cell (SMap.get cellCandidates cell)) in
+        |> Cells.map (fun cell -> CandidateReduction.make cell (SMap.get cellCandidates cell)) in
 
     {
         puzzleMap.columns = _columns |> Columns.ofList;

@@ -6,7 +6,7 @@ open Hints
 let makeHints (p : puzzleMap) (cellCandidates : cellCandidates) pointerCells primaryHouses secondaryHouses candidate = 
     let pointers =
         pointerCells
-        |> Cells.map (fun cell -> makeCandidateReduction cell (Digits.singleton candidate))
+        |> Cells.map (fun cell -> CandidateReduction.make cell (Digits.singleton candidate))
         in
 
     let colCells =
@@ -17,9 +17,9 @@ let makeHints (p : puzzleMap) (cellCandidates : cellCandidates) pointerCells pri
 
     let candidatesReductions = 
         Cells.difference colCells pointerCells
-        |> Cells.map (fun cell -> makeCandidateReduction cell (SMap.get cellCandidates cell))
+        |> Cells.map (fun cell -> CandidateReduction.make cell (SMap.get cellCandidates cell))
         |> List.filter (fun cr -> Digits.contains candidate cr.candidates)
-        |> List.map (fun cr -> makeCandidateReduction cr.cell (Digits.singleton candidate))
+        |> List.map (fun cr -> CandidateReduction.make cr.cell (Digits.singleton candidate))
         in
 
     if List.length candidatesReductions > 0 then 
@@ -36,13 +36,13 @@ let xWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates) (h
     let houseCandidateCells1 =
         house1
         |> SMap.get p.houseCells
-        |> Cells.map (fun cell -> makeCandidateReduction cell (SMap.get cellCandidates cell))
+        |> Cells.map (fun cell -> CandidateReduction.make cell (SMap.get cellCandidates cell))
         in
 
     let houseCandidateCells2 =
         house2
         |> SMap.get p.houseCells
-        |> Cells.map (fun cell -> makeCandidateReduction cell (SMap.get cellCandidates cell))
+        |> Cells.map (fun cell -> CandidateReduction.make cell (SMap.get cellCandidates cell))
         in
 
     let hht1 =
@@ -65,13 +65,13 @@ let xWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates) (h
         if Columns.count cols1 = 2 && Columns.count cols2 = 2 && Columns.count cols = 2 then 
             let row1Cells =
                 cols
-                |> Columns.map (fun col -> makeCell col row1)
+                |> Columns.map (fun col -> Cell.make col row1)
                 |> Cells.ofList
                 in
 
             let row2Cells = 
                 cols
-                |> Columns.map (fun col -> makeCell col row2)
+                |> Columns.map (fun col -> Cell.make col row2)
                 |> Cells.ofList
                 in
 
@@ -101,13 +101,13 @@ let xWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates) (h
         if Rows.count rows1 = 2 && Rows.count rows2 = 2 && Rows.count rows = 2 then 
             let col1Cells =
                 rows
-                |> Rows.map (fun row -> makeCell col1 row)
+                |> Rows.map (fun row -> Cell.make col1 row)
                 |> Cells.ofList
                 in
 
             let col2Cells =
                 rows
-                |> Rows.map (fun row -> makeCell col2 row)
+                |> Rows.map (fun row -> Cell.make col2 row)
                 |> Cells.ofList
                 in
 
@@ -209,13 +209,13 @@ let yWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates)
         if Columns.count cols1 = 2 && Columns.count cols2 = 2 && Columns.count cols = 2 then 
             let row1Cells =
                 cols
-                |> Columns.map (fun col -> makeCell col row1)
+                |> Columns.map (fun col -> Cell.make col row1)
                 |> Cells.ofList
                 in
 
             let row2Cells =
                 cols
-                |> Columns.map (fun col -> makeCell col row2)
+                |> Columns.map (fun col -> Cell.make col row2)
                 |> Cells.ofList
                 in
 
@@ -241,13 +241,13 @@ let yWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates)
         if Rows.count rows1 = 2 && Rows.count rows2 = 2 && Rows.count rows = 2 then 
             let col1Cells = 
                 rows
-                |> Rows.map (fun row -> makeCell col1 row)
+                |> Rows.map (fun row -> Cell.make col1 row)
                 |> Cells.ofList
                 in
 
             let col2Cells =
                 rows
-                |> Rows.map (fun row -> makeCell col2 row)
+                |> Rows.map (fun row -> Cell.make col2 row)
                 |> Cells.ofList
                 in
 
@@ -268,22 +268,22 @@ let yWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates)
 let yWingsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (row1 : row) 
     (row2 : row) (col1 : column) (col2 : column)  : hintDescription list = 
 
-    let cell11 = makeCell col1 row1 in
-    let cell12 = makeCell col2 row1 in
-    let cell21 = makeCell col1 row2 in
-    let cell22 = makeCell col2 row2 in
+    let cell11 = Cell.make col1 row1 in
+    let cell12 = Cell.make col2 row1 in
+    let cell21 = Cell.make col1 row2 in
+    let cell22 = Cell.make col2 row2 in
     
     let cells = [ cell11; cell12; cell21; cell22 ] in
 
     let candidateCells =
         cells
-        |> List.map (fun cell -> makeCandidateReduction cell (SMap.get cellCandidates cell))
+        |> List.map (fun cell -> CandidateReduction.make cell (SMap.get cellCandidates cell))
         in
 
-    let ccell11 = makeCandidateReduction cell11 (SMap.get cellCandidates cell11) in
-    let ccell12 = makeCandidateReduction cell12 (SMap.get cellCandidates cell12) in
-    let ccell21 = makeCandidateReduction cell21 (SMap.get cellCandidates cell21) in
-    let ccell22 = makeCandidateReduction cell22 (SMap.get cellCandidates cell22) in
+    let ccell11 = CandidateReduction.make cell11 (SMap.get cellCandidates cell11) in
+    let ccell12 = CandidateReduction.make cell12 (SMap.get cellCandidates cell12) in
+    let ccell21 = CandidateReduction.make cell21 (SMap.get cellCandidates cell21) in
+    let ccell22 = CandidateReduction.make cell22 (SMap.get cellCandidates cell22) in
 
     let allNonEmpty =
         candidateCells
@@ -322,7 +322,7 @@ let yWingsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (row1 : row
                         if Digits.count removee = 1 && (left.candidates <> right.candidates) && 
                             Digits.isSubset removee (SMap.get cellCandidates other) then
 
-                            let candidateReductions = makeCandidateReduction other removee in
+                            let candidateReductions = CandidateReduction.make other removee in
 
                             let pointers = triple in
 

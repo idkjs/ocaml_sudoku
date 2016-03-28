@@ -46,7 +46,7 @@ let parse (p : puzzleMap) (item : string) (solution : solution) (puzzle : puzzle
             (solution, List.empty)
 
         | FCOk r ->
-            Console.WriteLine(parse_value_result_tostring r)
+            Console.WriteLine(parse_value_result_to_string r)
             (solution, List.empty)
 
         | FCWrongTermCount _ ->
@@ -80,11 +80,11 @@ let parse (p : puzzleMap) (item : string) (solution : solution) (puzzle : puzzle
 
                 | SCCRGiven _
                 | SCCRNotACandidate _ ->
-                    Console.WriteLine (set_cell_command_check_result_tostring setCellValueOpt)
+                    Console.WriteLine (set_cell_command_check_result_to_string setCellValueOpt)
                     solution
 
             | SCCBadParams (parse_cell, parse_value) ->
-                Console.WriteLine(String.Format("Cell: {0}, Value: {1}", (parse_cell_results_tostring parse_cell), (parse_value_result_tostring parse_value)))
+                Console.WriteLine(String.Format("Cell: {0}, Value: {1}", (parse_cell_results_to_string parse_cell), (parse_value_result_to_string parse_value)))
                 solution
 
             | SCCWrongTermCount _ ->
@@ -112,11 +112,11 @@ let parse (p : puzzleMap) (item : string) (solution : solution) (puzzle : puzzle
 
                 | CCCCRGiven _
                 | CCCCRNotACandidate _ -> 
-                    Console.WriteLine(clear_candidate_command_check_result_tostring clearCommandOpt)
+                    Console.WriteLine(clear_candidate_command_check_result_to_string clearCommandOpt)
                     solution
 
             | CCCPRParseError (parse_cell, parse_value) ->
-                Console.WriteLine(String.Format("Cell: {0}, Value: {1}", (parse_cell_results_tostring parse_cell), (parse_value_result_tostring parse_value)))
+                Console.WriteLine(String.Format("Cell: {0}, Value: {1}", (parse_cell_results_to_string parse_cell), (parse_value_result_to_string parse_value)))
                 solution
 
             | CCCPRWrongItemCount _ ->
@@ -149,7 +149,7 @@ let run (solution : solution ref) (puzzle : puzzleShape)
     else
         let p = tPuzzleMap puzzle
 
-        let cellCandidates = currentCellCandidates p.cells (!solution).current
+        let cellCandidates = Solution.currentCellCandidates p.cells (!solution).current
 
         let (soln, hints) = 
             parse p item !solution puzzle cellCandidates puzzleDrawCandidateGridAnnotations print_last
@@ -191,8 +191,8 @@ let repl (sudoku : string) (puzzleShape : puzzleShape) =
             match action with
             | Load _ -> drawConsoleChar (CStr "")
             | LoadEliminate  -> drawConsoleChar (CStr "")
-            | Placement sv -> drawConsoleChar (CStr (value_tostring sv))
-            | Eliminate candidate -> drawConsoleChar (CStr(candidate_tostring candidate))
+            | Placement sv -> drawConsoleChar (CStr (Value.to_string sv))
+            | Eliminate candidate -> drawConsoleChar (CStr(Candidate.to_string candidate))
         | [] -> ()
 
         drawConsoleChar NL
@@ -268,6 +268,6 @@ let example = "10000056949205610805610924000964080106401000021803560404050001690
 (*let example = "273005081810302004009010200100953728792186345538724196021060500300201869080530412" *)
 
 
-repl example defaultPuzzleSpec
+repl example PuzzleShape.default'
 
 Console.WriteLine "bye"

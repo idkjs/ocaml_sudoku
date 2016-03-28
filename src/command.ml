@@ -22,7 +22,7 @@ type parse_column_or_row_results =
     | CROk of int
     | CRError of string * int
 
-let parse_column_or_row_results_tostring (r : parse_column_or_row_results) : string =
+let parse_column_or_row_results_to_string (r : parse_column_or_row_results) : string =
     match r with
     | CROk i -> Printf.sprintf "%d" i
     | CRError (what, gridSize) -> Printf.sprintf "%s must be a number between 1 and %d" what gridSize
@@ -42,12 +42,12 @@ type parse_cell_results =
     | CRowError of int * parse_column_or_row_results
     | CColRowError of parse_column_or_row_results * parse_column_or_row_results
 
-let parse_cell_results_tostring (r : parse_cell_results) : string =
+let parse_cell_results_to_string (r : parse_cell_results) : string =
     match r with
-    | COk cell -> cell_tostring cell
-    | CColError (parsedCol, row) -> Printf.sprintf "(%s,%d) column wrong, is not a cell" (parse_column_or_row_results_tostring parsedCol) row
-    | CRowError (col, parsedRow) -> Printf.sprintf "(%d,%s) row wrong, is not a cell" col (parse_column_or_row_results_tostring parsedRow)
-    | CColRowError (parsedCol, parsedRow) -> Printf.sprintf "(%s,%s) column and row wrong, is not a cell" (parse_column_or_row_results_tostring parsedCol) (parse_column_or_row_results_tostring parsedRow)
+    | COk cell -> Cell.to_string cell
+    | CColError (parsedCol, row) -> Printf.sprintf "(%s,%d) column wrong, is not a cell" (parse_column_or_row_results_to_string parsedCol) row
+    | CRowError (col, parsedRow) -> Printf.sprintf "(%d,%s) row wrong, is not a cell" col (parse_column_or_row_results_to_string parsedRow)
+    | CColRowError (parsedCol, parsedRow) -> Printf.sprintf "(%s,%s) column and row wrong, is not a cell" (parse_column_or_row_results_to_string parsedCol) (parse_column_or_row_results_to_string parsedRow)
 
 (* find a cell from a pair of strings *)
 let parseCell (gridSize : int) (cells : cells) (termColumn : string) (termRow : string) : parse_cell_results =
@@ -58,7 +58,7 @@ let parseCell (gridSize : int) (cells : cells) (termColumn : string) (termRow : 
     | (CROk col, CROk row) ->
         cells
         |> Cells.toList
-        |> List.find (fun cell -> cell.col = (makeColumn col) && cell.row = (makeRow row))
+        |> List.find (fun cell -> cell.col = (Column.make col) && cell.row = (Row.make row))
         |> COk
     | (CRError _, CROk row) -> CColError (parsedCol, row)
     | (CROk col, CRError _) -> CRowError (col, parsedRow)
@@ -73,9 +73,9 @@ type parse_value_result =
     | VErrorInvalid of string * string
     | VErrorTooMany of string
 
-let parse_value_result_tostring (r : parse_value_result) : string =
+let parse_value_result_to_string (r : parse_value_result) : string =
     match r with
-    | VOk d -> Printf.sprintf "%s" (digit_tostring d)
+    | VOk d -> Printf.sprintf "%s" (Digit.to_string d)
     | VErrorInvalid (term, digits) -> Printf.sprintf "%s must be one of %s" term digits
     | VErrorTooMany term -> Printf.sprintf "%s should be single character" term
 
@@ -84,7 +84,7 @@ let parseValue (digits : digits) (term : string) : parse_value_result =
     if term.Length = 1 then
         match charToCandidate digits (term.Chars 0) with
         | Some d -> VOk d
-        | None -> VErrorInvalid (term, (Digits.tostring digits))
+        | None -> VErrorInvalid (term, (Digits.to_string digits))
     else VErrorTooMany term
 
 type focus_command_result =
@@ -119,7 +119,7 @@ let setCellCommandParse (s: puzzleShape) (item : string) (p : puzzleMap) : set_c
         let parsedValue = parseValue s.alphabet terms.[3] in
 
         match (parsedCell, parsedValue) with
-        | (COk cell, VOk value) -> SCCOk (makeValue cell value)
+        | (COk cell, VOk value) -> SCCOk (Value.make cell value)
         | _ -> SCCBadParams (parsedCell, parsedValue)
     else SCCWrongTermCount (terms.Length)
 
@@ -128,11 +128,11 @@ type set_cell_command_check_result =
     | SCCRGiven of value * digit
     | SCCRNotACandidate of value
 
-let set_cell_command_check_result_tostring (r : set_cell_command_check_result) : string =
+let set_cell_command_check_result_to_string (r : set_cell_command_check_result) : string =
     match r with
     | SSCROk value -> ""
-    | SCCRGiven (value, digit) -> Printf.sprintf "Error: Cell %s has given %s" (cell_tostring value.cell) (digit_tostring digit)
-    | SCCRNotACandidate value -> Printf.sprintf "Warning: Cell %s does not have candidate %s" (cell_tostring value.cell) (digit_tostring value.digit)
+    | SCCRGiven (value, digit) -> Printf.sprintf "Error: Cell %s has given %s" (Cell.to_string value.cell) (Digit.to_string digit)
+    | SCCRNotACandidate value -> Printf.sprintf "Warning: Cell %s does not have candidate %s" (Cell.to_string value.cell) (Digit.to_string value.digit)
 
 let setCellCommandCheck (given : given) (cellCandidates : cellCandidates) (value : value) : set_cell_command_check_result =
     let givenDigitOpt = SMap.get given value.cell in
@@ -155,7 +155,7 @@ let candidateClearCommandParse (s: puzzleShape) (item : string) (p : puzzleMap) 
         let parsedDigit = parseValue s.alphabet terms.[3] in
 
         match (parsedCell, parsedDigit) with
-        | (COk cell, VOk digit) -> CCCPROk (makeCandidate cell digit)
+        | (COk cell, VOk digit) -> CCCPROk (Candidate.make cell digit)
         | _ -> CCCPRParseError (parsedCell, parsedDigit)
     else CCCPRWrongItemCount (terms.Length)
 
@@ -164,11 +164,11 @@ type clear_candidate_command_check_result =
     | CCCCRGiven of candidate * digit
     | CCCCRNotACandidate of candidate
 
-let clear_candidate_command_check_result_tostring (r : clear_candidate_command_check_result) : string =
+let clear_candidate_command_check_result_to_string (r : clear_candidate_command_check_result) : string =
     match r with
     | CCCCROk candidate -> ""
-    | CCCCRGiven (candidate, digit) -> Printf.sprintf "Error: Cell %s has given %s" (cell_tostring candidate.cell) (digit_tostring digit)
-    | CCCCRNotACandidate candidate -> Printf.sprintf "Warning: Cell %s does not have candidate %s" (cell_tostring candidate.cell) (digit_tostring candidate.digit)
+    | CCCCRGiven (candidate, digit) -> Printf.sprintf "Error: Cell %s has given %s" (Cell.to_string candidate.cell) (Digit.to_string digit)
+    | CCCCRNotACandidate candidate -> Printf.sprintf "Warning: Cell %s does not have candidate %s" (Cell.to_string candidate.cell) (Digit.to_string candidate.digit)
 
 let candidateClearCommandCheck (given : given) (cellCandidates : cellCandidates) (candidate : candidate) : clear_candidate_command_check_result =
     let givenDigitOpt = SMap.get given candidate.cell in

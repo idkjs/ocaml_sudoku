@@ -1,24 +1,6 @@
 open Smap
 open Sudoku
 
-val makeColumn : int -> column
-
-val makeRow : int -> row
-
-val makeCell : column -> row -> cell
-
-val makeStack : int -> stack
-
-val makeBand : int -> band
-
-val makeBox : stack -> band -> box
-
-val makeValue : cell -> digit -> value
-
-val makeCandidate : cell -> digit -> candidate
-
-val makeCandidateReduction : cell -> digits -> candidateReduction
-
 [<NoComparisonAttribute;NoEqualityAttribute>]
 type puzzleMap =
     {

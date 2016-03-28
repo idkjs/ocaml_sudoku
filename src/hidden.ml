@@ -8,15 +8,15 @@ let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (
     let pointers = 
         primaryHouse
         |> SMap.get p.houseCells
-        |> Cells.map (fun cell -> makeCandidateReduction cell (SMap.get cellCandidates cell))
-        |> List.map (fun cr -> makeCandidateReduction cr.cell (Digits.intersect cr.candidates candidateSubset))
+        |> Cells.map (fun cell -> CandidateReduction.make cell (SMap.get cellCandidates cell))
+        |> List.map (fun cr -> CandidateReduction.make cr.cell (Digits.intersect cr.candidates candidateSubset))
         |> List.filter (fun cr -> Digits.count cr.candidates > 0) 
         in
 
     let candidateReductions = 
         primaryHouse
         |> SMap.get p.houseCells
-        |> Cells.map (fun cell -> makeCandidateReduction cell (SMap.get cellCandidates cell))
+        |> Cells.map (fun cell -> CandidateReduction.make cell (SMap.get cellCandidates cell))
         |> List.map
             (fun cr -> 
                 let pointerCandidates = Digits.intersect cr.candidates candidateSubset in
@@ -26,7 +26,7 @@ let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (
                     else Digits.empty
                     in
 
-                let candidateReduction = makeCandidateReduction cr.cell crs in
+                let candidateReduction = CandidateReduction.make cr.cell crs in
             
                 candidateReduction)
         |> List.filter (fun cr -> Digits.count cr.candidates > 0) 
@@ -40,7 +40,7 @@ let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (
                 let cell = h.cell in
                 let candidate = Digits.first candidateSubset in
 
-                let setCellValue = makeValue cell candidate in
+                let setCellValue = Value.make cell candidate in
 
                 Some setCellValue
             else None

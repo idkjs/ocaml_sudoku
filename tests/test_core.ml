@@ -43,7 +43,7 @@ let pick_more<'a> (as' : 'a list) : 'a list * 'a list =
 
 [<Test>]
 let ``Can make column sets``() =
-    let p = tPuzzleMap defaultPuzzleSpec in
+    let p = tPuzzleMap PuzzleShape.default' in
 
     let (picked, expected) = pick_some (Columns.toList p.columns) in
 
@@ -57,7 +57,7 @@ let ``Can make column sets``() =
 
 [<Test>]
 let ``Can make row sets``() =
-    let p = tPuzzleMap defaultPuzzleSpec in
+    let p = tPuzzleMap PuzzleShape.default' in
 
     let (picked, expected) = pick_some (Rows.toList p.rows) in
 
@@ -71,7 +71,7 @@ let ``Can make row sets``() =
 
 [<Test>]
 let ``Can make cell sets``() =
-    let p = tPuzzleMap defaultPuzzleSpec in
+    let p = tPuzzleMap PuzzleShape.default' in
 
     let (picked, expected) = pick_more (Cells.toList p.cells) in
 
@@ -85,9 +85,9 @@ let ``Can make cell sets``() =
 
 [<Test>]
 let ``Can make digit sets``() =
-    let p = tPuzzleMap defaultPuzzleSpec in
+    let p = tPuzzleMap PuzzleShape.default' in
 
-    let (picked, expected) = pick_some (Digits.toList defaultPuzzleSpec.alphabet) in
+    let (picked, expected) = pick_some (Digits.toList PuzzleShape.default'.alphabet) in
 
     let picked' =
         picked
@@ -99,7 +99,7 @@ let ``Can make digit sets``() =
 
 [<Test>]
 let ``Can make columns``() =
-    let p = tPuzzleMap defaultPuzzleSpec in
+    let p = tPuzzleMap PuzzleShape.default' in
     let actual = Columns.toList p.columns in
 
     let expected =
@@ -111,7 +111,7 @@ let ``Can make columns``() =
 
 [<Test>]
 let ``Can make rows``() = 
-    let p = tPuzzleMap defaultPuzzleSpec in
+    let p = tPuzzleMap PuzzleShape.default' in
     let actual = Rows.toList p.rows in
 
     let expected =
@@ -123,7 +123,7 @@ let ``Can make rows``() =
 
 [<Test>]
 let ``Can make cells``() = 
-    let p = tPuzzleMap defaultPuzzleSpec in
+    let p = tPuzzleMap PuzzleShape.default' in
     let actual = Cells.toList p.cells in
 
     let expected =
@@ -132,7 +132,7 @@ let ``Can make cells``() =
             (fun r ->
                 [1..9]
                 |> List.map
-                    (fun c -> makeCell (c |> CColumn) (r |> RRow)))
+                    (fun c -> Cell.make (c |> CColumn) (r |> RRow)))
         |> List.concat
         in
 
@@ -173,7 +173,7 @@ let ``Can make boxes``() =
             (fun b ->
                 [1..4]
                 |> List.map
-                    (fun s -> makeBox (s |> SStack) (b |> BBand)))
+                    (fun s -> Box.make (s |> SStack) (b |> BBand)))
         |> List.concat
         in
 
@@ -202,7 +202,7 @@ let ``Can make houses``() =
             (fun b ->
                 [1..4]
                 |> List.map
-                    (fun s -> makeBox (s |> SStack) (b |> BBand)))
+                    (fun s -> Box.make (s |> SStack) (b |> BBand)))
         |> List.concat
         |> List.map HBox
         in
@@ -216,7 +216,7 @@ let ``Can make houses``() =
 
 [<Test>]
 let ``Get column cells``() = 
-    let p = tPuzzleMap defaultPuzzleSpec in
+    let p = tPuzzleMap PuzzleShape.default' in
 
     let column = CColumn 2 in
 
@@ -227,14 +227,14 @@ let ``Get column cells``() =
     let expected =
         [1..9]
         |> List.map
-            (fun r -> makeCell column (r |> RRow))
+            (fun r -> Cell.make column (r |> RRow))
         in
 
     Assert.AreEqual(expected, actual, "{0}!={1}", Cells.list_to_string expected, Cells.list_to_string actual)
 
 [<Test>]
 let ``Get row cells``() = 
-    let p = tPuzzleMap defaultPuzzleSpec in
+    let p = tPuzzleMap PuzzleShape.default' in
 
     let row = RRow 7 in
 
@@ -245,14 +245,14 @@ let ``Get row cells``() =
     let expected =
         [1..9]
         |> List.map
-            (fun c -> makeCell (c |> CColumn) (7 |> RRow))
+            (fun c -> Cell.make (c |> CColumn) (7 |> RRow))
         in
 
     Assert.AreEqual(expected, actual, "{0}!={1}", Cells.list_to_string expected, Cells.list_to_string actual)
 
 [<Test>]
 let ``Get stack for a column``() =
-    let p = tPuzzleMap defaultPuzzleSpec in
+    let p = tPuzzleMap PuzzleShape.default' in
 
     let actual =
         p.columns
@@ -272,7 +272,7 @@ let ``Get stack for a column``() =
 
 [<Test>]
 let ``Get stack columns``() = 
-    let p = tPuzzleMap defaultPuzzleSpec in
+    let p = tPuzzleMap PuzzleShape.default' in
 
     let actual = SMap.get p.stackColumns (2 |> SStack) in
 
@@ -285,7 +285,7 @@ let ``Get stack columns``() =
 
 [<Test>]
 let ``Get band for a row``() =
-    let p = tPuzzleMap defaultPuzzleSpec in
+    let p = tPuzzleMap PuzzleShape.default' in
 
     let actual =
         p.rows
@@ -305,7 +305,7 @@ let ``Get band for a row``() =
 
 [<Test>]
 let ``Get band rows``() = 
-    let p = tPuzzleMap defaultPuzzleSpec in
+    let p = tPuzzleMap PuzzleShape.default' in
 
     let actual = SMap.get p.bandRows (2 |> BBand) in
 
@@ -318,12 +318,12 @@ let ``Get band rows``() =
 
 [<Test>]
 let ``Get box for a cell``() =
-    let p = tPuzzleMap defaultPuzzleSpec in
+    let p = tPuzzleMap PuzzleShape.default' in
 
     let actual =
         [1..9]
         |> List.map
-            (fun r -> makeCell (5 |> CColumn) (r |> RRow))
+            (fun r -> Cell.make (5 |> CColumn) (r |> RRow))
         |> List.map (SMap.get p.cellBox)
         in
 
@@ -333,7 +333,7 @@ let ``Get box for a cell``() =
             (fun b ->
                 [1..3]
                 |> List.map
-                    (fun _ -> makeBox (2 |> SStack) (b |> BBand)))
+                    (fun _ -> Box.make (2 |> SStack) (b |> BBand)))
         |> List.concat
         in
 

@@ -25,7 +25,7 @@ let intersectionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (pri
 
         let pointers  = 
             pointerCells
-            |> Cells.map (fun cell -> makeCandidateReduction cell (Digits.singleton candidate))
+            |> Cells.map (fun cell -> CandidateReduction.make cell (Digits.singleton candidate))
             in
 
         let hintsPerSecondaryHouse (secondaryHouses : house list) : hintDescription option = 
@@ -45,7 +45,7 @@ let intersectionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (pri
                     |> Cells.filter (fun cell -> 
                         let candidates = SMap.get cellCandidates cell in
                         Digits.contains candidate candidates)
-                    |> Cells.map (fun cell -> makeCandidateReduction cell (Digits.singleton candidate))
+                    |> Cells.map (fun cell -> CandidateReduction.make cell (Digits.singleton candidate))
                     in
 
                 if List.length candidateReductions > 0 then 

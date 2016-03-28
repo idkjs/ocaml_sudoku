@@ -30,7 +30,7 @@ let loadEliminateFind  (p : puzzleMap) (current : current) : candidateReduction 
     |> List.choose
         (fun cell ->
             reductions cell
-            |> Option.map (fun digits -> makeCandidateReduction cell digits))
+            |> Option.map (fun digits -> CandidateReduction.make cell digits))
 
 let loadEliminateApply (p : puzzleMap) (candidateReductions : candidateReduction list) (current : current) : current = 
 

@@ -12,21 +12,23 @@ type hintDescription =
       pointers : candidateReduction list;
       focus : digits }
 
-let hintDescription_tostring (h : hintDescription) : string =
+module HintDescription = struct
+    let to_string (h : hintDescription) : string =
 
-    let line1 = Printf.sprintf "Primary Houses %s\r\n" (Houses.tostring h.primaryHouses) in
-    let line2 = Printf.sprintf "Secondary Houses %s\r\n" (Houses.tostring h.secondaryHouses) in
-    let line3 = Printf.sprintf "Pointers %s\r\n" (CandidateReductions.tostring h.pointers) in
+        let line1 = Printf.sprintf "Primary Houses %s\r\n" (Houses.to_string h.primaryHouses) in
+        let line2 = Printf.sprintf "Secondary Houses %s\r\n" (Houses.to_string h.secondaryHouses) in
+        let line3 = Printf.sprintf "Pointers %s\r\n" (CandidateReductions.to_string h.pointers) in
 
-    let crlines =
-        h.candidateReductions
-        |> List.map
-            (fun candidateReduction ->
-                Printf.sprintf "  %s\r\n" (candidateReduction_tostring candidateReduction))
-        in
+        let crlines =
+            h.candidateReductions
+            |> List.map
+                (fun candidateReduction ->
+                    Printf.sprintf "  %s\r\n" (CandidateReduction.to_string candidateReduction))
+            in
 
-    [ line1; line2; line3; String.concat "," crlines]
-    |> String.concat ","
+        [ line1; line2; line3; String.concat "," crlines]
+        |> String.concat ","
+end
 
 (* To draw a cell we may want to display extra information... *)
 type annotation = 

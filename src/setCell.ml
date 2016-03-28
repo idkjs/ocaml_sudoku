@@ -29,7 +29,7 @@ let setCellDigitTry (cell : cell) (candidate : digit) (cellCandidates : cellCand
     let candidates = SMap.get cellCandidates cell in
 
     if Digits.contains candidate candidates then
-        makeValue cell candidate
+        Value.make cell candidate
         |> Some
     else None
 
