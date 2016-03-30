@@ -1,7 +1,6 @@
 open Sudoku
 open Puzzlemap
-open Hints
 
-val eliminateCandidateHintDescription : puzzleMap -> candidate -> hintDescription
+val description : puzzleMap -> candidate -> Hint.description
 
-val eliminateCandidateStep : puzzleMap -> candidate -> solution -> solution
+val step : puzzleMap -> candidate -> solution -> solution

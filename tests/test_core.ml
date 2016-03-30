@@ -1,6 +1,3 @@
-module test_core
-
-open Smap
 open Sudoku
 open Puzzlemap
 
@@ -221,7 +218,7 @@ let ``Get column cells``() =
     let column = CColumn 2 in
 
     let actual =
-        SMap.get p.columnCells column
+        Smap.get p.columnCells column
         |> Cells.toList in
 
     let expected =
@@ -239,7 +236,7 @@ let ``Get row cells``() =
     let row = RRow 7 in
 
     let actual =
-        SMap.get p.rowCells row
+        Smap.get p.rowCells row
         |> Cells.toList in
 
     let expected =
@@ -256,7 +253,7 @@ let ``Get stack for a column``() =
 
     let actual =
         p.columns
-        |> Columns.map (SMap.get p.columnStack)
+        |> Columns.map (Smap.get p.columnStack)
         in
 
     let expected =
@@ -274,7 +271,7 @@ let ``Get stack for a column``() =
 let ``Get stack columns``() = 
     let p = tPuzzleMap PuzzleShape.default' in
 
-    let actual = SMap.get p.stackColumns (2 |> SStack) in
+    let actual = Smap.get p.stackColumns (2 |> SStack) in
 
     let expected =
         [4..6]
@@ -289,7 +286,7 @@ let ``Get band for a row``() =
 
     let actual =
         p.rows
-        |> Rows.map (SMap.get p.rowBand)
+        |> Rows.map (Smap.get p.rowBand)
         in
 
     let expected =
@@ -307,7 +304,7 @@ let ``Get band for a row``() =
 let ``Get band rows``() = 
     let p = tPuzzleMap PuzzleShape.default' in
 
-    let actual = SMap.get p.bandRows (2 |> BBand) in
+    let actual = Smap.get p.bandRows (2 |> BBand) in
 
     let expected =
         [4..6]
@@ -324,7 +321,7 @@ let ``Get box for a cell``() =
         [1..9]
         |> List.map
             (fun r -> Cell.make (5 |> CColumn) (r |> RRow))
-        |> List.map (SMap.get p.cellBox)
+        |> List.map (Smap.get p.cellBox)
         in
 
     let expected =

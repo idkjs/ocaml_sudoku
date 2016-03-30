@@ -1,5 +1,4 @@
 open Sudoku
 open Puzzlemap
-open Hints
 
-val hiddenN : int -> puzzleMap -> cellCandidates -> hintDescription list
+val find : int -> puzzleMap -> cellCandidates -> Hint.description list

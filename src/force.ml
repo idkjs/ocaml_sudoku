@@ -1,7 +1,5 @@
-open Smap
 open Sudoku
 open Puzzlemap
-open SetCell
 
 let isPencilMarksCellContents (cellContents : cellContents) : bool =
     match cellContents with
@@ -40,7 +38,7 @@ let rec searchr (p : puzzleMap) (solution : solution) (existing : solution list)
             (fun digit ->
                 let setCellValue = Value.make cell digit in
                 
-                let current = setCellDigitApply p setCellValue solution.current in
+                let current = SetCell.apply p setCellValue solution.current in
 
                 let newSolution =
                     { solution with

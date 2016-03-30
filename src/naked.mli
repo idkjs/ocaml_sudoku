@@ -1,7 +1,4 @@
 open Sudoku
 open Puzzlemap
-open Hints
 
-val nakedSingle : puzzleMap -> cellCandidates -> hintDescription list
-
-val nakedN : int -> puzzleMap -> cellCandidates -> hintDescription list
+val find : int -> puzzleMap -> cellCandidates -> Hint.description list

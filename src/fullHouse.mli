@@ -1,5 +1,4 @@
 open Sudoku
 open Puzzlemap
-open Hints
 
-val fullHouses : puzzleMap -> cellCandidates -> hintDescription list
+val find : puzzleMap -> cellCandidates -> Hint.description list

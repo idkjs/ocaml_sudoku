@@ -1,4 +1,3 @@
-open Smap
 open Sudoku
 
 type puzzleMap =

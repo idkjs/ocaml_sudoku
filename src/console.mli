@@ -1,10 +1,6 @@
-module console
-
 open System
 
-open Smap
 open Sudoku
-open Hints
 
 open format
 
@@ -24,4 +20,4 @@ val drawConsoleChar : consoleChar -> Unit
 
 val drawDigitCellContents : digit option -> cellContents -> consoleChar
 
-val drawDigitCellContentAnnotations : digit -> (cell * annotation) list -> cell -> digit -> consoleChar
+val drawDigitCellContentAnnotations : digit -> (cell * Hint.annotation) list -> cell -> digit -> consoleChar

@@ -76,8 +76,9 @@
     <Compile Include="src\sudoku.ml" />
     <Compile Include="src\puzzlemap.mli" />
     <Compile Include="src\puzzlemap.ml" />
-    <Compile Include="src\hints.mli" />
-    <Compile Include="src\hints.ml" />
+    <Compile Include="src\hint.mli" />
+    <Compile Include="src\hint.ml" />
+    <Compile Include="src\loadEliminate.mli" />
     <Compile Include="src\loadEliminate.ml" />
     <Compile Include="src\setCell.mli" />
     <Compile Include="src\setCell.ml" />
@@ -105,6 +106,7 @@
     <Compile Include="src\load.ml" />
     <Compile Include="tests\test_core.ml" />
     <Compile Include="tests\test_naked.ml" />
+    <Compile Include="tests\test_full_house.ml" />
     <Compile Include="main.fs" />
     <None Include="App.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

@@ -1,12 +1,5 @@
-module test_naked
-
 open Sudoku
 open Puzzlemap
-open LoadEliminate
-
-open Naked
-
-open Load
 
 open NUnit.Framework
 
@@ -16,23 +9,23 @@ let ``Can find naked singles``() =
 
     let p = tPuzzleMap PuzzleShape.default' in
 
-    let solution = load PuzzleShape.default' sudoku in
+    let solution = Load.load PuzzleShape.default' sudoku in
 
-    let candidateReductions = loadEliminateFind p solution.current in
-    let newSolution = loadEliminateStep p solution candidateReductions in
+    let candidateReductions = LoadEliminate.find p solution.current in
+    let newSolution = LoadEliminate.step p solution candidateReductions in
 
     let cellCandidates = Solution.currentCellCandidates p.cells newSolution.current in
 
-    let hints = nakedSingle p cellCandidates in
+    let hints = Naked.find 1 p cellCandidates in
 
-    let expectedHints : Hints.hintDescription list =
-        [   { Hints.hintDescription.primaryHouses = Houses.empty;
+    let expectedHints : Hint.description list =
+        [   { primaryHouses = Houses.empty;
               secondaryHouses = Houses.empty;
               candidateReductions = [];
               setCellValueAction = Some (Value.make (Cell.make (Column.make 8) (Row.make 1)) (Digits.nth PuzzleShape.default'.alphabet 8));
               pointers = [];
               focus = Digits.empty };
-            { Hints.hintDescription.primaryHouses = Houses.empty;
+            { primaryHouses = Houses.empty;
               secondaryHouses = Houses.empty;
               candidateReductions = [];
               setCellValueAction = Some (Value.make (Cell.make (Column.make 8) (Row.make 9)) (Digits.nth PuzzleShape.default'.alphabet 5));

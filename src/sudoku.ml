@@ -1,4 +1,3 @@
-open Smap
 
 (* A sudoku is a square grid of size... *)
 type size = int
@@ -454,20 +453,20 @@ end
 type given = Given of (cell * digit option) list
 
 module Given = struct
-    let get (Given l:given) (k:cell) : digit option = SMap.get l k
+    let get (Given l:given) (k:cell) : digit option = Smap.get l k
 end
 
 type current = Current of (cell * cellContents) list
 
 module Current = struct
-    let get (Current l:current) (k:cell) : cellContents = SMap.get l k
+    let get (Current l:current) (k:cell) : cellContents = Smap.get l k
 end
 
 (* for a cell, return a set of candidates *)
 type cellCandidates = CellCandidates of (cell * digits) list
 
 module CellCandidates = struct
-    let get (CellCandidates l:cellCandidates) (k:cell) : digits = SMap.get l k
+    let get (CellCandidates l:cellCandidates) (k:cell) : digits = Smap.get l k
 end
 
 [<NoComparisonAttribute>]

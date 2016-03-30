@@ -1,9 +1,7 @@
-open Smap
 open Sudoku
 open Puzzlemap
-open Hints
 
-let eliminateCandidateApply (p : puzzleMap) (candidate : candidate) (current : current) : current = 
+let apply (p : puzzleMap) (candidate : candidate) (current : current) : current = 
 
     let update (cell : cell) : cellContents = 
         let cellContents = Current.get current cell in
@@ -14,19 +12,19 @@ let eliminateCandidateApply (p : puzzleMap) (candidate : candidate) (current : c
             else cellContents
         in
 
-    SMap.ofLookup<cell, cellContents> (Cells.toList p.cells) update
+    Smap.ofLookup<cell, cellContents> (Cells.toList p.cells) update
     |> Current
 
-let eliminateCandidateHintDescription (p: puzzleMap) (candidate : candidate) : hintDescription =
+let description (p: puzzleMap) (candidate : candidate) : Hint.description =
     let cr = CandidateReduction.make (candidate.cell) (Digits.singleton candidate.digit) in
 
-    { hintDescription.primaryHouses = Houses.empty;
+    { primaryHouses = Houses.empty;
       secondaryHouses = Houses.empty;
       candidateReductions = [cr];
       setCellValueAction = None;
       pointers = [];
       focus = Digits.empty }
 
-let eliminateCandidateStep (p : puzzleMap) (candidate : candidate) (solution : solution) : solution =
-    { solution with current = eliminateCandidateApply p candidate solution.current;
+let step (p : puzzleMap) (candidate : candidate) (solution : solution) : solution =
+    { solution with current = apply p candidate solution.current;
                     steps = (Eliminate candidate) :: solution.steps }

@@ -1,16 +1,14 @@
-open Smap
 open Sudoku
 open Puzzlemap
-open Hints
 
-let setCellDigitApply (p : puzzleMap) (value : value) (current : current) : current = 
+let apply (p : puzzleMap) (value : value) (current : current) : current = 
 
     let update (cell : cell) : cellContents =
         let cellContents = Current.get current cell in
         match cellContents with
         | BigNumber _ -> cellContents
         | PencilMarks candidates -> 
-            let cells = SMap.get p.cellHouseCells value.cell in
+            let cells = Smap.get p.cellHouseCells value.cell in
 
             if value.cell = cell then BigNumber value.digit
             else if Cells.contains cell cells then 
@@ -18,7 +16,7 @@ let setCellDigitApply (p : puzzleMap) (value : value) (current : current) : curr
             else cellContents
         in
 
-    SMap.ofLookup<cell, cellContents> (Cells.toList p.cells) update
+    Smap.ofLookup<cell, cellContents> (Cells.toList p.cells) update
     |> Current
 
 type setCellDigitError = 
@@ -26,7 +24,7 @@ type setCellDigitError =
       candidate : digit;
       digit : digit }
 
-let setCellDigitTry (cell : cell) (candidate : digit) (cellCandidates : cellCandidates) : value option = 
+let try' (cell : cell) (candidate : digit) (cellCandidates : cellCandidates) : value option = 
     let candidates = CellCandidates.get cellCandidates cell in
 
     if Digits.contains candidate candidates then
@@ -34,14 +32,14 @@ let setCellDigitTry (cell : cell) (candidate : digit) (cellCandidates : cellCand
         |> Some
     else None
 
-let setCellHintDescription (p : puzzleMap) (setCellValue : value) : hintDescription =
-    { hintDescription.primaryHouses = Houses.empty;
+let description (p : puzzleMap) (setCellValue : value) : Hint.description =
+    { primaryHouses = Houses.empty;
       secondaryHouses = Houses.empty;
       candidateReductions = [];
       setCellValueAction = Some setCellValue;
       pointers = [];
       focus = Digits.empty }
 
-let setCellStep (p : puzzleMap) (setCellValue : value) (solution : solution) : solution =
-    { solution with current = setCellDigitApply p setCellValue solution.current;
+let step (p : puzzleMap) (setCellValue : value) (solution : solution) : solution =
+    { solution with current = apply p setCellValue solution.current;
                     steps = (Placement setCellValue) :: solution.steps }

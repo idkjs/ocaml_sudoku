@@ -1,10 +1,9 @@
-open Smap
 open Sudoku
 open Puzzlemap
 
 exception CellStateInvalid
 
-type hintDescription = 
+type description = 
     { primaryHouses : houses;
       secondaryHouses : houses;
       candidateReductions : candidateReduction list;
@@ -12,8 +11,8 @@ type hintDescription =
       pointers : candidateReduction list;
       focus : digits }
 
-module HintDescription = struct
-    let to_string (h : hintDescription) : string =
+module Description = struct
+    let to_string (h : description) : string =
 
         let line1 = Printf.sprintf "Primary Houses %s\r\n" (Houses.to_string h.primaryHouses) in
         let line2 = Printf.sprintf "Secondary Houses %s\r\n" (Houses.to_string h.secondaryHouses) in
@@ -43,10 +42,10 @@ type annotation =
       focus : digits }
 
 [<NoComparisonAttribute>]
-type hintDescription2 = 
+type description2 = 
     { annotations : (cell * annotation) list }
 
-let mhas (solution : solution) (p : puzzleMap) (hd : hintDescription) : hintDescription2 = 
+let mhas (solution : solution) (p : puzzleMap) (hd : description) : description2 = 
 
     let annotationLookup (cell : cell) : annotation = 
 
@@ -60,7 +59,7 @@ let mhas (solution : solution) (p : puzzleMap) (hd : hintDescription) : hintDesc
                     in
 
                 let r3 = 
-                    let cells = SMap.get p.cellHouseCells setCellValueAction.cell in
+                    let cells = Smap.get p.cellHouseCells setCellValueAction.cell in
 
                     if Cells.contains cell cells then Some setCellValueAction.digit
                     else None
@@ -111,11 +110,11 @@ let mhas (solution : solution) (p : puzzleMap) (hd : hintDescription) : hintDesc
           focus = hd.focus }
         in
 
-    let annotations = SMap.ofLookup (Cells.toList p.cells) annotationLookup in
+    let annotations = Smap.ofLookup (Cells.toList p.cells) annotationLookup in
 
-    { hintDescription2.annotations = annotations }
+    { description2.annotations = annotations }
 
-let mhas2 (solution : solution) (p : puzzleMap) : hintDescription2 = 
+let mhas2 (solution : solution) (p : puzzleMap) : description2 = 
 
     let annotationLookup (cell : cell) : annotation = 
         { annotation.given = Given.get solution.given cell;
@@ -129,6 +128,6 @@ let mhas2 (solution : solution) (p : puzzleMap) : hintDescription2 =
           focus = Digits.empty }
         in
 
-    let annotations = SMap.ofLookup (Cells.toList p.cells) annotationLookup in
+    let annotations = Smap.ofLookup (Cells.toList p.cells) annotationLookup in
 
-    { hintDescription2.annotations = annotations }
+    { description2.annotations = annotations }

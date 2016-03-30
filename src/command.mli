@@ -1,9 +1,5 @@
-module command
-
-open Smap
 open Sudoku
 open Puzzlemap
-open Hints
 
 type parse_column_or_row_results =
     | CROk of int
@@ -34,7 +30,7 @@ type focus_command_result =
 
 val focusCommandParse : puzzleShape -> string -> focus_command_result
 
-val focusCommandHintDescription : puzzleMap -> digit -> hintDescription
+val focusCommandHintDescription : puzzleMap -> digit -> Hint.description
 
 type set_cell_command_parse_result =
     | SCCOk of value
@@ -68,4 +64,4 @@ val clear_candidate_command_check_result_to_string : clear_candidate_command_che
 
 val candidateClearCommandCheck : given -> cellCandidates -> candidate -> clear_candidate_command_check_result
 
-val supportedHints : (string * (puzzleMap -> cellCandidates -> hintDescription list)) list
+val supportedHints : (string * (puzzleMap -> cellCandidates -> Hint.description list)) list

@@ -1,9 +1,7 @@
-open Smap
 open Sudoku
 open Puzzlemap
-open Hints
 
-let makeHints (p : puzzleMap) (cellCandidates : cellCandidates) pointerCells primaryHouses secondaryHouses candidate = 
+let makeHints (p : puzzleMap) (cellCandidates : cellCandidates) pointerCells primaryHouses secondaryHouses candidate : Hint.description option = 
     let pointers =
         pointerCells
         |> Cells.map (fun cell -> CandidateReduction.make cell (Digits.singleton candidate))
@@ -11,7 +9,7 @@ let makeHints (p : puzzleMap) (cellCandidates : cellCandidates) pointerCells pri
 
     let colCells =
         secondaryHouses
-        |> Houses.map (SMap.get p.houseCells)
+        |> Houses.map (Smap.get p.houseCells)
         |> Cells.unionManyList
         in
 
@@ -23,11 +21,11 @@ let makeHints (p : puzzleMap) (cellCandidates : cellCandidates) pointerCells pri
         in
 
     if List.length candidatesReductions > 0 then 
-        Some { hintDescription.candidateReductions = candidatesReductions;
-               primaryHouses = primaryHouses;
+        Some { primaryHouses = primaryHouses;
                secondaryHouses = secondaryHouses;
-               pointers = pointers;
+               candidateReductions = candidatesReductions;
                setCellValueAction = None;
+               pointers = pointers;
                focus = Digits.empty }
     else None
 
@@ -35,13 +33,13 @@ let xWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates) (h
 
     let houseCandidateCells1 =
         house1
-        |> SMap.get p.houseCells
+        |> Smap.get p.houseCells
         |> Cells.map (fun cell -> CandidateReduction.make cell (CellCandidates.get cellCandidates cell))
         in
 
     let houseCandidateCells2 =
         house2
-        |> SMap.get p.houseCells
+        |> Smap.get p.houseCells
         |> Cells.map (fun cell -> CandidateReduction.make cell (CellCandidates.get cellCandidates cell))
         in
 
@@ -129,18 +127,18 @@ let xWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates) (h
     | _ -> None
 
 let xWingsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (house1 : house) 
-    (house2 : house) : hintDescription list = 
+    (house2 : house) : Hint.description list = 
 
     let houseCandidates1 =
         house1
-        |> SMap.get p.houseCells
+        |> Smap.get p.houseCells
         |> Cells.map (CellCandidates.get cellCandidates)
         |> Digits.unionManyList
         in
 
     let houseCandidates2 =
         house2
-        |> SMap.get p.houseCells
+        |> Smap.get p.houseCells
         |> Cells.map (CellCandidates.get cellCandidates)
         |> Digits.unionManyList
         in
@@ -150,7 +148,7 @@ let xWingsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (house1 : h
     |> List.map (xWingsPerHouseCandidate p cellCandidates house1 house2)
     |> List.choose id
 
-let xWings (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescription list =
+let xWings (p : puzzleMap) (cellCandidates : cellCandidates) : Hint.description list =
     let rows = Rows.map HRow p.rows |> Houses.ofList in
     let cols = Columns.map HColumn p.columns |> Houses.ofList in
 
@@ -266,7 +264,7 @@ let yWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates)
     | _ -> None
 
 let yWingsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (row1 : row) 
-    (row2 : row) (col1 : column) (col2 : column)  : hintDescription list = 
+    (row2 : row) (col1 : column) (col2 : column)  : Hint.description list = 
 
     let cell11 = Cell.make col1 row1 in
     let cell12 = Cell.make col2 row1 in
@@ -336,12 +334,14 @@ let yWingsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (row1 : row
 
                             let primaryHouseCells = p.housesCells primaryHouses in
 
-                            Some { hintDescription.candidateReductions = [candidateReductions];
-                                   primaryHouses = primaryHouses;
-                                   secondaryHouses = Houses.empty;
-                                   pointers = pointers;
-                                   setCellValueAction = None;
-                                   focus = Digits.empty }
+                            let desc : Hint.description =
+                                { primaryHouses = primaryHouses;
+                                  secondaryHouses = Houses.empty;
+                                  candidateReductions = [candidateReductions];
+                                  setCellValueAction = None;
+                                  pointers = pointers;
+                                  focus = Digits.empty } in
+                            Some desc
                         else None
                     | _ -> None
                 else None
@@ -349,7 +349,7 @@ let yWingsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (row1 : row
         |> List.choose id
     else List.empty
 
-let yWings (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescription list =
+let yWings (p : puzzleMap) (cellCandidates : cellCandidates) : Hint.description list =
     let hints =
         p.rows
         |> Rows.mapi 

@@ -1,10 +1,6 @@
-module console
-
 open System
 
-open Smap
 open Sudoku
-open Hints
 
 open format
 
@@ -97,7 +93,7 @@ let drawDigitCellContents (firstDigit : digit option) (currentDigit : cellConten
     | None, BigNumber s -> ColouredString(Digit.to_string s, ConsoleColor.Red)
     | None, PencilMarks _ -> CChar '.'
 
-let drawBigNumber (annotation' : annotation) (s : digit) : consoleChar =
+let drawBigNumber (annotation' : Hint.annotation) (s : digit) : consoleChar =
     match annotation' with
     | annotation when annotation.primaryHintHouse && annotation.given.IsSome -> 
         ColouredString(Digit.to_string s, ConsoleColor.Cyan)
@@ -111,7 +107,7 @@ let drawBigNumber (annotation' : annotation) (s : digit) : consoleChar =
         ColouredString(Digit.to_string s, ConsoleColor.Blue)
     | _ -> ColouredString(Digit.to_string s, ConsoleColor.Red)
 
-let drawPencilMarks (annotation' : annotation) (candidate : digit) (candidates : digits) : consoleChar =
+let drawPencilMarks (annotation' : Hint.annotation) (candidate : digit) (candidates : digits) : consoleChar =
     match annotation' with
     | annotation when annotation.setValue.IsSome && annotation.setValue.Value = candidate -> 
         ColouredString(Digit.to_string candidate, ConsoleColor.Red)
@@ -135,9 +131,9 @@ let drawPencilMarks (annotation' : annotation) (candidate : digit) (candidates :
         if Digits.contains candidate candidates then CStr(Digit.to_string candidate)
         else CChar ' '
 
-let drawDigitCellContentAnnotations centreCandidate (annotations : (cell * annotation) list) (cell : cell) (candidate : digit) : consoleChar = 
+let drawDigitCellContentAnnotations centreCandidate (annotations : (cell * Hint.annotation) list) (cell : cell) (candidate : digit) : consoleChar = 
 
-    let annotation' = SMap.get annotations cell in
+    let annotation' = Smap.get annotations cell in
     let isCentre = centreCandidate = candidate in
 
     match annotation'.current with

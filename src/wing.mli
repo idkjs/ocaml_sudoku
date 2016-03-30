@@ -1,7 +1,6 @@
 open Sudoku
 open Puzzlemap
-open Hints
 
-val xWings : puzzleMap -> cellCandidates -> hintDescription list
+val xWings : puzzleMap -> cellCandidates -> Hint.description list
 
-val yWings : puzzleMap -> cellCandidates -> hintDescription list
+val yWings : puzzleMap -> cellCandidates -> Hint.description list

@@ -5,20 +5,12 @@ open System.Diagnostics
 open System.Runtime.InteropServices
 open System.Text
 
-open Smap
 open Sudoku
 open Puzzlemap
-open LoadEliminate
-open Hints
-open SetCell
-open EliminateCandidate
-open Force
 
-open command
-open console
+open Command
+open Console
 open format
-
-open Load
 
 [<DllImport("user32.dll")>]
 extern bool ShowWindow(System.IntPtr hWnd, int cmdShow)
@@ -28,12 +20,12 @@ let Maximize() =
     ShowWindow(p.MainWindowHandle, 3) (* SW_MAXIMIZE = 3 *)
 
 let parse (p : puzzleMap) (item : string) (solution : solution) (puzzle : puzzleShape) 
-    (cellCandidates : cellCandidates) puzzleDrawFull2 print_last : solution * hintDescription list = 
+    (cellCandidates : cellCandidates) puzzleDrawFull2 print_last : solution * Hint.description list = 
 
     Console.WriteLine item
 
     if item = "print" then 
-        let hd3 = mhas2 solution p
+        let hd3 = Hint.mhas2 solution p
         puzzleDrawFull2 hd3.annotations
         (solution, List.empty)
     else if item.StartsWith "focus" then
@@ -41,7 +33,7 @@ let parse (p : puzzleMap) (item : string) (solution : solution) (puzzle : puzzle
         match focusDigitResult with
         | FCOk (VOk focusDigit) ->
             let hd2 = focusCommandHintDescription p focusDigit
-            let hd3 = mhas solution p hd2
+            let hd3 = Hint.mhas solution p hd2
             puzzleDrawFull2 hd3.annotations
             (solution, List.empty)
 
@@ -54,13 +46,13 @@ let parse (p : puzzleMap) (item : string) (solution : solution) (puzzle : puzzle
             (solution, List.empty)
 
     else if item = "load" then
-        let candidateReductions = loadEliminateFind p solution.current
+        let candidateReductions = LoadEliminate.find p solution.current
 
-        let hd2 = loadEliminateDescription p candidateReductions
-        let hd3 = mhas solution p hd2
+        let hd2 = LoadEliminate.description p candidateReductions
+        let hd3 = Hint.mhas solution p hd2
         puzzleDrawFull2 hd3.annotations
 
-        let newSolution = loadEliminateStep p solution candidateReductions
+        let newSolution = LoadEliminate.step p solution candidateReductions
         //print_last newSolution
         (newSolution, List.empty)
     else if item.StartsWith "s" then
@@ -72,11 +64,11 @@ let parse (p : puzzleMap) (item : string) (solution : solution) (puzzle : puzzle
                 let setCellValueOpt = setCellCommandCheck solution.given cellCandidates value
                 match setCellValueOpt with
                 | SSCROk setCellValue ->
-                    let hd2 = setCellHintDescription p setCellValue
-                    let hd3 = mhas solution p hd2
+                    let hd2 = SetCell.description p setCellValue
+                    let hd3 = Hint.mhas solution p hd2
                     puzzleDrawFull2 hd3.annotations
 
-                    setCellStep p setCellValue solution
+                    SetCell.step p setCellValue solution
 
                 | SCCRGiven _
                 | SCCRNotACandidate _ ->
@@ -104,11 +96,11 @@ let parse (p : puzzleMap) (item : string) (solution : solution) (puzzle : puzzle
                 let clearCommandOpt = candidateClearCommandCheck solution.given cellCandidates candidate
                 match clearCommandOpt with
                 | CCCCROk clearCommand ->
-                    let hd2 = eliminateCandidateHintDescription p candidate
-                    let hd3 = mhas solution p hd2
+                    let hd2 = EliminateCandidate.description p candidate
+                    let hd3 = Hint.mhas solution p hd2
                     puzzleDrawFull2 hd3.annotations
 
-                    eliminateCandidateStep p candidate solution
+                    EliminateCandidate.step p candidate solution
 
                 | CCCCRGiven _
                 | CCCCRNotACandidate _ -> 
@@ -127,18 +119,18 @@ let parse (p : puzzleMap) (item : string) (solution : solution) (puzzle : puzzle
         (newSolution, List.empty)
 
     else
-        let supportedHintOpt = SMap.tryGet supportedHints item
+        let supportedHintOpt = Smap.tryGet supportedHints item
         match supportedHintOpt with
         | Some supportedHint ->
             let hints = supportedHint p cellCandidates
             (solution, hints)
         | None -> (solution, List.empty)
 
-let printHint (solution : solution) (p : puzzleMap) drawHint (index : int) (hint : hintDescription) : unit = 
+let printHint (solution : solution) (p : puzzleMap) drawHint (index : int) (hint : Hint.description) : unit = 
 
     Console.WriteLine("{0}: {1}", index, hint)
 
-    let hd3 = mhas solution p hint
+    let hd3 = Hint.mhas solution p hint
     drawHint hd3.annotations
 
     Console.Read() |> ignore
@@ -166,7 +158,7 @@ let repl (sudoku : string) (puzzleShape : puzzleShape) =
 
     let p = tPuzzleMap puzzleShape
 
-    let solution = ref (load puzzleShape sudoku)
+    let solution = ref (Load.load puzzleShape sudoku)
 
     let centreDigit : digit = Digits.nth puzzleShape.alphabet ((Digits.count puzzleShape.alphabet) / 2)
 
@@ -235,7 +227,7 @@ let repl (sudoku : string) (puzzleShape : puzzleShape) =
 
 Maximize() |> ignore
 
-let all_core_tests = test_core.all_tests in
+let all_core_tests = Test_core.all_tests in
 
 all_core_tests
 |> List.iter (fun test -> test())
@@ -249,9 +241,9 @@ Console.WriteLine "1234567891234567891234567891234567891234567891234567891234567
 (*let example = "000105000140000670080002400063070010900000003010090520007200080026000035000409000" *)
 
 (* FullHouse *)
-(*let example = "800739006370465000040182009000600040054300610060500000400853070000271064100940002" *)
-(*let example = "801006094300009080970080500547062030632000050198375246083620915065198000219500008" *)
-(*let example = "2...3..7.9...1..8.5...6.9.4653871492489325761721496.....5.8.....6..4.....9..5...3" *)
+(*let example = "800739006370465000040182009000600040054300610060500000400853070000271064100940002"*)
+(*let example = "801006094300009080970080500547062030632000050198375246083620915065198000219500008"*)
+let example = "2...3..7.9...1..8.5...6.9.4653871492489325761721496.....5.8.....6..4.....9..5...3"
 
 (* ht *)
 (*let example = "528600049136490025794205630000100200007826300002509060240300976809702413070904582" *)
@@ -262,7 +254,7 @@ Console.WriteLine "1234567891234567891234567891234567891234567891234567891234567
 (*let example = "000500000425090001800010020500000000019000460000000002090040003200060807000001600" *)
 
 (* http://www.sudokuwiki.org/X_Wing_Strategy *)
-let example = "100000569492056108056109240009640801064010000218035604040500016905061402621000005"
+(* let example = "100000569492056108056109240009640801064010000218035604040500016905061402621000005" *)
 (* http://www.sudokuwiki.org/Y_Wing_Strategy *)
 (*let example = "900240000050690231020050090090700320002935607070002900069020073510079062207086009" *)
 (*let example = "273005081810302004009010200100953728792186345538724196021060500300201869080530412" *)

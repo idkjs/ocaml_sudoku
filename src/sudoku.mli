@@ -1,4 +1,3 @@
-module Sudoku
 type size = int
 type column = | CColumn of int
 module Column = begin

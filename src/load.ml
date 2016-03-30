@@ -1,4 +1,3 @@
-open Smap
 open Sudoku
 open Puzzlemap
 

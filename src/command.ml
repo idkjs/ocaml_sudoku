@@ -1,19 +1,7 @@
-module command
-
-open Smap
 open Sudoku
 open Puzzlemap
-open Hints
-open SetCell
-open EliminateCandidate
 
-open FullHouse
-open Hidden
-open Intersection
-open Naked
-open Wing
-
-open console
+open Console
 open format
 
 (*F# open FSharp.Compatibility.OCaml F#*)
@@ -99,8 +87,8 @@ let focusCommandParse (s: puzzleShape) (item : string) : focus_command_result =
     else
         FCWrongTermCount terms.Length
 
-let focusCommandHintDescription (p : puzzleMap) (digit : digit) : hintDescription =
-    { hintDescription.primaryHouses = Houses.empty;
+let focusCommandHintDescription (p : puzzleMap) (digit : digit) : Hint.description =
+    { primaryHouses = Houses.empty;
       secondaryHouses = Houses.empty;
       candidateReductions = [];
       setCellValueAction = None;
@@ -179,7 +167,7 @@ let candidateClearCommandCheck (given : given) (cellCandidates : cellCandidates)
         if Digits.contains candidate.digit digits then CCCCROk candidate
         else CCCCRNotACandidate candidate
 
-let supportedHints : (string * (puzzleMap -> cellCandidates -> hintDescription list)) list =
+let supportedHints : (string * (puzzleMap -> cellCandidates -> Hint.description list)) list =
     let keys =
         [
             "fh";
@@ -200,19 +188,19 @@ let supportedHints : (string * (puzzleMap -> cellCandidates -> hintDescription l
 
     let command key =
         match key with
-        | "fh" -> fullHouses
-        | "hs" -> hiddenN 1
-        | "hp" -> hiddenN 2
-        | "ht" -> hiddenN 3
-        | "hq" -> hiddenN 4
-        | "ns" -> nakedSingle
-        | "np" -> nakedN 2
-        | "nt" -> nakedN 3
-        | "nq" -> nakedN 4
-        | "pp" -> pointingPairs
-        | "bl" -> boxLineReductions
-        | "x" -> xWings
-        | "y" -> yWings
+        | "fh" -> FullHouse.find
+        | "hs" -> Hidden.find 1
+        | "hp" -> Hidden.find 2
+        | "ht" -> Hidden.find 3
+        | "hq" -> Hidden.find 4
+        | "ns" -> Naked.find 1
+        | "np" -> Naked.find 2
+        | "nt" -> Naked.find 3
+        | "nq" -> Naked.find 4
+        | "pp" -> Intersection.pointingPairs
+        | "bl" -> Intersection.boxLineReductions
+        | "x" -> Wing.xWings
+        | "y" -> Wing.yWings
         in
 
-    SMap.ofLookup keys command
+    Smap.ofLookup keys command

@@ -1,13 +1,11 @@
-open Smap
 open Sudoku
 open Puzzlemap
-open Hints
 
-let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (candidateSubset : digits) (primaryHouse : house) = 
+let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (candidateSubset : digits) (primaryHouse : house) : Hint.description option = 
 
     let pointers = 
         primaryHouse
-        |> SMap.get p.houseCells
+        |> Smap.get p.houseCells
         |> Cells.map (fun cell -> CandidateReduction.make cell (CellCandidates.get cellCandidates cell))
         |> List.map (fun cr -> CandidateReduction.make cr.cell (Digits.intersect cr.candidates candidateSubset))
         |> List.filter (fun cr -> Digits.count cr.candidates > 0) 
@@ -15,7 +13,7 @@ let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (
 
     let candidateReductions = 
         primaryHouse
-        |> SMap.get p.houseCells
+        |> Smap.get p.houseCells
         |> Cells.map (fun cell -> CandidateReduction.make cell (CellCandidates.get cellCandidates cell))
         |> List.map
             (fun cr -> 
@@ -46,7 +44,7 @@ let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (
             else None
             in
 
-        Some { hintDescription.primaryHouses = Houses.singleton primaryHouse;
+        Some { primaryHouses = Houses.singleton primaryHouse;
                secondaryHouses = Houses.empty;
                candidateReductions = candidateReductions;
                setCellValueAction = setCellValue;
@@ -54,11 +52,11 @@ let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (
                focus = Digits.empty }
     else None
 
-let hiddenNPerHouse (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (house : house) : hintDescription list = 
+let hiddenNPerHouse (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (house : house) : Hint.description list = 
 
     let houseCandidates =
         house
-        |> SMap.get p.houseCells
+        |> Smap.get p.houseCells
         |> Cells.map (CellCandidates.get cellCandidates)
         |> Digits.unionManyList
         in
@@ -68,7 +66,7 @@ let hiddenNPerHouse (count : int) (p : puzzleMap) (cellCandidates : cellCandidat
         (fun candidateSubset -> 
             findHidden count p cellCandidates (Digits.ofList candidateSubset) house)
 
-let hiddenN (i : int) (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescription list =
+let find (i : int) (p : puzzleMap) (cellCandidates : cellCandidates) : Hint.description list =
     p.houses
     |> List.map (hiddenNPerHouse i p cellCandidates)
     |> List.concat

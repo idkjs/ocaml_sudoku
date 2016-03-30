@@ -1,4 +1,3 @@
-open Smap
 open Sudoku
 
 let columns (length : size) : column list =
@@ -176,24 +175,24 @@ let tPuzzleMap (puzzleShape : puzzleShape) : puzzleMap =
     let _houseCells = houseCells puzzleShape.size puzzleShape.boxWidth puzzleShape.boxHeight in
     let _cellHouseCells = cellHouseCells puzzleShape.size puzzleShape.boxWidth puzzleShape.boxHeight in
 
-    let _columnCellsLookup = SMap.ofLookup<column, cells> _columns _columnCells in
-    let _rowCellsLookup = SMap.ofLookup<row, cells> _rows _rowCells in
-    let _columnStackLookup = SMap.ofLookup<column, stack> _columns _columnStack in
-    let _stackColumnsLookup = SMap.ofLookup<stack, column list> _stacks _stackColumns in
-    let _rowBandLookup = SMap.ofLookup<row, band> _rows _rowBand in
-    let _bandRowsLookup = SMap.ofLookup<band, row list> _bands _bandRows in
-    let _cellBoxLookup = SMap.ofLookup<cell, box> _cells _cellBox in
-    let _boxCellsLookup = SMap.ofLookup<box, cells> _boxes _boxCells in
-    let _houseCellsLookup = SMap.ofLookup<house, cells> _houses _houseCells in
-    let _cellHouseCellsLookup = SMap.ofLookup<cell, cells> _cells _cellHouseCells in
+    let _columnCellsLookup = Smap.ofLookup<column, cells> _columns _columnCells in
+    let _rowCellsLookup = Smap.ofLookup<row, cells> _rows _rowCells in
+    let _columnStackLookup = Smap.ofLookup<column, stack> _columns _columnStack in
+    let _stackColumnsLookup = Smap.ofLookup<stack, column list> _stacks _stackColumns in
+    let _rowBandLookup = Smap.ofLookup<row, band> _rows _rowBand in
+    let _bandRowsLookup = Smap.ofLookup<band, row list> _bands _bandRows in
+    let _cellBoxLookup = Smap.ofLookup<cell, box> _cells _cellBox in
+    let _boxCellsLookup = Smap.ofLookup<box, cells> _boxes _boxCells in
+    let _houseCellsLookup = Smap.ofLookup<house, cells> _houses _houseCells in
+    let _cellHouseCellsLookup = Smap.ofLookup<cell, cells> _cells _cellHouseCells in
 
     let _housesCells (houses : houses) : cells =
         houses
-        |> Houses.map (SMap.get _houseCellsLookup)
+        |> Houses.map (Smap.get _houseCellsLookup)
         |> Cells.unionManyList in
 
     let _houseCellCandidateReductions (house : house) (cellCandidates : cellCandidates) : candidateReduction list =
-        SMap.get _houseCellsLookup house
+        Smap.get _houseCellsLookup house
         |> Cells.map (fun cell -> CandidateReduction.make cell (CellCandidates.get cellCandidates cell)) in
 
     {

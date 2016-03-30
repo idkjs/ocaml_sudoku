@@ -3,9 +3,8 @@
 
 open Sudoku
 open Puzzlemap
-open Hints
 
-let fullHousePerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primaryHouse : house) : hintDescription option =
+let fullHousePerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primaryHouse : house) : Hint.description option =
 
     let hhs =
         p.houseCellCandidateReductions primaryHouse cellCandidates
@@ -19,7 +18,7 @@ let fullHousePerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primary
 
         let setCellValue = Value.make cell candidate in
 
-        Some { hintDescription.primaryHouses = Houses.singleton primaryHouse;
+        Some { primaryHouses = Houses.singleton primaryHouse;
                secondaryHouses = Houses.empty;
                candidateReductions = [];
                setCellValueAction = Some setCellValue;
@@ -27,6 +26,6 @@ let fullHousePerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primary
                focus = Digits.empty }
     else None
 
-let fullHouses (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescription list =
+let find (p : puzzleMap) (cellCandidates : cellCandidates) : Hint.description list =
     p.houses
     |> List.choose (fullHousePerHouse p cellCandidates)

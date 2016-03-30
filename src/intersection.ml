@@ -1,23 +1,21 @@
-open Smap
 open Sudoku
 open Puzzlemap
-open Hints
 
 type cellHouses = (cell * house list) list
 
-let intersectionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primaryHouse : house) (secondaryHouseLookups : cellHouses) : hintDescription list = 
+let intersectionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primaryHouse : house) (secondaryHouseLookups : cellHouses) : Hint.description list = 
 
     let primaryHouseCandidates = 
         primaryHouse
-        |> SMap.get p.houseCells
+        |> Smap.get p.houseCells
         |> Cells.map (CellCandidates.get cellCandidates)
         |> Digits.unionManyList
         in
 
-    let uniqueSecondaryForCandidate (candidate : digit) : hintDescription list = 
+    let uniqueSecondaryForCandidate (candidate : digit) : Hint.description list = 
         let pointerCells = 
             primaryHouse
-            |> SMap.get p.houseCells
+            |> Smap.get p.houseCells
             |> Cells.filter (fun cell -> 
                 let candidates = CellCandidates.get cellCandidates cell in
                 Digits.contains candidate candidates) 
@@ -28,15 +26,15 @@ let intersectionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (pri
             |> Cells.map (fun cell -> CandidateReduction.make cell (Digits.singleton candidate))
             in
 
-        let hintsPerSecondaryHouse (secondaryHouses : house list) : hintDescription option = 
+        let hintsPerSecondaryHouse (secondaryHouses : house list) : Hint.description option = 
             if Cells.count pointerCells > 1 && List.length secondaryHouses = 1 then 
                 let primaryHouseCells =
                     primaryHouse
-                    |> SMap.get p.houseCells
+                    |> Smap.get p.houseCells
                     in
 
                 let secondaryHouse = secondaryHouses.[0] in
-                let secondaryHouseCells = SMap.get p.houseCells secondaryHouse in
+                let secondaryHouseCells = Smap.get p.houseCells secondaryHouse in
 
                 let otherHouseCells = Cells.difference secondaryHouseCells primaryHouseCells in
                 
@@ -49,7 +47,7 @@ let intersectionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (pri
                     in
 
                 if List.length candidateReductions > 0 then 
-                    Some { hintDescription.primaryHouses = Houses.singleton primaryHouse;
+                    Some { primaryHouses = Houses.singleton primaryHouse;
                            secondaryHouses = Houses.singleton secondaryHouse;
                            candidateReductions = candidateReductions;
                            setCellValueAction = None;
@@ -61,7 +59,7 @@ let intersectionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (pri
 
         pointerCells
         |> Cells.choose (fun cell -> 
-                            SMap.get secondaryHouseLookups cell
+                            Smap.get secondaryHouseLookups cell
                             |> hintsPerSecondaryHouse)
         in
 
@@ -70,35 +68,35 @@ let intersectionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (pri
     |> List.map uniqueSecondaryForCandidate
     |> List.concat
 
-let pointingPairsPerBox (p : puzzleMap) (cellCandidates : cellCandidates) (primaryHouse : house) : hintDescription list =
+let pointingPairsPerBox (p : puzzleMap) (cellCandidates : cellCandidates) (primaryHouse : house) : Hint.description list =
     let cellLines (cell : cell) =
         [ HRow cell.row; HColumn cell.col ]
         in
 
     let secondaryHouseLookups =
-        SMap.ofLookup<cell, house list> (Cells.toList p.cells) cellLines
+        Smap.ofLookup<cell, house list> (Cells.toList p.cells) cellLines
         in
 
     intersectionsPerHouse p cellCandidates primaryHouse secondaryHouseLookups
 
-let boxLineReductionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primaryHouse : house) : hintDescription list = 
+let boxLineReductionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primaryHouse : house) : Hint.description list = 
     let cellBox (cell : cell) =
-        [ SMap.get p.cellBox cell |> HBox ]
+        [ Smap.get p.cellBox cell |> HBox ]
         in
 
     let secondaryHouseLookups =
-        SMap.ofLookup<cell, house list> (Cells.toList p.cells) cellBox
+        Smap.ofLookup<cell, house list> (Cells.toList p.cells) cellBox
         in
 
     intersectionsPerHouse p cellCandidates primaryHouse secondaryHouseLookups
 
-let pointingPairs (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescription list =
+let pointingPairs (p : puzzleMap) (cellCandidates : cellCandidates) : Hint.description list =
     p.boxes
     |> List.map HBox
     |> List.map (pointingPairsPerBox p cellCandidates) 
     |> List.concat
 
-let boxLineReductions (p : puzzleMap) (cellCandidates : cellCandidates) : hintDescription list =
+let boxLineReductions (p : puzzleMap) (cellCandidates : cellCandidates) : Hint.description list =
     let rowHints =
         p.rows
         |> Rows.map HRow

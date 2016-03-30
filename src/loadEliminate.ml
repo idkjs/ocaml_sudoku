@@ -1,9 +1,7 @@
-open Smap
 open Sudoku
 open Puzzlemap
-open Hints
 
-let loadEliminateFind  (p : puzzleMap) (current : current) : candidateReduction list = 
+let find  (p : puzzleMap) (current : current) : candidateReduction list = 
 
     let reductions (cell : cell) : digits option =
         let cellContents = Current.get current cell in
@@ -12,7 +10,7 @@ let loadEliminateFind  (p : puzzleMap) (current : current) : candidateReduction 
         | PencilMarks candidates -> 
             let digits =
                 cell
-                |> SMap.get p.cellHouseCells
+                |> Smap.get p.cellHouseCells
                 |> Cells.choose
                     (fun cell ->
                         let houseCellContents = Current.get current cell in
@@ -32,7 +30,7 @@ let loadEliminateFind  (p : puzzleMap) (current : current) : candidateReduction 
             reductions cell
             |> Option.map (fun digits -> CandidateReduction.make cell digits))
 
-let loadEliminateApply (p : puzzleMap) (candidateReductions : candidateReduction list) (current : current) : current = 
+let apply (p : puzzleMap) (candidateReductions : candidateReduction list) (current : current) : current = 
 
     let candidateReductionsLookup =
         candidateReductions
@@ -53,21 +51,21 @@ let loadEliminateApply (p : puzzleMap) (candidateReductions : candidateReduction
             | None -> cellContents
         in
 
-    SMap.ofLookup<cell, cellContents> (Cells.toList p.cells) update
+    Smap.ofLookup<cell, cellContents> (Cells.toList p.cells) update
     |> Current
 
-let loadEliminateDescription (p : puzzleMap) (candidateReductions : candidateReduction list) : hintDescription =
-    { hintDescription.primaryHouses = Houses.empty;
+let description (p : puzzleMap) (candidateReductions : candidateReduction list) : Hint.description =
+    { primaryHouses = Houses.empty;
       secondaryHouses = Houses.empty;
       candidateReductions = candidateReductions;
       setCellValueAction = None;
       pointers = [];
       focus = Digits.empty }
 
-let loadEliminateStep (p : puzzleMap) (solution : solution) (candidateReductions : candidateReduction list) : solution =
-    { solution with current = loadEliminateApply p candidateReductions solution.current;
+let step (p : puzzleMap) (solution : solution) (candidateReductions : candidateReduction list) : solution =
+    { solution with current = apply p candidateReductions solution.current;
                     steps = LoadEliminate :: solution.steps }
 
-let loadEliminateFindAndApply (p : puzzleMap) (solution : solution) : solution =
-    let candidateReductions = loadEliminateFind p solution.current in
-    loadEliminateStep p solution candidateReductions
+let findAndApply (p : puzzleMap) (solution : solution) : solution =
+    let candidateReductions = find p solution.current in
+    step p solution candidateReductions

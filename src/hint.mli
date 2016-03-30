@@ -1,8 +1,7 @@
-open Smap
 open Sudoku
 open Puzzlemap
 
-type hintDescription = 
+type description = 
     { primaryHouses : houses;
       secondaryHouses : houses;
       candidateReductions : candidateReduction list;
@@ -23,9 +22,9 @@ type annotation =
       focus : digits }
 
 [<NoComparisonAttribute>]
-type hintDescription2 = 
+type description2 = 
     { annotations : (cell * annotation) list }
 
-val mhas : solution -> puzzleMap -> hintDescription -> hintDescription2
+val mhas : solution -> puzzleMap -> description -> description2
 
-val mhas2 : solution -> puzzleMap -> hintDescription2
+val mhas2 : solution -> puzzleMap -> description2
