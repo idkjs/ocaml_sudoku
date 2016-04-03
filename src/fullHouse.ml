@@ -3,6 +3,7 @@
 
 open Sudoku
 open Puzzlemap
+(*F# open FSharp.Compatibility.OCaml F#*)
 
 let fullHousePerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primaryHouse : house) : Hint.description option =
 
@@ -12,7 +13,7 @@ let fullHousePerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primary
         in
 
     if List.length hhs = 1 then 
-        let h = List.head hhs in
+        let h = List.hd hhs in
         let cell = h.cell in
         let candidate = Digits.first h.candidates in
 
@@ -28,4 +29,4 @@ let fullHousePerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primary
 
 let find (p : puzzleMap) (cellCandidates : cellCandidates) : Hint.description list =
     p.houses
-    |> List.choose (fullHousePerHouse p cellCandidates)
+    |> Sset.choose (fullHousePerHouse p cellCandidates)

@@ -21,7 +21,7 @@ let nakedSingle (p : puzzleMap) (cellCandidates : cellCandidates) : Hint.descrip
     p.cells
     |> Cells.toList
     |> List.map (nakedSingleCell p cellCandidates)
-    |> List.choose id
+    |> Sset.choose Sset.id
 
 let findNaked (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (primaryHouse : house) (cellSubset : cells) : Hint.description option = 
 
@@ -70,7 +70,7 @@ let nakedNPerHouse (count : int) (p : puzzleMap) (cellCandidates : cellCandidate
 
     Sset.setSubsets (Cells.toList hht) count
     |> List.map (fun ss -> findNaked count p cellCandidates primaryHouse (Cells.ofList ss))
-    |> List.choose id
+    |> Sset.choose Sset.id
 
 let nakedN (i : int) (p : puzzleMap) (cellCandidates : cellCandidates) : Hint.description list =
     p.houses

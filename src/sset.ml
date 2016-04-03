@@ -207,3 +207,4 @@ let rec setSubsets (as' : 'a list) (size : int) : 'a list list =
 
 let rec range i j = if i > j then [] else i :: (range (i+1) j)
 
+let id (x : 'a) : 'a = x

@@ -1,5 +1,6 @@
 open Sudoku
 open Puzzlemap
+(*F# open FSharp.Compatibility.OCaml F#*)
 
 let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (candidateSubset : digits) (primaryHouse : house) : Hint.description option = 
 
@@ -34,7 +35,7 @@ let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (
 
         let setCellValue = 
             if count = 1 then 
-                let h = List.head pointers in
+                let h = List.hd pointers in
                 let cell = h.cell in
                 let candidate = Digits.first candidateSubset in
 
@@ -62,7 +63,7 @@ let hiddenNPerHouse (count : int) (p : puzzleMap) (cellCandidates : cellCandidat
         in
 
     Sset.setSubsets (Digits.toList houseCandidates) count
-    |> List.choose
+    |> Sset.choose
         (fun candidateSubset -> 
             findHidden count p cellCandidates (Digits.ofList candidateSubset) house)
 
