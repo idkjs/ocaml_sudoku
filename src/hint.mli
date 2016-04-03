@@ -21,7 +21,6 @@ type annotation =
       pointers : digits;
       focus : digits }
 
-[<NoComparisonAttribute>]
 type description2 = 
     { annotations : (cell * annotation) list }
 

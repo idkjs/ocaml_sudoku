@@ -12,6 +12,8 @@ open Command
 open Console
 open format
 
+(*F# open FSharp.Compatibility.OCaml F#*)
+
 [<DllImport("user32.dll")>]
 extern bool ShowWindow(System.IntPtr hWnd, int cmdShow)
 
@@ -119,7 +121,7 @@ let parse (p : puzzleMap) (item : string) (solution : solution) (puzzle : puzzle
         (newSolution, List.empty)
 
     else
-        let supportedHintOpt = Smap.tryGet supportedHints item
+        let supportedHintOpt = Smap.tryGet String.compare supportedHints item
         match supportedHintOpt with
         | Some supportedHint ->
             let hints = supportedHint p cellCandidates
@@ -204,13 +206,14 @@ let repl (sudoku : string) (puzzleShape : puzzleShape) =
     let stopwatch = new Stopwatch() in
     let _ = stopwatch.Start() in
 
-    let forcedSolutions = solve p (!solution)
+    let forcedSolutions = Force.solve p (!solution)
 
     let _ = stopwatch.Stop() in
 
     let _ = Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed) in
 
-    puzzleDrawGrid()
+    //puzzleDrawGrid() |> ignore
+
     if List.length forcedSolutions > 0 then
         forcedSolutions
         |> List.iter

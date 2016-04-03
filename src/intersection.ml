@@ -7,7 +7,7 @@ let intersectionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (pri
 
     let primaryHouseCandidates = 
         primaryHouse
-        |> Smap.get p.houseCells
+        |> Smap.get House.comparer p.houseCells
         |> Cells.map (CellCandidates.get cellCandidates)
         |> Digits.unionManyList
         in
@@ -15,7 +15,7 @@ let intersectionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (pri
     let uniqueSecondaryForCandidate (candidate : digit) : Hint.description list = 
         let pointerCells = 
             primaryHouse
-            |> Smap.get p.houseCells
+            |> Smap.get House.comparer p.houseCells
             |> Cells.filter (fun cell -> 
                 let candidates = CellCandidates.get cellCandidates cell in
                 Digits.contains candidate candidates) 
@@ -30,11 +30,11 @@ let intersectionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (pri
             if Cells.count pointerCells > 1 && List.length secondaryHouses = 1 then 
                 let primaryHouseCells =
                     primaryHouse
-                    |> Smap.get p.houseCells
+                    |> Smap.get House.comparer p.houseCells
                     in
 
                 let secondaryHouse = secondaryHouses.[0] in
-                let secondaryHouseCells = Smap.get p.houseCells secondaryHouse in
+                let secondaryHouseCells = Smap.get House.comparer p.houseCells secondaryHouse in
 
                 let otherHouseCells = Cells.difference secondaryHouseCells primaryHouseCells in
                 
@@ -59,7 +59,7 @@ let intersectionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (pri
 
         pointerCells
         |> Cells.choose (fun cell -> 
-                            Smap.get secondaryHouseLookups cell
+                            Smap.get Cell.comparer secondaryHouseLookups cell
                             |> hintsPerSecondaryHouse)
         in
 
@@ -74,18 +74,18 @@ let pointingPairsPerBox (p : puzzleMap) (cellCandidates : cellCandidates) (prima
         in
 
     let secondaryHouseLookups =
-        Smap.ofLookup<cell, house list> (Cells.toList p.cells) cellLines
+        Smap.ofLookup (Cells.toList p.cells) cellLines
         in
 
     intersectionsPerHouse p cellCandidates primaryHouse secondaryHouseLookups
 
 let boxLineReductionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primaryHouse : house) : Hint.description list = 
     let cellBox (cell : cell) =
-        [ Smap.get p.cellBox cell |> HBox ]
+        [ Smap.get Cell.comparer p.cellBox cell |> HBox ]
         in
 
     let secondaryHouseLookups =
-        Smap.ofLookup<cell, house list> (Cells.toList p.cells) cellBox
+        Smap.ofLookup (Cells.toList p.cells) cellBox
         in
 
     intersectionsPerHouse p cellCandidates primaryHouse secondaryHouseLookups

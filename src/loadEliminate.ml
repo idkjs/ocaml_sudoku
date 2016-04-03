@@ -10,7 +10,7 @@ let find  (p : puzzleMap) (current : current) : candidateReduction list =
         | PencilMarks candidates -> 
             let digits =
                 cell
-                |> Smap.get p.cellHouseCells
+                |> Smap.get Cell.comparer p.cellHouseCells
                 |> Cells.choose
                     (fun cell ->
                         let houseCellContents = Current.get current cell in
@@ -25,17 +25,17 @@ let find  (p : puzzleMap) (current : current) : candidateReduction list =
 
     p.cells
     |> Cells.toList
-    |> List.choose
+    |> Sset.choose
         (fun cell ->
-            reductions cell
-            |> Option.map (fun digits -> CandidateReduction.make cell digits))
+            match reductions cell with
+            | Some digits -> Some (CandidateReduction.make cell digits)
+            | None -> None)
 
 let apply (p : puzzleMap) (candidateReductions : candidateReduction list) (current : current) : current = 
 
     let candidateReductionsLookup =
         candidateReductions
         |> List.map (fun cr -> (cr.cell, cr.candidates))
-        |> Map.ofSeq
         in
 
     let update (cell : cell) : cellContents =
@@ -43,16 +43,16 @@ let apply (p : puzzleMap) (candidateReductions : candidateReduction list) (curre
         match cellContents with
         | BigNumber _ -> cellContents
         | PencilMarks candidates ->
-            let digitsOpt = candidateReductionsLookup.TryFind cell in
+            let digitsOpt = Smap.tryGet Cell.comparer candidateReductionsLookup cell in
             match digitsOpt with
             | Some digits ->
                 Digits.difference candidates digits
-                |> PencilMarks
+                |> CellContents.make_pencil_marks
             | None -> cellContents
         in
 
-    Smap.ofLookup<cell, cellContents> (Cells.toList p.cells) update
-    |> Current
+    Smap.ofLookup (Cells.toList p.cells) update
+    |> Current.make
 
 let description (p : puzzleMap) (candidateReductions : candidateReduction list) : Hint.description =
     { primaryHouses = Houses.empty;

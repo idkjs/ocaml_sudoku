@@ -31,7 +31,7 @@ type puzzleMap =
         housesCells : houses -> cells;
         houseCellCandidateReductions : house -> cellCandidates -> candidateReduction list;
 
-        //abstract member houseCellCandidates : (house, cellCandidates) list
+        (*abstract member houseCellCandidates : (house, cellCandidates) list*)
     }
 
 val tPuzzleMap : puzzleShape -> puzzleMap

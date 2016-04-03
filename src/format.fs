@@ -76,7 +76,7 @@ let printColumn (printCell : cell -> seq<'c>) row column : seq<'c> =
 
 (* Print a stack *)
 let printStack (p : puzzleMap) (columnPrinter : row -> column -> seq<'c>) (columnSeparator : seq<'c>) (row : row) (stack : stack) = 
-    simpleInterleave (columnPrinter row) columnSeparator (Smap.get p.stackColumns stack)
+    simpleInterleave (columnPrinter row) columnSeparator (Smap.get Stack.comparer p.stackColumns stack)
 
 (* Print a row *)
 let printRow (stackPrinter : stack -> seq<'c>) (gridCharsRow : gridCharsRow<seq<'c>>) eol (stacks : stack list) = 
@@ -89,7 +89,7 @@ let printRow (stackPrinter : stack -> seq<'c>) (gridCharsRow : gridCharsRow<seq<
 
 (* Print a band *)
 let printBand (p : puzzleMap) (rowToSeq : row -> seq<'c>) (rowSeparator : seq<'c>) (band : band) = 
-    simpleInterleave rowToSeq rowSeparator (Smap.get p.bandRows band)
+    simpleInterleave rowToSeq rowSeparator (Smap.get Band.comparer p.bandRows band)
 
 (* Print a puzzle grid, supply callback to draw each cell *)
 let printGrid (p : puzzleMap) (gridChars : gridChars<seq<'c>>) (digitTo : cell -> 'c) = 
@@ -102,7 +102,7 @@ let printGrid (p : puzzleMap) (gridChars : gridChars<seq<'c>>) (digitTo : cell -
 
     let doPrintBand = printBand p doPrintRow Seq.empty
 
-    let r = Seq.collect (konst gridChars.h) (Smap.get p.stackColumns p.stacks.[0])
+    let r = Seq.collect (konst gridChars.h) (Smap.get Stack.comparer p.stackColumns p.stacks.[0])
     let printHorizontal (g : gridCharsRow<seq<'c>>) = sinterleave (konst r) g.l g.m g.r gridChars.n p.stacks
     let t = printHorizontal gridChars.t
     let m = printHorizontal gridChars.m
@@ -113,15 +113,15 @@ let printGrid (p : puzzleMap) (gridChars : gridChars<seq<'c>>) (digitTo : cell -
 let printCandidateGrid (p : puzzleMap) (candidateGridChars : candidateGridChars<seq<'c>>) (alphabet : digits) 
     (draw_cell : cell -> digit -> 'c) = 
 
-    let d = Seq.collect (konst candidateGridChars.h) (Smap.get p.stackColumns p.stacks.[0])
-    let i = Seq.collect (konst candidateGridChars.hi) (Smap.get p.stackColumns p.stacks.[0])
+    let d = Seq.collect (konst candidateGridChars.h) (Smap.get Stack.comparer p.stackColumns p.stacks.[0])
+    let i = Seq.collect (konst candidateGridChars.hi) (Smap.get Stack.comparer p.stackColumns p.stacks.[0])
     
     let printFullHorizontal (x : candidateGridCharsRow<seq<'c>>) i = 
-        let s = simpleInterleave (konst i) x.mi (Smap.get p.stackColumns p.stacks.[0])
+        let s = simpleInterleave (konst i) x.mi (Smap.get Stack.comparer p.stackColumns p.stacks.[0])
 
         sinterleave (konst s) x.x.l x.x.m x.x.r candidateGridChars.n p.stacks
     
-    let c = List.length (Smap.get p.stackColumns p.stacks.[0])
+    let c = List.length (Smap.get Stack.comparer p.stackColumns p.stacks.[0])
     let s = Digits.toList alphabet
     
     let ss = 

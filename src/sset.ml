@@ -6,7 +6,7 @@ https://www.cl.cam.ac.uk/~jrh13/atp/OCaml/lib.ml
 https://hackage.haskell.org/package/base-4.8.2.0/docs/src/GHC.List.html
 *)
 
-let rec drop<'a> (n : int) (l : 'a list) : 'a list =
+let rec drop (n : int) (l : 'a list) : 'a list =
     if n <= 0 then l
     else
         match l with
@@ -14,8 +14,7 @@ let rec drop<'a> (n : int) (l : 'a list) : 'a list =
         | _::t  when n = 1 -> t
         | h::t -> drop (n-1) t
 
-
-let rec uniq<'a> (comparer:'a->'a->int) (l : 'a list) : 'a list =
+let rec uniq (comparer:'a->'a->int) (l : 'a list) : 'a list =
     match l with
     | [] -> []
     | x :: (y :: _ as tl) when comparer x y = 0 -> (uniq comparer tl)
@@ -128,27 +127,41 @@ let image (comparer : 'a -> 'a -> int) f s = setify comparer (map f s);;
 let rec itlist f l b =
   match l with
     [] -> b
-  | (h::t) -> f h (itlist f t b);;
+  | (h::t) -> f h (itlist f t b)
 
-let unions comparer s = setify comparer (itlist (@) s []);;
+let unions comparer s = setify comparer (itlist (@) s [])
 
-
-
-
-
-
-
-
-
-
-let contains<'a> (comparer : 'a -> 'a -> int) (t : 'a) (s : 'a list) : bool =
+let contains (comparer : 'a -> 'a -> int) (t : 'a) (s : 'a list) : bool =
     List.exists (fun t' -> comparer t' t = 0) s
 
-let remove<'a> (comparer : 'a -> 'a -> int) (t : 'a) (s : 'a list) : 'a list =
+let remove (comparer : 'a -> 'a -> int) (t : 'a) (s : 'a list) : 'a list =
     List.filter (fun t' -> comparer t' t <> 0) s
 
-let isSubset<'a when 'a : comparison> (ts : 'a list) (ts' : 'a list) : bool =
-    Set.isSubset (ts |> Set.ofList) (ts' |> Set.ofList)
+let subset (comparer : 'a -> 'a -> int) (s1 : 'a list) (s2 : 'a list) =
+  let rec subset l1 l2 =
+    match (l1,l2) with
+        ([],l2) -> true
+      | (l1,[]) -> false
+      | (h1::t1,h2::t2) ->
+          if h1 = h2 then subset t1 t2
+          else if h1 < h2 then false
+          else subset l1 t2
+     in
+  subset (setify comparer s1) (setify comparer s2)
+
+let rec choose f l =
+  match l with
+    [] -> []
+  | (h::t) -> let rest = choose f t in
+              match f h with
+              | Some x -> x :: rest
+              | None -> rest
+
+let rec mapfilter f l =
+  match l with
+    [] -> []
+  | (h::t) -> let rest = mapfilter f t in
+              try (f h)::rest with Failure _ -> rest;;
 
 let rec doSetSubsets (list : 'a list) (size : int) (prefix : 'a list) : 'a list list = 
     match list with
@@ -191,3 +204,6 @@ let rec setSubsets (as' : 'a list) (size : int) : 'a list list =
     let p34 = setSubsets s3 4
     let p35 = setSubsets s3 5
 *)
+
+let rec range i j = if i > j then [] else i :: (range (i+1) j)
+

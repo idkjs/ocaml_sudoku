@@ -9,7 +9,7 @@ let makeHints (p : puzzleMap) (cellCandidates : cellCandidates) pointerCells pri
 
     let colCells =
         secondaryHouses
-        |> Houses.map (Smap.get p.houseCells)
+        |> Houses.map (Smap.get House.comparer p.houseCells)
         |> Cells.unionManyList
         in
 
@@ -33,13 +33,13 @@ let xWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates) (h
 
     let houseCandidateCells1 =
         house1
-        |> Smap.get p.houseCells
+        |> Smap.get House.comparer p.houseCells
         |> Cells.map (fun cell -> CandidateReduction.make cell (CellCandidates.get cellCandidates cell))
         in
 
     let houseCandidateCells2 =
         house2
-        |> Smap.get p.houseCells
+        |> Smap.get House.comparer p.houseCells
         |> Cells.map (fun cell -> CandidateReduction.make cell (CellCandidates.get cellCandidates cell))
         in
 
@@ -131,14 +131,14 @@ let xWingsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (house1 : h
 
     let houseCandidates1 =
         house1
-        |> Smap.get p.houseCells
+        |> Smap.get House.comparer p.houseCells
         |> Cells.map (CellCandidates.get cellCandidates)
         |> Digits.unionManyList
         in
 
     let houseCandidates2 =
         house2
-        |> Smap.get p.houseCells
+        |> Smap.get House.comparer p.houseCells
         |> Cells.map (CellCandidates.get cellCandidates)
         |> Digits.unionManyList
         in

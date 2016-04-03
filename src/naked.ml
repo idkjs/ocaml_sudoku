@@ -34,7 +34,7 @@ let findNaked (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (p
     if Digits.count subsetDigits <= count then
         let candidateReductions =
             primaryHouse
-            |> Smap.get p.houseCells
+            |> Smap.get House.comparer p.houseCells
             |> Cells.filter (fun cell -> Cells.contains cell cellSubset = false) 
             |> Cells.map (fun cell -> 
                 let candidates = CellCandidates.get cellCandidates cell in
@@ -62,7 +62,7 @@ let nakedNPerHouse (count : int) (p : puzzleMap) (cellCandidates : cellCandidate
     
     let hht = 
         primaryHouse
-        |> Smap.get p.houseCells
+        |> Smap.get House.comparer p.houseCells
         |> Cells.filter (fun cell -> 
             let candidates = CellCandidates.get cellCandidates cell in
             Digits.count candidates > 1 && Digits.count candidates <= count) 

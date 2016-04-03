@@ -1,11 +1,11 @@
 open Sudoku
 
 let columns (length : size) : column list =
-    [ 1..(int) length ]
+    Sset.range 1 length
     |> List.map Column.make
 
 let rows (length : size) : row list =
-    [ 1..(int) length ]
+    Sset.range 1 length
     |> List.map Row.make
 
 let cells (length : size) : cell list =
@@ -20,11 +20,11 @@ let cells (length : size) : cell list =
     |> List.concat
 
 let stacks (length : size) (boxWidth : boxWidth) : stack list =
-    [ 1..((int) length / (int) boxWidth) ]
+    Sset.range 1 (length / boxWidth)
     |> List.map Stack.make
 
 let bands (length : size) (boxHeight : boxHeight) : band list =
-    [ 1..((int) length / (int) boxHeight) ]
+    Sset.range 1 (length / boxHeight)
     |> List.map Band.make
 
 let boxes (length : size) (boxWidth : boxWidth) (boxHeight : boxHeight) : box list =
@@ -38,9 +38,9 @@ let boxes (length : size) (boxWidth : boxWidth) (boxHeight : boxHeight) : box li
     |> List.concat
 
 let houses (length : size) (boxWidth : boxWidth) (boxHeight : boxHeight) : house list =
-    let chs = List.map HColumn (columns length) in
-    let rhs = List.map HRow (rows length) in
-    let bhs = List.map HBox (boxes length boxWidth boxHeight) in
+    let chs = List.map House.make_column (columns length) in
+    let rhs = List.map House.make_row (rows length) in
+    let bhs = List.map House.make_box (boxes length boxWidth boxHeight) in
 
     List.concat [ chs; rhs; bhs ]
 
@@ -57,26 +57,26 @@ let rowCells (length : size) (row : row) : cell list =
 let columnStack (boxWidth : boxWidth) (column : column) : stack =
     match column with
     | CColumn c ->
-        1 + ((int) c- 1) / (int) boxWidth
+        1 + (c - 1) / boxWidth
         |> Stack.make
 
 let stackColumns (boxWidth : boxWidth) (stack : stack) : column list =
     match stack with
     | SStack s ->
-        let t = ((int) s - 1) * (int) boxWidth in
-        [ (t + 1)..(t + (int) boxWidth) ]
+        let t = (s - 1) * boxWidth in
+        Sset.range (t + 1) (t + boxWidth)
         |> List.map Column.make
 
 let rowBand (boxHeight : boxHeight) (row : row) : band =
     match row with
     | RRow r ->
-        1 + ((int) r - 1) / (int) boxHeight
+        1 + (r - 1) / boxHeight
         |> Band.make
 
 let bandRows (boxHeight : boxHeight) (band : band) : row list =
-    let c = match band with BBand b -> ((int) b - 1) * (int) boxHeight in
+    let c = match band with BBand b -> (b - 1) * boxHeight in
 
-    [ (c + 1)..(c + (int) boxHeight) ]
+    Sset.range (c + 1) (c + boxHeight)
     |> List.map Row.make
 
 let cellBox (boxWidth : boxWidth) (boxHeight : boxHeight) (cell : cell) : box =
@@ -120,7 +120,6 @@ let cellHouseCells (length : size) (boxWidth : boxWidth) (boxHeight : boxHeight)
     [ Cells.singleton cell; rowCells'; columnCells'; boxCells' ]
     |> Cells.unionManyList
 
-[<NoComparisonAttribute;NoEqualityAttribute>]
 type puzzleMap =
     {
         columns : columns;
@@ -152,7 +151,7 @@ type puzzleMap =
         housesCells : houses -> cells;
         houseCellCandidateReductions : house -> cellCandidates -> candidateReduction list;
 
-        //abstract member houseCellCandidates : (house, cellCandidates>
+        (*abstract member houseCellCandidates : (house, cellCandidates>*)
     }
 
 let tPuzzleMap (puzzleShape : puzzleShape) : puzzleMap =
@@ -164,39 +163,39 @@ let tPuzzleMap (puzzleShape : puzzleShape) : puzzleMap =
     let _bands = bands puzzleShape.size puzzleShape.boxHeight in
     let _boxes = boxes puzzleShape.size puzzleShape.boxWidth puzzleShape.boxHeight in
     let _houses = houses puzzleShape.size puzzleShape.boxWidth puzzleShape.boxHeight in
-    let _columnCells = columnCells puzzleShape.size >> Cells.ofList in
-    let _rowCells = rowCells puzzleShape.size >> Cells.ofList in
+    let _columnCells = fun column -> columnCells puzzleShape.size column |> Cells.ofList in
+    let _rowCells = fun row -> rowCells puzzleShape.size row |> Cells.ofList in
     let _columnStack = columnStack puzzleShape.boxWidth in
     let _stackColumns = stackColumns puzzleShape.boxWidth in
     let _rowBand = rowBand puzzleShape.boxHeight in
     let _bandRows = bandRows puzzleShape.boxHeight in
     let _cellBox = cellBox puzzleShape.boxWidth puzzleShape.boxHeight in
-    let _boxCells = boxCells puzzleShape.boxWidth puzzleShape.boxHeight >> Cells.ofList in
+    let _boxCells = fun box -> boxCells puzzleShape.boxWidth puzzleShape.boxHeight box |> Cells.ofList in
     let _houseCells = houseCells puzzleShape.size puzzleShape.boxWidth puzzleShape.boxHeight in
     let _cellHouseCells = cellHouseCells puzzleShape.size puzzleShape.boxWidth puzzleShape.boxHeight in
 
-    let _columnCellsLookup = Smap.ofLookup<column, cells> _columns _columnCells in
-    let _rowCellsLookup = Smap.ofLookup<row, cells> _rows _rowCells in
-    let _columnStackLookup = Smap.ofLookup<column, stack> _columns _columnStack in
-    let _stackColumnsLookup = Smap.ofLookup<stack, column list> _stacks _stackColumns in
-    let _rowBandLookup = Smap.ofLookup<row, band> _rows _rowBand in
-    let _bandRowsLookup = Smap.ofLookup<band, row list> _bands _bandRows in
-    let _cellBoxLookup = Smap.ofLookup<cell, box> _cells _cellBox in
-    let _boxCellsLookup = Smap.ofLookup<box, cells> _boxes _boxCells in
-    let _houseCellsLookup = Smap.ofLookup<house, cells> _houses _houseCells in
-    let _cellHouseCellsLookup = Smap.ofLookup<cell, cells> _cells _cellHouseCells in
+    let _columnCellsLookup = Smap.ofLookup _columns _columnCells in
+    let _rowCellsLookup = Smap.ofLookup _rows _rowCells in
+    let _columnStackLookup = Smap.ofLookup _columns _columnStack in
+    let _stackColumnsLookup = Smap.ofLookup _stacks _stackColumns in
+    let _rowBandLookup = Smap.ofLookup _rows _rowBand in
+    let _bandRowsLookup = Smap.ofLookup _bands _bandRows in
+    let _cellBoxLookup = Smap.ofLookup _cells _cellBox in
+    let _boxCellsLookup = Smap.ofLookup _boxes _boxCells in
+    let _houseCellsLookup = Smap.ofLookup _houses _houseCells in
+    let _cellHouseCellsLookup = Smap.ofLookup _cells _cellHouseCells in
 
     let _housesCells (houses : houses) : cells =
         houses
-        |> Houses.map (Smap.get _houseCellsLookup)
+        |> Houses.map (Smap.get House.comparer _houseCellsLookup)
         |> Cells.unionManyList in
 
     let _houseCellCandidateReductions (house : house) (cellCandidates : cellCandidates) : candidateReduction list =
-        Smap.get _houseCellsLookup house
+        Smap.get House.comparer _houseCellsLookup house
         |> Cells.map (fun cell -> CandidateReduction.make cell (CellCandidates.get cellCandidates cell)) in
 
     {
-        puzzleMap.columns = _columns |> Columns.ofList;
+        columns = _columns |> Columns.ofList;
         rows = _rows |> Rows.ofList ;
         cells = _cells |> Cells.ofList;
         stacks = _stacks;

@@ -133,7 +133,7 @@ let drawPencilMarks (annotation' : Hint.annotation) (candidate : digit) (candida
 
 let drawDigitCellContentAnnotations centreCandidate (annotations : (cell * Hint.annotation) list) (cell : cell) (candidate : digit) : consoleChar = 
 
-    let annotation' = Smap.get annotations cell in
+    let annotation' = Smap.get Cell.comparer annotations cell in
     let isCentre = centreCandidate = candidate in
 
     match annotation'.current with

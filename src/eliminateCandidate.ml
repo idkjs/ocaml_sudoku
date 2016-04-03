@@ -12,8 +12,8 @@ let apply (p : puzzleMap) (candidate : candidate) (current : current) : current 
             else cellContents
         in
 
-    Smap.ofLookup<cell, cellContents> (Cells.toList p.cells) update
-    |> Current
+    Smap.ofLookup (Cells.toList p.cells) update
+    |> Current.make
 
 let description (p: puzzleMap) (candidate : candidate) : Hint.description =
     let cr = CandidateReduction.make (candidate.cell) (Digits.singleton candidate.digit) in

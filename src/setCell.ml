@@ -8,7 +8,7 @@ let apply (p : puzzleMap) (value : value) (current : current) : current =
         match cellContents with
         | BigNumber _ -> cellContents
         | PencilMarks candidates -> 
-            let cells = Smap.get p.cellHouseCells value.cell in
+            let cells = Smap.get Cell.comparer p.cellHouseCells value.cell in
 
             if value.cell = cell then BigNumber value.digit
             else if Cells.contains cell cells then 
@@ -16,8 +16,8 @@ let apply (p : puzzleMap) (value : value) (current : current) : current =
             else cellContents
         in
 
-    Smap.ofLookup<cell, cellContents> (Cells.toList p.cells) update
-    |> Current
+    Smap.ofLookup (Cells.toList p.cells) update
+    |> Current.make
 
 type setCellDigitError = 
     { cell : cell;
@@ -28,8 +28,7 @@ let try' (cell : cell) (candidate : digit) (cellCandidates : cellCandidates) : v
     let candidates = CellCandidates.get cellCandidates cell in
 
     if Digits.contains candidate candidates then
-        Value.make cell candidate
-        |> Some
+        Some (Value.make cell candidate)
     else None
 
 let description (p : puzzleMap) (setCellValue : value) : Hint.description =

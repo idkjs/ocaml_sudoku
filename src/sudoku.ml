@@ -1,3 +1,4 @@
+(*F# open FSharp.Compatibility.OCaml F#*)
 
 (* A sudoku is a square grid of size... *)
 type size = int
@@ -7,8 +8,7 @@ type column =
     | CColumn of int
 
 module Column = struct
-    let make (i : int) : column =
-        i |> CColumn
+    let make (i : int) : column = CColumn i
 
     let comparer (CColumn c1 : column) (CColumn c2 : column) : int =
         if c1 < c2 then -1
@@ -22,16 +22,23 @@ end
 type columns = CColumns of column list
 
 module Columns = struct
+    let make (l : column list) : columns =
+        CColumns l
 
-    let count (CColumns s : columns) : int = List.length s
+    let count (CColumns s : columns) : int =
+        List.length s
 
-    let drop (n : int) (CColumns columns : columns) : columns = Sset.drop n columns |> CColumns
+    let drop (n : int) (CColumns columns : columns) : columns =
+        Sset.drop n columns |> make
 
-    let ofList (s : column list) : columns = Sset.setify Column.comparer s |> CColumns
+    let ofList (s : column list) : columns =
+        Sset.setify Column.comparer s |> make
 
-    let map (map : column -> 'b) (CColumns s : columns) : 'b list = List.map map s
+    let map (map : column -> 'b) (CColumns s : columns) : 'b list =
+        List.map map s
 
-    let mapi (map : int -> column -> 'b) (CColumns s : columns) : 'b list = List.mapi map s
+    let mapi (map : int -> column -> 'b) (CColumns s : columns) : 'b list =
+        List.mapi map s
 
     let toList (CColumns s : columns) : column list = s
 
@@ -42,7 +49,8 @@ module Columns = struct
 
     let to_string (CColumns s : columns) : string = list_to_string s
 
-    let union (CColumns s : columns) (CColumns s' : columns) : columns = Sset.union Column.comparer s s' |> CColumns
+    let union (CColumns s : columns) (CColumns s' : columns) : columns =
+        Sset.union Column.comparer s s' |> make
 end
 
 (* ... by rows *)
@@ -50,8 +58,7 @@ type row =
     | RRow of int
 
 module Row = struct
-    let make (i : int) : row =
-        i |> RRow
+    let make (i : int) : row = RRow i
 
     let comparer (RRow r1 : row) (RRow r2 : row) : int =
         if r1 < r2 then -1
@@ -65,16 +72,23 @@ end
 type rows = CRows of row list
 
 module Rows = struct
+    let make (l : row list) : rows =
+        CRows l
 
-    let count (CRows s : rows) : int = List.length s
+    let count (CRows s : rows) : int =
+        List.length s
 
-    let drop (n : int) (CRows rows : rows) : rows = Sset.drop n rows |> CRows
+    let drop (n : int) (CRows rows : rows) : rows =
+        Sset.drop n rows |> make
 
-    let ofList (s : row list) : rows = Sset.setify Row.comparer s |> CRows
+    let ofList (s : row list) : rows =
+        Sset.setify Row.comparer s |> make
 
-    let map (map : row -> 'b) (CRows s : rows) : 'b list = List.map map s
+    let map (map : row -> 'b) (CRows s : rows) : 'b list =
+        List.map map s
 
-    let mapi (map : int -> row -> 'b) (CRows s : rows) : 'b list = List.mapi map s
+    let mapi (map : int -> row -> 'b) (CRows s : rows) : 'b list =
+        List.mapi map s
 
     let toList (CRows s : rows) : row list = s
 
@@ -85,7 +99,8 @@ module Rows = struct
 
     let to_string (CRows s : rows) : string = list_to_string s
 
-    let union (CRows s : rows) (CRows s' : rows) : rows = Sset.union Row.comparer s s' |> CRows
+    let union (CRows s : rows) (CRows s' : rows) : rows =
+        Sset.union Row.comparer s s' |> make
 end
 
 (* Each cell is identified by (col, row) *)
@@ -95,7 +110,7 @@ type cell =
 
 module Cell = struct
     let make (c : column) (r : row) : cell =
-        { cell.col = c;
+        { col = c;
           row = r }
 
     let comparer ({ col = CColumn c1; row = RRow r1} : cell) ({ col = CColumn c2; row = RRow r2} : cell) : int =
@@ -113,24 +128,35 @@ end
 type cells = CCells of cell list
 
 module Cells = struct
+    let make (l : cell list) : cells =
+        CCells l
 
-    let choose (map : cell -> 'b option) (CCells s : cells) : 'b list = List.choose map s
+    let choose (map : cell -> 'b option) (CCells s : cells) : 'b list =
+        Sset.choose map s
 
-    let contains (d : cell) (CCells s : cells) : bool = Sset.contains<cell> Cell.comparer d s
+    let contains (d : cell) (CCells s : cells) : bool =
+        Sset.contains Cell.comparer d s
 
-    let count (CCells s : cells) : int = List.length s
+    let count (CCells s : cells) : int =
+        List.length s
 
-    let difference (CCells s : cells) (CCells s' : cells) : cells = Sset.subtract Cell.comparer s s' |> CCells
+    let difference (CCells s : cells) (CCells s' : cells) : cells =
+        Sset.subtract Cell.comparer s s' |> make
 
-    let filter (predicate : cell -> bool) (CCells s : cells) : cells = List.filter predicate s |> CCells
+    let filter (predicate : cell -> bool) (CCells s : cells) : cells =
+        List.filter predicate s |> make
 
-    let map (map : cell -> 'b) (CCells s : cells) : 'b list = List.map map s
+    let map (map : cell -> 'b) (CCells s : cells) : 'b list =
+        List.map map s
 
-    let ofList (as' : cell list) : cells = Sset.setify Cell.comparer as' |> CCells
+    let ofList (as' : cell list) : cells =
+        Sset.setify Cell.comparer as' |> make
 
-    let remove (d : cell) (CCells s : cells) : cells = Sset.remove<cell> Cell.comparer d s |> CCells
+    let remove (d : cell) (CCells s : cells) : cells =
+        Sset.remove Cell.comparer d s |> make
 
-    let singleton (d : cell) : cells = [ d ] |> CCells
+    let singleton (d : cell) : cells =
+        [ d ] |> make
 
     let toList (CCells s : cells) : cell list = s
 
@@ -141,11 +167,12 @@ module Cells = struct
 
     let to_string (CCells s : cells) : string = list_to_string s
 
-    let union (CCells s : cells) (CCells s' : cells) : cells = Sset.union Cell.comparer s s' |> CCells
+    let union (CCells s : cells) (CCells s' : cells) : cells =
+        Sset.union Cell.comparer s s' |> make
 
     let unionManyList (ss : cells list) : cells =
         let tss = List.map toList ss in
-        Sset.unions Cell.comparer tss |> CCells
+        Sset.unions Cell.comparer tss |> make
 end
 
 (* The grid is divided into boxes,
@@ -156,8 +183,7 @@ type stack =
     | SStack of int
 
 module Stack = struct
-    let make (i : int) : stack =
-        i |> SStack
+    let make (i : int) : stack = SStack i
 
     let comparer (SStack s1 : stack) (SStack s2 : stack) : int =
         if s1 < s2 then -1
@@ -182,8 +208,7 @@ type band =
     | BBand of int
 
 module Band = struct
-    let make (i : int) : band =
-        i |> BBand
+    let make (i : int) : band = BBand i
 
     let comparer (BBand b1 : band) (BBand b2 : band) : int =
         if b1 < b2 then -1
@@ -210,7 +235,7 @@ type box =
 
 module Box = struct
     let make (s : stack) (b : band) : box =
-        { box.stack = s;
+        { stack = s;
           band = b }
 
     let comparer ({ stack = SStack s1; band = BBand b1} : box) ({ stack = SStack s2; band = BBand b2} : box) : int =
@@ -244,6 +269,15 @@ type house =
     | HBox of box
 
 module House = struct
+    let make_column (column : column) : house =
+        HColumn column
+
+    let make_row (row : row) : house =
+        HRow row
+
+    let make_box (box : box) : house =
+        HBox box
+
     let comparer (h1 : house) (h2 : house) : int =
         match h1, h2 with
         | HColumn c1, HColumn c2 -> Column.comparer c1 c2
@@ -266,18 +300,26 @@ end
 type houses = CHouses of house list
 
 module Houses = struct
+    let make (l : house list) : houses =
+        CHouses l
 
-    let drop (n : int) (CHouses houses : houses) : houses = Sset.drop n houses |> CHouses
+    let drop (n : int) (CHouses houses : houses) : houses =
+        Sset.drop n houses |> make
 
-    let empty : houses = [] |> CHouses
+    let empty : houses =
+        [] |> make
 
-    let map (map : house -> 'b) (CHouses s : houses) : 'b list = List.map map s
+    let map (map : house -> 'b) (CHouses s : houses) : 'b list =
+        List.map map s
 
-    let mapi (map : int -> house -> 'b) (CHouses s : houses) : 'b list = List.mapi map s
+    let mapi (map : int -> house -> 'b) (CHouses s : houses) : 'b list =
+        List.mapi map s
 
-    let ofList (as' : house list) : houses = Sset.setify House.comparer as' |> CHouses
+    let ofList (as' : house list) : houses =
+        Sset.setify House.comparer as' |> make
 
-    let singleton (d : house) : houses = [ d ] |> CHouses
+    let singleton (d : house) : houses =
+        [ d ] |> make
 
     let toList (CHouses houses : houses) : house list = houses
 
@@ -295,7 +337,7 @@ type digit =
     | Digit of char
 
 module Digit = struct
-    let make i = (char) i + '0' |> Digit
+    let make (i : int) : digit = Digit (Char.chr (i + (Char.code '0')))
 
     let comparer (Digit d1 : digit) (Digit d2 : digit) : int =
         if d1 < d2 then -1
@@ -303,46 +345,59 @@ module Digit = struct
         else 1
 
     let to_string (Digit s : digit) : string =
-        (string) s
+        String.make 1 s
 end
 
 type digits = CDigits of digit list
 
 module Digits = struct
-    let contains (d : digit) (CDigits s : digits) : bool = Sset.contains<digit> Digit.comparer d s
+    let make (l : digit list) : digits =
+        CDigits l
+
+    let contains (d : digit) (CDigits s : digits) : bool =
+        Sset.contains Digit.comparer d s
 
     let count (CDigits s : digits) : int = List.length s
 
-    let difference (CDigits s : digits) (CDigits s' : digits) : digits = Sset.subtract Digit.comparer s s' |> CDigits
+    let difference (CDigits s : digits) (CDigits s' : digits) : digits =
+        Sset.subtract Digit.comparer s s' |> make
 
-    let empty : digits = [] |> CDigits
+    let empty : digits =
+        [] |> make
 
-    let filter (predicate : digit -> bool) (CDigits s : digits) : digits = List.filter predicate s |> CDigits
+    let filter (predicate : digit -> bool) (CDigits s : digits) : digits =
+        List.filter predicate s |> make
 
     let first (CDigits d : digits) : digit = 
         match d with
         | h :: _ -> h
         | [] -> failwith "Not empty"
 
-    let intersect (CDigits s : digits) (CDigits s' : digits) : digits = Sset.intersect Digit.comparer s s' |> CDigits
+    let intersect (CDigits s : digits) (CDigits s' : digits) : digits =
+        Sset.intersect Digit.comparer s s' |> make
 
-    let isSubset (CDigits s : digits) (CDigits s' : digits) : bool = Sset.isSubset s s'
+    let isSubset (CDigits s : digits) (CDigits s' : digits) : bool =
+        Sset.subset Digit.comparer s s'
 
     let nth (CDigits s : digits) (i : int) : digit = List.nth s i
 
-    let ofList (as' : digit list) : digits = Sset.setify Digit.comparer as' |> CDigits
+    let ofList (as' : digit list) : digits =
+        Sset.setify Digit.comparer as' |> make
 
-    let remove (d : digit) (CDigits s : digits) : digits = Sset.remove Digit.comparer d s |> CDigits
+    let remove (d : digit) (CDigits s : digits) : digits = 
+        Sset.remove Digit.comparer d s |> make
 
-    let singleton (d : digit) : digits = [ d ] |> CDigits
+    let singleton (d : digit) : digits =
+        [ d ] |> make
 
     let toList (CDigits s : digits) : digit list = s
 
-    let union (CDigits s : digits) (CDigits s' : digits) : digits = Sset.union Digit.comparer s s' |> CDigits
+    let union (CDigits s : digits) (CDigits s' : digits) : digits =
+        Sset.union Digit.comparer s s' |> make
 
     let unionManyList (ss : digits list) : digits =
         let tss = List.map toList ss in
-        Sset.unions Digit.comparer tss |> CDigits
+        Sset.unions Digit.comparer tss |> make
 
     let list_to_string (s : digit list) : string =
         s
@@ -361,15 +416,13 @@ type puzzleShape =
       boxHeight : boxHeight;
       alphabet : digits }
 
-(*let rec range i j = if i > j then [] else i :: (range (i+1) j)*)
-
 module PuzzleShape = struct
     let default' : puzzleShape = 
         { size = 9;
           boxWidth = 3;
           boxHeight = 3;
           alphabet =
-            [1..9]
+            Sset.range 1 9
             |> List.map Digit.make
             |> Digits.ofList
             }
@@ -382,6 +435,14 @@ type cellContents =
     | BigNumber of digit
     | PencilMarks of digits
 
+module CellContents = struct
+    let make_big_number (digit : digit) : cellContents =
+        BigNumber digit
+
+    let make_pencil_marks (digits : digits) : cellContents =
+        PencilMarks digits
+end
+
 (* Working towards a solution we take one of the following actions:
  Sset the cell to have a Digit *)
 type value = 
@@ -390,7 +451,7 @@ type value =
 
 module Value = struct
     let make (cell : cell) (digit : digit) : value = 
-        { value.cell = cell;
+        { cell = cell;
           digit = digit }
 
     let to_string ({ cell = cell; digit = digit} : value) : string =
@@ -404,7 +465,7 @@ type candidate =
 
 module Candidate = struct
     let make (cell : cell) (digit : digit) : candidate =
-        { candidate.cell = cell;
+        { cell = cell;
           digit = digit }
 
     let to_string ({ cell = cell; digit = digit} : candidate) : string =
@@ -417,7 +478,7 @@ type candidateReduction =
 
 module CandidateReduction = struct
     let make (cell : cell) (digits : digits) : candidateReduction =
-        { candidateReduction.cell = cell;
+        { cell = cell;
           candidates = digits }
 
     let to_string ({ cell = cell; candidates = digits} : candidateReduction) : string =
@@ -434,7 +495,6 @@ end
 (* Working towards a solution we take one of the following actions:
  Sset the cell to have a Digit
  or remove a candidate *)
- [<NoComparisonAttribute>]
 type action =
     | Load of string
     | LoadEliminate
@@ -453,23 +513,27 @@ end
 type given = Given of (cell * digit option) list
 
 module Given = struct
-    let get (Given l:given) (k:cell) : digit option = Smap.get l k
+    let get (Given l:given) (k:cell) : digit option = Smap.get Cell.comparer l k
 end
 
 type current = Current of (cell * cellContents) list
 
 module Current = struct
-    let get (Current l:current) (k:cell) : cellContents = Smap.get l k
+    let make (l : (cell * cellContents) list) : current = Current l
+
+    let get (Current l:current) (k:cell) : cellContents = Smap.get Cell.comparer l k
 end
 
 (* for a cell, return a set of candidates *)
 type cellCandidates = CellCandidates of (cell * digits) list
 
 module CellCandidates = struct
-    let get (CellCandidates l:cellCandidates) (k:cell) : digits = Smap.get l k
+    let make (l : (cell * digits) list) : cellCandidates =
+        CellCandidates l
+
+    let get (CellCandidates l:cellCandidates) (k:cell) : digits = Smap.get Cell.comparer l k
 end
 
-[<NoComparisonAttribute>]
 type solution = 
     { given : given;
       current : current;
@@ -487,7 +551,7 @@ module Solution = struct
         cells
         |> Cells.toList
         |> List.map (fun a -> (a, makeCellContents a))
-        |> Current
+        |> Current.make
 
     let currentCellCandidates (cells : cells) (current : current) : cellCandidates =
         let getCandidateEntries (cell : cell) : digits =
@@ -500,5 +564,5 @@ module Solution = struct
         cells
         |> Cells.toList
         |> List.map (fun a -> (a, getCandidateEntries a))
-        |> CellCandidates
+        |> CellCandidates.make
 end

@@ -41,7 +41,6 @@ type annotation =
       pointers : digits;
       focus : digits }
 
-[<NoComparisonAttribute>]
 type description2 = 
     { annotations : (cell * annotation) list }
 
@@ -59,7 +58,7 @@ let mhas (solution : solution) (p : puzzleMap) (hd : description) : description2
                     in
 
                 let r3 = 
-                    let cells = Smap.get p.cellHouseCells setCellValueAction.cell in
+                    let cells = Smap.get Cell.comparer p.cellHouseCells setCellValueAction.cell in
 
                     if Cells.contains cell cells then Some setCellValueAction.digit
                     else None
@@ -99,7 +98,7 @@ let mhas (solution : solution) (p : puzzleMap) (hd : description) : description2
             p.housesCells hd.secondaryHouses
             in
 
-        { annotation.given = Given.get solution.given cell;
+        { given = Given.get solution.given cell;
           current = Current.get solution.current cell;
           setValue = setValue;
           primaryHintHouse = Cells.contains cell primaryHouseCells;
@@ -112,12 +111,12 @@ let mhas (solution : solution) (p : puzzleMap) (hd : description) : description2
 
     let annotations = Smap.ofLookup (Cells.toList p.cells) annotationLookup in
 
-    { description2.annotations = annotations }
+    { annotations = annotations }
 
 let mhas2 (solution : solution) (p : puzzleMap) : description2 = 
 
     let annotationLookup (cell : cell) : annotation = 
-        { annotation.given = Given.get solution.given cell;
+        { given = Given.get solution.given cell;
           current = Current.get solution.current cell;
           setValue = None;
           primaryHintHouse = false;
@@ -130,4 +129,4 @@ let mhas2 (solution : solution) (p : puzzleMap) : description2 =
 
     let annotations = Smap.ofLookup (Cells.toList p.cells) annotationLookup in
 
-    { description2.annotations = annotations }
+    { annotations = annotations }

@@ -1,6 +1,8 @@
 open Sudoku
 open Puzzlemap
 
+(*F# open FSharp.Compatibility.OCaml F#*)
+
 let isPencilMarksCellContents (cellContents : cellContents) : bool =
     match cellContents with
     | BigNumber _ -> false
@@ -15,13 +17,19 @@ let isValid (solution : solution) (cells : cells) : bool =
     cells
     |> Cells.toList
     |> List.map (Current.get solution.current)
-    |> List.forall isValidCellContents
+    |> List.for_all isValidCellContents
 
-let rec searchr (p : puzzleMap) (solution : solution) (existing : solution list) : solution list = 
+let rec searchr (p : puzzleMap) (solution : solution) (existing : solution list) : solution list =
     let emptyCell : cell option =
-        p.cells
-        |> Cells.toList
-        |> List.tryFind (Current.get solution.current >> isPencilMarksCellContents)
+        let is_cell_empty (cell : cell) : bool =
+            Current.get solution.current cell |> isPencilMarksCellContents
+            in
+
+        let cell_list = Cells.toList p.cells in
+
+        if List.exists is_cell_empty cell_list then
+            Some (List.find is_cell_empty cell_list)
+        else None
         in
 
     match emptyCell with
