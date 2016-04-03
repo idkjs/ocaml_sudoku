@@ -2,6 +2,10 @@
 *.bat
 *.userprefs
 *.suo
+*.cmi
+*.cmo
 bin/
 obj/
 packages/
+._bcdi/
+._d/
