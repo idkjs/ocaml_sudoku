@@ -2,7 +2,7 @@ open Sudoku
 open Puzzlemap
 
 open Console
-open format
+open Format
 
 (*F# open FSharp.Compatibility.OCaml F#*)
 

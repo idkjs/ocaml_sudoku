@@ -1,5 +1,6 @@
 open Sudoku
 open Puzzlemap
+(*F# open FSharp.Compatibility.OCaml F#*)
 
 let makeHints (p : puzzleMap) (cellCandidates : cellCandidates) pointerCells primaryHouses secondaryHouses candidate : Hint.description option = 
     let pointers =
@@ -82,7 +83,7 @@ let xWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates) (h
 
             let secondaryHouses =
                 cols
-                |> Columns.map HColumn
+                |> Columns.map House.make_column
                 |> Houses.ofList
                 in
 
@@ -117,7 +118,7 @@ let xWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates) (h
             let primaryHouses = Houses.ofList [ house1; house2 ] in
             let secondaryHouses =
                 rows
-                |> Rows.map HRow
+                |> Rows.map House.make_row
                 |> Houses.ofList
                 in
 
@@ -146,11 +147,11 @@ let xWingsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (house1 : h
     Digits.intersect houseCandidates1 houseCandidates2
     |> Digits.toList
     |> List.map (xWingsPerHouseCandidate p cellCandidates house1 house2)
-    |> List.choose id
+    |> Sset.choose Sset.id
 
 let xWings (p : puzzleMap) (cellCandidates : cellCandidates) : Hint.description list =
-    let rows = Rows.map HRow p.rows |> Houses.ofList in
-    let cols = Columns.map HColumn p.columns |> Houses.ofList in
+    let rows = Rows.map House.make_row p.rows |> Houses.ofList in
+    let cols = Columns.map House.make_column p.columns |> Houses.ofList in
 
     let rowHints1 = 
         rows
@@ -222,7 +223,7 @@ let yWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates)
             let primaryHouses = Houses.ofList [ house1; house2 ] in
             let secondaryHouses =
                 cols
-                |> Columns.map HColumn
+                |> Columns.map House.make_column
                 |> Houses.ofList
                 in
 
@@ -254,7 +255,7 @@ let yWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates)
             let primaryHouses = Houses.ofList [ house1; house2 ] in
             let secondaryHouses =
                 rows
-                |> Rows.map HRow
+                |> Rows.map House.make_row
                 |> Houses.ofList
                 in
 
@@ -285,7 +286,7 @@ let yWingsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (row1 : row
 
     let allNonEmpty =
         candidateCells
-        |> List.forall (fun cr -> Digits.count cr.candidates > 0)
+        |> List.for_all (fun cr -> Digits.count cr.candidates > 0)
         in
 
     if allNonEmpty then 
@@ -303,7 +304,7 @@ let yWingsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (row1 : row
 
             let allPairs =
                 ccs
-                |> List.forall (fun c -> Digits.count c = 2)
+                |> List.for_all (fun c -> Digits.count c = 2)
                 in
 
             if allPairs then 
@@ -346,8 +347,8 @@ let yWingsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (row1 : row
                     | _ -> None
                 else None
             else None)
-        |> List.choose id
-    else List.empty
+        |> Sset.choose Sset.id
+    else []
 
 let yWings (p : puzzleMap) (cellCandidates : cellCandidates) : Hint.description list =
     let hints =

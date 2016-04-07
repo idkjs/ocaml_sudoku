@@ -1,23 +1,14 @@
-open System
-
 open Sudoku
+open Format
 
-open format
+val defaultGridChars : gridChars
 
-(* Things we may want to write *)
-type consoleChar = 
-    | CChar of char
-    | CStr of string
-    | ColouredChar of char * ConsoleColor
-    | ColouredString of string * ConsoleColor
-    | NL
-
-val defaultGridChars : gridChars<seq<consoleChar>>
-
-val defaultCandidateGridChars : candidateGridChars<seq<consoleChar>>
-
-val drawConsoleChar : consoleChar -> Unit
+val defaultCandidateGridChars : candidateGridChars
 
 val drawDigitCellContents : digit option -> cellContents -> consoleChar
 
+val drawDigitCellString : digit option -> cellContents -> consoleString
+
 val drawDigitCellContentAnnotations : digit -> (cell * Hint.annotation) list -> cell -> digit -> consoleChar
+
+val drawDigitCellContentAnnotationString : digit -> (cell * Hint.annotation) list -> cell -> digit -> consoleString

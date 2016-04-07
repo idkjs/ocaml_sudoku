@@ -5,6 +5,13 @@ Bits borrowed from:
 https://www.cl.cam.ac.uk/~jrh13/atp/OCaml/lib.ml
 https://hackage.haskell.org/package/base-4.8.2.0/docs/src/GHC.List.html
 *)
+let rec funpow n f x =
+  if n < 1 then x else funpow (n-1) f (f x)
+
+(*
+let rec funpow2 (n : int) (f : 'a -> unit) (x : 'a) =
+  if n < 1 then x else f(x); funpow2 (n-1) f x
+*)
 
 let rec drop (n : int) (l : 'a list) : 'a list =
     if n <= 0 then l

@@ -1,4 +1,5 @@
 RESULT = sudoku_repl
+
 SOURCES = \
   src/sset.ml src/smap.ml \
   src/sudoku.mli src/sudoku.ml \
@@ -12,7 +13,8 @@ SOURCES = \
   src/hidden.mli src/hidden.ml \
   src/naked.mli src/naked.ml \
   src/intersection.mli src/intersection.ml \
-  src/wing.mli
+  src/wing.mli src/wing.ml \
+  src/format.mli
 
 OCAMLMAKEFILE = OCamlMakefile
 include $(OCAMLMAKEFILE)

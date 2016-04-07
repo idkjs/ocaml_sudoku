@@ -1,21 +1,10 @@
-open System
-
 open Sudoku
+open Format
 
-open format
-
-(* Things we may want to write *)
-type consoleChar = 
-    | CChar of char
-    | CStr of string
-    | ColouredChar of char * ConsoleColor
-    | ColouredString of string * ConsoleColor
-    | NL
-
-let cs = CChar >> Seq.singleton
+let cs (c : char) : consoleString = [CChar c]
 
 (* Some predefined characters - for smaller grid *)
-let defaultGridChars : gridChars<seq<consoleChar>> = 
+let defaultGridChars : gridChars = 
     { h = cs '─';
       v = 
           { l = cs '│';
@@ -33,10 +22,10 @@ let defaultGridChars : gridChars<seq<consoleChar>> =
           { l = cs '└';
             m = cs '┴';
             r = cs '┘' };
-      n = Seq.singleton NL }
+      n = [NL] }
 
 (* Some predefined characters - for smaller grid *)
-let defaultCandidateGridChars : candidateGridChars<seq<consoleChar>> = 
+let defaultCandidateGridChars : candidateGridChars = 
     { h = cs '═';
       hi = cs '─';
       v = 
@@ -68,64 +57,50 @@ let defaultCandidateGridChars : candidateGridChars<seq<consoleChar>> =
                 { l = cs '╚';
                   m = cs '╩';
                   r = cs '╝' } };
-      n = Seq.singleton NL }
+      n = [NL] }
 
-(* Change the console colour to write a string *)
-let consoleWriteColor (value : 'a) consoleColour = 
-    let foregroundColour = System.Console.ForegroundColor in
-    try 
-        let _ = System.Console.ForegroundColor <- consoleColour in
-        System.Console.Write value
-    finally
-        System.Console.ForegroundColor <- foregroundColour
-
-let drawConsoleChar (consoleChar : consoleChar) = 
-    match consoleChar with
-    | CChar c -> Console.Write c
-    | CStr c -> Console.Write c
-    | ColouredChar(c, consoleColour) -> consoleWriteColor c consoleColour
-    | ColouredString(c, consoleColour) -> consoleWriteColor c consoleColour
-    | NL -> Console.WriteLine ""
-
-let drawDigitCellContents (firstDigit : digit option) (currentDigit : cellContents) = 
+let drawDigitCellContents (firstDigit : digit option) (currentDigit : cellContents) : consoleChar = 
     match firstDigit, currentDigit with
-    | Some s, _ -> ColouredString(Digit.to_string s, ConsoleColor.Blue)
-    | None, BigNumber s -> ColouredString(Digit.to_string s, ConsoleColor.Red)
+    | Some s, _ -> ColouredString(Digit.to_string s, Blue)
+    | None, BigNumber s -> ColouredString(Digit.to_string s, Red)
     | None, PencilMarks _ -> CChar '.'
+
+let drawDigitCellString (firstDigit : digit option) (currentDigit : cellContents) : consoleString =
+    [drawDigitCellContents firstDigit currentDigit]
 
 let drawBigNumber (annotation' : Hint.annotation) (s : digit) : consoleChar =
     match annotation' with
     | annotation when annotation.primaryHintHouse && annotation.given.IsSome -> 
-        ColouredString(Digit.to_string s, ConsoleColor.Cyan)
+        ColouredString(Digit.to_string s, Cyan)
     | annotation when annotation.primaryHintHouse -> 
-        ColouredString(Digit.to_string s, ConsoleColor.Yellow)
+        ColouredString(Digit.to_string s, Yellow)
     | annotation when annotation.secondaryHintHouse && annotation.given.IsSome -> 
-        ColouredString(Digit.to_string s, ConsoleColor.DarkBlue)
+        ColouredString(Digit.to_string s, DarkBlue)
     | annotation when annotation.secondaryHintHouse -> 
-        ColouredString(Digit.to_string s, ConsoleColor.DarkRed)
+        ColouredString(Digit.to_string s, DarkRed)
     | annotation when annotation.given.IsSome -> 
-        ColouredString(Digit.to_string s, ConsoleColor.Blue)
-    | _ -> ColouredString(Digit.to_string s, ConsoleColor.Red)
+        ColouredString(Digit.to_string s, Blue)
+    | _ -> ColouredString(Digit.to_string s, Red)
 
 let drawPencilMarks (annotation' : Hint.annotation) (candidate : digit) (candidates : digits) : consoleChar =
     match annotation' with
     | annotation when annotation.setValue.IsSome && annotation.setValue.Value = candidate -> 
-        ColouredString(Digit.to_string candidate, ConsoleColor.Red)
+        ColouredString(Digit.to_string candidate, Red)
     | annotation when annotation.setValue.IsSome && Digits.contains candidate candidates -> 
-        ColouredString(Digit.to_string candidate, ConsoleColor.DarkYellow)
+        ColouredString(Digit.to_string candidate, DarkYellow)
     | annotation when annotation.setValueReduction.IsSome && annotation.setValueReduction.Value = candidate && Digits.contains candidate candidates -> 
-        ColouredString(Digit.to_string candidate, ConsoleColor.DarkYellow)
+        ColouredString(Digit.to_string candidate, DarkYellow)
     | annotation when Digits.contains candidate annotation.reductions -> 
-        ColouredString(Digit.to_string candidate, ConsoleColor.DarkYellow)
+        ColouredString(Digit.to_string candidate, DarkYellow)
     | annotation when Digits.contains candidate annotation.pointers -> 
-        ColouredString(Digit.to_string candidate, ConsoleColor.Magenta)
+        ColouredString(Digit.to_string candidate, Magenta)
     | annotation when Digits.contains candidate annotation.focus && Digits.contains candidate candidates -> 
-        ColouredString(Digit.to_string candidate, ConsoleColor.Yellow)
+        ColouredString(Digit.to_string candidate, Yellow)
     | annotation when annotation.primaryHintHouse -> 
-        if Digits.contains candidate candidates then ColouredString(Digit.to_string candidate, ConsoleColor.DarkGreen)
+        if Digits.contains candidate candidates then ColouredString(Digit.to_string candidate, DarkGreen)
         else CChar ' '
     | annotation when annotation.secondaryHintHouse -> 
-        if Digits.contains candidate candidates then ColouredString(Digit.to_string candidate, ConsoleColor.Green)
+        if Digits.contains candidate candidates then ColouredString(Digit.to_string candidate, Green)
         else CChar ' '
     | _ -> 
         if Digits.contains candidate candidates then CStr(Digit.to_string candidate)
@@ -140,3 +115,6 @@ let drawDigitCellContentAnnotations centreCandidate (annotations : (cell * Hint.
     | BigNumber _ when not isCentre -> CChar ' '
     | BigNumber s -> drawBigNumber annotation' s
     | PencilMarks digits -> drawPencilMarks annotation' candidate digits
+
+let drawDigitCellContentAnnotationString (centreCandidate : digit) (annotations : (cell * Hint.annotation) list) (cell : cell) (candidate : digit) : consoleString =
+    [drawDigitCellContentAnnotations centreCandidate annotations cell candidate]

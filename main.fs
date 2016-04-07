@@ -10,7 +10,8 @@ open Puzzlemap
 
 open Command
 open Console
-open format
+open Format
+open console_win
 
 (*F# open FSharp.Compatibility.OCaml F#*)
 
@@ -165,17 +166,17 @@ let repl (sudoku : string) (puzzleShape : puzzleShape) =
     let centreDigit : digit = Digits.nth puzzleShape.alphabet ((Digits.count puzzleShape.alphabet) / 2)
 
     (* Print a Digit option, with colours *)
-    let puzzleDrawCell (solution : solution) (cell : cell) : consoleChar = 
-        drawDigitCellContents (Given.get solution.given cell) (Current.get solution.current cell)
+    let puzzleDrawCell (solution : solution) (cell : cell) : consoleString = 
+        drawDigitCellString (Given.get solution.given cell) (Current.get solution.current cell)
 
-    let puzzleDrawLine (solution : solution) =
-        Seq.iter drawConsoleChar (printLine p.cells (puzzleDrawCell solution))
+    let puzzleDrawLine (solution : solution) : unit =
+        printLine p.cells (puzzleDrawCell solution) |> drawConsoleString
 
-    let puzzleDrawGrid (solution : solution) =
-        Seq.iter drawConsoleChar (printGrid p defaultGridChars (puzzleDrawCell solution))
-    
-    let puzzleDrawCandidateGridAnnotations annotations = 
-        Seq.iter drawConsoleChar (printCandidateGrid p defaultCandidateGridChars puzzleShape.alphabet (drawDigitCellContentAnnotations centreDigit annotations))
+    let puzzleDrawGrid (solution : solution) : unit =
+        printGrid p defaultGridChars (puzzleDrawCell solution) |> drawConsoleString
+
+    let puzzleDrawCandidateGridAnnotations annotations : unit = 
+        printCandidateGrid p defaultCandidateGridChars puzzleShape.alphabet (drawDigitCellContentAnnotationString centreDigit annotations) |> drawConsoleString
 
     let print_last (solution : solution) = 
         puzzleDrawGrid solution

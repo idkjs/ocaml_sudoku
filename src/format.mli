@@ -1,38 +1,65 @@
-module format
-
 open Sudoku
 open Puzzlemap
+(*F# open FSharp.Compatibility.OCaml F#*)
 
-type gridCharsRow<'a> = 
-    { l : 'a;
-      m : 'a;
-      r : 'a }
+type basic_color =
+    Black
+  | Red
+  | Green
+  | Yellow
+  | Blue
+  | Magenta
+  | Cyan
+  | White
+  | DarkRed
+  | DarkGreen
+  | DarkYellow
+  | DarkBlue
 
-type gridChars<'a> = 
-    { h : 'a;
-      v : gridCharsRow<'a>;
-      t : gridCharsRow<'a>;
-      m : gridCharsRow<'a>;
-      b : gridCharsRow<'a>;
-      n : 'a }
+(* Things we may want to write *)
+type consoleChar = 
+    | CNil
+    | CChar of char
+    | CStr of string
+    | ColouredChar of char * basic_color
+    | ColouredString of string * basic_color
+    | NL
 
-type candidateGridCharsRow<'a> = 
-    { mi : 'a;
-      x : gridCharsRow<'a> }
+type consoleString = consoleChar list
 
-type candidateGridChars<'a> = 
-    { h : 'a;
-      hi : 'a;
-      v : gridCharsRow<'a>;
-      vi : 'a;
-      t : candidateGridCharsRow<'a>;
-      m : candidateGridCharsRow<'a>;
-      mi : candidateGridCharsRow<'a>;
-      b : candidateGridCharsRow<'a>;
-      n : 'a }
+(* Printing a row, we need special characters at left, in the middle and on the right *)
+type gridCharsRow = 
+    { l : consoleString;
+      m : consoleString;
+      r : consoleString }
 
-val printLine : cells -> (cell -> 'c) -> 'c list
+(* Printing a grid, we need special rows at top, in the middle and on the bottom
+ Also, horizontal and vertical spacers *)
+type gridChars = 
+    { h : consoleString;
+      v : gridCharsRow;
+      t : gridCharsRow;
+      m : gridCharsRow;
+      b : gridCharsRow;
+      n : consoleString }
 
-val printGrid : puzzleMap -> gridChars<seq<'c>> -> (cell -> 'c) -> seq<'c>
+type candidateGridCharsRow = 
+    { mi : consoleString;
+      x : gridCharsRow }
 
-val printCandidateGrid : puzzleMap -> candidateGridChars<seq<'c>> -> digits -> (cell -> digit -> 'c) -> seq<'c>
+type candidateGridChars = 
+    { h : consoleString;
+      hi : consoleString;
+      v : gridCharsRow;
+      vi : consoleString;
+      t : candidateGridCharsRow;
+      m : candidateGridCharsRow;
+      mi : candidateGridCharsRow;
+      b : candidateGridCharsRow;
+      n : consoleString }
+
+val printLine : cells -> (cell -> consoleString) -> consoleString
+
+val printGrid : puzzleMap -> gridChars -> (cell -> consoleString) -> consoleString
+
+val printCandidateGrid : puzzleMap -> candidateGridChars -> digits -> (cell -> digit -> consoleString) -> consoleString
