@@ -1,5 +1,6 @@
 open Sudoku
 open Puzzlemap
+open Hint
 
 let nakedSingleCell (p : puzzleMap) (cellCandidates : cellCandidates) (cell : cell) : Hint.description option =
     let candidates = CellCandidates.get cellCandidates cell in

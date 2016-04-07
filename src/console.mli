@@ -1,9 +1,6 @@
 open Sudoku
 open Format
 
-val defaultGridChars : gridChars
-
-val defaultCandidateGridChars : candidateGridChars
 
 val drawDigitCellContents : digit option -> cellContents -> consoleChar
 

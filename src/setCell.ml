@@ -1,5 +1,6 @@
 open Sudoku
 open Puzzlemap
+open Hint
 
 let apply (p : puzzleMap) (value : value) (current : current) : current = 
 

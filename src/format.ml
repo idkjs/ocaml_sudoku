@@ -21,8 +21,10 @@ type consoleChar =
     | CNil
     | CChar of char
     | CStr of string
+    | CDigit of digit
     | ColouredChar of char * basic_color
     | ColouredString of string * basic_color
+    | ColouredDigit of digit * basic_color
     | NL
 
 type consoleString = consoleChar list
@@ -63,7 +65,8 @@ let konst x _ = x
 let printLine (cells : cells) (digitTo : cell -> consoleString) : consoleString = 
     cells
     |> Cells.toList
-    |> List.collect digitTo
+    |> List.map digitTo
+    |> List.concat
 
 (* Combine fences with posts (there's one more fence than posts: f p f p ... p f) *)
 let simpleInterleave (fenceToSeq : 'a -> consoleString) (post : consoleString) (fences : 'a list) : consoleString = 
@@ -111,7 +114,11 @@ let printGrid (p : puzzleMap) (gridChars : gridChars) (digitTo : cell -> console
 
     let doPrintBand : band -> consoleString = printBand p doPrintRow [] in
 
-    let r : consoleString = List.collect (konst gridChars.h) (Smap.get Stack.comparer p.stackColumns p.stacks.[0]) in
+    let r : consoleString =
+        (Smap.get Stack.comparer p.stackColumns (List.hd p.stacks))
+        |> List.map (konst gridChars.h)
+        |> List.concat
+        in
 
     let printHorizontal (g : gridCharsRow) : consoleString = sinterleave (konst r) g.l g.m g.r gridChars.n p.stacks in
 
@@ -123,25 +130,39 @@ let printGrid (p : puzzleMap) (gridChars : gridChars) (digitTo : cell -> console
 
 let printCandidateGrid (p : puzzleMap) (candidateGridChars : candidateGridChars) (alphabet : digits) (draw_cell : cell -> digit -> consoleString) : consoleString = 
 
-    let d : consoleString = List.collect (konst candidateGridChars.h) (Smap.get Stack.comparer p.stackColumns p.stacks.[0]) in
-    let i : consoleString = List.collect (konst candidateGridChars.hi) (Smap.get Stack.comparer p.stackColumns p.stacks.[0]) in
+    let d : consoleString =
+        Smap.get Stack.comparer p.stackColumns (List.hd p.stacks)
+        |> List.map (konst candidateGridChars.h)
+        |> List.concat
+        in
+
+    let i : consoleString =
+        Smap.get Stack.comparer p.stackColumns (List.hd p.stacks)
+        |> List.map (konst candidateGridChars.hi)
+        |> List.concat
+        in
 
     let printFullHorizontal (x : candidateGridCharsRow) (i : consoleString) : consoleString = 
-        let s = simpleInterleave (konst i) x.mi (Smap.get Stack.comparer p.stackColumns p.stacks.[0]) in
+        let s = simpleInterleave (konst i) x.mi (Smap.get Stack.comparer p.stackColumns (List.hd p.stacks)) in
 
         sinterleave (konst s) x.x.l x.x.m x.x.r candidateGridChars.n p.stacks
         in
 
-    let c : int = List.length (Smap.get Stack.comparer p.stackColumns p.stacks.[0]) in
+    let c : int = List.length (Smap.get Stack.comparer p.stackColumns (List.hd p.stacks)) in
     let s : digit list = Digits.toList alphabet in
     
     let ss : digit list list = 
-        Sset.range 0 (p.stacks.Length - 1)
-        |> List.map (fun i -> Seq.skip (i * c) s |> Seq.take c |> Seq.toList)
+        Sset.range 0 (List.length p.stacks - 1)
+        |> List.map (fun i -> Sset.drop (i * c) s |> Sset.take c)
         in
 
     let doPrintColumn (digits : digit list) : row -> column -> consoleString = 
-        let doPrintCell : cell -> consoleString = fun cell -> List.collect (fun digit -> draw_cell cell digit) digits in
+        let doPrintCell : cell -> consoleString =
+            fun cell ->
+                digits
+                |> List.map (fun digit -> draw_cell cell digit)
+                |> List.concat
+                in
         printColumn doPrintCell
         in
 
@@ -151,8 +172,9 @@ let printCandidateGrid (p : puzzleMap) (candidateGridChars : candidateGridChars)
 
     let doPrintRow (row : row) : consoleString = 
         ss
-        |> List.collect
-            (fun digits -> printRow (doPrintStack digits row) candidateGridChars.v candidateGridChars.n p.stacks) 
+        |> List.map
+            (fun digits -> printRow (doPrintStack digits row) candidateGridChars.v candidateGridChars.n p.stacks)
+        |> List.concat
         in
 
     let t : consoleString = printFullHorizontal candidateGridChars.t d in

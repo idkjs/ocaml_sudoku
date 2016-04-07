@@ -3,19 +3,21 @@ open Puzzlemap
 
 (* Load a sudoku given as a single line of gridSize*gridSize characters *)
 let loadPuzzle (cells : cells) (alphabetisedLine : digit option list) : given =
-    List.zip (Cells.toList cells) alphabetisedLine
-    |> Given
+    Given (Sset.zip (Cells.toList cells) alphabetisedLine)
 
 let load (puzzleShape : puzzleShape) (sudoku : string) : solution = 
 
     let charToDigit (trialDigit : char) : digit option = 
         let compareAlpha (Digit charDigit) = trialDigit = charDigit in
-        List.tryFind compareAlpha (Digits.toList puzzleShape.alphabet)
+        let digits = Digits.toList puzzleShape.alphabet in
+        if List.exists compareAlpha digits then
+            Some (List.find compareAlpha digits)
+        else None
         in
 
-    let alphabetisedLine =
+    let alphabetisedLine : digit option list =
         sudoku
-        |> List.ofSeq
+        |> Sset.explode
         |> List.map charToDigit
         in
 
@@ -25,6 +27,6 @@ let load (puzzleShape : puzzleShape) (sudoku : string) : solution =
 
     let current = Solution.givenToCurrent p.cells given puzzleShape.alphabet in
 
-    { solution.given = given;
+    { given = given;
       current = current;
       steps = [ Load sudoku ] }

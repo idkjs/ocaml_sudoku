@@ -104,8 +104,8 @@
     <Compile Include="src\command.ml" />
     <Compile Include="src\load.mli" />
     <Compile Include="src\load.ml" />
-    <Compile Include="src\console_win.fsi" />
-    <Compile Include="src\console_win.fs" />
+    <Compile Include="src\console_win.mli" />
+    <Compile Include="src\console_win.ml" />
     <Compile Include="tests\test_core.ml" />
     <Compile Include="tests\test_naked.ml" />
     <Compile Include="tests\test_full_house.ml" />

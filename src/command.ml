@@ -1,9 +1,8 @@
 open Sudoku
 open Puzzlemap
-
+open Hint
 open Console
 open Format
-
 (*F# open FSharp.Compatibility.OCaml F#*)
 
 type parse_column_or_row_results =
@@ -44,17 +43,21 @@ let parseCell (gridSize : int) (cells : cells) (termColumn : string) (termRow : 
 
     match (parsedCol, parsedRow) with
     | (CROk col, CROk row) ->
-        cells
-        |> Cells.toList
-        |> List.find (fun cell -> cell.col = (Column.make col) && cell.row = (Row.make row))
-        |> COk
+        let cell =
+            cells
+            |> Cells.toList
+            |> List.find (fun cell -> cell.col = (Column.make col) && cell.row = (Row.make row))
+            in
+        COk cell
     | (CRError _, CROk row) -> CColError (parsedCol, row)
     | (CROk col, CRError _) -> CRowError (col, parsedRow)
     | (CRError _, CRError _) -> CColRowError (parsedCol, parsedRow)
 
 let charToCandidate (digits : digits) (trialDigit : char) : digit option = 
     let compareAlpha (Digit charDigit) = trialDigit = charDigit in
-    List.tryFind compareAlpha (Digits.toList digits)
+    if List.exists compareAlpha (Digits.toList digits) then
+        Some (List.find compareAlpha (Digits.toList digits))
+    else None
 
 type parse_value_result =
     | VOk of digit
@@ -69,8 +72,8 @@ let parse_value_result_to_string (r : parse_value_result) : string =
 
 (* find an element of the alphabet *)
 let parseValue (digits : digits) (term : string) : parse_value_result = 
-    if term.Length = 1 then
-        match charToCandidate digits (term.Chars 0) with
+    if String.length term = 1 then
+        match charToCandidate digits (String.get term 0) with
         | Some d -> VOk d
         | None -> VErrorInvalid (term, (Digits.to_string digits))
     else VErrorTooMany term
@@ -80,12 +83,11 @@ type focus_command_result =
     | FCWrongTermCount of int
 
 let focusCommandParse (s: puzzleShape) (item : string) : focus_command_result =
-    let terms = item.Split(' ') in
-    if terms.Length = 2 then 
-        parseValue s.alphabet terms.[1]
-        |> FCOk
+    let terms = Sset.split_char ' ' item in
+    if List.length terms = 2 then 
+        FCOk (parseValue s.alphabet (List.nth terms 1))
     else
-        FCWrongTermCount terms.Length
+        FCWrongTermCount (List.length terms)
 
 let focusCommandHintDescription (p : puzzleMap) (digit : digit) : Hint.description =
     { primaryHouses = Houses.empty;
@@ -101,15 +103,15 @@ type set_cell_command_parse_result =
     | SCCWrongTermCount of int
 
 let setCellCommandParse (s: puzzleShape) (item : string) (p : puzzleMap) : set_cell_command_parse_result = 
-    let terms = item.Split(' ') in
-    if terms.Length = 4 then 
-        let parsedCell = parseCell (Digits.count s.alphabet) p.cells terms.[1] terms.[2] in
-        let parsedValue = parseValue s.alphabet terms.[3] in
+    let terms = Sset.split_char ' ' item in
+    if List.length terms = 4 then 
+        let parsedCell = parseCell (Digits.count s.alphabet) p.cells (List.nth terms 1) (List.nth terms 2) in
+        let parsedValue = parseValue s.alphabet (List.nth terms 3) in
 
         match (parsedCell, parsedValue) with
         | (COk cell, VOk value) -> SCCOk (Value.make cell value)
         | _ -> SCCBadParams (parsedCell, parsedValue)
-    else SCCWrongTermCount (terms.Length)
+    else SCCWrongTermCount (List.length terms)
 
 type set_cell_command_check_result =
     | SSCROk of value
@@ -137,15 +139,15 @@ type clear_candidate_command_parse_result =
     | CCCPRWrongItemCount of int
 
 let candidateClearCommandParse (s: puzzleShape) (item : string) (p : puzzleMap) : clear_candidate_command_parse_result = 
-    let terms = item.Split(' ') in
-    if terms.Length = 4 then 
-        let parsedCell = parseCell (Digits.count s.alphabet) p.cells terms.[1] terms.[2] in
-        let parsedDigit = parseValue s.alphabet terms.[3] in
+    let terms = Sset.split_char ' ' item in
+    if List.length terms = 4 then 
+        let parsedCell = parseCell (Digits.count s.alphabet) p.cells (List.nth terms 1) (List.nth terms 2) in
+        let parsedDigit = parseValue s.alphabet (List.nth terms 3) in
 
         match (parsedCell, parsedDigit) with
         | (COk cell, VOk digit) -> CCCPROk (Candidate.make cell digit)
         | _ -> CCCPRParseError (parsedCell, parsedDigit)
-    else CCCPRWrongItemCount (terms.Length)
+    else CCCPRWrongItemCount (List.length terms)
 
 type clear_candidate_command_check_result =
     | CCCCROk of candidate

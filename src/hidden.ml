@@ -1,5 +1,6 @@
 open Sudoku
 open Puzzlemap
+open Hint
 (*F# open FSharp.Compatibility.OCaml F#*)
 
 let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (candidateSubset : digits) (primaryHouse : house) : Hint.description option = 

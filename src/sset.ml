@@ -5,6 +5,8 @@ Bits borrowed from:
 https://www.cl.cam.ac.uk/~jrh13/atp/OCaml/lib.ml
 https://hackage.haskell.org/package/base-4.8.2.0/docs/src/GHC.List.html
 *)
+(*F# open FSharp.Compatibility.OCaml F#*)
+
 let rec funpow n f x =
   if n < 1 then x else funpow (n-1) f (f x)
 
@@ -12,6 +14,12 @@ let rec funpow n f x =
 let rec funpow2 (n : int) (f : 'a -> unit) (x : 'a) =
   if n < 1 then x else f(x); funpow2 (n-1) f x
 *)
+let rec take (n : int) (l : 'a list) : 'a list =
+    if n <= 0 then []
+    else
+        match l with
+        | [] -> []
+        | x :: xs -> x :: take (n - 1) xs
 
 let rec drop (n : int) (l : 'a list) : 'a list =
     if n <= 0 then l
@@ -215,3 +223,30 @@ let rec setSubsets (as' : 'a list) (size : int) : 'a list list =
 let rec range i j = if i > j then [] else i :: (range (i+1) j)
 
 let id (x : 'a) : 'a = x
+
+let rec zip l1 l2 =
+  match (l1,l2) with
+        ([],[]) -> []
+      | (h1::t1,h2::t2) -> (h1,h2)::(zip t1 t2)
+      | _ -> failwith "zip"
+
+let explode (s : string) =
+  let rec exp i l =
+    if i < 0 then l else exp (i - 1) (s.[i] :: l) in
+  exp (String.length s - 1) []
+
+(* https://www.rosettacode.org/wiki/Tokenize_a_string#OCaml *)
+let split_char sep str =
+  let string_index_from i =
+    try Some (String.index_from str i sep)
+    with Not_found -> None
+  in
+  let rec aux i acc = match string_index_from i with
+    | Some i' ->
+        let w = String.sub str i (i' - i) in
+        aux (succ i') (w::acc)
+    | None ->
+        let w = String.sub str i (String.length str - i) in
+        List.rev (w::acc)
+  in
+  aux 0 []

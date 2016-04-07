@@ -1,5 +1,6 @@
 open Sudoku
 open Puzzlemap
+open Hint
 (*F# open FSharp.Compatibility.OCaml F#*)
 
 let makeHints (p : puzzleMap) (cellCandidates : cellCandidates) pointerCells primaryHouses secondaryHouses candidate : Hint.description option = 
@@ -21,13 +22,16 @@ let makeHints (p : puzzleMap) (cellCandidates : cellCandidates) pointerCells pri
         |> List.map (fun cr -> CandidateReduction.make cr.cell (Digits.singleton candidate))
         in
 
-    if List.length candidatesReductions > 0 then 
-        Some { primaryHouses = primaryHouses;
-               secondaryHouses = secondaryHouses;
-               candidateReductions = candidatesReductions;
-               setCellValueAction = None;
-               pointers = pointers;
-               focus = Digits.empty }
+    if List.length candidatesReductions > 0 then
+        let hint : Hint.description =
+            { primaryHouses = primaryHouses;
+              secondaryHouses = secondaryHouses;
+              candidateReductions = candidatesReductions;
+              setCellValueAction = None;
+              pointers = pointers;
+              focus = Digits.empty }
+            in
+        Some hint
     else None
 
 let xWingsPerHouseCandidate (p : puzzleMap) (cellCandidates : cellCandidates) (house1 : house) (house2 : house) (candidate : digit) = 
@@ -332,8 +336,6 @@ let yWingsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (row1 : row
                                   HColumn col2; ]
                                 |> Houses.ofList
                                 in
-
-                            let primaryHouseCells = p.housesCells primaryHouses in
 
                             let desc : Hint.description =
                                 { primaryHouses = primaryHouses;

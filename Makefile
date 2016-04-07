@@ -14,7 +14,10 @@ SOURCES = \
   src/naked.mli src/naked.ml \
   src/intersection.mli src/intersection.ml \
   src/wing.mli src/wing.ml \
-  src/format.mli
+  src/format.mli src/format.ml \
+  src/console.mli src/console.ml \
+  src/command.mli src/command.ml \
+  src/load.mli src/load.ml
 
 OCAMLMAKEFILE = OCamlMakefile
 include $(OCAMLMAKEFILE)

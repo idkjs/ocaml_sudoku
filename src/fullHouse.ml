@@ -3,6 +3,7 @@
 
 open Sudoku
 open Puzzlemap
+open Hint
 (*F# open FSharp.Compatibility.OCaml F#*)
 
 let fullHousePerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primaryHouse : house) : Hint.description option =

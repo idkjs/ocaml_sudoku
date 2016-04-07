@@ -1,5 +1,6 @@
 open Sudoku
 open Puzzlemap
+open Hint
 
 type cellHouses = (cell * house list) list
 

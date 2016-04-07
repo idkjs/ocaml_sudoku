@@ -1,5 +1,6 @@
 open Sudoku
 open Puzzlemap
+open Hint
 
 let find  (p : puzzleMap) (current : current) : candidateReduction list = 
 

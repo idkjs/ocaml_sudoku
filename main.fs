@@ -1,9 +1,6 @@
 module main
 
 open System
-open System.Diagnostics
-open System.Runtime.InteropServices
-open System.Text
 
 open Sudoku
 open Puzzlemap
@@ -11,16 +8,9 @@ open Puzzlemap
 open Command
 open Console
 open Format
-open console_win
+open Console_win
 
 (*F# open FSharp.Compatibility.OCaml F#*)
-
-[<DllImport("user32.dll")>]
-extern bool ShowWindow(System.IntPtr hWnd, int cmdShow)
-
-let Maximize() = 
-    let p = Process.GetCurrentProcess()
-    ShowWindow(p.MainWindowHandle, 3) (* SW_MAXIMIZE = 3 *)
 
 let parse (p : puzzleMap) (item : string) (solution : solution) (puzzle : puzzleShape) 
     (cellCandidates : cellCandidates) puzzleDrawFull2 print_last : solution * Hint.description list = 
@@ -229,13 +219,12 @@ let repl (sudoku : string) (puzzleShape : puzzleShape) =
     Seq.tryPick (run solution puzzleShape puzzleDrawCandidateGridAnnotations print_last puzzlePrintHint) 
         readlines |> ignore
 
-Maximize() |> ignore
+maximise_console()
 
 let all_core_tests = Test_core.all_tests in
 
 all_core_tests
 |> List.iter (fun test -> test())
-
 
 (* Input puzzle *)
 Console.WriteLine "1........2........3........4........5........6........7........8........9........"

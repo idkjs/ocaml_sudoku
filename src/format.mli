@@ -21,8 +21,10 @@ type consoleChar =
     | CNil
     | CChar of char
     | CStr of string
+    | CDigit of digit
     | ColouredChar of char * basic_color
     | ColouredString of string * basic_color
+    | ColouredDigit of digit * basic_color
     | NL
 
 type consoleString = consoleChar list
