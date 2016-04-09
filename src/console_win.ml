@@ -1,3 +1,4 @@
+open Sudoku
 open Format
 open System
 open System.Diagnostics
@@ -10,23 +11,23 @@ let cs (c : char) : consoleString = [CChar c]
 
 (* Some predefined characters - for smaller grid *)
 let defaultGridChars : gridChars = 
-    { h = cs '\xC4' (*'─'*);
+    { h = cs '─';
       v = 
-          { l = cs '\xB3' (*'│'*);
-            m = cs '\xB3' (*'│'*);
-            r = cs '\xB3' (*'│'*) };
+          { l = cs '│';
+            m = cs '│';
+            r = cs '│' };
       t = 
-          { l = cs '\xDA' (*'┌'*);
-            m = cs '\xC2' (*'┬'*);
-            r = cs '\xBF' (*'┐'*) };
+          { l = cs '┌';
+            m = cs '┬';
+            r = cs '┐' };
       m = 
-          { l = cs '\xC3' (*'├'*);
-            m = cs '\xC5' (*'┼'*);
-            r = cs '\xB4' (*'┤'*) };
+          { l = cs '├';
+            m = cs '┼';
+            r = cs '┤' };
       b = 
-          { l = cs '\xC0' (*'└'*);
-            m = cs '\xC1' (*'┴'*);
-            r = cs '\xD9' (*'┘'*) };
+          { l = cs '└';
+            m = cs '┴';
+            r = cs '┘' };
       n = [NL] }
 
 (* Some predefined characters - for smaller grid *)
@@ -37,7 +38,7 @@ let defaultCandidateGridChars : candidateGridChars =
           { l = cs '║';
             m = cs '║';
             r = cs '║' };
-      vi = cs '\xB3' (*'│'*);
+      vi = cs '│';
       t = 
           { mi = cs '╦';
             x = 
@@ -81,7 +82,7 @@ let basic_to_system (color : basic_color) : ConsoleColor =
 
 
 (* Change the console colour to write a string *)
-let consoleWriteColor (value : 'a) consoleColour = 
+let consoleWriteColor (consoleColour : ConsoleColor) (value : 'a) = 
     let foregroundColour = System.Console.ForegroundColor in
     try 
         let _ = System.Console.ForegroundColor <- consoleColour in
@@ -94,11 +95,13 @@ let drawConsoleChar (consoleChar : consoleChar) =
     | CNil -> ()
     | CChar c -> Console.Write c
     | CStr c -> Console.Write c
-    | ColouredChar(c, basic_color) -> consoleWriteColor c (basic_to_system basic_color)
-    | ColouredString(c, basic_color) -> consoleWriteColor c (basic_to_system basic_color)
+    | CDigit (Digit d) -> Console.Write d
+    | ColouredChar(c, basic_color) -> consoleWriteColor (basic_to_system basic_color) c
+    | ColouredString(c, basic_color) -> consoleWriteColor (basic_to_system basic_color) c
+    | ColouredDigit ((Digit d), basic_color) -> consoleWriteColor (basic_to_system basic_color) d
     | NL -> Console.WriteLine ""
 
-let drawConsoleString (consoleString : consoleString) : Unit =
+let drawConsoleString (consoleString : consoleString) : unit =
     List.iter drawConsoleChar consoleString
 
 let maximise_console() : unit =

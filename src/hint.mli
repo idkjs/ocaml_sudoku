@@ -9,6 +9,10 @@ type description =
       pointers : candidateReduction list;
       focus : digits }
 
+module Description : sig
+    val to_string : description -> string
+end
+
 (* To draw a cell we may want to display extra information... *)
 type annotation = 
     { given : digit option;

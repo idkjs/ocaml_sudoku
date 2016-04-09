@@ -17,7 +17,9 @@ SOURCES = \
   src/format.mli src/format.ml \
   src/console.mli src/console.ml \
   src/command.mli src/command.ml \
-  src/load.mli src/load.ml
+  src/load.mli src/load.ml \
+  src/console_nix.mli src/console_nix.ml \
+  main.ml
 
 OCAMLMAKEFILE = OCamlMakefile
 include $(OCAMLMAKEFILE)

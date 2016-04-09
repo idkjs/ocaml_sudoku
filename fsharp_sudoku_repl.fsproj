@@ -106,10 +106,12 @@
     <Compile Include="src\load.ml" />
     <Compile Include="src\console_win.mli" />
     <Compile Include="src\console_win.ml" />
+    <Compile Include="src\console_nix.mli" />
+    <Compile Include="src\console_nix.ml" />
     <Compile Include="tests\test_core.ml" />
     <Compile Include="tests\test_naked.ml" />
     <Compile Include="tests\test_full_house.ml" />
-    <Compile Include="main.fs" />
+    <Compile Include="main.ml" />
     <None Include="App.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
