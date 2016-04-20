@@ -118,7 +118,7 @@ let parse (p : puzzleMap) (item : string) (solution : solution) (puzzle : puzzle
             (solution, hints)
         | None -> (solution, [])
 
-let printHint (solution : solution) (p : puzzleMap) drawHint (index : int) (hint : Hint.description) : unit = 
+let printHint (p : puzzleMap) drawHint (solution : solution) (index : int) (hint : Hint.description) : unit = 
 
     Printf.printf "%d: %s\n" index (Hint.Description.to_string hint);
 
@@ -139,7 +139,7 @@ let run (solution : solution ref) (puzzle : puzzleShape)
             parse p item !solution puzzle cellCandidates puzzleDrawCandidateGridAnnotations print_last in
         solution := soln;
 
-        List.iteri puzzlePrintHint hints;
+        List.iteri (puzzlePrintHint soln) hints;
 
         None
 
@@ -214,7 +214,7 @@ let repl (sudoku : string) (puzzleShape : puzzleShape) : unit =
     else Console.WriteLine("No solutions")
 *)
 
-    let puzzlePrintHint = printHint (!solution) p puzzleDrawCandidateGridAnnotations in
+    let puzzlePrintHint = printHint p puzzleDrawCandidateGridAnnotations in
 
     let rec loop (l : string list) : string list =
         print_string ">";
@@ -260,6 +260,11 @@ let example = "2...3..7.9...1..8.5...6.9.4653871492489325761721496.....5.8.....6
 (* http://www.sudokuwiki.org/Y_Wing_Strategy *)
 (*let example = "900240000050690231020050090090700320002935607070002900069020073510079062207086009" *)
 (*let example = "273005081810302004009010200100953728792186345538724196021060500300201869080530412" *)
+
+Printf.printf "\033[38;5;208mpeach\033[0;00m\n";
+Printf.printf "\027[31;1mbright red\027[39;49;0m\n";
+Printf.printf "\027[31;7minvert red\027[39;49;0m\n";
+Printf.printf "\027[31mred\027[39;49;0m\n";
 
 repl example PuzzleShape.default';
 

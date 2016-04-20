@@ -3,65 +3,64 @@ open Format
 open Hint
 (*F# open FSharp.Compatibility.OCaml F#*)
 
-let drawDigitCellContents (firstDigit : digit option) (currentDigit : cellContents) : consoleChar = 
-    match firstDigit, currentDigit with
-    | Some s, _ -> ColouredString(Digit.to_string s, Blue)
-    | None, BigNumber s -> ColouredString(Digit.to_string s, Red)
+let drawDigitCellContents (given : digit option) (current : cellContents) : consoleChar = 
+    match given, current with
+    | Some s, _ -> ColouredDigit(s, Blue, DefaultColour)
+    | None, BigNumber s -> ColouredDigit(s, Red, DefaultColour)
     | None, PencilMarks _ -> CChar '.'
 
-let drawDigitCellString (firstDigit : digit option) (currentDigit : cellContents) : consoleString =
-    [drawDigitCellContents firstDigit currentDigit]
+let drawDigitCellString (given : digit option) (current : cellContents) : consoleString =
+    [drawDigitCellContents given current]
 
-let drawBigNumber (annotation : Hint.annotation) (s : digit) : consoleChar =
+let drawBigNumber (annotation : annotation) (digit : digit) : consoleChar =
     if annotation.primaryHintHouse then
         match annotation.given with
-        | Some _ -> ColouredString(Digit.to_string s, Cyan)
-        | None -> ColouredString(Digit.to_string s, Yellow)
+        | Some _ -> ColouredDigit(digit, Cyan, DefaultColour)
+        | None -> ColouredDigit(digit, Yellow, DefaultColour)
     else if annotation.secondaryHintHouse then
         match annotation.given with
-        | Some _ -> ColouredString(Digit.to_string s, DarkBlue)
-        | None -> ColouredString(Digit.to_string s, DarkRed)
+        | Some _ -> ColouredDigit(digit, DefaultColour, Blue)
+        | None -> ColouredDigit(digit, DefaultColour, Red)
     else
         match annotation.given with
-        | Some _ -> ColouredString(Digit.to_string s, Blue)
-        | None -> ColouredString(Digit.to_string s, Red)
+        | Some _ -> ColouredDigit(digit, Blue, DefaultColour)
+        | None -> ColouredDigit(digit, Red, DefaultColour)
 
 let drawPencilMarks (annotation : Hint.annotation) (candidate : digit) (candidates : digits) : consoleChar =
     match annotation.setValue with
     | Some vv when vv = candidate -> 
-        ColouredString(Digit.to_string candidate, Red)
+        ColouredDigit(candidate, Red, DefaultColour)
     | Some _ when Digits.contains candidate candidates -> 
-        ColouredString(Digit.to_string candidate, DarkYellow)
+        ColouredDigit(candidate, Green, DefaultColour)
     | _ ->
         (match annotation.setValueReduction with
          | Some svr when svr = candidate && Digits.contains candidate candidates -> 
-            ColouredString(Digit.to_string candidate, DarkYellow)
+            ColouredDigit(candidate, Green, DefaultColour)
          | _ ->
             (if Digits.contains candidate annotation.reductions then
-                ColouredString(Digit.to_string candidate, DarkYellow)
+                ColouredDigit(candidate, Green, DefaultColour)
              else if Digits.contains candidate annotation.pointers then
-                ColouredString(Digit.to_string candidate, Magenta)
+                ColouredDigit(candidate, Magenta, DefaultColour)
              else if Digits.contains candidate annotation.focus && Digits.contains candidate candidates then
-                ColouredString(Digit.to_string candidate, Yellow)
+                ColouredDigit(candidate, Yellow, DefaultColour)
              else if annotation.primaryHintHouse then
-                if Digits.contains candidate candidates then ColouredString(Digit.to_string candidate, DarkGreen)
+                if Digits.contains candidate candidates then ColouredDigit(candidate, Cyan, DefaultColour)
                 else CChar ' '
              else if annotation.secondaryHintHouse then
-                if Digits.contains candidate candidates then ColouredString(Digit.to_string candidate, Green)
+                if Digits.contains candidate candidates then ColouredDigit(candidate, Green, DefaultColour)
                 else CChar ' '
              else
-                if Digits.contains candidate candidates then CStr(Digit.to_string candidate)
+                if Digits.contains candidate candidates then CDigit candidate
                 else CChar ' '))
 
 let drawDigitCellContentAnnotations centreCandidate (annotations : (cell * Hint.annotation) list) (cell : cell) (candidate : digit) : consoleChar = 
 
-    let annotation' = Smap.get Cell.comparer annotations cell in
-    let isCentre = centreCandidate = candidate in
+    let annotation = Smap.get Cell.comparer annotations cell in
 
-    match annotation'.current with
-    | BigNumber _ when not isCentre -> CChar ' '
-    | BigNumber s -> drawBigNumber annotation' s
-    | PencilMarks digits -> drawPencilMarks annotation' candidate digits
+    match annotation.current with
+    | BigNumber s when centreCandidate = candidate -> drawBigNumber annotation s
+    | BigNumber _ -> CChar ' '
+    | PencilMarks digits -> drawPencilMarks annotation candidate digits
 
 let drawDigitCellContentAnnotationString (centreCandidate : digit) (annotations : (cell * Hint.annotation) list) (cell : cell) (candidate : digit) : consoleString =
     [drawDigitCellContentAnnotations centreCandidate annotations cell candidate]

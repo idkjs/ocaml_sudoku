@@ -67,6 +67,7 @@ let defaultCandidateGridChars : candidateGridChars =
 
 let basic_to_system (color : basic_color) : ConsoleColor =
     match color with
+    | DefaultColour -> ConsoleColor.White
     | Black -> ConsoleColor.Black
     | Red -> ConsoleColor.Red
     | Green -> ConsoleColor.Green
@@ -75,20 +76,30 @@ let basic_to_system (color : basic_color) : ConsoleColor =
     | Magenta -> ConsoleColor.Magenta
     | Cyan -> ConsoleColor.Cyan
     | White -> ConsoleColor.White
-    | DarkRed -> ConsoleColor.DarkRed
-    | DarkGreen -> ConsoleColor.DarkGreen
-    | DarkYellow -> ConsoleColor.DarkYellow
-    | DarkBlue -> ConsoleColor.DarkBlue
-
 
 (* Change the console colour to write a string *)
-let consoleWriteColor (consoleColour : ConsoleColor) (value : 'a) = 
-    let foregroundColour = System.Console.ForegroundColor in
-    try 
-        let _ = System.Console.ForegroundColor <- consoleColour in
+let consoleWriteColor (foreground_colour : basic_color) (background_colour : basic_color) (value : 'a) = 
+    match foreground_colour, background_colour with
+    | DefaultColour, DefaultColour ->
         System.Console.Write value
-    finally
+    | _, DefaultColour ->
+        let foregroundColour = System.Console.ForegroundColor in
+        System.Console.ForegroundColor <- basic_to_system foreground_colour;
+        System.Console.Write value;
         System.Console.ForegroundColor <- foregroundColour
+    | DefaultColour, _ ->
+        let backgroundColour = System.Console.BackgroundColor in
+        System.Console.BackgroundColor <- basic_to_system background_colour;
+        System.Console.Write value;
+        System.Console.BackgroundColor <- backgroundColour
+    | _ ->
+        let foregroundColour = System.Console.ForegroundColor in
+        let backgroundColour = System.Console.BackgroundColor in
+        System.Console.ForegroundColor <- basic_to_system foreground_colour;
+        System.Console.BackgroundColor <- basic_to_system background_colour;
+        System.Console.Write value;
+        System.Console.ForegroundColor <- foregroundColour;
+        System.Console.BackgroundColor <- backgroundColour
 
 let drawConsoleChar (consoleChar : consoleChar) = 
     match consoleChar with
@@ -96,9 +107,8 @@ let drawConsoleChar (consoleChar : consoleChar) =
     | CChar c -> Console.Write c
     | CStr c -> Console.Write c
     | CDigit (Digit d) -> Console.Write d
-    | ColouredChar(c, basic_color) -> consoleWriteColor (basic_to_system basic_color) c
-    | ColouredString(c, basic_color) -> consoleWriteColor (basic_to_system basic_color) c
-    | ColouredDigit ((Digit d), basic_color) -> consoleWriteColor (basic_to_system basic_color) d
+    | ColouredString(c, foreground_colour, background_colour) -> consoleWriteColor foreground_colour background_colour c
+    | ColouredDigit ((Digit d), foreground_colour, background_colour) -> consoleWriteColor foreground_colour background_colour d
     | NL -> Console.WriteLine ""
 
 let drawConsoleString (consoleString : consoleString) : unit =

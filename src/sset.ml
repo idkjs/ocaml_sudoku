@@ -239,7 +239,7 @@ let explode (s : string) =
 let split_char sep str =
   let string_index_from i =
     try Some (String.index_from str i sep)
-    with Not_found -> None
+    with _ -> None
   in
   let rec aux i acc = match string_index_from i with
     | Some i' ->

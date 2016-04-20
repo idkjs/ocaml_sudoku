@@ -3,6 +3,7 @@ open Puzzlemap
 (*F# open FSharp.Compatibility.OCaml F#*)
 
 type basic_color =
+    | DefaultColour
     | Black
     | Red
     | Green
@@ -11,10 +12,6 @@ type basic_color =
     | Magenta
     | Cyan
     | White
-    | DarkRed
-    | DarkGreen
-    | DarkYellow
-    | DarkBlue
 
 (* Things we may want to write *)
 type consoleChar = 
@@ -22,9 +19,8 @@ type consoleChar =
     | CChar of char
     | CStr of string
     | CDigit of digit
-    | ColouredChar of char * basic_color
-    | ColouredString of string * basic_color
-    | ColouredDigit of digit * basic_color
+    | ColouredString of string * basic_color * basic_color
+    | ColouredDigit of digit * basic_color * basic_color
     | NL
 
 type consoleString = consoleChar list
