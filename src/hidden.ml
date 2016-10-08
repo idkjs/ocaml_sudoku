@@ -70,5 +70,5 @@ let hiddenNPerHouse (count : int) (p : puzzleMap) (cellCandidates : cellCandidat
 
 let find (i : int) (p : puzzleMap) (cellCandidates : cellCandidates) : Hint.description list =
     p.houses
-    |> List.map (hiddenNPerHouse i p cellCandidates)
+    |> Houses.map (hiddenNPerHouse i p cellCandidates)
     |> List.concat

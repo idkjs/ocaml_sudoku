@@ -13,7 +13,6 @@ module Columns : sig
   val map : (column -> 'b) -> columns -> 'b list
   val mapi : (int -> column -> 'b) -> columns -> 'b list
   val to_list : columns -> column list
-  val list_to_string : column list -> string
   val to_string : columns -> string
   val union : columns -> columns -> columns
 end
@@ -31,7 +30,6 @@ module Rows : sig
   val map : (row -> 'b) -> rows -> 'b list
   val mapi : (int -> row -> 'b) -> rows -> 'b list
   val to_list : rows -> row list
-  val list_to_string : row list -> string
   val to_string : rows -> string
   val union : rows -> rows -> rows
 end
@@ -55,7 +53,6 @@ module Cells : sig
   val remove : cell -> cells -> cells
   val singleton : cell -> cells
   val to_list : cells -> cell list
-  val list_to_string : cell list -> string
   val to_string : cells -> string
   val union : cells -> cells -> cells
   val union_many : cells list -> cells
@@ -67,7 +64,7 @@ module Stack : sig
   val to_string : stack -> string
 end
 module Stacks : sig
-  val list_to_string : stack list -> string
+  val to_string : stack list -> string
 end
 type boxWidth = int
 type band = | BBand of int
@@ -77,7 +74,7 @@ module Band : sig
   val to_string : band -> string
 end
 module Bands : sig
-  val list_to_string : band list -> string
+  val to_string : band list -> string
 end
 type boxHeight = int
 type box =
@@ -89,7 +86,7 @@ module Box : sig
   val to_string : box -> string
 end
 module Boxes : sig
-  val list_to_string : box list -> string
+  val to_string : box list -> string
 end
 type line =
   | LColumn of column
@@ -107,14 +104,13 @@ module House : sig
 end
 type houses = | CHouses of house list
 module Houses : sig
+  val choose : (house -> 'b option) -> houses -> 'b list
   val drop : int -> houses -> houses
   val empty : houses
   val make : house list -> houses
   val map : (house -> 'b) -> houses -> 'b list
   val mapi : (int -> house -> 'b) -> houses -> 'b list
   val singleton : house -> houses
-  val to_list : houses -> house list
-  val list_to_string : house list -> string
   val to_string : houses -> string
 end
 type digit = | Digit of char
@@ -128,19 +124,21 @@ module Digits : sig
   val contains : digit -> digits -> bool
   val count : digits -> int
   val difference : digits -> digits -> digits
+  val drop : int -> digits -> digits
   val empty : digits
   val filter : (digit -> bool) -> digits -> digits
   val first : digits -> digit
   val intersect : digits -> digits -> digits
   val is_subset : digits -> digits -> bool
   val make : digit list -> digits
+  val map : (digit -> 'b) -> digits -> 'b list
   val nth : digits -> int -> digit
   val remove : digit -> digits -> digits
   val singleton : digit -> digits
+  val take : int -> digits -> digits
   val to_list : digits -> digit list
   val union : digits -> digits -> digits
   val union_many : digits list -> digits
-  val list_to_string : digit list -> string
   val to_string : digits -> string
 end
 type puzzleShape =

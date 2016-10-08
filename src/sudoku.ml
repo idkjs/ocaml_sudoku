@@ -52,14 +52,10 @@ module Columns = struct
     let to_list (CColumns cs : columns) : column list =
         cs
 
-    let list_to_string (cs : column list) : string =
+    let to_string (CColumns cs : columns) : string =
         cs
         |> List.map Column.to_string
         |> String.concat ","
-
-    let to_string (CColumns cs : columns) : string =
-        cs
-        |> list_to_string
 
     let union (CColumns cs : columns) (CColumns cs' : columns) : columns =
         Sset.union Column.comparer cs cs'
@@ -114,14 +110,10 @@ module Rows = struct
     let to_list (CRows rs : rows) : row list =
         rs
 
-    let list_to_string (rs : row list) : string =
+    let to_string (CRows rs : rows) : string =
         rs
         |> List.map Row.to_string
         |> String.concat ","
-
-    let to_string (CRows rs : rows) : string =
-        rs
-        |> list_to_string
 
     let union (CRows rs : rows) (CRows rs' : rows) : rows =
         Sset.union Row.comparer rs rs'
@@ -199,14 +191,10 @@ module Cells = struct
     let to_list (CCells cs : cells) : cell list =
         cs
 
-    let list_to_string (cs : cell list) : string =
+    let to_string (CCells cs : cells) : string =
         cs
         |> List.map Cell.to_string
         |> String.concat ","
-
-    let to_string (CCells cs : cells) : string =
-        cs
-        |> list_to_string
 
     let union (CCells cs : cells) (CCells cs' : cells) : cells =
         Sset.union Cell.comparer cs cs'
@@ -240,7 +228,7 @@ module Stack = struct
 end
 
 module Stacks = struct
-    let list_to_string (ss : stack list) : string =
+    let to_string (ss : stack list) : string =
         ss
         |> List.map Stack.to_string
         |> String.concat ","
@@ -266,7 +254,7 @@ module Band = struct
 end
 
 module Bands = struct
-    let list_to_string (bs : band list) : string =
+    let to_string (bs : band list) : string =
         bs
         |> List.map Band.to_string
         |> String.concat ","
@@ -297,7 +285,7 @@ module Box = struct
 end
 
 module Boxes = struct
-    let list_to_string (bs : box list) : string =
+    let to_string (bs : box list) : string =
         bs
         |> List.map Box.to_string
         |> String.concat ","
@@ -350,6 +338,10 @@ module Houses = struct
     let make' (l : house list) : houses =
         CHouses l
 
+    let choose (map : house -> 'b option) (CHouses hs : houses) : 'b list =
+        hs
+        |> Sset.choose map
+
     let drop (n : int) (CHouses hs : houses) : houses =
         hs
         |> Sset.drop n
@@ -376,17 +368,10 @@ module Houses = struct
         [ h ]
         |> make'
 
-    let to_list (CHouses hs : houses) : house list =
-        hs
-
-    let list_to_string (hs : house list) : string =
+    let to_string (CHouses hs : houses) : string =
         hs
         |> List.map House.to_string
         |> String.concat ","
-
-    let to_string (CHouses hs : houses) : string =
-        hs
-        |> list_to_string
 end
 
 (* Each cell in the grid contains a Digit, usually numbers 1..9 *)
@@ -425,6 +410,11 @@ module Digits = struct
         Sset.subtract Digit.comparer ds ds'
         |> make'
 
+    let drop (n : int) (CDigits ds : digits) : digits =
+        ds
+        |> Sset.drop n
+        |> make'
+
     let empty : digits =
         []
         |> make'
@@ -454,6 +444,10 @@ module Digits = struct
         |> Sset.setify Digit.comparer
         |> make'
 
+    let map (map : digit -> 'b) (CDigits ds : digits) : 'b list =
+        ds
+        |> List.map map
+
     let remove (d : digit) (CDigits ds : digits) : digits = 
         ds
         |> Sset.remove Digit.comparer d
@@ -461,6 +455,11 @@ module Digits = struct
 
     let singleton (d : digit) : digits =
         [ d ]
+        |> make'
+
+    let take (n : int) (CDigits ds : digits) : digits =
+        ds
+        |> Sset.take n
         |> make'
 
     let to_list (CDigits ds : digits) : digit list =
@@ -476,14 +475,10 @@ module Digits = struct
         |> Sset.unions Digit.comparer
         |> make'
 
-    let list_to_string (ds : digit list) : string =
+    let to_string (CDigits ds : digits) : string =
         ds
         |> List.map Digit.to_string
         |> String.concat ","
-
-    let to_string (CDigits ds : digits) : string =
-        ds
-        |> list_to_string
 end
 
 (* A sudoku is defined by the overall grid size (it is always square)

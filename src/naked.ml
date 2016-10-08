@@ -75,7 +75,7 @@ let nakedNPerHouse (count : int) (p : puzzleMap) (cellCandidates : cellCandidate
 
 let nakedN (i : int) (p : puzzleMap) (cellCandidates : cellCandidates) : Hint.description list =
     p.houses
-    |> List.map (nakedNPerHouse i p cellCandidates )
+    |> Houses.map (nakedNPerHouse i p cellCandidates )
     |> List.concat
 
 let find (i : int) (p : puzzleMap) (cellCandidates : cellCandidates) : Hint.description list =

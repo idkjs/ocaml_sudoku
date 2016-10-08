@@ -128,7 +128,7 @@ type puzzleMap =
         stacks : stack list;
         bands : band list;
         boxes : box list;
-        houses : house list;
+        houses : houses;
         (* for a column, return the cells in it *)
         columnCells : (column * cells) list;
         (* for a row, return the cells in it *)
@@ -201,7 +201,7 @@ let tPuzzleMap (puzzleShape : puzzleShape) : puzzleMap =
         stacks = _stacks;
         bands = _bands;
         boxes = _boxes;
-        houses = _houses;
+        houses = _houses |> Houses.make;
         columnCells = _columnCellsLookup;
         rowCells = _rowCellsLookup;
         columnStack = _columnStackLookup;

@@ -12,7 +12,7 @@ let twoByFourPuzzleSpec =
             |> List.map (fun i -> (char) i + '0' |> Digit)
             |> Digits.make }
 
-let pick_some<'a> (as' : 'a list) : 'a list * 'a list =
+let pick_some (as' : 'a list) : 'a list * 'a list =
     let picked =
         [9; 5; 2; 5; 5; 5; 1; 8; 9; 3; 5; 6]
         |> List.map (fun i -> List.nth as' (i - 1))
@@ -47,10 +47,14 @@ let ``Can make column sets``() =
     let picked' =
         picked
         |> Columns.make
-        |> Columns.to_list
         in
 
-    Assert.AreEqual(expected, picked', "{0}!={1}", Columns.list_to_string expected, Columns.list_to_string picked')
+    let expected' =
+        expected
+        |> Columns.make
+        in
+
+    Assert.AreEqual(expected, picked', "{0}!={1}", Columns.to_string expected', Columns.to_string picked')
 
 [<Test>]
 let ``Can make row sets``() =
@@ -61,10 +65,14 @@ let ``Can make row sets``() =
     let picked' =
         picked
         |> Rows.make
-        |> Rows.to_list
         in
 
-    Assert.AreEqual(expected, picked', "{0}!={1}", Rows.list_to_string expected, Rows.list_to_string picked')
+    let expected' =
+        expected
+        |> Rows.make
+        in
+
+    Assert.AreEqual(expected, picked', "{0}!={1}", Rows.to_string expected', Rows.to_string picked')
 
 [<Test>]
 let ``Can make cell sets``() =
@@ -75,10 +83,14 @@ let ``Can make cell sets``() =
     let picked' =
         picked
         |> Cells.make
-        |> Cells.to_list
         in
 
-    Assert.AreEqual(expected, picked', "{0}!={1}", Cells.list_to_string expected, Cells.list_to_string picked')
+    let expected' =
+        expected
+        |> Cells.make
+        in
+
+    Assert.AreEqual(expected, picked', "{0}!={1}", Cells.to_string expected', Cells.to_string picked')
 
 [<Test>]
 let ``Can make digit sets``() =
@@ -89,39 +101,45 @@ let ``Can make digit sets``() =
     let picked' =
         picked
         |> Digits.make
-        |> Digits.to_list
         in
 
-    Assert.AreEqual(expected, picked', "{0}!={1}", Digits.list_to_string expected, Digits.list_to_string picked')
+    let expected' =
+        expected
+        |> Digits.make
+        in
+
+    Assert.AreEqual(expected, picked', "{0}!={1}", Digits.to_string expected', Digits.to_string picked')
 
 [<Test>]
 let ``Can make columns``() =
     let p = tPuzzleMap PuzzleShape.default' in
-    let actual = Columns.to_list p.columns in
+    let actual = p.columns in
 
     let expected =
         [1..9]
         |> List.map CColumn
+        |> Columns.make
         in
 
-    Assert.AreEqual(expected, actual, "{0}!={1}", Columns.list_to_string expected, Columns.list_to_string actual)
+    Assert.AreEqual(expected, actual, "{0}!={1}", Columns.to_string expected, Columns.to_string actual)
 
 [<Test>]
 let ``Can make rows``() = 
     let p = tPuzzleMap PuzzleShape.default' in
-    let actual = Rows.to_list p.rows in
+    let actual = p.rows in
 
     let expected =
         [1..9]
         |> List.map RRow
+        |> Rows.make
         in
 
-    Assert.AreEqual(expected, actual, "{0}!={1}", Rows.list_to_string expected, Rows.list_to_string actual)
+    Assert.AreEqual(expected, actual, "{0}!={1}", Rows.to_string expected, Rows.to_string actual)
 
 [<Test>]
 let ``Can make cells``() = 
     let p = tPuzzleMap PuzzleShape.default' in
-    let actual = Cells.to_list p.cells in
+    let actual = p.cells in
 
     let expected =
         [1..9]
@@ -131,9 +149,10 @@ let ``Can make cells``() =
                 |> List.map
                     (fun c -> Cell.make (c |> CColumn) (r |> RRow)))
         |> List.concat
+        |> Cells.make
         in
 
-    Assert.AreEqual(expected, actual, "{0}!={1}", Cells.list_to_string expected, Cells.list_to_string actual)
+    Assert.AreEqual(expected, actual, "{0}!={1}", Cells.to_string expected, Cells.to_string actual)
 
 [<Test>]
 let ``Can make stacks``() = 
@@ -145,7 +164,7 @@ let ``Can make stacks``() =
         |> List.map SStack
         in
 
-    Assert.AreEqual(expected, actual, "{0}!={1}", Stacks.list_to_string expected, Stacks.list_to_string actual)
+    Assert.AreEqual(expected, actual, "{0}!={1}", Stacks.to_string expected, Stacks.to_string actual)
 
 [<Test>]
 let ``Can make bands``() = 
@@ -157,7 +176,7 @@ let ``Can make bands``() =
         |> List.map BBand
         in
 
-    Assert.AreEqual(expected, actual, "{0}!={1}", Bands.list_to_string expected, Bands.list_to_string actual)
+    Assert.AreEqual(expected, actual, "{0}!={1}", Bands.to_string expected, Bands.to_string actual)
 
 [<Test>]
 let ``Can make boxes``() = 
@@ -174,7 +193,7 @@ let ``Can make boxes``() =
         |> List.concat
         in
 
-    Assert.AreEqual(expected, actual, "{0}!={1}", Boxes.list_to_string expected, Boxes.list_to_string actual)
+    Assert.AreEqual(expected, actual, "{0}!={1}", Boxes.to_string expected, Boxes.to_string actual)
 
 [<Test>]
 let ``Can make houses``() = 
@@ -207,9 +226,10 @@ let ``Can make houses``() =
     let expected =
         [ expectedColumns; expectedRows; expectedBoxes]
         |> List.concat
+        |> Houses.make
         in
 
-    Assert.AreEqual(expected, actual, "{0}!={1}", Houses.list_to_string expected, Houses.list_to_string actual)
+    Assert.AreEqual(expected, actual, "{0}!={1}", Houses.to_string expected, Houses.to_string actual)
 
 [<Test>]
 let ``Get column cells``() = 
@@ -218,16 +238,16 @@ let ``Get column cells``() =
     let column = CColumn 2 in
 
     let actual =
-        Smap.get Column.comparer column p.columnCells
-        |> Cells.to_list in
+        Smap.get Column.comparer column p.columnCells in
 
     let expected =
         [1..9]
         |> List.map
             (fun r -> Cell.make column (r |> RRow))
+        |> Cells.make
         in
 
-    Assert.AreEqual(expected, actual, "{0}!={1}", Cells.list_to_string expected, Cells.list_to_string actual)
+    Assert.AreEqual(expected, actual, "{0}!={1}", Cells.to_string expected, Cells.to_string actual)
 
 [<Test>]
 let ``Get row cells``() = 
@@ -236,16 +256,16 @@ let ``Get row cells``() =
     let row = RRow 7 in
 
     let actual =
-        Smap.get Row.comparer row p.rowCells
-        |> Cells.to_list in
+        Smap.get Row.comparer row p.rowCells in
 
     let expected =
         [1..9]
         |> List.map
             (fun c -> Cell.make (c |> CColumn) (7 |> RRow))
+        |> Cells.make
         in
 
-    Assert.AreEqual(expected, actual, "{0}!={1}", Cells.list_to_string expected, Cells.list_to_string actual)
+    Assert.AreEqual(expected, actual, "{0}!={1}", Cells.to_string expected, Cells.to_string actual)
 
 [<Test>]
 let ``Get stack for a column``() =
@@ -265,20 +285,24 @@ let ``Get stack for a column``() =
         |> List.concat
         in
 
-    Assert.AreEqual(expected, actual, "{0}!={1}", Stacks.list_to_string expected, Stacks.list_to_string actual)
+    Assert.AreEqual(expected, actual, "{0}!={1}", Stacks.to_string expected, Stacks.to_string actual)
 
 [<Test>]
 let ``Get stack columns``() = 
     let p = tPuzzleMap PuzzleShape.default' in
 
-    let actual = Smap.get Stack.comparer (2 |> SStack) p.stackColumns in
+    let actual =
+        Smap.get Stack.comparer (2 |> SStack) p.stackColumns
+        |> Columns.make
+        in
 
     let expected =
         [4..6]
         |> List.map CColumn
+        |> Columns.make
         in
 
-    Assert.AreEqual(expected, actual, "{0}!={1}", Columns.list_to_string expected, Columns.list_to_string actual)
+    Assert.AreEqual(expected, actual, "{0}!={1}", Columns.to_string expected, Columns.to_string actual)
 
 [<Test>]
 let ``Get band for a row``() =
@@ -298,20 +322,24 @@ let ``Get band for a row``() =
         |> List.concat
         in
 
-    Assert.AreEqual(expected, actual, "{0}!={1}", Bands.list_to_string expected, Bands.list_to_string actual)
+    Assert.AreEqual(expected, actual, "{0}!={1}", Bands.to_string expected, Bands.to_string actual)
 
 [<Test>]
 let ``Get band rows``() = 
     let p = tPuzzleMap PuzzleShape.default' in
 
-    let actual = Smap.get Band.comparer (2 |> BBand) p.bandRows in
+    let actual =
+        Smap.get Band.comparer (2 |> BBand) p.bandRows
+        |> Rows.make
+        in
 
     let expected =
         [4..6]
         |> List.map RRow
+        |> Rows.make
         in
 
-    Assert.AreEqual(expected, actual, "{0}!={1}", Rows.list_to_string expected, Rows.list_to_string actual)
+    Assert.AreEqual(expected, actual, "{0}!={1}", Rows.to_string expected, Rows.to_string actual)
 
 [<Test>]
 let ``Get box for a cell``() =
@@ -334,7 +362,7 @@ let ``Get box for a cell``() =
         |> List.concat
         in
 
-    Assert.AreEqual(expected, actual, "{0}!={1}", Boxes.list_to_string expected, Boxes.list_to_string actual)
+    Assert.AreEqual(expected, actual, "{0}!={1}", Boxes.to_string expected, Boxes.to_string actual)
 
 let all_tests =
     [

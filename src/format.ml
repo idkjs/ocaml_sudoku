@@ -145,24 +145,23 @@ let printCandidateGrid (p : puzzleMap) (candidateGridChars : candidateGridChars)
         in
 
     let c : int = List.length (Smap.get Stack.comparer (List.hd p.stacks) p.stackColumns) in
-    let s : digit list = Digits.to_list alphabet in
     
-    let ss : digit list list = 
+    let ss : digits list = 
         Sset.range 0 (List.length p.stacks - 1)
-        |> List.map (fun i -> Sset.drop (i * c) s |> Sset.take c)
+        |> List.map (fun i -> Digits.drop (i * c) alphabet |> Digits.take c)
         in
 
-    let doPrintColumn (digits : digit list) : row -> column -> consoleString = 
+    let doPrintColumn (digits : digits) : row -> column -> consoleString = 
         let doPrintCell : cell -> consoleString =
             fun cell ->
                 digits
-                |> List.map (fun digit -> draw_cell cell digit)
+                |> Digits.map (fun digit -> draw_cell cell digit)
                 |> List.concat
                 in
         printColumn doPrintCell
         in
 
-    let doPrintStack (digits : digit list) : row -> stack -> consoleString =
+    let doPrintStack (digits : digits) : row -> stack -> consoleString =
         printStack p (doPrintColumn digits) candidateGridChars.vi
         in
 

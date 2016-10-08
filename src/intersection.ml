@@ -65,8 +65,7 @@ let intersectionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (pri
         in
 
     primaryHouseCandidates
-    |> Digits.to_list
-    |> List.map uniqueSecondaryForCandidate
+    |> Digits.map uniqueSecondaryForCandidate
     |> List.concat
 
 let pointingPairsPerBox (p : puzzleMap) (cellCandidates : cellCandidates) (primaryHouse : house) : Hint.description list =

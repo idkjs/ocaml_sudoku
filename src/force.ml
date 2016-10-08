@@ -37,12 +37,12 @@ let rec searchr (p : puzzleMap) (solution : solution) (existing : solution list)
         let candidates =
             let cellContents = Current.get cell solution.current in
             match cellContents with
-            | BigNumber _ -> []
-            | PencilMarks candidates -> candidates |> Digits.to_list
+            | BigNumber _ -> Digits.empty
+            | PencilMarks candidates -> candidates
             in
 
         candidates
-        |> List.map
+        |> Digits.map
             (fun digit ->
                 let setCellValue = Value.make cell digit in
                 

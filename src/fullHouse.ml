@@ -30,4 +30,4 @@ let fullHousePerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (primary
 
 let find (p : puzzleMap) (cellCandidates : cellCandidates) : Hint.description list =
     p.houses
-    |> Sset.choose (fullHousePerHouse p cellCandidates)
+    |> Houses.choose (fullHousePerHouse p cellCandidates)

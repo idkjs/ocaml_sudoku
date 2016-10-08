@@ -8,7 +8,7 @@ type puzzleMap =
         stacks : stack list;
         bands : band list;
         boxes : box list;
-        houses : house list;
+        houses : houses;
         (* for a column, return the cells in it *)
         columnCells : (column * cells) list;
         (* for a row, return the cells in it *)

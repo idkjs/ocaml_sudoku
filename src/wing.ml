@@ -149,8 +149,7 @@ let xWingsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) (house1 : h
         in
 
     Digits.intersect houseCandidates1 houseCandidates2
-    |> Digits.to_list
-    |> List.map (xWingsPerHouseCandidate p cellCandidates house1 house2)
+    |> Digits.map (xWingsPerHouseCandidate p cellCandidates house1 house2)
     |> Sset.choose Sset.id
 
 let xWings (p : puzzleMap) (cellCandidates : cellCandidates) : Hint.description list =
