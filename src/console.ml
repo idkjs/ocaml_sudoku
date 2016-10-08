@@ -23,7 +23,7 @@ let drawBigNumber (annotation : annotation) (digit : digit) : consoleChar =
         | None -> ColouredDigit(digit, DefaultColour, Red)
     else
         match annotation.given with
-        | Some _ -> ColouredDigit(digit, Blue, DefaultColour)
+        | Some _ -> ColouredDigit(digit, Blue, White)
         | None -> ColouredDigit(digit, Red, DefaultColour)
 
 let drawPencilMarks (annotation : Hint.annotation) (candidate : digit) (candidates : digits) : consoleChar =
@@ -50,16 +50,16 @@ let drawPencilMarks (annotation : Hint.annotation) (candidate : digit) (candidat
                 if Digits.contains candidate candidates then ColouredDigit(candidate, Green, DefaultColour)
                 else CChar ' '
              else
-                if Digits.contains candidate candidates then CDigit candidate
+                if Digits.contains candidate candidates then ColouredDigit(candidate, Green, DefaultColour)
                 else CChar ' '))
 
 let drawDigitCellContentAnnotations centreCandidate (annotations : (cell * Hint.annotation) list) (cell : cell) (candidate : digit) : consoleChar = 
 
-    let annotation = Smap.get Cell.comparer annotations cell in
+    let annotation = Smap.get Cell.comparer cell annotations in
 
     match annotation.current with
     | BigNumber s when centreCandidate = candidate -> drawBigNumber annotation s
-    | BigNumber _ -> CChar ' '
+    | BigNumber _ -> ColouredString(" ", Blue, White)
     | PencilMarks digits -> drawPencilMarks annotation candidate digits
 
 let drawDigitCellContentAnnotationString (centreCandidate : digit) (annotations : (cell * Hint.annotation) list) (cell : cell) (candidate : digit) : consoleString =

@@ -3,13 +3,13 @@ open Puzzlemap
 
 (* Load a sudoku given as a single line of gridSize*gridSize characters *)
 let loadPuzzle (cells : cells) (alphabetisedLine : digit option list) : given =
-    Given (Sset.zip (Cells.toList cells) alphabetisedLine)
+    Given (Sset.zip (Cells.to_list cells) alphabetisedLine)
 
 let load (puzzleShape : puzzleShape) (sudoku : string) : solution = 
 
     let charToDigit (trialDigit : char) : digit option = 
         let compareAlpha (Digit charDigit) = trialDigit = charDigit in
-        let digits = Digits.toList puzzleShape.alphabet in
+        let digits = Digits.to_list puzzleShape.alphabet in
         if List.exists compareAlpha digits then
             Some (List.find compareAlpha digits)
         else None

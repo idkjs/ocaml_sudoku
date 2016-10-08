@@ -10,7 +10,7 @@ let twoByFourPuzzleSpec =
       alphabet = 
             [1..8]
             |> List.map (fun i -> (char) i + '0' |> Digit)
-            |> Digits.ofList }
+            |> Digits.make }
 
 let pick_some<'a> (as' : 'a list) : 'a list * 'a list =
     let picked =
@@ -42,12 +42,12 @@ let pick_more<'a> (as' : 'a list) : 'a list * 'a list =
 let ``Can make column sets``() =
     let p = tPuzzleMap PuzzleShape.default' in
 
-    let (picked, expected) = pick_some (Columns.toList p.columns) in
+    let (picked, expected) = pick_some (Columns.to_list p.columns) in
 
     let picked' =
         picked
-        |> Columns.ofList
-        |> Columns.toList
+        |> Columns.make
+        |> Columns.to_list
         in
 
     Assert.AreEqual(expected, picked', "{0}!={1}", Columns.list_to_string expected, Columns.list_to_string picked')
@@ -56,12 +56,12 @@ let ``Can make column sets``() =
 let ``Can make row sets``() =
     let p = tPuzzleMap PuzzleShape.default' in
 
-    let (picked, expected) = pick_some (Rows.toList p.rows) in
+    let (picked, expected) = pick_some (Rows.to_list p.rows) in
 
     let picked' =
         picked
-        |> Rows.ofList
-        |> Rows.toList
+        |> Rows.make
+        |> Rows.to_list
         in
 
     Assert.AreEqual(expected, picked', "{0}!={1}", Rows.list_to_string expected, Rows.list_to_string picked')
@@ -70,12 +70,12 @@ let ``Can make row sets``() =
 let ``Can make cell sets``() =
     let p = tPuzzleMap PuzzleShape.default' in
 
-    let (picked, expected) = pick_more (Cells.toList p.cells) in
+    let (picked, expected) = pick_more (Cells.to_list p.cells) in
 
     let picked' =
         picked
-        |> Cells.ofList
-        |> Cells.toList
+        |> Cells.make
+        |> Cells.to_list
         in
 
     Assert.AreEqual(expected, picked', "{0}!={1}", Cells.list_to_string expected, Cells.list_to_string picked')
@@ -84,12 +84,12 @@ let ``Can make cell sets``() =
 let ``Can make digit sets``() =
     let p = tPuzzleMap PuzzleShape.default' in
 
-    let (picked, expected) = pick_some (Digits.toList PuzzleShape.default'.alphabet) in
+    let (picked, expected) = pick_some (Digits.to_list PuzzleShape.default'.alphabet) in
 
     let picked' =
         picked
-        |> Digits.ofList
-        |> Digits.toList
+        |> Digits.make
+        |> Digits.to_list
         in
 
     Assert.AreEqual(expected, picked', "{0}!={1}", Digits.list_to_string expected, Digits.list_to_string picked')
@@ -97,7 +97,7 @@ let ``Can make digit sets``() =
 [<Test>]
 let ``Can make columns``() =
     let p = tPuzzleMap PuzzleShape.default' in
-    let actual = Columns.toList p.columns in
+    let actual = Columns.to_list p.columns in
 
     let expected =
         [1..9]
@@ -109,7 +109,7 @@ let ``Can make columns``() =
 [<Test>]
 let ``Can make rows``() = 
     let p = tPuzzleMap PuzzleShape.default' in
-    let actual = Rows.toList p.rows in
+    let actual = Rows.to_list p.rows in
 
     let expected =
         [1..9]
@@ -121,7 +121,7 @@ let ``Can make rows``() =
 [<Test>]
 let ``Can make cells``() = 
     let p = tPuzzleMap PuzzleShape.default' in
-    let actual = Cells.toList p.cells in
+    let actual = Cells.to_list p.cells in
 
     let expected =
         [1..9]
@@ -218,8 +218,8 @@ let ``Get column cells``() =
     let column = CColumn 2 in
 
     let actual =
-        Smap.get Column.comparer p.columnCells column
-        |> Cells.toList in
+        Smap.get Column.comparer column p.columnCells
+        |> Cells.to_list in
 
     let expected =
         [1..9]
@@ -236,8 +236,8 @@ let ``Get row cells``() =
     let row = RRow 7 in
 
     let actual =
-        Smap.get Row.comparer p.rowCells row
-        |> Cells.toList in
+        Smap.get Row.comparer row p.rowCells
+        |> Cells.to_list in
 
     let expected =
         [1..9]
@@ -253,7 +253,7 @@ let ``Get stack for a column``() =
 
     let actual =
         p.columns
-        |> Columns.map (Smap.get Column.comparer p.columnStack)
+        |> Columns.map (fun column -> Smap.get Column.comparer column p.columnStack)
         in
 
     let expected =
@@ -271,7 +271,7 @@ let ``Get stack for a column``() =
 let ``Get stack columns``() = 
     let p = tPuzzleMap PuzzleShape.default' in
 
-    let actual = Smap.get Stack.comparer p.stackColumns (2 |> SStack) in
+    let actual = Smap.get Stack.comparer (2 |> SStack) p.stackColumns in
 
     let expected =
         [4..6]
@@ -286,7 +286,7 @@ let ``Get band for a row``() =
 
     let actual =
         p.rows
-        |> Rows.map (Smap.get Row.comparer p.rowBand)
+        |> Rows.map (fun row -> Smap.get Row.comparer row p.rowBand)
         in
 
     let expected =
@@ -304,7 +304,7 @@ let ``Get band for a row``() =
 let ``Get band rows``() = 
     let p = tPuzzleMap PuzzleShape.default' in
 
-    let actual = Smap.get Band.comparer p.bandRows (2 |> BBand) in
+    let actual = Smap.get Band.comparer (2 |> BBand) p.bandRows in
 
     let expected =
         [4..6]
@@ -321,7 +321,7 @@ let ``Get box for a cell``() =
         [1..9]
         |> List.map
             (fun r -> Cell.make (5 |> CColumn) (r |> RRow))
-        |> List.map (Smap.get Cell.comparer p.cellBox)
+        |> List.map (fun cell -> Smap.get Cell.comparer cell p.cellBox)
         in
 
     let expected =

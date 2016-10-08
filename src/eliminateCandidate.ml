@@ -5,7 +5,7 @@ open Hint
 let apply (p : puzzleMap) (candidate : candidate) (current : current) : current = 
 
     let update (cell : cell) : cellContents = 
-        let cellContents = Current.get current cell in
+        let cellContents = Current.get cell current in
         match cellContents with
         | BigNumber _ -> cellContents
         | PencilMarks candidates -> 
@@ -13,7 +13,7 @@ let apply (p : puzzleMap) (candidate : candidate) (current : current) : current 
             else cellContents
         in
 
-    Smap.ofLookup (Cells.toList p.cells) update
+    Smap.ofLookup update (Cells.to_list p.cells)
     |> Current.make
 
 let description (p: puzzleMap) (candidate : candidate) : Hint.description =

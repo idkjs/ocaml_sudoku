@@ -5,11 +5,11 @@ open Hint
 let apply (p : puzzleMap) (value : value) (current : current) : current = 
 
     let update (cell : cell) : cellContents =
-        let cellContents = Current.get current cell in
+        let cellContents = Current.get cell current in
         match cellContents with
         | BigNumber _ -> cellContents
         | PencilMarks candidates -> 
-            let cells = Smap.get Cell.comparer p.cellHouseCells value.cell in
+            let cells = Smap.get Cell.comparer value.cell p.cellHouseCells in
 
             if value.cell = cell then BigNumber value.digit
             else if Cells.contains cell cells then 
@@ -17,7 +17,7 @@ let apply (p : puzzleMap) (value : value) (current : current) : current =
             else cellContents
         in
 
-    Smap.ofLookup (Cells.toList p.cells) update
+    Smap.ofLookup update (Cells.to_list p.cells)
     |> Current.make
 
 type setCellDigitError = 
@@ -26,7 +26,7 @@ type setCellDigitError =
       digit : digit }
 
 let try' (cell : cell) (candidate : digit) (cellCandidates : cellCandidates) : value option = 
-    let candidates = CellCandidates.get cellCandidates cell in
+    let candidates = CellCandidates.get cell cellCandidates in
 
     if Digits.contains candidate candidates then
         Some (Value.make cell candidate)

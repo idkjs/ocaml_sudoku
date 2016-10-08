@@ -58,7 +58,7 @@ let mhas (solution : solution) (p : puzzleMap) (hd : description) : description2
                     in
 
                 let r3 = 
-                    let cells = Smap.get Cell.comparer p.cellHouseCells setCellValueAction.cell in
+                    let cells = Smap.get Cell.comparer setCellValueAction.cell p.cellHouseCells in
 
                     if Cells.contains cell cells then Some setCellValueAction.digit
                     else None
@@ -98,8 +98,8 @@ let mhas (solution : solution) (p : puzzleMap) (hd : description) : description2
             p.housesCells hd.secondaryHouses
             in
 
-        { given = Given.get solution.given cell;
-          current = Current.get solution.current cell;
+        { given = Given.get cell solution.given;
+          current = Current.get cell solution.current;
           setValue = setValue;
           primaryHintHouse = Cells.contains cell primaryHouseCells;
           secondaryHintHouse = Cells.contains cell secondaryHouseCells;
@@ -109,15 +109,15 @@ let mhas (solution : solution) (p : puzzleMap) (hd : description) : description2
           focus = hd.focus }
         in
 
-    let annotations = Smap.ofLookup (Cells.toList p.cells) annotationLookup in
+    let annotations = Smap.ofLookup annotationLookup (Cells.to_list p.cells) in
 
     { annotations = annotations }
 
 let mhas2 (solution : solution) (p : puzzleMap) : description2 = 
 
     let annotationLookup (cell : cell) : annotation = 
-        { given = Given.get solution.given cell;
-          current = Current.get solution.current cell;
+        { given = Given.get cell solution.given;
+          current = Current.get cell solution.current;
           setValue = None;
           primaryHintHouse = false;
           secondaryHintHouse = false;
@@ -127,6 +127,6 @@ let mhas2 (solution : solution) (p : puzzleMap) : description2 =
           focus = Digits.empty }
         in
 
-    let annotations = Smap.ofLookup (Cells.toList p.cells) annotationLookup in
+    let annotations = Smap.ofLookup annotationLookup (Cells.to_list p.cells) in
 
     { annotations = annotations }

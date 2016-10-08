@@ -5,27 +5,27 @@ open Hint
 let find  (p : puzzleMap) (current : current) : candidateReduction list = 
 
     let reductions (cell : cell) : digits option =
-        let cellContents = Current.get current cell in
+        let cellContents = Current.get cell current in
         match cellContents with
         | BigNumber _ -> None
         | PencilMarks candidates -> 
             let digits =
-                cell
-                |> Smap.get Cell.comparer p.cellHouseCells
+                p.cellHouseCells
+                |> Smap.get Cell.comparer cell
                 |> Cells.choose
                     (fun cell ->
-                        let houseCellContents = Current.get current cell in
+                        let houseCellContents = Current.get cell current in
                         match houseCellContents with
                         | BigNumber digit -> Some digit
                         | PencilMarks _ -> None)
-                |> Digits.ofList in
+                |> Digits.make in
 
             if Digits.count digits > 0 then Some digits
             else None
         in
 
     p.cells
-    |> Cells.toList
+    |> Cells.to_list
     |> Sset.choose
         (fun cell ->
             match reductions cell with
@@ -40,11 +40,11 @@ let apply (p : puzzleMap) (candidateReductions : candidateReduction list) (curre
         in
 
     let update (cell : cell) : cellContents =
-        let cellContents = Current.get current cell in
+        let cellContents = Current.get cell current in
         match cellContents with
         | BigNumber _ -> cellContents
         | PencilMarks candidates ->
-            let digitsOpt = Smap.tryGet Cell.comparer candidateReductionsLookup cell in
+            let digitsOpt = Smap.tryGet Cell.comparer cell candidateReductionsLookup in
             match digitsOpt with
             | Some digits ->
                 Digits.difference candidates digits
@@ -52,7 +52,7 @@ let apply (p : puzzleMap) (candidateReductions : candidateReduction list) (curre
             | None -> cellContents
         in
 
-    Smap.ofLookup (Cells.toList p.cells) update
+    Smap.ofLookup update (Cells.to_list p.cells)
     |> Current.make
 
 let description (p : puzzleMap) (candidateReductions : candidateReduction list) : Hint.description =

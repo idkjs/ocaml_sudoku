@@ -6,17 +6,17 @@ open Hint
 let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (candidateSubset : digits) (primaryHouse : house) : Hint.description option = 
 
     let pointers = 
-        primaryHouse
-        |> Smap.get House.comparer p.houseCells
-        |> Cells.map (fun cell -> CandidateReduction.make cell (CellCandidates.get cellCandidates cell))
+        p.houseCells
+        |> Smap.get House.comparer primaryHouse 
+        |> Cells.map (fun cell -> CandidateReduction.make cell (CellCandidates.get cell cellCandidates))
         |> List.map (fun cr -> CandidateReduction.make cr.cell (Digits.intersect cr.candidates candidateSubset))
         |> List.filter (fun cr -> Digits.count cr.candidates > 0) 
         in
 
     let candidateReductions = 
-        primaryHouse
-        |> Smap.get House.comparer p.houseCells
-        |> Cells.map (fun cell -> CandidateReduction.make cell (CellCandidates.get cellCandidates cell))
+        p.houseCells
+        |> Smap.get House.comparer primaryHouse
+        |> Cells.map (fun cell -> CandidateReduction.make cell (CellCandidates.get cell cellCandidates))
         |> List.map
             (fun cr -> 
                 let pointerCandidates = Digits.intersect cr.candidates candidateSubset in
@@ -57,16 +57,16 @@ let findHidden (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (
 let hiddenNPerHouse (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (house : house) : Hint.description list = 
 
     let houseCandidates =
-        house
-        |> Smap.get House.comparer p.houseCells
-        |> Cells.map (CellCandidates.get cellCandidates)
-        |> Digits.unionManyList
+        p.houseCells
+        |> Smap.get House.comparer house
+        |> Cells.map (fun cell -> CellCandidates.get cell cellCandidates)
+        |> Digits.union_many
         in
 
-    Sset.setSubsets (Digits.toList houseCandidates) count
+    Sset.setSubsets (Digits.to_list houseCandidates) count
     |> Sset.choose
         (fun candidateSubset -> 
-            findHidden count p cellCandidates (Digits.ofList candidateSubset) house)
+            findHidden count p cellCandidates (Digits.make candidateSubset) house)
 
 let find (i : int) (p : puzzleMap) (cellCandidates : cellCandidates) : Hint.description list =
     p.houses

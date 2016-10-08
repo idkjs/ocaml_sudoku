@@ -15,17 +15,17 @@ let isValidCellContents (cellContents : cellContents) : bool =
 
 let isValid (solution : solution) (cells : cells) : bool =
     cells
-    |> Cells.toList
-    |> List.map (Current.get solution.current)
+    |> Cells.map (fun cell -> Current.get cell solution.current)
     |> List.for_all isValidCellContents
 
 let rec searchr (p : puzzleMap) (solution : solution) (existing : solution list) : solution list =
     let emptyCell : cell option =
         let is_cell_empty (cell : cell) : bool =
-            Current.get solution.current cell |> isPencilMarksCellContents
+            Current.get cell solution.current
+            |> isPencilMarksCellContents
             in
 
-        let cell_list = Cells.toList p.cells in
+        let cell_list = Cells.to_list p.cells in
 
         if List.exists is_cell_empty cell_list then
             Some (List.find is_cell_empty cell_list)
@@ -35,10 +35,10 @@ let rec searchr (p : puzzleMap) (solution : solution) (existing : solution list)
     match emptyCell with
     | Some cell ->
         let candidates =
-            let cellContents = Current.get solution.current cell in
+            let cellContents = Current.get cell solution.current in
             match cellContents with
             | BigNumber _ -> []
-            | PencilMarks candidates -> candidates |> Digits.toList
+            | PencilMarks candidates -> candidates |> Digits.to_list
             in
 
         candidates

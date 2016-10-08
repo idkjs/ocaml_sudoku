@@ -45,7 +45,7 @@ let parseCell (gridSize : int) (cells : cells) (termColumn : string) (termRow : 
     | (CROk col, CROk row) ->
         let cell =
             cells
-            |> Cells.toList
+            |> Cells.to_list
             |> List.find (fun cell -> cell.col = (Column.make col) && cell.row = (Row.make row))
             in
         COk cell
@@ -55,8 +55,8 @@ let parseCell (gridSize : int) (cells : cells) (termColumn : string) (termRow : 
 
 let charToCandidate (digits : digits) (trialDigit : char) : digit option = 
     let compareAlpha (Digit charDigit) = trialDigit = charDigit in
-    if List.exists compareAlpha (Digits.toList digits) then
-        Some (List.find compareAlpha (Digits.toList digits))
+    if List.exists compareAlpha (Digits.to_list digits) then
+        Some (List.find compareAlpha (Digits.to_list digits))
     else None
 
 type parse_value_result =
@@ -125,11 +125,11 @@ let set_cell_command_check_result_to_string (r : set_cell_command_check_result) 
     | SCCRNotACandidate value -> Printf.sprintf "Warning: Cell %s does not have candidate %s" (Cell.to_string value.cell) (Digit.to_string value.digit)
 
 let setCellCommandCheck (given : given) (cellCandidates : cellCandidates) (value : value) : set_cell_command_check_result =
-    let givenDigitOpt = Given.get given value.cell in
+    let givenDigitOpt = Given.get value.cell given in
     match givenDigitOpt with
     | Some givenDigit -> SCCRGiven (value, givenDigit)
     | None ->
-        let digits = CellCandidates.get cellCandidates value.cell in
+        let digits = CellCandidates.get value.cell cellCandidates in
         if Digits.contains value.digit digits then SSCROk value
         else SCCRNotACandidate value
 
@@ -161,11 +161,11 @@ let clear_candidate_command_check_result_to_string (r : clear_candidate_command_
     | CCCCRNotACandidate candidate -> Printf.sprintf "Warning: Cell %s does not have candidate %s" (Cell.to_string candidate.cell) (Digit.to_string candidate.digit)
 
 let candidateClearCommandCheck (given : given) (cellCandidates : cellCandidates) (candidate : candidate) : clear_candidate_command_check_result =
-    let givenDigitOpt = Given.get given candidate.cell in
+    let givenDigitOpt = Given.get candidate.cell given in
     match givenDigitOpt with
     | Some givenDigit -> CCCCRGiven (candidate, givenDigit)
     | None ->
-        let digits = CellCandidates.get cellCandidates candidate.cell in
+        let digits = CellCandidates.get candidate.cell cellCandidates in
         if Digits.contains candidate.digit digits then CCCCROk candidate
         else CCCCRNotACandidate candidate
 
@@ -205,4 +205,4 @@ let supportedHints : (string * (puzzleMap -> cellCandidates -> Hint.description 
         | "y" -> Wing.yWings
         in
 
-    Smap.ofLookup keys command
+    Smap.ofLookup command keys

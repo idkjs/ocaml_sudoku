@@ -111,7 +111,7 @@ let parse (p : puzzleMap) (item : string) (solution : solution) (puzzle : puzzle
         (newSolution, [])
 
     else
-        let supportedHintOpt = Smap.tryGet String.compare supportedHints item in
+        let supportedHintOpt = Smap.tryGet String.compare item supportedHints in
         match supportedHintOpt with
         | Some supportedHint ->
             let hints = supportedHint p cellCandidates in
@@ -155,7 +155,7 @@ let repl (sudoku : string) (puzzleShape : puzzleShape) : unit =
 
     (* Print a Digit option, with colours *)
     let puzzleDrawCell (solution : solution) (cell : cell) : consoleString = 
-        drawDigitCellString (Given.get solution.given cell) (Current.get solution.current cell)
+        drawDigitCellString (Given.get cell solution.given) (Current.get cell solution.current)
         in
 
     let puzzleDrawLine (solution : solution) : unit =
