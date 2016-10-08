@@ -74,7 +74,7 @@ let pointingPairsPerBox (p : puzzleMap) (cellCandidates : cellCandidates) (prima
         in
 
     let secondaryHouseLookups =
-        Smap.ofLookup cellLines (Cells.to_list p.cells)
+        Cells.ofLookup cellLines p.cells
         in
 
     intersectionsPerHouse p cellCandidates primaryHouse secondaryHouseLookups
@@ -85,7 +85,7 @@ let boxLineReductionsPerHouse (p : puzzleMap) (cellCandidates : cellCandidates) 
         in
 
     let secondaryHouseLookups =
-        Smap.ofLookup cellBox (Cells.to_list p.cells)
+        Cells.ofLookup cellBox p.cells
         in
 
     intersectionsPerHouse p cellCandidates primaryHouse secondaryHouseLookups

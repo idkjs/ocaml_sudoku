@@ -17,7 +17,7 @@ let apply (p : puzzleMap) (value : value) (current : current) : current =
             else cellContents
         in
 
-    Smap.ofLookup update (Cells.to_list p.cells)
+    Cells.ofLookup update p.cells
     |> Current.make
 
 type setCellDigitError = 

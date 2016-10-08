@@ -60,8 +60,7 @@ let konst x _ = x
 
 let printLine (cells : cells) (digitTo : cell -> consoleString) : consoleString = 
     cells
-    |> Cells.to_list
-    |> List.map digitTo
+    |> Cells.map digitTo
     |> List.concat
 
 (* Combine fences with posts (there's one more fence than posts: f p f p ... p f) *)

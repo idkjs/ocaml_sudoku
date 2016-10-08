@@ -25,10 +25,8 @@ let rec searchr (p : puzzleMap) (solution : solution) (existing : solution list)
             |> isPencilMarksCellContents
             in
 
-        let cell_list = Cells.to_list p.cells in
-
-        if List.exists is_cell_empty cell_list then
-            Some (List.find is_cell_empty cell_list)
+        if Cells.exists is_cell_empty p.cells then
+            Some (Cells.find is_cell_empty p.cells)
         else None
         in
 

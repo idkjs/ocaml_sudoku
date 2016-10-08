@@ -20,8 +20,7 @@ let nakedSingleCell (p : puzzleMap) (cellCandidates : cellCandidates) (cell : ce
 
 let nakedSingle (p : puzzleMap) (cellCandidates : cellCandidates) : Hint.description list =
     p.cells
-    |> Cells.to_list
-    |> List.map (nakedSingleCell p cellCandidates)
+    |> Cells.map (nakedSingleCell p cellCandidates)
     |> Sset.choose Sset.id
 
 let findNaked (count : int) (p : puzzleMap) (cellCandidates : cellCandidates) (primaryHouse : house) (cellSubset : cells) : Hint.description option = 

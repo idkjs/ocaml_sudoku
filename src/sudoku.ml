@@ -165,10 +165,21 @@ module Cells = struct
         Sset.subtract Cell.comparer cs cs'
         |> make'
 
+    let exists (predicate : cell -> bool) (CCells cs : cells) : bool =
+        cs
+        |> List.exists predicate
+
     let filter (predicate : cell -> bool) (CCells cs : cells) : cells =
         cs
         |> List.filter predicate
         |> make'
+
+    let find (predicate : cell -> bool) (CCells cs : cells) : cell =
+        cs
+        |> List.find predicate
+
+    let ofLookup (fn : cell -> 'b) (CCells cs : cells) : (cell * 'b) list =
+        List.map (fun c -> (c, fn c)) cs
 
     let map (map : cell -> 'b) (CCells cs : cells) : 'b list =
         cs
@@ -630,8 +641,7 @@ module Solution = struct
             in
 
         cells
-        |> Cells.to_list
-        |> List.map (fun a -> (a, makeCellContents a))
+        |> Cells.map (fun a -> (a, makeCellContents a))
         |> Current.make
 
     let currentCellCandidates (cells : cells) (current : current) : cellCandidates =
@@ -643,7 +653,6 @@ module Solution = struct
             in
 
         cells
-        |> Cells.to_list
-        |> List.map (fun a -> (a, getCandidateEntries a))
+        |> Cells.map (fun a -> (a, getCandidateEntries a))
         |> CellCandidates.make
 end

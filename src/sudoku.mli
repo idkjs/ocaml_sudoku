@@ -47,7 +47,10 @@ module Cells : sig
   val contains : cell -> cells -> bool
   val count : cells -> int
   val difference : cells -> cells -> cells
+  val exists : (cell -> bool) -> cells -> bool
   val filter : (cell -> bool) -> cells -> cells
+  val find : (cell -> bool) -> cells -> cell
+  val ofLookup : (cell -> 'b) -> cells -> (cell * 'b) list
   val make : cell list -> cells
   val map : (cell -> 'b) -> cells -> 'b list
   val remove : cell -> cells -> cells

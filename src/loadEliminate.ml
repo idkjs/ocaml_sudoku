@@ -25,8 +25,7 @@ let find  (p : puzzleMap) (current : current) : candidateReduction list =
         in
 
     p.cells
-    |> Cells.to_list
-    |> Sset.choose
+    |> Cells.choose
         (fun cell ->
             match reductions cell with
             | Some digits -> Some (CandidateReduction.make cell digits)
@@ -52,7 +51,7 @@ let apply (p : puzzleMap) (candidateReductions : candidateReduction list) (curre
             | None -> cellContents
         in
 
-    Smap.ofLookup update (Cells.to_list p.cells)
+    Cells.ofLookup update p.cells
     |> Current.make
 
 let description (p : puzzleMap) (candidateReductions : candidateReduction list) : Hint.description =

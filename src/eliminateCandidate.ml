@@ -13,7 +13,7 @@ let apply (p : puzzleMap) (candidate : candidate) (current : current) : current 
             else cellContents
         in
 
-    Smap.ofLookup update (Cells.to_list p.cells)
+    Cells.ofLookup update p.cells
     |> Current.make
 
 let description (p: puzzleMap) (candidate : candidate) : Hint.description =

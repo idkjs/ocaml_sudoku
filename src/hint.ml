@@ -109,7 +109,7 @@ let mhas (solution : solution) (p : puzzleMap) (hd : description) : description2
           focus = hd.focus }
         in
 
-    let annotations = Smap.ofLookup annotationLookup (Cells.to_list p.cells) in
+    let annotations = Cells.ofLookup annotationLookup p.cells in
 
     { annotations = annotations }
 
@@ -127,6 +127,6 @@ let mhas2 (solution : solution) (p : puzzleMap) : description2 =
           focus = Digits.empty }
         in
 
-    let annotations = Smap.ofLookup annotationLookup (Cells.to_list p.cells) in
+    let annotations = Cells.ofLookup annotationLookup p.cells in
 
     { annotations = annotations }

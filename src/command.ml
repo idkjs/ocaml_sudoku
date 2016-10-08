@@ -45,8 +45,7 @@ let parseCell (gridSize : int) (cells : cells) (termColumn : string) (termRow : 
     | (CROk col, CROk row) ->
         let cell =
             cells
-            |> Cells.to_list
-            |> List.find (fun cell -> cell.col = (Column.make col) && cell.row = (Row.make row))
+            |> Cells.find (fun cell -> cell.col = (Column.make col) && cell.row = (Row.make row))
             in
         COk cell
     | (CRError _, CROk row) -> CColError (parsedCol, row)
