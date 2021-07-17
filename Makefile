@@ -1,4 +1,4 @@
-RESULT = sudoku_repl
+RESULT = sudoku_repl.exe
 
 SOURCES = \
   src/sset.ml src/smap.ml \

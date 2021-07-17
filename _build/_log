@@ -1,0 +1,12 @@
+### Starting build.
+# Target: main.ml.depends, tags: { extension:ml, file:main.ml, ocaml, ocamldep, quiet }
+/Users/mando/.opam/4.12.0/bin/ocamldep.opt -modules main.ml > main.ml.depends
+# Target: main.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:main.cmo, file:main.ml, implem, ocaml, quiet }
+/Users/mando/.opam/4.12.0/bin/ocamlc.opt -c -o main.cmo main.ml
++ /Users/mando/.opam/4.12.0/bin/ocamlc.opt -c -o main.cmo main.ml
+File "main.ml", line 1, characters 5-11:
+1 | open Sudoku
+         ^^^^^^
+Error: Unbound module Sudoku
+Command exited with code 2.
+# Compilation unsuccessful.
